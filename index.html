@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>BLM48 - Member & Fans Ranking</title>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    :root {
+      --primary-pink: #ff85a2;
+      --soft-pink: #ffe4e1;
+      --gold: #ffd700;
+      --silver: #C0C0C0;
+      --bronze: #cd7f32;
+      --bg-color: #fffdf5;
+      --violet-border: #e0c3fc;
+    }
+
+    body { 
+      font-family: 'Quicksand', 'Kanit', sans-serif; 
+      background-color: var(--bg-color); 
+      margin: 0; 
+      padding: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Navbar */
+    .navbar {
+      background: white;
+      padding: 15px 20px;
+      border-bottom: 2px solid #f0f0f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .brand { font-size: 24px; font-weight: bold; color: var(--primary-pink); letter-spacing: 1px; }
+    .nav-btns { display: flex; gap: 15px; }
+    .nav-icon { background: none; border: none; color: #ffb3c1; cursor: pointer; font-size: 1.2rem; transition: 0.3s; }
+    .nav-icon:hover { color: var(--primary-pink); transform: scale(1.1); }
+
+    /* Profile Bar */
+    .user-profile-bar { max-width: 900px; margin: 20px auto; background: white; border-radius: 24px; padding: 20px; box-shadow: 0 10px 25px rgba(255, 133, 162, 0.1); border: 2px solid var(--soft-pink); }
+    .user-info-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+    .profile-img-container { position: relative; width: 70px; height: 70px; }
+    .user-avatar-img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary-pink); }
+    .edit-photo-btn { position: absolute; bottom: 0; right: 0; width: 24px; height: 24px; background: var(--primary-pink); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; cursor: pointer; border: 2px solid white; }
+    .user-name { font-weight: 700; color: var(--primary-pink); font-size: 20px; display: flex; align-items: center; gap: 8px; }
+    .role-badge { font-size: 10px; padding: 2px 8px; border-radius: 5px; background: #f0f0f0; color: #888; text-transform: uppercase; }
+    .oshi-list { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 5px; }
+    .tag { font-size: 11px; padding: 4px 12px; border-radius: 20px; color: white; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+    .tag-kami { background: var(--primary-pink); box-shadow: 0 2px 5px rgba(255,133,162,0.3); }
+    .tag-oshi { background: #87ceeb; box-shadow: 0 2px 5px rgba(135,206,235,0.3); }
+
+    .wallet { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 15px 0; }
+    .wallet-item { background: #fffcfd; border: 1px solid #ffeef2; padding: 12px 5px; border-radius: 15px; font-size: 13px; text-align: center; font-weight: 700; color: #555; }
+    
+    .bonus-container { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .btn-bonus { height: 48px; border: none; border-radius: 14px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; color: white; }
+    .btn-monthly { background: var(--primary-pink); box-shadow: 0 4px 12px rgba(255,133,162,0.3); }
+    .btn-redeem { background: #4dabf7; box-shadow: 0 4px 12px rgba(77,171,247,0.3); }
+    .btn-locked { background: #ccc !important; cursor: not-allowed; opacity: 0.7; }
+
+    /* Ranking & Lists */
+    .section-title { font-family: 'Kanit'; font-weight: 600; color: #444; margin: 30px 0 15px 20px; font-size: 18px; border-left: 5px solid var(--primary-pink); padding-left: 12px; }
+    .ranking-wrapper { width: 100%; overflow-x: auto; padding-bottom: 15px; -webkit-overflow-scrolling: touch; }
+    .horizontal-list { display: flex; gap: 18px; padding: 10px 20px; min-width: max-content; align-items: flex-end; }
+
+    /* Member Card */
+    .member-card { width: 170px; text-align: center; background: white; padding: 25px 15px; border-radius: 30px; box-shadow: 0 8px 20px rgba(0,0,0,0.04); border: 2.5px solid transparent; transition: 0.3s ease; }
+    .member-card:hover { transform: translateY(-8px); box-shadow: 0 12px 25px rgba(0,0,0,0.08); }
+    .rank-1 { height: 310px; border-color: var(--gold); background: linear-gradient(to bottom, #fffef0, #ffffff); }
+    .rank-2 { height: 280px; border-color: var(--silver); }
+    .rank-3 { height: 260px; border-color: var(--bronze); }
+    .rank-other { height: 240px; border-color: #f5f5f5; }
+
+    .img-wrapper { position: relative; width: 100px; height: 100px; margin: 0 auto 12px; border-radius: 50%; padding: 4px; background: white; border: 3px solid var(--violet-border); cursor: pointer; }
+    .rank-1 .img-wrapper { width: 115px; height: 115px; border-color: var(--gold); }
+    .img-wrapper img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+    
+    .rank-badge { position: absolute; bottom: -5px; right: -5px; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2.5px solid white; box-shadow: 0 3px 6px rgba(0,0,0,0.1); font-size: 13px; }
+    .rank-1 .rank-badge { background: var(--gold); color: white; width: 38px; height: 38px; }
+    .rank-2 .rank-badge { background: var(--silver); color: white; }
+    .rank-3 .rank-badge { background: var(--bronze); color: white; }
+    .rank-other .rank-badge { background: #eee; color: #888; }
+
+    .name-text { font-weight: 700; color: #333; font-size: 16px; text-transform: uppercase; margin-bottom: 2px; }
+    .gen-text { font-size: 10px; color: #bbb; letter-spacing: 1px; margin-bottom: 8px; font-weight: 500; }
+    .cookie-text { font-size: 16px; color: var(--primary-pink); font-weight: 800; margin-bottom: 12px; }
+
+    .btn-group { display: flex; justify-content: center; gap: 5px; }
+    .btn-action { border: none; border-radius: 8px; padding: 6px 10px; font-size: 10px; font-family: 'Kanit'; cursor: pointer; font-weight: 600; transition: 0.2s; }
+    .btn-kami { background: #fff0f3; color: var(--primary-pink); }
+    .btn-oshi { background: #eef9ff; color: #0077b6; }
+    .btn-give { background: #fffceb; color: #b08d00; }
+    .btn-action:hover { filter: brightness(0.95); transform: scale(1.05); }
+
+    /* Modals & Stats */
+    #modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(6px); z-index: 1000; overflow-y: auto; padding: 40px 10px; box-sizing: border-box; }
+    .modal-box { background: white; width: 100%; max-width: 380px; margin: 0 auto; padding: 30px 20px; border-radius: 35px; text-align: center; position: relative; }
+    
+    .stats-header { margin-bottom: 25px; }
+    .stats-avatar { width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--primary-pink); margin-bottom: 15px; object-fit: cover; }
+    .stats-name { font-size: 24px; font-weight: 800; color: var(--primary-pink); margin-bottom: 5px; }
+    .stats-summary { display: flex; justify-content: center; gap: 20px; margin-bottom: 20px; padding: 15px; background: #fff5f7; border-radius: 20px; }
+    .stat-item { flex: 1; }
+    .stat-label { font-size: 11px; color: #888; display: block; margin-bottom: 3px; }
+    .stat-val { font-size: 18px; font-weight: 700; color: #444; }
+
+    .top-fans-list { text-align: left; margin-top: 25px; }
+    .top-fans-title { font-weight: 700; color: #555; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; padding-left: 5px; }
+    .fan-row { display: flex; align-items: center; gap: 12px; padding: 12px; border-bottom: 1px solid #f9f9f9; }
+    .fan-rank { width: 25px; font-weight: 800; color: #ccc; font-size: 14px; }
+    .fan-row:nth-child(1) .fan-rank { color: var(--gold); font-size: 18px; }
+    .fan-row:nth-child(2) .fan-rank { color: var(--silver); }
+    .fan-row:nth-child(3) .fan-rank { color: var(--bronze); }
+    .fan-img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #eee; object-fit: cover; }
+    .fan-info { flex: 1; }
+    .fan-name { font-size: 14px; font-weight: 700; color: #444; }
+    .fan-cookies { font-size: 12px; color: var(--primary-pink); font-weight: 600; }
+
+    /* Login Form */
+    .login-input { width: 100%; padding: 14px; margin: 10px 0; border: 1.5px solid #eee; border-radius: 12px; font-family: 'Kanit'; box-sizing: border-box; outline: none; transition: 0.3s; }
+    .login-input:focus { border-color: var(--primary-pink); box-shadow: 0 0 0 3px rgba(255,133,162,0.1); }
+
+    /* Float Button */
+    .btn-refresh-float { position: fixed; bottom: 25px; right: 25px; width: 55px; height: 55px; background: var(--primary-pink); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 15px rgba(255,133,162,0.4); cursor: pointer; z-index: 99; border: none; font-size: 1.2rem; transition: 0.3s; }
+    .btn-refresh-float:active { transform: scale(0.9) rotate(45deg); }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .wallet { grid-template-columns: 1fr 1fr; }
+      .wallet-item:last-child { grid-column: span 2; }
+      .member-card { width: 150px; padding: 20px 10px; }
+      .rank-1 { height: 280px; }
+      .img-wrapper { width: 85px; height: 85px; }
+      .rank-1 .img-wrapper { width: 100px; height: 100px; }
+    }
+
+    .cookie-fall { position: fixed; top: -50px; z-index: -1; color: #e6b38a; pointer-events: none; animation: falling linear forwards; opacity: 0.6; }
+    @keyframes falling { to { transform: translateY(110vh) rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="brand">BLM48</div>
+  <div class="nav-btns">
+    <button onclick="refreshPage()" class="nav-icon" title="Refresh"><i class="fas fa-sync-alt"></i></button>
+    <button onclick="confirmLogout()" class="nav-icon" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+  </div>
+</nav>
+
+<div id="user-bar" class="user-profile-bar"></div>
+
+<div class="section-title">🏆 Member Ranking</div>
+<div class="ranking-wrapper">
+  <div id="ranking-list" class="horizontal-list"></div>
+</div>
+
+<div class="section-title">💖 Top Fans</div>
+<div class="ranking-wrapper">
+  <div id="global-fan-list" class="horizontal-list"></div>
+</div>
+
+<!-- Modal -->
+<div id="modal-overlay">
+  <!-- Stats Modal -->
+  <div class="modal-box" id="stats-form">
+    <div id="stats-content"></div>
+    <div class="top-fans-list">
+      <div class="top-fans-title"><i class="fas fa-heart" style="color:var(--primary-pink)"></i> Top Fans</div>
+      <div id="member-fans-content"></div>
+    </div>
+    <button onclick="closeModal()" style="margin-top:25px; width:100%; background: #f5f5f5; border: none; padding: 12px; border-radius: 15px; cursor: pointer; font-family: 'Kanit'; font-weight: 600; color: #666;">Close</button>
+  </div>
+  
+  <!-- Login Modal -->
+  <div class="modal-box" id="login-form" style="display:none;">
+    <h2 style="color: var(--primary-pink); margin-bottom: 25px;">BLM48 Login</h2>
+    <input type="text" id="login-user" class="login-input" placeholder="ชื่อผู้ใช้ (Username)">
+    <input type="password" id="login-pass" class="login-input" placeholder="รหัสผ่าน (Password)">
+    <button onclick="doLogin()" style="width:100%; background:var(--primary-pink); color:white; border:none; padding:14px; border-radius:12px; cursor:pointer; font-weight:700; margin-top:15px; box-shadow: 0 4px 10px rgba(255,133,162,0.3);">LOGIN</button>
+    <button onclick="closeModal()" style="width:100%; background:none; color:#aaa; border:none; padding:12px; border-radius:12px; cursor:pointer; font-size:13px; margin-top:10px;">Cancle</button>
+  </div>
+</div>
+
+<input type="file" id="profile-upload" style="display:none" accept="image/*" onchange="handleImageUpload(event)">
+
+<footer style="padding: 50px 20px; text-align: center; color: #bbb; font-size: 12px;">
+  <div style="font-weight: 700; color: #888; margin-bottom: 5px;">BLM48 PROJECT</div>
+  <div>© 2026 Virtual Idol Cover Group</div>
+</footer>
+
+<button class="btn-refresh-float" onclick="refreshPage()">
+  <i class="fas fa-sync-alt"></i>
+</button>
+
+<script>
+  const scriptURL = 'https://script.google.com/macros/s/AKfycbwV5PhKOB21YFCkyy5y8cDX0IElIjmCuMF1b5xl84FUN55uk97YbL9wpEZP6lmniXC8/exec';
+  
+  let user = getUserSession();
+  let currentRankingData = [];
+  let currentTopFansData = {};
+
+  // --- Session Management ---
+  function saveUserSession(userData) {
+    const expiry = new Date().getTime() + (90 * 24 * 60 * 60 * 1000); 
+    localStorage.setItem('bnl_session', JSON.stringify({ data: userData, expiry: expiry }));
+  }
+
+  function getUserSession() {
+    const sessionStr = localStorage.getItem('bnl_session');
+    if (!sessionStr) return null;
+    const session = JSON.parse(sessionStr);
+    if (new Date().getTime() > session.expiry) {
+      localStorage.removeItem('bnl_session');
+      return null;
+    }
+    return session.data;
+  }
+
+  function isUserMember() {
+    return user && user.role && user.role.toUpperCase().trim() === 'MEMBER';
+  }
+
+  // --- API Calls ---
+  async function syncUserData() {
+    if (!user) return;
+    try {
+      const resp = await fetch(`${scriptURL}?action=getUserInfo&username=${encodeURIComponent(user.username)}&_=${Date.now()}`);
+      const res = await resp.json();
+      if (res.status === "success") {
+        user = res.data; 
+        saveUserSession(user); 
+        updateUI();
+      }
+    } catch (e) { console.error("Sync Error:", e); }
+  }
+
+  async function loadData() {
+    try {
+      // Load Ranking
+      const resp = await fetch(`${scriptURL}?_=${Date.now()}`);
+      currentRankingData = await resp.json();
+      
+      // Load Top Fans from fanLogs
+      const fanResp = await fetch(`${scriptURL}?action=getTopFans&_=${Date.now()}`);
+      currentTopFansData = await fanResp.json();
+      
+      renderRanking(currentRankingData);
+      renderGlobalFans(currentTopFansData);
+    } catch(e) { console.error("Load Error:", e); }
+  }
+
+  // --- UI Rendering ---
+  function updateUI() {
+    const bar = document.getElementById('user-bar');
+    if (user) {
+      const isMember = isUserMember();
+      const kamiTag = user.kamioshi ? `<span class="tag tag-kami" onclick="confirmRemoveOshi('kami', '${user.kamioshi}')"><i class="fas fa-crown"></i> ${user.kamioshi} <i class="fas fa-times-circle" style="opacity:0.6; font-size:9px;"></i></span>` : '';
+      const oshiTags = (user.oshis || []).map(o => `<span class="tag tag-oshi" onclick="confirmRemoveOshi('oshi', '${o}')"><i class="fas fa-heart"></i> ${o} <i class="fas fa-times-circle" style="opacity:0.6; font-size:9px;"></i></span>`).join('');
+
+      bar.innerHTML = `
+        <div class="user-info-header">
+          <div class="profile-img-container">
+            <img src="${getImg(user.profile_img)}" class="user-avatar-img">
+            <div class="edit-photo-btn" onclick="document.getElementById('profile-upload').click()"><i class="fas fa-camera"></i></div>
+          </div>
+          <div style="flex:1">
+            <div class="user-name">${user.name} <span class="role-badge">${user.role}</span></div>
+            <div class="oshi-list">${kamiTag}${oshiTags}</div>
+          </div>
+        </div>
+        <div class="wallet">
+          <div class="wallet-item"><div style="font-size:10px; color:#aaa;">Tokens</div>🪙 ${Number(user.token || 0).toLocaleString()}</div>
+          <div class="wallet-item"><div style="font-size:10px; color:#aaa;">Cookies</div>🍪 ${Number(user.cookie || 0).toLocaleString()}</div>
+          <div class="wallet-item"><div style="font-size:10px; color:#aaa;">GE Tokens</div>💎 ${Number(user.geToken || 0).toLocaleString()}</div>
+        </div>
+        <div class="bonus-container">
+          <button onclick="${isMember ? "Swal.fire('ขออภัย','เมมเบอร์รับไม่ได้ค่ะ','info')" : "claimMonthly()"}" class="btn-bonus btn-monthly ${isMember ? 'btn-locked' : ''}"><i class="fas fa-gift"></i> รับคุกกี้รายเดือน</button>
+          <button onclick="redeemCode()" class="btn-bonus btn-redeem"><i class="fas fa-ticket-alt"></i> Redeem</button>
+        </div>
+      `;
+    } else {
+      bar.innerHTML = `<button onclick="openLogin()" class="btn-bonus btn-monthly" style="width:100%; height:60px; font-size:18px; letter-spacing:2px;">LOG IN TO BLM48</button>`;
+    }
+  }
+
+  function renderRanking(data) {
+    const list = document.getElementById('ranking-list');
+    list.innerHTML = '';
+    const isMember = isUserMember();
+    
+    data.filter(m => m.name).forEach((m, i) => {
+      const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-other';
+      let badgeContent = i + 1;
+      if (i === 0) badgeContent = '<i class="fas fa-crown"></i>';
+      else if (i === 1) badgeContent = '<i class="fas fa-medal"></i>';
+      else if (i === 2) badgeContent = '<i class="fas fa-medal"></i>';
+
+      const card = document.createElement('div');
+      card.className = `member-card ${rankClass}`;
+      card.innerHTML = `
+        <div class="img-wrapper" onclick="showStats('${m.name}')">
+          <img src="${getImg(m.profile_img)}">
+          <div class="rank-badge">${badgeContent}</div>
+        </div>
+        <div class="name-text">${m.name}</div>
+        <div class="gen-text"></div>
+        <div class="cookie-text">🍪 ${Number(m.total_cookies || 0).toLocaleString()}</div>
+        <div class="btn-group">
+          <button class="btn-action btn-kami ${isMember ? 'btn-locked' : ''}" onclick="setOshi('kami', '${m.name}')">KAMI</button>
+          <button class="btn-action btn-oshi ${isMember ? 'btn-locked' : ''}" onclick="setOshi('oshi', '${m.name}')">OSHI</button>
+          <button class="btn-action btn-give ${isMember ? 'btn-locked' : ''}" onclick="giveCookie('${m.name}')">SEND</button>
+        </div>
+      `;
+      list.appendChild(card);
+    });
+  }
+
+  function renderGlobalFans(topFansData) {
+    const list = document.getElementById('global-fan-list');
+    list.innerHTML = '';
+    
+    const topMember = currentRankingData[0]?.name;
+    const fans = topFansData[topMember] || [];
+
+    if (fans.length === 0) {
+      list.innerHTML = '<div style="padding:20px; color:#ccc; font-size:13px;">ยังไม่มีข้อมูลการส่งคุกกี้</div>';
+      return;
+    }
+
+    fans.forEach(f => {
+      const card = document.createElement('div');
+      card.style = "min-width:110px; background:white; padding:15px; border-radius:20px; text-align:center; border:1px solid #ffeef2;";
+      card.innerHTML = `
+        <img src="${getImg(f.img)}" style="width:50px; height:50px; border-radius:50%; border:2px solid var(--primary-pink); margin-bottom:8px; object-fit:cover;">
+        <div style="font-weight:700; font-size:12px; color:#444; overflow:hidden; text-overflow:ellipsis;">${f.username}</div>
+        <div style="font-size:11px; color:var(--primary-pink); font-weight:700;">🍪 ${f.total.toLocaleString()}</div>
+      `;
+      list.appendChild(card);
+    });
+  }
+
+  // --- Interaction Functions ---
+  async function showStats(name) {
+    const m = currentRankingData.find(x => x.name === name);
+    if(!m) return;
+    
+    document.getElementById('modal-overlay').style.display = 'block';
+    document.getElementById('stats-form').style.display = 'block';
+    document.getElementById('login-form').style.display = 'none';
+
+    // Info Content - ใช้ข้อมูล total_kami และ total_oshi จาก Apps Script
+    document.getElementById('stats-content').innerHTML = `
+      <div class="stats-header">
+        <img src="${getImg(m.profile_img)}" class="stats-avatar">
+        <div class="stats-name">${m.name}</div>
+        <div style="font-size:12px; color:#aaa; letter-spacing:2px;">BLM48 MEMBER</div>
+      </div>
+      <div class="stats-summary">
+        <div class="stat-item">
+          <span class="stat-label">Kami</span>
+          <span class="stat-val">${m.total_kami || 0}</span>
+        </div>
+        <div class="stat-item" style="border-left: 1px solid #ffdce3; border-right: 1px solid #ffdce3;">
+          <span class="stat-label">Oshi</span>
+          <span class="stat-val">${m.total_oshi || 0}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Total Cookies</span>
+          <span class="stat-val" style="color:var(--primary-pink)">${Number(m.total_cookies || 0).toLocaleString()}</span>
+        </div>
+      </div>
+    `;
+
+    // Render Top Fans for THIS member
+    const fans = currentTopFansData[name] || [];
+    const fanContainer = document.getElementById('member-fans-content');
+    fanContainer.innerHTML = '';
+
+    if(fans.length === 0) {
+      fanContainer.innerHTML = '<div style="padding:20px; color:#bbb; font-size:13px;">ยังไม่มีแฟนคลับปาคุกกี้ให้ในเดือนนี้</div>';
+    } else {
+      fans.slice(0, 10).forEach((f, idx) => {
+        const row = document.createElement('div');
+        row.className = 'fan-row';
+        row.innerHTML = `
+          <div class="fan-rank">${idx + 1}</div>
+          <img src="${getImg(f.img)}" class="fan-img" onerror="this.src='https://via.placeholder.com/150'">
+          <div class="fan-info">
+            <div class="fan-name">${f.username}</div>
+            <div class="fan-cookies">🍪 ${f.total.toLocaleString()} Cookies</div>
+          </div>
+        `;
+        fanContainer.appendChild(row);
+      });
+    }
+  }
+
+  async function giveCookie(memberName) {
+    if (!user) return Swal.fire('เข้าสู่ระบบก่อนนะ', 'ต้อง Login เพื่อปาคุกกี้ครับ', 'warning');
+
+    const { value: amount } = await Swal.fire({
+      title: `ปาคุกกี้ให้ ${memberName}`,
+      input: 'number',
+      inputLabel: `คุณมีคุกกี้ทั้งหมด ${Number(user.cookie).toLocaleString()} ชิ้น`,
+      inputPlaceholder: 'ใส่จำนวนคุกกี้ที่ต้องการให้...',
+      showCancelButton: true, 
+      confirmButtonColor: '#ff85a2'
+    }); 
+
+    if (amount) {
+      const numAmount = parseInt(amount);
+      if (numAmount <= 0) return Swal.fire('ผิดพลาด', 'กรุณาใส่จำนวนที่มากกว่า 0', 'error');
+      if (numAmount > user.cookie) return Swal.fire('คุกกี้ไม่พอ', 'ยอดคุกกี้ของคุณไม่เพียงพอครับ', 'error');
+
+      Swal.fire({ title: 'กำลังส่งคุกกี้...', didOpen: () => Swal.showLoading() });
+
+      try {
+        const resp = await fetch(scriptURL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'giveCookie',
+            username: user.username,
+            memberName: memberName,
+            amount: numAmount
+          })
+        });
+        
+        const res = await resp.json();
+        if (res.status === 'success') {
+          Swal.fire('สำเร็จ!', `ปาให้ ${memberName} เรียบร้อยแล้ว ${numAmount} ชิ้น`, 'success');
+          syncUserData(); 
+          loadData();  
+        } else {
+          Swal.fire('Error', res.message, 'error');
+        }
+      } catch (err) {
+        Swal.fire('Error', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'error');
+      }
+    }
+  }
+
+  async function setOshi(type, memberName) {
+    if (!user) return openLogin();
+    if (isUserMember()) return Swal.fire('ขออภัย', 'เมมเบอร์ไม่สามารถเลือกโอชิได้ค่ะ', 'info');
+    
+    Swal.fire({ title: 'กำลังบันทึก...', didOpen: () => Swal.showLoading() });
+    try {
+      const resp = await fetch(`${scriptURL}?action=updateOshi&username=${encodeURIComponent(user.username)}&type=${type}&memberName=${encodeURIComponent(memberName)}`);
+      const res = await resp.json();
+      if (res.status === "success") { 
+        await syncUserData(); 
+        Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ!', text: `คุณได้เลือก ${memberName} เป็น ${type} แล้ว`, timer: 2000 });
+      } else {
+        Swal.fire('อุ๊ปส์', res.message, 'warning');
+      }
+    } catch (e) { Swal.fire('Error', 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้', 'error'); }
+  }
+
+  async function confirmRemoveOshi(type, memberName) {
+    const result = await Swal.fire({
+      title: 'ยกเลิกการติดตาม?',
+      text: `ต้องการลบ ${memberName} ออกจากรายการ ${type} หรือไม่?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#ff85a2',
+      confirmButtonText: 'ใช่, ลบเลย'
+    });
+
+    if (result.isConfirmed) {
+      Swal.fire({ title: 'กำลังดำเนินการ...', didOpen: () => Swal.showLoading() });
+      try {
+        const resp = await fetch(`${scriptURL}?action=removeOshi&username=${encodeURIComponent(user.username)}&type=${type}&memberName=${encodeURIComponent(memberName)}`);
+        const res = await resp.json();
+        if (res.status === "success") {
+          await syncUserData(); 
+          Swal.fire('สำเร็จ', 'ลบเรียบร้อยแล้วค่ะ', 'success');
+        }
+      } catch (e) { Swal.fire('Error', 'ผิดพลาด', 'error'); }
+    }
+  }
+
+  // --- Utility Functions ---
+  function refreshPage() {
+    Swal.fire({
+      title: 'กำลังอัปเดตข้อมูล...',
+      timer: 1000,
+      didOpen: () => Swal.showLoading(),
+      willClose: () => {
+        loadData();
+        if(user) syncUserData();
+      }
+    });
+  }
+
+  function confirmLogout() {
+    if(!user) return openLogin();
+    Swal.fire({
+      title: 'ออกจากระบบ?',
+      text: "คุณต้องการออกจากระบบ BLM48 ใช่หรือไม่?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ff85a2',
+      confirmButtonText: 'ออกจากระบบ',
+      cancelButtonText: 'ยกเลิก'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        localStorage.removeItem('bnl_session');
+        user = null;
+        updateUI();
+        Swal.fire('Logout!', 'ออกจากระบบเรียบร้อยแล้วค่ะ', 'success').then(() => openLogin());
+      }
+    });
+  }
+
+  async function claimMonthly() {
+    if(!user) return openLogin();
+    Swal.fire({ title: 'กำลังตรวจสอบ...', didOpen: () => Swal.showLoading() });
+    try {
+      const resp = await fetch(`${scriptURL}?action=claimMonthly&username=${encodeURIComponent(user.username)}`);
+      const res = await resp.json();
+      if(res.status === "success") { 
+        await syncUserData(); 
+        Swal.fire('สำเร็จ!', 'รับคุกกี้ 100 ชิ้นเรียบร้อยค่ะ', 'success'); 
+      } else { 
+        Swal.fire('ขออภัย', res.message || 'คุณได้รับของรางวัลเดือนนี้ไปแล้วค่ะ', 'info'); 
+      }
+    } catch (e) { Swal.fire('Error', 'ระบบขัดข้อง', 'error'); }
+  }
+
+  async function redeemCode() {
+    if (!user) return openLogin();
+    const { value: code } = await Swal.fire({ 
+      title: 'Redeem Code', 
+      input: 'text', 
+      inputPlaceholder: 'กรอกรหัสโค้ดที่นี่...',
+      showCancelButton: true 
+    });
+    if (code) {
+      Swal.fire({ title: 'กำลังตรวจสอบโค้ด...', didOpen: () => Swal.showLoading() });
+      try {
+        const resp = await fetch(`${scriptURL}?action=redeemCode&username=${encodeURIComponent(user.username)}&code=${encodeURIComponent(code)}`);
+        const res = await resp.json();
+        if (res.status === "success") { 
+          await syncUserData(); 
+          Swal.fire('สำเร็จ!', `คุณได้รับรางวัลเรียบร้อยแล้ว!`, 'success'); 
+        } else {
+          Swal.fire('ผิดพลาด', res.message || 'โค้ดไม่ถูกต้องหรือหมดอายุ', 'error');
+        }
+      } catch (e) { Swal.fire('Error', 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้', 'error'); }
+    }
+  }
+
+  async function doLogin() {
+    const u = document.getElementById('login-user').value;
+    const p = document.getElementById('login-pass').value;
+    if(!u || !p) return Swal.fire('เตือน', 'กรุณากรอกข้อมูลให้ครบนะจ๊ะ', 'warning');
+
+    Swal.fire({ title: 'กำลังเข้าสู่ระบบ...', didOpen: () => Swal.showLoading() });
+    try {
+      const resp = await fetch(`${scriptURL}?action=login&username=${encodeURIComponent(u)}&password=${encodeURIComponent(p)}`);
+      const result = await resp.json();
+      if (result.status === "success") { 
+        user = result.data; 
+        saveUserSession(user); 
+        closeModal(); 
+        updateUI(); 
+        loadData();
+        Swal.fire('ยินดีต้อนรับ', `สวัสดีค่ะคุณ ${user.name}`, 'success');
+      } else { 
+        Swal.fire('ล้มเหลว', 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง', 'error'); 
+      }
+    } catch(e) { Swal.fire('Error', 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้', 'error'); }
+  }
+  
+// --- ฟังก์ชันอัปโหลดรูปภาพ (แก้ไขให้จำกัดขนาด 2MB) ---
+
+function handleImageUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // 1. ปรับขนาดไฟล์เป็น 2MB (2 * 1024 * 1024 bytes)
+  const maxSize = 2 * 1024 * 1024; 
+  if (file.size > maxSize) {
+    return Swal.fire({
+      icon: 'error',
+      title: 'รูปใหญ่เกินไปงับ',
+      text: 'ขอขนาดไม่เกิน 2MB นะคะ',
+      confirmButtonColor: '#ff85a2' // สีชมพูสไตล์ BLM48
+    });
+  }
+
+  const reader = new FileReader();
+  reader.onload = async function(e) {
+    const base64Data = e.target.result;
+    
+    // แสดง Loading ระหว่างรอ Apps Script ประมวลผล
+    Swal.fire({ 
+      title: 'กำลังอัพโหลด...', 
+      text: 'กรุณารอสักครู่นะคะ',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading() 
+    });
+
+    try {
+      // ส่งข้อมูลไปยัง Apps Script (doPost)
+      const resp = await fetch(scriptURL, {
+        method: 'POST',
+        body: JSON.stringify({ 
+          action: 'updateProfileImage', 
+          username: user.username, 
+          image: base64Data 
+        })
+      });
+
+      const res = await resp.json();
+
+      if (res.status === 'success') {
+        // อัปเดตข้อมูลในตัวแปร user และ Local Storage
+        user.profile_img = res.link; 
+        const session = JSON.parse(localStorage.getItem('bnl_session')) || {};
+        session.data = user;
+        localStorage.setItem('bnl_session', JSON.stringify(session));
+        
+        updateUI(); // อัปเดตการแสดงผลหน้าเว็บทันที
+        
+        Swal.fire({
+          icon: 'success',
+          title: 'สำเร็จแล้ว!',
+          text: 'เปลี่ยนรูปโปรไฟล์เรียบร้อยค่ะ',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      } else {
+        // กรณี Apps Script ส่ง error กลับมา (เช่น ลืมให้สิทธิ์ Drive)
+        Swal.fire('เกิดข้อผิดพลาด', res.message || 'Apps Script ปฏิเสธการบันทึก', 'error');
+      }
+    } catch (err) { 
+      console.error('Upload Error:', err);
+      Swal.fire('Error', 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้: ' + err.message, 'error'); 
+    }
+  };
+  
+  reader.readAsDataURL(file);
+}
+  
+  function openLogin() { 
+    document.getElementById('modal-overlay').style.display = 'block'; 
+    document.getElementById('login-form').style.display = 'block'; 
+    document.getElementById('stats-form').style.display = 'none'; 
+  }
+  
+  function closeModal() { 
+    document.getElementById('modal-overlay').style.display = 'none'; 
+  }
+
+  function getImg(url) {
+    if (url && url.includes('drive.google.com')) return `https://lh3.googleusercontent.com/u/0/d/${url.match(/[-\w]{25,}/)}`;
+    if (url && url.startsWith('data:image')) return url;
+    return url || 'https://via.placeholder.com/150';
+  }
+
+  window.onload = () => { 
+    user = getUserSession(); 
+    updateUI(); 
+    loadData(); 
+    if(user) syncUserData(); 
+  };
+
+  // Cookie animation
+  setInterval(() => {
+    const c = document.createElement('i');
+    c.className = 'fas fa-cookie cookie-fall';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.animationDuration = (Math.random() * 3 + 4) + 's';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 6000);
+  }, 4000);
+</script>
+</body>
+</html>
