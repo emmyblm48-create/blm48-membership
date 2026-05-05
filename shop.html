@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <title>BLM48 Shop</title>
+    
+
+  </head>
+    
+  <body>
+  <!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BLM48 Shop - ร้านค้าไอเทม</title>
+    <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1MUHJ2BW9u5T-BZiP6uRqd5KNQdT1V-7e=s32">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- แทรก Style ที่เอ็มมี่ส่งมา + Style หน้า Shop เพิ่มเติม -->
+    <style>
+        :root {
+            --primary-pink: #ff85a2;
+            --soft-pink: #ffe4e1;
+            --bg-color: #fffdf5;
+            --ios-gray: #8e8e93;
+        }
+
+        body { 
+            font-family: 'Quicksand', 'Kanit', sans-serif; 
+            background-color: var(--bg-color); 
+            margin: 0; padding: 0; min-height: 100vh;
+        }
+      .brand { font-size: 24px; font-weight: bold; color: var(--primary-pink); letter-spacing: 1px; }
+    .nav-btns { display: flex; gap: 15px; }
+    .nav-icon { background: none; border: none; color: #ffb3c1; cursor: pointer; font-size: 1.2rem; transition: 0.3s; }
+    .nav-icon:hover { color: var(--primary-pink); transform: scale(1.1); }
+
+        /* Navbar & Nav Links (คงไว้ตามหน้าแรก) */
+        .navbar {
+            background: white; padding: 15px 20px; border-bottom: 2px solid #f0f0f0;
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 100;
+        }
+        .brand { font-size: 24px; font-weight: bold; color: var(--primary-pink); }
+        .nav-links { display: flex; gap: 20px; }
+        .nav-link { text-decoration: none; color: var(--primary-pink); font-weight: bold; font-size: 14px; }
+        
+        /* Profile Bar (ย่อให้เล็กลงสำหรับหน้า Shop) */
+        .user-profile-bar { 
+            max-width: 900px; margin: 15px auto; background: white; border-radius: 20px; 
+            padding: 15px; border: 2px solid var(--soft-pink); 
+        }
+        .wallet { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .wallet-item { 
+            background: #fffcfd; border: 1px solid #ffeef2; padding: 10px; 
+            border-radius: 12px; font-size: 13px; text-align: center; font-weight: 700; color: #555; 
+        }
+
+        /* Shop Sections */
+        .section-title { 
+            font-family: 'Kanit'; font-weight: 600; color: #444; margin: 25px 0 15px 20px; 
+            font-size: 18px; border-left: 5px solid var(--primary-pink); padding-left: 12px; 
+        }
+
+        /* Grid ของสินค้า */
+        .shop-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+            padding: 0 20px 40px;
+            max-width: 940px;
+            margin: 0 auto;
+        }
+
+        /* การ์ดสินค้า */
+        .product-card {
+            background: white;
+            border-radius: 20px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+            border: 1.5px solid #f9f9f9;
+            transition: 0.3s;
+        }
+        .product-card:hover { transform: translateY(-5px); border-color: var(--soft-pink); }
+
+        .product-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .product-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #444;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .product-desc {
+            font-size: 11px;
+            color: #999;
+            margin-bottom: 12px;
+            display: block;
+            line-height: 1.4;
+        }
+
+        .product-price {
+            background: #fff0f3;
+            color: var(--primary-pink);
+            padding: 8px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            cursor: pointer;
+            border: none;
+            width: 100%;
+            transition: 0.2s;
+        }
+        .product-price:active { transform: scale(0.95); background: var(--soft-pink); }
+        
+        /* ตกแต่งหมวดหมู่สินค้า Official (สีฟ้า) */
+        .category-official .product-price {
+            background: #eef9ff;
+            color: #0077b6;
+        }
+      
+          /* กำหนดความกว้างของ Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+/* ส่วนพื้นหลังของ Scrollbar */
+::-webkit-scrollbar-track {
+  background: #fff5f7; 
+  border-radius: 10px;
+}
+
+/* ส่วนตัวเลื่อน (Handle) */
+::-webkit-scrollbar-thumb {
+  background: #ffb6c1; /* ชมพูอ่อนเข้ากับธีม */
+  border-radius: 10px;
+  border: 2px solid #fff5f7;
+}
+
+/* เมื่อเอาเมาส์ไปวางบนตัวเลื่อน */
+::-webkit-scrollbar-thumb:hover {
+  background: #ff85a2; /* ชมพูเข้มขึ้นเล็กน้อย */
+}
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="brand">BLM48</div>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">HOME</a>
+            <a href="shop.html" class="nav-link" style="text-decoration: underline;">SHOP</a>
+        </div>
+        <div class="nav-icons">
+    <button onclick="refreshPage()" class="nav-icon" title="Refresh"><i class="fas fa-sync-alt"></i></button>
+  </div>
+    </nav>
+
+    <!-- Profile Wallet แสดงยอดเงินปัจจุบัน -->
+    <div class="user-profile-bar">
+        <div class="wallet">
+            <div class="wallet-item">
+                <span style="font-size: 10px; color: #888; display: block;">Tokens</span>
+                <i class="fas fa-coins" style="color: #ffb347;"></i> 10,000
+            </div>
+            <div class="wallet-item">
+                <span style="font-size: 10px; color: #888; display: block;">Cookies</span>
+                <i class="fas fa-cookie-bite" style="color: #d2691e;"></i> 5,500
+            </div>
+            <div class="wallet-item">
+                <span style="font-size: 10px; color: #888; display: block;">GE Tokens</span>
+                <i class="fas fa-gem" style="color: #4dabf7;"></i> 0
+            </div>
+        </div>
+    </div>
+
+    <!-- หมวดหมู่: Cookie Shop -->
+    <h2 class="section-title">Cookie Shop</h2>
+    <div class="shop-container">
+        <!-- รายการที่ 1 -->
+        <div class="product-card">
+            <span class="product-icon">🍪</span>
+            <span class="product-name">100 Cookies</span>
+            <button class="product-price" onclick="buyItem('100 Cookies', 10)">
+                <i class="fas fa-coins"></i> 10 Tokens
+            </button>
+        </div>
+
+        <!-- รายการที่ 2 -->
+        <div class="product-card">
+            <span class="product-icon">🍪✨</span>
+            <span class="product-name">1000 Cookies</span>
+          <button class="product-price" onclick="buyItem('1000 Cookies', 100)">
+                <i class="fas fa-coins"></i> 100 Tokens
+            </button>
+        </div>
+    </div>
+
+    <!-- หมวดหมู่: Official Merchandise -->
+    <h2 class="section-title">Official Goods</h2>
+    <div class="shop-container category-official">
+
+    </div>
+
+    <script>
+        function buyItem(itemName, price) {
+            const confirmBuy = confirm(`คุณต้องการแลก ${itemName} ด้วยราคา ${price} Tokens ใช่หรือไม่?`);
+            if (confirmBuy) {
+                alert(`แลกซื้อ ${itemName} สำเร็จแล้ว! (ระบบจำลอง)`);
+                // ในอนาคตเอ็มมี่สามารถเขียนเชื่อมต่อกับ Supabase หรือ Firebase ตรงนี้ได้ครับ
+            }
+        }
+    </script>
+
+</body>
+</html>
+    
+  </body>
+  
+</html>
