@@ -601,10 +601,18 @@ function renderGlobalFans(rawData) {
           })
         });
         const res = await resp.json();
-        if (res.status === 'success' || Array.isArray(res)) {
-          Swal.fire('สำเร็จ!', `ส่งคุกกี้ให้ ${memberName} เรียบร้อยแล้วค่ะ`, 'success');
-          syncUserData(); loadData();  
-        } else { Swal.fire('Error', res.message, 'error'); }
+      if (res.status === 'success') {
+    // อัปเดตข้อมูลในพื้นหลังก่อนบอกว่าสำเร็จ
+    await Promise.all([syncUserData(), loadData()]); 
+    
+    // แสดงข้อความสำเร็จ พร้อมยอดคุกกี้และโบนัสที่ได้จริงจาก Response
+    Swal.fire({
+        icon: 'success',
+        title: 'สำเร็จ!',
+        text: res.message, // ใช้ Message จากหลังบ้านที่บอกเรื่อง Bonus 10 Token ด้วย
+        confirmButtonColor: '#ff85a2'
+    });
+}else { Swal.fire('Error', res.message, 'error'); }
       } catch (err) { Swal.fire('Error', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'error'); }
     }
   }
@@ -699,14 +707,19 @@ async function setOshi(type, memberName) {
   }
 }
 
-  async function refreshPage() {
-    Swal.fire({ title: 'กำลังอัปเดตข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-    try {
-      await Promise.all([loadData(), user ? syncUserData() : Promise.resolve()]);
-      Swal.close();
-    } catch (error) { Swal.fire('ผิดพลาด', 'ไม่สามารถดึงข้อมูลล่าสุดได้', 'error'); }
+async function refreshPage() {
+  Swal.fire({ title: 'กำลังอัปเดตข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+  try {
+    // ล้าง Cache เก่าออกก่อนเพื่อให้มั่นใจว่าดึงใหม่จริง
+    localStorage.removeItem('bnl_ranking_cache');
+    localStorage.removeItem('bnl_topfans_cache');
+    
+    await Promise.all([loadData(), user ? syncUserData() : Promise.resolve()]);
+    Swal.fire({ icon: 'success', title: 'อัปเดตสำเร็จ', timer: 1000, showConfirmButton: false });
+  } catch (error) { 
+    Swal.fire('ผิดพลาด', 'ไม่สามารถดึงข้อมูลล่าสุดได้', 'error'); 
   }
-
+}
   function confirmLogout() {
     if(!user) return openLogin();
     Swal.fire({
