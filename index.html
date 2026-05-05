@@ -773,9 +773,8 @@ async function refreshPage() {
 
   
   async function updateDisplayName() {
-  // สมมติว่าคุณเอ็มมี่เก็บข้อมูลผู้ใช้ที่ล็อกอินไว้ในตัวแปร currentUser
-  if (!currentUser || currentUser.role.toLowerCase() !== "user") {
-    alert("เฉพาะผู้ใช้งานทั่วไป (User) เท่านั้นที่สามารถเปลี่ยนชื่อได้ค่ะ");
+  if (!user || user.role.toLowerCase() !== "user") { // เปลี่ยนจาก currentUser เป็น user
+    Swal.fire("ขออภัย","เฉพาะผู้ใช้งานทั่วไปเท่านั้นที่เปลี่ยนชื่อได้ค่ะ","info");
     return;
   }
 
@@ -783,40 +782,40 @@ async function refreshPage() {
     title: 'แก้ไขชื่อของคุณ',
     input: 'text',
     inputLabel: 'กรอกชื่อใหม่ที่ต้องการ',
-    inputValue: currentUser.name,
+    inputValue: user.name, // เปลี่ยนเป็น user.name
     showCancelButton: true,
+    confirmButtonColor: '#ff85a2',
     inputValidator: (value) => {
       if (!value) return 'กรุณากรอกชื่อด้วยนะคะ'
-      if (value.length > 20) return 'ชื่อยาวเกินไปหน่อยค่ะ (ไม่ควรเกิน 20 ตัวอักษร)'
+      if (value.length > 20) return 'ชื่อยาวเกินไปหน่อยค่ะ'
     }
   });
 
   if (newName) {
+    Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
     try {
-      // แสดง Loading
-      Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
-
-      const response = await fetch(SCRIPT_URL, {
+      const response = await fetch(scriptURL, { // ใช้ scriptURL ที่ประกาศไว้ข้างบน
         method: 'POST',
-        mode: 'no-cors', // หรือปรับตามการตั้งค่า Deployment ของคุณ
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `action=updateName&username=${currentUser.username}&newName=${encodeURIComponent(newName)}`
+        body: JSON.stringify({
+          action: 'updateName',
+          username: user.username,
+          newName: newName
+        })
       });
-
-      // หมายเหตุ: ถ้าใช้ no-cors จะอ่าน response ตรงๆ ไม่ได้ 
-      // แนะนำให้ใช้การแจ้งเตือนสำเร็จไปเลย หรือใช้เทคนิคอื่นในการเช็ค
-      Swal.fire('สำเร็จ!', 'เปลี่ยนชื่อเป็น ' + newName + ' เรียบร้อยแล้วค่ะ', 'success');
       
-      // อัปเดตชื่อในหน้าเว็บทันทีโดยไม่ต้องรีโหลด
-      currentUser.name = newName;
-      document.getElementById('user-display-name').innerText = newName; 
-
+      const res = await response.json();
+      if (res.status === "success") {
+        Swal.fire('สำเร็จ!', 'เปลี่ยนชื่อเรียบร้อยแล้วค่ะ', 'success');
+        user.name = newName;
+        document.getElementById('user-display-name').innerText = newName;
+        saveUserSession(user);
+      }
     } catch (error) {
-      Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถเปลี่ยนชื่อได้ในขณะนี้', 'error');
+      Swal.fire('เกิดข้อผิดพลาด', 'ลองใหม่อีกครั้งนะงับ', 'error');
     }
   }
 }
-
+ 
   async function redeemCode() {
     if (!user) return openLogin();
     const { value: code } = await Swal.fire({ 
