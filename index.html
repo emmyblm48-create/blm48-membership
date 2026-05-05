@@ -289,7 +289,7 @@
 
 <script>
   // --- CONFIG & CONSTANTS ---
-  const scriptURL = 'https://script.google.com/macros/s/AKfycbwXn1plPzk3lpGRHrZd9qu4vc4m8bKdbjTxTThJk9ZDk_sMcDFiqb_MMJXxWTvmja0t/exec';
+  const scriptURL = 'https://script.google.com/macros/s/AKfycbzrzqV5zH54wgGU-gn3a7Usx8wuPjqs_IyjXtHwK34Zbe9fkarBs4ec_S2yunHFiX5t/exec';
   
   // ใช้หุ้มข้อมูลเพื่อลด Global Variable รบกวนกัน
   let user = getUserSession();
@@ -1118,7 +1118,7 @@ window.handleImageUpload = async function(event, username) {
 };
 
   async function sendToGoogleSheets(username, url) {
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbwXn1plPzk3lpGRHrZd9qu4vc4m8bKdbjTxTThJk9ZDk_sMcDFiqb_MMJXxWTvmja0t/exec';
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzrzqV5zH54wgGU-gn3a7Usx8wuPjqs_IyjXtHwK34Zbe9fkarBs4ec_S2yunHFiX5t/exec';
     await fetch(scriptURL, {
       method: 'POST',
       body: JSON.stringify({
