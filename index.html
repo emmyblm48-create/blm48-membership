@@ -816,53 +816,6 @@ async function refreshPage() {
     }
   }
 }
-  
-  async function updateDisplayName() {
-  // เปลี่ยน currentUser เป็น user ให้เหมือนตัวแปรหลักด้านบน
-  if (!user || user.role.toLowerCase() !== "user") {
-    Swal.fire('ขออภัย', 'เฉพาะผู้ใช้งานทั่วไปเท่านั้นที่สามารถเปลี่ยนชื่อได้ค่ะ', 'info');
-    return;
-  }
-
-  const { value: newName } = await Swal.fire({
-    title: 'แก้ไขชื่อของคุณ',
-    input: 'text',
-    inputLabel: 'กรอกชื่อใหม่ที่ต้องการ',
-    inputValue: user.name, // ใช้ user.name
-    showCancelButton: true,
-    confirmButtonColor: '#ff85a2',
-    inputValidator: (value) => {
-      if (!value) return 'กรุณากรอกชื่อด้วยนะคะ'
-      if (value.length > 20) return 'ชื่อยาวเกินไปหน่อยค่ะ'
-    }
-  });
-
-  if (newName) {
-    Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-
-    try {
-      // ใช้ fetch แบบปกติ (ไม่ใช่ no-cors) เพื่อให้รับ status กลับมาเช็คได้
-      const response = await fetch(scriptURL, {
-        method: 'POST',
-        body: JSON.stringify({
-          action: 'updateName',
-          username: user.username,
-          newName: newName
-        })
-      });
-
-      const res = await response.json();
-      if (res.status === "success") {
-        user.name = newName; // อัปเดตตัวแปรในเครื่อง
-        saveUserSession(user); // บันทึกลง LocalStorage
-        updateUI(); // สั่งวาด UI ใหม่ ชื่อจะเปลี่ยนทันที
-        Swal.fire('สำเร็จ!', 'เปลี่ยนชื่อเรียบร้อยแล้วค่ะ', 'success');
-      }
-    } catch (error) {
-      Swal.fire('Error', 'ไม่สามารถเปลี่ยนชื่อได้ในขณะนี้', 'error');
-    }
-  }
-}
 
   async function redeemCode() {
     if (!user) return openLogin();
