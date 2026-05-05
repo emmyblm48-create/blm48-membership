@@ -444,31 +444,36 @@ function renderGlobalFans(rawData) {
   if (!list) return;
   list.innerHTML = '';
 
-  // 1. ตรวจสอบและแปลงข้อมูลให้เป็น Array เสมอ
   let fansArray = [];
   if (Array.isArray(rawData)) {
     fansArray = rawData;
   } else if (rawData && typeof rawData === 'object') {
-    // ถ้าข้อมูลมาเป็น Object ให้ดึงเฉพาะส่วนที่เป็นรายชื่อแฟนคลับรวม (ถ้ามีคีย์ 'global')
-    // หรือรวมข้อมูลจากทุก Member เข้าด้วยกัน
-    fansArray = rawData.global || Object.values(rawData).flat();
+    fansArray = Object.values(rawData).flat(); // รวมข้อมูลจากทุกเมมเบอร์เป็นก้อนเดียว
   }
 
-  // 2. ถ้าไม่มีข้อมูลจริงๆ ให้แสดงข้อความแจ้งเตือน[cite: 1]
   if (fansArray.length === 0) {
-    list.innerHTML = '<div style="padding:20px; color:#ccc; font-size:13px; width:100%; text-align:center;">ยังไม่มีข้อมูลการส่งคุกกี้ในขณะนี้</div>';
+    list.innerHTML = '<div style="padding:20px; color:#ccc; font-size:13px; width:100%; text-align:center;">ยังไม่มีข้อมูลแฟนคลับ...</div>';
     return;
   }
 
-  // 3. เรียงลำดับจากมากไปน้อย (กันเหนียวเผื่อ API ไม่ได้เรียงมาให้)
-  fansArray.sort((a, b) => (b.total || 0) - (a.total || 0));
+  // --- ส่วนสำคัญ: รวมยอด (Group By User) ---
+  const groupedFans = fansArray.reduce((acc, current) => {
+    const key = current.username; // ใช้ username เป็นหลักในการรวม
+    if (!acc[key]) {
+      acc[key] = { ...current, total: 0 };
+    }
+    acc[key].total += Number(current.total || 0); // รวมยอดคุกกี้เข้าด้วยกัน
+    return acc;
+  }, {});
 
-  // 4. วาดการ์ดแฟนคลับ[cite: 1]
-  fansArray.forEach((f, i) => {
+  // แปลงกลับเป็น Array และเรียงลำดับจากมากไปน้อย
+  const finalFans = Object.values(groupedFans).sort((a, b) => b.total - a.total);
+
+  // --- แสดงผล ---
+  finalFans.forEach((f, i) => {
     const isTop3 = i < 3;
     const rankColor = i === 0 ? '#ffd700' : i === 1 ? '#c0c0c0' : i === 2 ? '#cd7f32' : '#ffeef2';
     const rankIcon = i === 0 ? '<i class="fas fa-crown"></i>' : (i + 1);
-    const fanName = f.name || f.username || 'Anonymous'; // ใช้ชื่อเล่นตามที่คุณต้องการ[cite: 1]
 
     const card = document.createElement('div');
     card.className = 'fan-card';
@@ -484,14 +489,14 @@ function renderGlobalFans(rawData) {
         background: ${rankColor}; color: ${isTop3 ? '#fff' : '#ff85a2'};
         padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: bold;
         box-shadow: 0 2px 5px rgba(0,0,0,0.1); white-space: nowrap;">
-        ${rankIcon} อันดับ ${i + 1}
+        ${isTop3 ? rankIcon + ' ' : ''}อันดับ ${i + 1}
       </div>
       <img src="${getImg(f.img)}" style="width:65px; height:65px; border-radius:50%; border:3px solid #fef5f7; margin-top:5px; object-fit:cover;" onerror="this.src='https://via.placeholder.com/150'">
       <div style="font-weight:700; font-size:14px; color:#444; margin-top:8px; white-space: nowrap; overflow:hidden; text-overflow:ellipsis;">
-        ${fanName}
+        ${f.name || f.username}
       </div>
       <div style="font-size:12px; color:#ff85a2; font-weight:700; margin-top:4px;">
-        <i class="fas fa-cookie-bite" style="color: #d2691e;"></i> ${Number(f.total || 0).toLocaleString()}
+        <i class="fas fa-cookie-bite" style="color: #d2691e;"></i> ${Number(f.total).toLocaleString()}
       </div>
     `;
     list.appendChild(card);
