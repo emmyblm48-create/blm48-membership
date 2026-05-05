@@ -289,7 +289,7 @@
 
 <script>
   // --- CONFIG & CONSTANTS ---
-  const scriptURL = 'https://script.google.com/macros/s/AKfycbwJu2gCJKwkQy38q7zmQK4G2A-SU0EdsgSA3VLb5P7gTgUv_gxBn_VuDKG0cNL55BEH/exec';
+  const scriptURL = 'https://script.google.com/macros/s/AKfycbzq7ir6MUZe7hN6iAJujqfmtIT4k6z8wbnsoPsEMWAIdrDLT9ejq9PjIrsowYZ49Et_/exec';
    
   // ใช้หุ้มข้อมูลเพื่อลด Global Variable รบกวนกัน
   let user = getUserSession();
@@ -406,38 +406,44 @@
     }
   }
 
-  function renderRanking(data) {
-    const list = document.getElementById('ranking-list');
-    if (!list) return;
-    list.innerHTML = '';
-    const isMember = isUserMember();
-    
-    data.filter(m => m.name).forEach((m, i) => {
-      const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-other';
-      let badgeContent = i + 1;
-      if (i === 0) badgeContent = '<i class="fas fa-crown"></i>';
-      else if (i === 1 || i === 2) badgeContent = '<i class="fas fa-medal"></i>';
+function renderRanking(data) {
+  const list = document.getElementById('ranking-list');
+  if (!list) return;
+  list.innerHTML = '';
+  const isMember = isUserMember();
+  
+  // กรองข้อมูลและใช้ยอดรายเดือน (monthly_cookies) ในการจัดอันดับ
+  data.filter(m => m.name).forEach((m, i) => {
+    const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-other';
+    let badgeContent = i + 1;
+    if (i === 0) badgeContent = '<i class="fas fa-crown"></i>';
+    else if (i === 1 || i === 2) badgeContent = '<i class="fas fa-medal"></i>';
 
-      const card = document.createElement('div');
-      card.className = `member-card ${rankClass}`;
-      // ใช้ loading="lazy" สำหรับรูปภาพเพื่อความลื่นไหล
-      card.innerHTML = `
-        <div class="img-wrapper" onclick="showStats('${m.name}')">
-          <img src="${getImg(m.profile_img)}" loading="lazy">
-          <div class="rank-badge">${badgeContent}</div>
-        </div>
-        <div class="name-text">${m.name}</div>
-        <div class="gen-text"></div>
-        <div class="cookie-text"><i class="fas fa-cookie-bite" style="color: #d2691e;"></i> ${Number(m.total_cookies || 0).toLocaleString()}</div>
-        <div class="btn-group">
-          <button class="btn-action btn-kami ${isMember ? 'btn-locked' : ''}" onclick="setOshi('kami', '${m.name}')">KAMI</button>
-          <button class="btn-action btn-oshi ${isMember ? 'btn-locked' : ''}" onclick="setOshi('oshi', '${m.name}')">OSHI</button>
-          <button class="btn-action btn-give ${isMember ? 'btn-locked' : ''}" onclick="giveCookie('${m.name}')">SEND</button>
-        </div>
-      `;
-      list.appendChild(card);
-    });
-  }
+    const card = document.createElement('div');
+    card.className = `member-card ${rankClass}`;
+    
+    card.innerHTML = `
+      <div class="img-wrapper" onclick="showStats('${m.name}')">
+        <img src="${getImg(m.profile_img)}" loading="lazy">
+        <div class="rank-badge">${badgeContent}</div>
+      </div>
+      <div class="name-text">${m.name}</div>
+     
+
+      <div class="cookie-text" style="margin-bottom: 2px;">
+        <i class="fas fa-cookie-bite" style="color: #d2691e;"></i> 
+        ${Number(m.monthly_cookies || 0).toLocaleString()}
+      </div>
+
+      <div class="btn-group">
+        <button class="btn-action btn-kami ${isMember ? 'btn-locked' : ''}" onclick="setOshi('kami', '${m.name}')">KAMI</button>
+        <button class="btn-action btn-oshi ${isMember ? 'btn-locked' : ''}" onclick="setOshi('oshi', '${m.name}')">OSHI</button>
+        <button class="btn-action btn-give ${isMember ? 'btn-locked' : ''}" onclick="giveCookie('${m.name}')">SEND</button>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
 
 function renderGlobalFans(rawData) {
   const list = document.getElementById('global-fan-list');
@@ -511,7 +517,7 @@ function renderGlobalFans(rawData) {
     document.getElementById('modal-overlay').style.display = 'block';
     document.getElementById('stats-form').style.display = 'block';
     document.getElementById('login-form').style.display = 'none';
-    document.getElementById('stats-content').innerHTML = `
+   document.getElementById('stats-content').innerHTML = `
     <div class="stats-header">
       <img src="${getImg(m.profile_img)}" class="stats-avatar">
       <div class="stats-name">${m.name}</div>
@@ -521,16 +527,11 @@ function renderGlobalFans(rawData) {
       <div class="stat-item"><span class="stat-label">Kami</span><span class="stat-val">${m.total_kami || 0}</span></div>
       <div class="stat-item" style="border-left: 1px solid #ffdce3; border-right: 1px solid #ffdce3;"><span class="stat-label">Oshi</span><span class="stat-val">${m.total_oshi || 0}</span></div>
       
-      <!-- 🌟 จุดที่ต้องแก้ไขคือตรงนี้ครับ 🌟 -->
       <div class="stat-item">
         <span class="stat-label">Total Cookies</span>
         <span class="stat-val" style="color:var(--primary-pink)">
-          ${Number(m.grand_total || 0).toLocaleString()}
+          ${Number(m.all_time_total || 0).toLocaleString()}
         </span>
-        <!-- เพิ่มบรรทัดด้านล่างนี้เพื่อให้ Monthly แสดงเลขครับ -->
-        <div style="font-size:10px; color:#888; margin-top:4px;">
-          Monthly: ${Number(m.current_month || 0).toLocaleString()}
-        </div>
       </div>
     </div>
   `;
@@ -598,13 +599,13 @@ function renderGlobalFans(rawData) {
       Swal.fire({ title: 'กำลังปาคุ้กกี้...', didOpen: () => Swal.showLoading() });
       try {
         const resp = await fetch(scriptURL, {
-          method: 'POST',
+          method: 'POST', 
           body: JSON.stringify({
             action: 'giveCookie',
             username: user.username,
             memberName: memberName,
             amount: numAmount
-          })
+          }) 
         });
         const res = await resp.json();
         if (res.status === 'success' || Array.isArray(res)) {
@@ -1124,7 +1125,7 @@ window.handleImageUpload = async function(event, username) {
 };
 
   async function sendToGoogleSheets(username, url) {
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbwJu2gCJKwkQy38q7zmQK4G2A-SU0EdsgSA3VLb5P7gTgUv_gxBn_VuDKG0cNL55BEH/exec';
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzq7ir6MUZe7hN6iAJujqfmtIT4k6z8wbnsoPsEMWAIdrDLT9ejq9PjIrsowYZ49Et_/exec';
     await fetch(scriptURL, {
       method: 'POST',
       body: JSON.stringify({
