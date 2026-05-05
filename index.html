@@ -1004,6 +1004,88 @@ function setupUserProfile(user) {
     }
   }
 
+    async function compressImage(file) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 400; // ขนาดที่พอดีสำหรับรูปโปรไฟล์
+                const scaleSize = MAX_WIDTH / img.width;
+                canvas.width = MAX_WIDTH;
+                canvas.height = img.height * scaleSize;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                
+                canvas.toBlob((blob) => {
+                    resolve(blob);
+                }, 'image/jpeg', 0.8); // บีบอัดคุณภาพเหลือ 80%
+            };
+        };
+    });
+}
+
+window.handleImageUpload = async function(event, username) {
+    const finalUsername = username || (window.user ? window.user.username : null);
+
+    if (!finalUsername || finalUsername === 'undefined') {
+        Swal.fire('ไม่พบชื่อผู้ใช้', 'กรุณาเข้าสู่ระบบใหม่อีกครั้งนะงับ', 'error');
+        return;
+    }
+
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const result = await Swal.fire({
+        title: 'เปลี่ยนรูปโปรไฟล์?',
+        text: `คุณต้องการใช้รูปนี้ใช่หรือไม่?`, 
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#ff85a2',
+        confirmButtonText: 'ตกลง',
+        cancelButtonText: 'ยกเลิก'
+    });
+
+    if (result.isConfirmed) {
+        Swal.fire({
+            title: 'กำลังประมวลผล...',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); }
+        });
+
+        try {
+            // บีบอัดรูปก่อนส่ง
+            const compressedFile = await compressImage(file);
+
+            // 1. อัปโหลดไป ImgBB
+            const imageUrl = await uploadToStorage(compressedFile); 
+            
+            // 2. อัปเดตลง Firebase และ Google Sheets แบบพร้อมกัน (Parallel) เพื่อความรวดเร็ว
+            const updates = {};
+            updates['/users/' + finalUsername + '/profile_img'] = imageUrl;
+            
+            await Promise.all([
+                update(ref(database), updates),
+                sendToGoogleSheets(finalUsername, imageUrl)
+            ]);
+
+            Swal.fire('สำเร็จ!', 'อัปเดตรูปโปรไฟล์เรียบร้อยแล้วค่ะ', 'success');
+            
+            if (typeof window.syncUserData === 'function') {
+                window.syncUserData();
+            }
+
+        } catch (error) {
+            Swal.fire('เกิดข้อผิดพลาด!', 'ระบบขัดข้องนิดหน่อย ลองใหม่อีกครั้งนะงับ', 'error');
+            console.error(error);
+        }
+    }
+};
+
   async function sendToGoogleSheets(username, url) {
     const scriptURL = 'https://script.google.com/macros/s/AKfycbwxDYRjubE6WYx_G3rL448n0xIor8kY-S5XlSwXkXepGMEdLYnIxESFAGknGDFG1_8/exec';
     await fetch(scriptURL, {
