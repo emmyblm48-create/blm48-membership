@@ -289,8 +289,8 @@
 
 <script>
   // --- CONFIG & CONSTANTS ---
-  const scriptURL = 'https://script.google.com/macros/s/AKfycbzcEK_jCtqz_zqh7CheYvCFASNFAjbHaQrVJFFcCejzeIw7AO-XF1nq37ubpsHRWtAu/exec';
-  
+  const scriptURL = 'https://script.google.com/macros/s/AKfycbyTxCqT3SWppOJfgwk6LhEW3C27mFguADqzvIf5U7A2uXoWzOTe1eHoylYHmeEDPVRb/exec';
+   
   // ใช้หุ้มข้อมูลเพื่อลด Global Variable รบกวนกัน
   let user = getUserSession();
   let currentRankingData = JSON.parse(localStorage.getItem('bnl_ranking_cache')) || [];
@@ -1124,7 +1124,7 @@ window.handleImageUpload = async function(event, username) {
 };
 
   async function sendToGoogleSheets(username, url) {
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbzcEK_jCtqz_zqh7CheYvCFASNFAjbHaQrVJFFcCejzeIw7AO-XF1nq37ubpsHRWtAu/exec';
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbyTxCqT3SWppOJfgwk6LhEW3C27mFguADqzvIf5U7A2uXoWzOTe1eHoylYHmeEDPVRb/exec';
     await fetch(scriptURL, {
       method: 'POST',
       body: JSON.stringify({
