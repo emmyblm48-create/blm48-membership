@@ -1,15 +1,4 @@
 <!DOCTYPE html>
-<html lang="en">
-
-  <head>
-    <meta charset="UTF-8">
-    <title>BLM48 Shop</title>
-    
-
-  </head>
-    
-  <body>
-  <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
@@ -18,14 +7,14 @@
     <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1MUHJ2BW9u5T-BZiP6uRqd5KNQdT1V-7e=s32">
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
-    <!-- แทรก Style ที่เอ็มมี่ส่งมา + Style หน้า Shop เพิ่มเติม -->
     <style>
         :root {
             --primary-pink: #ff85a2;
             --soft-pink: #ffe4e1;
             --bg-color: #fffdf5;
-            --ios-gray: #8e8e93;
+            --cookie-brown: #d2691e;
         }
 
         body { 
@@ -33,25 +22,25 @@
             background-color: var(--bg-color); 
             margin: 0; padding: 0; min-height: 100vh;
         }
-      .brand { font-size: 24px; font-weight: bold; color: var(--primary-pink); letter-spacing: 1px; }
-    .nav-btns { display: flex; gap: 15px; }
-    .nav-icon { background: none; border: none; color: #ffb3c1; cursor: pointer; font-size: 1.2rem; transition: 0.3s; }
-    .nav-icon:hover { color: var(--primary-pink); transform: scale(1.1); }
 
-        /* Navbar & Nav Links (คงไว้ตามหน้าแรก) */
+        /* Navbar */
         .navbar {
             background: white; padding: 15px 20px; border-bottom: 2px solid #f0f0f0;
             display: flex; justify-content: space-between; align-items: center;
             position: sticky; top: 0; z-index: 100;
         }
-        .brand { font-size: 24px; font-weight: bold; color: var(--primary-pink); }
+        .brand { font-size: 24px; font-weight: bold; color: var(--primary-pink); letter-spacing: 1px; }
         .nav-links { display: flex; gap: 20px; }
-        .nav-link { text-decoration: none; color: var(--primary-pink); font-weight: bold; font-size: 14px; }
-        
-        /* Profile Bar (ย่อให้เล็กลงสำหรับหน้า Shop) */
+        .nav-link { text-decoration: none; color: var(--primary-pink); font-weight: bold; font-size: 14px; transition: 0.3s; }
+        .nav-link:hover { opacity: 0.7; }
+    .nav-btns { display: flex; gap: 15px; }
+    .nav-icon { background: none; border: none; color: #ffb3c1; cursor: pointer; font-size: 1.2rem; transition: 0.3s; }
+    .nav-icon:hover { color: var(--primary-pink); transform: scale(1.1); }
+
+        /* Wallet Section */
         .user-profile-bar { 
             max-width: 900px; margin: 15px auto; background: white; border-radius: 20px; 
-            padding: 15px; border: 2px solid var(--soft-pink); 
+            padding: 15px; border: 2px solid var(--soft-pink); box-shadow: 0 5px 15px rgba(255,133,162,0.05);
         }
         .wallet { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .wallet-item { 
@@ -59,178 +48,254 @@
             border-radius: 12px; font-size: 13px; text-align: center; font-weight: 700; color: #555; 
         }
 
-        /* Shop Sections */
+        /* Shop Layout */
         .section-title { 
             font-family: 'Kanit'; font-weight: 600; color: #444; margin: 25px 0 15px 20px; 
             font-size: 18px; border-left: 5px solid var(--primary-pink); padding-left: 12px; 
         }
 
-        /* Grid ของสินค้า */
         .shop-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 15px;
-            padding: 0 20px 40px;
-            max-width: 940px;
-            margin: 0 auto;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px; padding: 0 20px 40px; max-width: 940px; margin: 0 auto;
         }
 
-        /* การ์ดสินค้า */
         .product-card {
-            background: white;
-            border-radius: 20px;
-            padding: 15px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
-            border: 1.5px solid #f9f9f9;
-            transition: 0.3s;
+            background: white; border-radius: 20px; padding: 15px; text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03); border: 1.5px solid #f9f9f9; transition: 0.3s;
         }
         .product-card:hover { transform: translateY(-5px); border-color: var(--soft-pink); }
-
-        .product-icon {
-            font-size: 40px;
-            margin-bottom: 10px;
-            display: block;
-        }
-        
-        .product-name {
-            font-size: 14px;
-            font-weight: 700;
-            color: #444;
-            margin-bottom: 5px;
-            display: block;
-        }
-
-        .product-desc {
-            font-size: 11px;
-            color: #999;
-            margin-bottom: 12px;
-            display: block;
-            line-height: 1.4;
-        }
-
+        .product-icon { font-size: 40px; margin-bottom: 10px; display: block; }
+        .product-name { font-size: 14px; font-weight: 700; color: #444; margin-bottom: 5px; display: block; }
         .product-price {
-            background: #fff0f3;
-            color: var(--primary-pink);
-            padding: 8px;
-            border-radius: 12px;
-            font-weight: 800;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            cursor: pointer;
-            border: none;
-            width: 100%;
-            transition: 0.2s;
+            background: #fff0f3; color: var(--primary-pink); padding: 8px; border-radius: 12px;
+            font-weight: 800; font-size: 14px; border: none; width: 100%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 5px; transition: 0.2s;
         }
-        .product-price:active { transform: scale(0.95); background: var(--soft-pink); }
-        
-        /* ตกแต่งหมวดหมู่สินค้า Official (สีฟ้า) */
-        .category-official .product-price {
-            background: #eef9ff;
-            color: #0077b6;
-        }
+        .product-price:active { transform: scale(0.95); }
+        .product-price:disabled { background: #eee; color: #aaa; cursor: not-allowed; }
+
+        /* Official Goods Style */
+        .coming-soon { opacity: 0.6; filter: grayscale(0.5); }
       
-          /* กำหนดความกว้างของ Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
+      /* Responsive */
+    @media (max-width: 600px) {
+      .wallet { grid-template-columns: 1fr 1fr; }
+      .wallet-item:last-child { grid-column: span 2; }
+      .member-card { width: 150px; padding: 20px 10px; }
+      .rank-1 { height: 280px; }
+      .img-wrapper { width: 85px; height: 85px; }
+      .rank-1 .img-wrapper { width: 100px; height: 100px; }
+    }
 
-/* ส่วนพื้นหลังของ Scrollbar */
-::-webkit-scrollbar-track {
-  background: #fff5f7; 
-  border-radius: 10px;
-}
-
-/* ส่วนตัวเลื่อน (Handle) */
-::-webkit-scrollbar-thumb {
-  background: #ffb6c1; /* ชมพูอ่อนเข้ากับธีม */
-  border-radius: 10px;
-  border: 2px solid #fff5f7;
-}
-
-/* เมื่อเอาเมาส์ไปวางบนตัวเลื่อน */
-::-webkit-scrollbar-thumb:hover {
-  background: #ff85a2; /* ชมพูเข้มขึ้นเล็กน้อย */
-}
+    .cookie-fall { position: fixed; top: -50px; z-index: -1; color: #e6b38a; pointer-events: none; animation: falling linear forwards; opacity: 0.6; }
+    @keyframes falling { to { transform: translateY(110vh) rotate(360deg); } }
+      
     </style>
 </head>
 <body>
 
-    <!-- Navbar -->
     <nav class="navbar">
-        <div class="brand">BLM48</div>
-        <div class="nav-links">
-            <a href="index.html" class="nav-link">HOME</a>
-            <a href="shop.html" class="nav-link">SHOP</a>
-        </div>
-        <div class="nav-icons">
+  <div class="brand">BLM48</div>
+  <div class="nav-links">
+        <a href="index.html" class="nav-link">HOME</a>
+    <a href="shop.html" class="nav-link">SHOP</a>
+    </div>
+  <div class="nav-btns">
+    <!-- ส่วนของ Navigation Bar (แก้ไขจุดที่มีปุ่ม Refresh) -->
+<div class="nav-icons">
     <button onclick="refreshPage()" class="nav-icon" title="Refresh"><i class="fas fa-sync-alt"></i></button>
+    <button onclick="confirmLogout()" class="nav-icon" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
   </div>
-    </nav>
+</nav>
 
-    <!-- Profile Wallet แสดงยอดเงินปัจจุบัน -->
-    <div class="user-profile-bar">
+    <div class="user-profile-bar" id="shop-wallet-bar">
+        <!-- ยอดเงินจะถูกเขียนทับด้วย JavaScript -->
         <div class="wallet">
-            <div class="wallet-item">
-                <span style="font-size: 10px; color: #888; display: block;">Tokens</span>
-                <i class="fas fa-coins" style="color: #ffb347;"></i> 10,000
-            </div>
-            <div class="wallet-item">
-                <span style="font-size: 10px; color: #888; display: block;">Cookies</span>
-                <i class="fas fa-cookie-bite" style="color: #d2691e;"></i> 5,500
-            </div>
-            <div class="wallet-item">
-                <span style="font-size: 10px; color: #888; display: block;">GE Tokens</span>
-                <i class="fas fa-gem" style="color: #4dabf7;"></i> 0
-            </div>
+            <div class="wallet-item">Tokens: -</div>
+            <div class="wallet-item">Cookies: -</div>
+            <div class="wallet-item">GE Tokens: -</div>
         </div>
     </div>
 
-    <!-- หมวดหมู่: Cookie Shop -->
-    <h2 class="section-title">Cookie Shop</h2>
+    <h2 class="section-title">🍪 Cookie Shop</h2>
     <div class="shop-container">
-        <!-- รายการที่ 1 -->
+        <!-- 10 Tokens -->
         <div class="product-card">
             <span class="product-icon">🍪</span>
             <span class="product-name">100 Cookies</span>
-            <button class="product-price" onclick="buyItem('100 Cookies', 10)">
+            <button class="product-price" onclick="processPurchase(10, 100, '100 Cookies')">
                 <i class="fas fa-coins"></i> 10 Tokens
             </button>
         </div>
 
-        <!-- รายการที่ 2 -->
+        <!-- 100 Tokens -->
         <div class="product-card">
             <span class="product-icon">🍪✨</span>
-            <span class="product-name">1000 Cookies</span>
-          <button class="product-price" onclick="buyItem('1000 Cookies', 100)">
+            <span class="product-name">1,000 Cookies</span>
+            <button class="product-price" onclick="processPurchase(100, 1000, '1,000 Cookies')">
                 <i class="fas fa-coins"></i> 100 Tokens
             </button>
         </div>
     </div>
 
-    <!-- หมวดหมู่: Official Merchandise -->
-    <h2 class="section-title">Official Goods</h2>
-    <div class="shop-container category-official">
+    <h2 class="section-title">🎀 Official Merchandise</h2>
+    <div class="shop-container">
+        <div class="product-card coming-soon">
+            <span class="product-icon">🛍️</span>
+            <span class="product-name">BLM48 OFFICIAL</span>
+            <button class="product-price" disabled>Coming Soon</button>
+        </div>
+    </div> 
+      
+<footer style="padding: 50px 20px; text-align: center; color: #bbb; font-size: 12px;">
+  <div style="font-weight: 700; color: #888; margin-bottom: 5px;">BLM48 MEMBERSHIP</div>
+  <div>© 2026 Virtual Idol Cover Group</div>
+</footer>
+      
+<script>
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbxHHbH7TvSqsPeRGs9h4Yr3KoVArA5k4r136hl8LPN1BhuXIL2x6YPiHjHL02DUPMOC/exec';
+        let userData = null;
 
-    </div>
+        // 1. โหลดข้อมูลผู้ใช้จากหน้าแรก (LocalStorage)
+        function initShop() {
+            const session = localStorage.getItem('bnl_session');
+            if (!session) {
+                Swal.fire('เข้าสู่ระบบก่อนนะงับ', 'กรุณากลับไปหน้าแรกเพื่อ Login', 'warning').then(() => {
+                    window.location.href = 'index.html';
+                });
+                return;
+            }
+            userData = JSON.parse(session).data;
+            updateWalletUI();
+        }
 
-    <script>
-        function buyItem(itemName, price) {
-            const confirmBuy = confirm(`คุณต้องการแลก ${itemName} ด้วยราคา ${price} Tokens ใช่หรือไม่?`);
-            if (confirmBuy) {
-                alert(`แลกซื้อ ${itemName} สำเร็จแล้ว! (ระบบจำลอง)`);
-                // ในอนาคตเอ็มมี่สามารถเขียนเชื่อมต่อกับ Supabase หรือ Firebase ตรงนี้ได้ครับ
+        // 2. อัปเดตการแสดงผลยอดเงิน
+        function updateWalletUI() {
+            const walletBar = document.getElementById('shop-wallet-bar');
+            if (!userData) return;
+            
+            walletBar.innerHTML = `
+                <div class="wallet">
+                    <div class="wallet-item">
+                        <span style="font-size: 10px; color: #888; display: block;">Tokens</span>
+                        <i class="fas fa-coins" style="color: #ffb347;"></i> ${Number(userData.token).toLocaleString()}
+                    </div>
+                    <div class="wallet-item">
+                        <span style="font-size: 10px; color: #888; display: block;">Cookies</span>
+                        <i class="fas fa-cookie-bite" style="color: var(--cookie-brown);"></i> ${Number(userData.cookie).toLocaleString()}
+                    </div>
+                    <div class="wallet-item">
+                        <span style="font-size: 10px; color: #888; display: block;">GE Tokens</span>
+                        <i class="fas fa-gem" style="color: #4dabf7;"></i> ${Number(userData.geToken || 0).toLocaleString()}
+                    </div>
+                </div>
+            `;
+        }
+
+        // 3. ระบบ Refresh ข้อมูล (ดึงจาก Google Sheets ใหม่)
+        async function refreshPage() {
+            if (!userData) return;
+            
+            Swal.fire({ 
+                title: 'กำลังอัปเดตข้อมูล...', 
+                allowOutsideClick: false, 
+                didOpen: () => Swal.showLoading() 
+            });
+
+            try {
+                // ดึงข้อมูลใหม่โดยใช้ Username เดิม
+                const response = await fetch(`${scriptURL}?action=getUserData&username=${userData.username}`);
+                const result = await response.json();
+
+                if (result.status === "success") {
+                    userData = result.data;
+                    // อัปเดต LocalStorage ด้วย
+                    const session = JSON.parse(localStorage.getItem('bnl_session'));
+                    session.data = userData;
+                    localStorage.setItem('bnl_session', JSON.stringify(session));
+                    
+                    updateWalletUI();
+                    Swal.fire('อัปเดตแล้ว!', 'ข้อมูลกระเป๋าเงินเป็นปัจจุบันแล้วค่ะ', 'success');
+                } else {
+                    throw new Error("User not found");
+                }
+            } catch (error) {
+                console.error(error);
+                Swal.fire('ผิดพลาด', 'ไม่สามารถดึงข้อมูลล่าสุดได้ กรุณาลองใหม่นะคะ', 'error');
             }
         }
-    </script>
 
+        // 4. ระบบ Logout
+        function confirmLogout() {
+            Swal.fire({
+                title: 'ออกจากระบบ?',
+                text: "คุณต้องการออกจากระบบใช่หรือไม่?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ff85a2',
+                confirmButtonText: 'ออกจากระบบ',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    localStorage.removeItem('bnl_session');
+                    Swal.fire('Logout!', 'ออกจากระบบเรียบร้อยแล้วค่ะ', 'success').then(() => {
+                        window.location.href = 'index.html'; // กลับหน้า Login
+                    });
+                }
+            });
+        }
+
+        // 5. ระบบซื้อสินค้า (แก้ไขจากภาพ image_f6295d.png)
+        async function processPurchase(price, reward, itemName) {
+            if (userData.token < price) {
+                Swal.fire('Token ไม่พอค่ะ', 'ไปเติม Token ก่อนนะงับ', 'error');
+                return;
+            }
+
+            const confirmResult = await Swal.fire({
+                title: `ยืนยันการแลกซื้อ?`,
+                text: `ใช้ ${price} Tokens แลก ${itemName}`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#ff85a2',
+                confirmButtonText: 'ยืนยัน',
+                cancelButtonText: 'ยกเลิก'
+            });
+
+            if (confirmResult.isConfirmed) {
+                Swal.fire({ title: 'กำลังประมวลผล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+                try {
+                    // ส่งข้อมูลไปที่ Apps Script
+                    const response = await fetch(scriptURL, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            action: 'exchangeCookies',
+                            username: userData.username,
+                            tokenPrice: price,
+                            cookieReward: reward
+                        })
+                    });
+
+                    // ถ้าเชื่อมต่อสำเร็จ (สถานะ 200)
+                    userData.token -= price;
+                    userData.cookie = Number(userData.cookie) + reward;
+
+                    const newSession = JSON.parse(localStorage.getItem('bnl_session'));
+                    newSession.data = userData;
+                    localStorage.setItem('bnl_session', JSON.stringify(newSession));
+
+                    updateWalletUI();
+                    Swal.fire('สำเร็จ!', `ได้รับ ${itemName} เรียบร้อยแล้วค่ะ`, 'success');
+
+                } catch (error) {
+                    // กรณีนี้จะทำงานถ้าลิงก์ผิด หรือ Server ล่ม แบบในภาพ image_f6295d.png
+                    Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ในขณะนี้', 'error');
+                }
+            }
+        }
+
+        window.onload = initShop;
+    </script>
 </body>
-</html>
-    
-  </body>
-  
 </html>
