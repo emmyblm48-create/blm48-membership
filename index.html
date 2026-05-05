@@ -289,7 +289,7 @@
 
 <script>
   // --- CONFIG & CONSTANTS ---
-  const scriptURL = 'https://script.google.com/macros/s/AKfycbzq7ir6MUZe7hN6iAJujqfmtIT4k6z8wbnsoPsEMWAIdrDLT9ejq9PjIrsowYZ49Et_/exec';
+  const scriptURL = 'https://script.google.com/macros/s/AKfycbz-3938AGxrmvVHCjDdea5KGv-DHtB9txP3UQfjY4nGNEsi1LiNWOoNPEnvofOGCOBU/exec';
    
   // ใช้หุ้มข้อมูลเพื่อลด Global Variable รบกวนกัน
   let user = getUserSession();
@@ -544,7 +544,7 @@ function renderGlobalFans(rawData) {
       fanContainer.innerHTML = '<div style="padding:20px; color:#bbb; font-size:13px;">ยังไม่มีแฟนคลับปาคุกกี้ให้ในเดือนนี้</div>';
     } else {
       // แสดง Top 10 แฟนคลับ โดยใช้ชื่อ (f.name) แทน username
-      fans.slice(0, 10).forEach((f, idx) => {
+      fans.slice(0, 10).forEach((f, idx) => { 
         const row = document.createElement('div');
         row.className = 'fan-row';
         
@@ -1124,8 +1124,8 @@ window.handleImageUpload = async function(event, username) {
     }
 };
 
-  async function sendToGoogleSheets(username, url) {
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbzq7ir6MUZe7hN6iAJujqfmtIT4k6z8wbnsoPsEMWAIdrDLT9ejq9PjIrsowYZ49Et_/exec';
+  async function sendToGoogleSheets(username, url) { 
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbz-3938AGxrmvVHCjDdea5KGv-DHtB9txP3UQfjY4nGNEsi1LiNWOoNPEnvofOGCOBU/exec';
     await fetch(scriptURL, {
       method: 'POST',
       body: JSON.stringify({
