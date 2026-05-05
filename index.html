@@ -449,13 +449,15 @@ function renderGlobalFans(sortedFansData) {
     return;
   }
 
+  // แสดงผลแฟนคลับทุกคนที่ส่งข้อมูลมา
   sortedFansData.forEach((f, i) => {
-    // กำหนดสีตามอันดับ 1, 2, 3
-    const rankColor = i === 0 ? '#ffd700' : i === 1 ? '#c0c0c0' : i === 2 ? '#cd7f32' : '#ffeef2';
+    // กำหนดสีและสัญลักษณ์ตามอันดับ 1, 2, 3
     const isTop3 = i < 3;
+    const rankColor = i === 0 ? '#ffd700' : i === 1 ? '#c0c0c0' : i === 2 ? '#cd7f32' : '#ffeef2';
+    const rankIcon = i === 0 ? '<i class="fas fa-crown"></i>' : (i + 1);
 
     const card = document.createElement('div');
-    card.className = 'fan-card'; // คุณสามารถเพิ่ม CSS .fan-card ได้
+    card.className = 'fan-card';
     card.style = `
       position: relative;
       min-width: 120px; 
@@ -466,6 +468,7 @@ function renderGlobalFans(sortedFansData) {
       border: 2px solid ${rankColor};
       box-shadow: 0 5px 15px rgba(0,0,0,0.05);
       margin-bottom: 10px;
+      flex-shrink: 0;
     `;
 
     card.innerHTML = `
@@ -473,67 +476,20 @@ function renderGlobalFans(sortedFansData) {
         position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
         background: ${rankColor}; color: ${isTop3 ? '#fff' : '#ff85a2'};
         padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: bold;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
       ">
-        ${isTop3 ? '<i class="fas fa-crown"></i> ' : ''}อันดับ ${i + 1}
+        ${rankIcon} อันดับ ${i + 1}
       </div>
       
-      <img src="${getImg(f.img)}" style="width:65px; height:65px; border-radius:50%; border:3px solid #fef5f7; margin-top:5px; object-fit:cover;">
+      <img src="${getImg(f.img)}" style="width:65px; height:65px; border-radius:50%; border:3px solid #fef5f7; margin-top:5px; object-fit:cover;" onerror="this.src='https://via.placeholder.com/150'">
       
-      <div style="font-weight:700; font-size:14px; color:#444; margin-top:8px; white-space: nowrap; overflow:hidden; text-overflow:ellipsis;">
+      <div style="font-weight:700; font-size:14px; color:#444; margin-top:8px; white-space: nowrap; overflow:hidden; text-overflow:ellipsis;" title="${f.name || f.username}">
         ${f.name || f.username}
       </div>
       
       <div style="font-size:12px; color:var(--primary-pink); font-weight:700; margin-top:4px;">
-        <i class="fas fa-cookie-bite" style="color: #d2691e;"></i> ${f.total.toLocaleString()}
+        <i class="fas fa-cookie-bite" style="color: #d2691e;"></i> ${Number(f.total || 0).toLocaleString()}
       </div>
-    `;
-    list.appendChild(card);
-  });
-}
-  fans.forEach((f, i) => {
-    const rankIcon = i === 0 ? '👑' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
-    const borderColor = i === 0 ? '#ffd700' : i === 1 ? '#c0c0c0' : i === 2 ? '#cd7f32' : '#ffeef2';
-    
-    // --- จุดที่แก้ไข: เปลี่ยนจาก f.username เป็น f.name (หรือ field ชื่อในฐานข้อมูลของคุณ) ---
-    const displayName = f.name || f.username; 
-
-    const card = document.createElement('div');
-    card.style = `
-      position: relative;
-      min-width: 110px; 
-      background: white; 
-      padding: 15px; 
-      border-radius: 20px; 
-      text-align: center; 
-      border: 2px solid ${borderColor};
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    `;
-
-    card.innerHTML = `
-      <div style="
-        position: absolute; 
-        top: -10px; 
-        left: 50%; 
-        transform: translateX(-50%);
-        background: ${borderColor};
-        color: ${i < 3 ? '#fff' : '#ff85a2'};
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        font-size: 12px;
-        font-weight: bold;
-        line-height: 24px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      ">${rankIcon}</div>
-      
-      <img src="${getImg(f.img)}" style="width:55px; height:55px; border-radius:50%; border:2px solid #ffeef2; margin: 5px 0 8px 0; object-fit:cover;" loading="lazy">
-      
-      <!-- แสดงชื่อแฟนคลับ -->
-      <div style="font-weight:700; font-size:12px; color:#444; white-space: nowrap; overflow:hidden; text-overflow:ellipsis;" title="${displayName}">
-        ${displayName}
-      </div>
-      
-      <div style="font-size:11px; color:var(--primary-pink); font-weight:700; margin-top:3px;"><i class="fas fa-cookie-bite" style="color: #d2691e;"></i> ${f.total.toLocaleString()}</div>
     `;
     list.appendChild(card);
   });
