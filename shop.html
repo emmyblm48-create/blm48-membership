@@ -153,7 +153,7 @@
 </footer>
       
 <script>
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbxHHbH7TvSqsPeRGs9h4Yr3KoVArA5k4r136hl8LPN1BhuXIL2x6YPiHjHL02DUPMOC/exec';
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbwXn1plPzk3lpGRHrZd9qu4vc4m8bKdbjTxTThJk9ZDk_sMcDFiqb_MMJXxWTvmja0t/exec';
         let userData = null;
 
         // 1. โหลดข้อมูลผู้ใช้จากหน้าแรก (LocalStorage)
@@ -246,54 +246,57 @@
         }
 
         // 5. ระบบซื้อสินค้า (แก้ไขจากภาพ image_f6295d.png)
-        async function processPurchase(price, reward, itemName) {
-            if (userData.token < price) {
-                Swal.fire('Token ไม่พอค่ะ', 'ไปเติม Token ก่อนนะงับ', 'error');
-                return;
-            }
+       async function processPurchase(price, reward, itemName) {
+    if (userData.token < price) {
+        Swal.fire('Token ไม่พอค่ะ', 'ไปเติม Token ก่อนนะงับ', 'error');
+        return;
+    }
 
-            const confirmResult = await Swal.fire({
-                title: `ยืนยันการแลกซื้อ?`,
-                text: `ใช้ ${price} Tokens แลก ${itemName}`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#ff85a2',
-                confirmButtonText: 'ยืนยัน',
-                cancelButtonText: 'ยกเลิก'
+    const confirmResult = await Swal.fire({
+        title: `ยืนยันการแลกซื้อ?`,
+        text: `ใช้ ${price} Tokens แลก ${itemName}`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#ff85a2',
+        confirmButtonText: 'ยืนยัน',
+        cancelButtonText: 'ยกเลิก'
+    });
+
+    if (confirmResult.isConfirmed) {
+        Swal.fire({ title: 'กำลังบันทึกข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+        try {
+            // ส่งคำสั่งไปที่ Apps Script จริงๆ
+            const response = await fetch(scriptURL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'exchangeCookies',
+                    username: userData.username,
+                    tokenPrice: price,
+                    cookieReward: reward
+                })
             });
 
-            if (confirmResult.isConfirmed) {
-                Swal.fire({ title: 'กำลังประมวลผล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            const result = await response.json();
 
-                try {
-                    // ส่งข้อมูลไปที่ Apps Script
-                    const response = await fetch(scriptURL, {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            action: 'exchangeCookies',
-                            username: userData.username,
-                            tokenPrice: price,
-                            cookieReward: reward
-                        })
-                    });
+            if (result.status === "success") {
+                // บันทึกสำเร็จแล้วค่อยหักลบตัวเลขในหน้าจอ
+                userData.token -= price;
+                userData.cookie = Number(userData.cookie) + reward;
 
-                    // ถ้าเชื่อมต่อสำเร็จ (สถานะ 200)
-                    userData.token -= price;
-                    userData.cookie = Number(userData.cookie) + reward;
+                const newSession = JSON.parse(localStorage.getItem('bnl_session'));
+                newSession.data = userData;
+                localStorage.setItem('bnl_session', JSON.stringify(newSession));
 
-                    const newSession = JSON.parse(localStorage.getItem('bnl_session'));
-                    newSession.data = userData;
-                    localStorage.setItem('bnl_session', JSON.stringify(newSession));
-
-                    updateWalletUI();
-                    Swal.fire('สำเร็จ!', `ได้รับ ${itemName} เรียบร้อยแล้วค่ะ`, 'success');
-
-                } catch (error) {
-                    // กรณีนี้จะทำงานถ้าลิงก์ผิด หรือ Server ล่ม แบบในภาพ image_f6295d.png
-                    Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ในขณะนี้', 'error');
-                }
+                updateWalletUI();
+                Swal.fire('สำเร็จ!', `บันทึกลงระบบและได้รับ ${itemName} แล้วค่ะ`, 'success');
             }
+        } catch (error) {
+            // ถ้าเน็ตหลุดหรือ scriptURL ผิด จะเด้งมาที่นี่
+            Swal.fire('เกิดข้อผิดพลาด', 'ระบบไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่นะคะ', 'error');
         }
+    }
+}
 
         window.onload = initShop;
     </script>
