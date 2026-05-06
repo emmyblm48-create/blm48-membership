@@ -2,6 +2,7 @@
 <html lang="en">
 
   <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
     <title>BLM48 Membership</title>
     <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1MUHJ2BW9u5T-BZiP6uRqd5KNQdT1V-7e=s32">
@@ -15,19 +16,14 @@
     <!-- ทำให้แถบด้านบน (Status Bar) ดูเป็นแอปมากขึ้น -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  </head>
-    
-  <body>
-  <!DOCTYPE html>
-<html lang="th">
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta charset="UTF-8">
-  <title>BLM48 - Member & Fans Ranking</title>
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11">
   </script>
+    
+  </head>
+    
+  <body>
  
   <style>
     :root {
@@ -121,6 +117,24 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #ff85a2; /* ชมพูเข้มขึ้นเล็กน้อย */
 }
+    
+    /* Dark Mode Classes */
+body.dark-mode {
+  --bg-color: #1a1a1a;
+  background-color: var(--bg-color);
+  color: #eee;
+}
+body.dark-mode .navbar, 
+body.dark-mode .user-profile-bar, 
+body.dark-mode .member-card, 
+body.dark-mode .modal-box, 
+body.dark-mode #sidebar {
+  background-color: #2d2d2d;
+  border-color: #444;
+  color: white;
+}
+body.dark-mode .name-text, body.dark-mode .section-title { color: #fff; }
+body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #444; }
 
     /* Profile Bar */
     .user-profile-bar { max-width: 900px; margin: 20px auto; background: white; border-radius: 24px; padding: 20px; box-shadow: 0 10px 25px rgba(255, 133, 162, 0.1); border: 2px solid var(--soft-pink); }
@@ -209,6 +223,39 @@
     /* Float Button */
     .btn-refresh-float { position: fixed; bottom: 25px; right: 25px; width: 55px; height: 55px; background: var(--primary-pink); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 15px rgba(255,133,162,0.4); cursor: pointer; z-index: 99; border: none; font-size: 1.2rem; transition: 0.3s; }
     .btn-refresh-float:active { transform: scale(0.9) rotate(45deg); }
+    
+    /* ค่าเริ่มต้นของ Sidebar ให้ซ่อนไว้ทางซ้าย */
+#sidebar {
+  position: fixed;
+  left: -280px; /* ซ่อนไว้ */
+  top: 0;
+  width: 280px;
+  height: 100%;
+  background: white;
+  z-index: 2000; /* ต้องสูงกว่า Navbar */
+  transition: 0.3s ease-in-out;
+  box-shadow: 5px 0 15px rgba(0,0,0,0.1);
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* คลาสที่จะเพิ่มเข้าไปเมื่อกดปุ่ม เพื่อให้ Sidebar แสดงผล */
+#sidebar.active {
+  left: 0 !important;
+}
+
+/* ตัวบังหน้าจอเวลาเมนูเปิด */
+#sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(2px);
+  z-index: 1999;
+}
 
     /* Responsive */
     @media (max-width: 600px) {
@@ -226,18 +273,61 @@
 </head>
 <body>
 
-<nav class="navbar">
-  <div class="brand">BLM48</div>
-  <div class="nav-links">
-        <a href="index.html" class="nav-link">HOME</a>
-        <a href="shop.html" class="nav-link">SHOP</a>
-        <a href="https://sites.google.com/view/blm48/home" class="nav-link">OFFICIAL SITE</a>
+<!-- 2. Sidebar (Slicer Menu) -->
+<div id="sidebar">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+    <div class="brand" style="font-size: 20px;">BLM48 MENU</div>
+    <i class="fas fa-times" onclick="toggleSidebar()" style="cursor:pointer; color:#ccc; font-size: 20px;"></i>
+  </div>
+  
+  <div class="sidebar-links">
+    <a href="index.html" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0;">
+      <i class="fas fa-home" style="width:20px;"></i> HOME
+    </a>
+    <a href="shop.html" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0;">
+      <i class="fas fa-shopping-cart" style="width:20px;"></i> SHOP
+    </a>
+    <a href="#" onclick="showHistory(); toggleSidebar();" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0;">
+      <i class="fas fa-history" style="width:20px;"></i> HISTORY
+    </a>
+    <a href="https://sites.google.com/view/blm48/home" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0;">
+      <i class="fas fa-globe" style="width:20px;"></i> OFFICIAL SITE
+    </a>
+    
+    <hr style="border: 0.5px solid #f0f0f0; margin: 10px 0;">
+    
+    <div onclick="toggleDarkMode();" class="nav-link" style="display:flex; justify-content:space-between; align-items:center; padding:15px 0; cursor:pointer;">
+       <span>DARK MODE</span>
+       <i class="fas fa-moon" id="dark-mode-icon"></i>
     </div>
+  </div>
+</div>
+
+<!-- Overlay สำหรับปิด Sidebar -->
+<div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<!-- 3. Navbar (ปรับปรุงปุ่ม) -->
+<nav class="navbar">
+  <div style="display: flex; align-items: center; gap: 15px;">
+    <button onclick="toggleSidebar()" class="nav-icon" style="font-size: 1.4rem;">
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="brand">BLM48</div>
+  </div>
+  
   <div class="nav-btns">
-    <!-- ส่วนของ Navigation Bar (แก้ไขจุดที่มีปุ่ม Refresh) -->
-<div class="nav-icons">
+    <!-- ปุ่มประวัติแบบไอคอน -->
+    <button onclick="showHistory()" class="nav-icon" title="History">
+      <i class="fas fa-history"></i>
+    </button>
+    <!-- ปุ่ม Shop กระโดดไป shop.html -->
+    <a href="shop.html" class="nav-icon" title="Shop">
+      <i class="fas fa-shopping-cart"></i>
+    </a>
     <button onclick="refreshPage()" class="nav-icon" title="Refresh"><i class="fas fa-sync-alt"></i></button>
-    <button onclick="confirmLogout()" class="nav-icon" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+    <button onclick="confirmLogout()" class="nav-icon" title="Logout">
+      <i class="fas fa-sign-out-alt"></i>
+    </button>
   </div>
 </nav>
 
@@ -247,7 +337,7 @@
 <div class="ranking-wrapper">
   <div id="ranking-list" class="horizontal-list"></div>
 </div>
-
+ 
 <div class="section-title">💖 Top Fans</div>
 <div class="ranking-wrapper">
   <div id="global-fan-list" class="horizontal-list"></div>
@@ -290,6 +380,105 @@
 <script>
   // --- CONFIG & CONSTANTS ---
   const scriptURL = 'https://script.google.com/macros/s/AKfycbz-3938AGxrmvVHCjDdea5KGv-DHtB9txP3UQfjY4nGNEsi1LiNWOoNPEnvofOGCOBU/exec';
+  
+  // --- ฟังก์ชันควบคุม Sidebar ---
+function toggleSidebar() { 
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  const isOpen = sidebar.style.left === '0px';
+  sidebar.style.left = isOpen ? '-280px' : '0px';
+  overlay.style.display = isOpen ? 'none' : 'block';
+}
+
+// --- ฟังก์ชัน Dark Mode ---
+function toggleDarkMode() {
+  document.body.classList.toggle('dark-mode');
+  const isDark = document.body.classList.contains('dark-mode');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  document.getElementById('dark-mode-btn').innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+}
+
+async function showHistory() {
+    const session = localStorage.getItem('bnl_session');
+    if (!session) return Swal.fire('เข้าสู่ระบบก่อนนะงับ', 'กรุณาล็อกอินก่อน', 'warning');
+
+    const userData = JSON.parse(session).data;
+    const username = userData.username; 
+
+    document.getElementById('modal-overlay').style.display = 'block';
+    document.getElementById('stats-form').style.display = 'block';
+    document.getElementById('stats-content').innerHTML = "กำลังดึงข้อมูลให้นะคะ...";
+
+    try {
+        const response = await fetch(`${scriptURL}?action=getMyHistory&username=${username}`);
+        const res = await response.json();
+        
+        if (res.status === "success") {
+            let html = `<h2 style="color:var(--primary-pink)">My History</h2>`;
+            
+            // --- 🛒 ประวัติการช้อปปิ้ง ---
+            html += `<div style="text-align:left; margin-top:20px;">
+                        <h4 style="border-bottom: 2px solid var(--soft-pink); padding-bottom:5px;">🛒 ประวัติการช้อปปิ้ง</h4>`;
+            
+            // เช็คชื่อตัวแปร purchaseHistory ให้ตรงกับ GAS
+            if (res.purchaseHistory && res.purchaseHistory.length > 0) {
+                res.purchaseHistory.forEach(log => {
+                    html += `
+                        <div class="fan-row">
+                            <div class="fan-info">
+                                <div class="fan-name">${log.action}: ${log.target}</div>
+                                <div style="font-size:10px; color:#aaa;">${new Date(log.timestamp).toLocaleString()}</div>
+                            </div>
+                            <div class="fan-cookies" style="color:#4dabf7">${log.amount}</div>
+                        </div>`;
+                });
+            } else {
+                html += `<p style="font-size:12px; color:#ccc; text-align:center;">ยังไม่มีประวัติการซื้อไอเทมงับ</p>`;
+            }
+            html += `</div>`;
+
+            // --- 💖 ประวัติการส่งกำลังใจ ---
+            html += `<div style="text-align:left; margin-top:25px;">
+                        <h4 style="border-bottom: 2px solid var(--soft-pink); padding-bottom:5px;">💖 ประวัติการส่งกำลังใจ</h4>`;
+            
+            // *** แก้ไขจุดนี้: เปลี่ยนจาก giveHistory เป็น giveLogs ตามที่ส่งมาจาก GAS ***
+            if (res.giveLogs && res.giveLogs.length > 0) {
+                res.giveLogs.forEach(log => {
+                    html += `
+                        <div class="fan-row">
+                            <div class="fan-info">
+                                <div class="fan-name">ปาให้: ${log.member}</div>
+                                <div style="font-size:10px; color:#aaa;">${new Date(log.timestamp).toLocaleString()}</div>
+                            </div>
+                            <div class="fan-cookies">${log.amount} 🍪</div>
+                        </div>`;
+                });
+            } else {
+                html += `<p style="font-size:12px; color:#ccc; text-align:center;">ยังไม่เคยปาคุกกี้เลยงับ</p>`;
+            }
+            html += `</div>`;
+            
+            document.getElementById('stats-content').innerHTML = html;
+        }
+    } catch (e) {
+        console.error(e);
+        document.getElementById('stats-content').innerHTML = "เกิดข้อผิดพลาดในการโหลดข้อมูลประวัติ";
+    }
+}
+
+// --- ปิด Splash Screen เมื่อโหลดข้อมูลเสร็จ ---
+function hideSplashScreen() {
+  const splash = document.getElementById('splash-screen');
+  splash.style.opacity = '0';
+  setTimeout(() => splash.style.display = 'none', 500);
+}
+
+// โหลดการตั้งค่าธีมเมื่อเริ่มแอป
+window.onload = () => {
+  if (localStorage.getItem('theme') === 'dark') toggleDarkMode();
+  // สมมติว่าดึงข้อมูลเสร็จแล้ว
+  setTimeout(hideSplashScreen, 2000); 
+};
    
   // ใช้หุ้มข้อมูลเพื่อลด Global Variable รบกวนกัน
   let user = getUserSession();
