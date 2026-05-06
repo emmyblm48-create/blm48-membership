@@ -663,10 +663,9 @@ function renderRanking(data) {
         <img src="${getImg(m.profile_img)}" loading="lazy">
         <div class="rank-badge">${badgeContent}</div>
       </div>
-      <div class="name-text">${m.name}</div>
-     
+      <div class="name-text" style="margin-bottom: 10px;">${m.name}</div>
 
-      <div class="cookie-text" style="margin-bottom: 2px;">
+      <div class="cookie-text" style="margin-bottom: 15px;">
         <i class="fas fa-cookie-bite" style="color: #d2691e;"></i> 
         ${Number(m.monthly_cookies || 0).toLocaleString()}
       </div>
