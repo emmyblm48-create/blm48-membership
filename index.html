@@ -613,9 +613,10 @@ window.onload = () => {
           <div class="wallet-item"><div style="font-size:10px; color:#aaa;">GE Tokens</div><i class="fas fa-gem" style="color: #4dabf7;"></i> ${Number(user.geToken || 0).toLocaleString()}</div>
         </div>
        <div class="bonus-container">
-    <button onclick="redeemCode()" class="btn-bonus btn-redeem"><i class="fas fa-ticket-alt"></i> Redeem</button>
-  </div>
-`;
+          <button onclick="${isMember ? "Swal.fire('ขออภัย','เมมเบอร์รับคุกกี้ฟรีไม่ได้ค่ะ','info')" : "claimMonthly()"}" class="btn-bonus btn-monthly ${isMember ? 'btn-locked' : ''}"><i class="fas fa-gift"></i> รับคุกกี้รายเดือน</button>
+          <button onclick="redeemCode()" class="btn-bonus btn-redeem"><i class="fas fa-ticket-alt"></i> Redeem</button>
+        </div>
+`; 
     } else {
       bar.innerHTML = `<button onclick="openLogin()" class="btn-bonus btn-monthly" style="width:100%; height:60px; font-size:18px; letter-spacing:2px;">LOG IN TO BLM48</button>`;
     }
@@ -948,10 +949,9 @@ async function setOshi(type, memberName) {
     });
   }
 
-  async function claimMonthly() {
+ async function claimMonthly() {
   if (!user) return openLogin();
   
-  // ป้องกันการกดซ้ำที่หน้าเว็บ
   const btnClaim = document.querySelector('.btn-monthly');
   if (btnClaim && btnClaim.disabled) return; 
   if (btnClaim) btnClaim.disabled = true;
@@ -969,22 +969,22 @@ async function setOshi(type, memberName) {
         action: 'claimMonthlyCookie',
         username: user.username
       })
-    });
+    }); 
     const res = await resp.json();
     
     if (res.status === "success") { 
       await syncUserData(); 
       Swal.fire('สำเร็จ!', res.message, 'success'); 
+      // หลังสำเร็จ ไม่ต้องเปิดปุ่มคืน (เพราะ syncUserData จะคุมสถานะปุ่มอยู่แล้ว)
     } else { 
       Swal.fire('ขออภัย', res.message, 'info'); 
-      if (btnClaim) btnClaim.disabled = false; // ถ้าไม่สำเร็จ ให้เปิดปุ่มให้กดใหม่ได้
+      if (btnClaim) btnClaim.disabled = false; 
     }
   } catch (e) { 
     Swal.fire('Error', 'ระบบขัดข้อง', 'error'); 
-    if (btnClaim) btnClaim.disabled = false;
+    if (btnClaim) btnClaim.disabled = false; // ✨ ปรับเป็น false เพื่อให้กดลองใหม่ได้หากเน็ตมีปัญหา
   }
 }
-
   
   async function updateDisplayName() {
   // สมมติว่าคุณเอ็มมี่เก็บข้อมูลผู้ใช้ที่ล็อกอินไว้ในตัวแปร currentUser
