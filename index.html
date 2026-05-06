@@ -345,14 +345,27 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
 
 <!-- Modal -->
 <div id="modal-overlay">
-  <!-- Stats Modal -->
-  <div class="modal-box" id="stats-form">
-    <div id="stats-content"></div>
-    <div class="top-fans-list">
-      <div class="top-fans-title"><i class="fas fa-heart" style="color:var(--primary-pink)"></i> Top Fans</div>
-      <div id="member-fans-content"></div>
+ <!-- Stats Modal -->
+<div class="modal-box" id="history-form" style="display:none;">
+    <div id="history-content"></div> <!-- ใช้ ID เฉพาะสำหรับประวัติ -->
+    <button onclick="closeModal()" style="margin-top:25px; width:100%; background: #f5f5f5; border: none; padding: 12px; border-radius: 15px; cursor: pointer; color: #666;">Close</button>
+</div>
+  
+<div class="modal-box" id="stats-form" style="display:none;">
+    <div id="stats-content"></div> 
+    <div class="top-fans-list" id="member-fans-section">
+        <div class="top-fans-title"><i class="fas fa-heart" style="color:var(--primary-pink)"></i> Top Fans</div>
+        <div id="member-fans-content"></div>
     </div>
-    <button onclick="closeModal()" style="margin-top:25px; width:100%; background: #f5f5f5; border: none; padding: 12px; border-radius: 15px; cursor: pointer; font-family: 'Kanit'; font-weight: 600; color: #666;">Close</button>
+    <button onclick="closeModal()" style="margin-top:25px; width:100%; background: #f5f5f5; border: none; padding: 12px; border-radius: 15px; cursor: pointer; color: #666;">Close</button>
+</div>
+  <!-- ส่วนนี้สำหรับโชว์ประวัติส่วนตัว (History) -->
+  <div id="stats-content"></div> 
+
+  <!-- ส่วนนี้สำหรับโชว์ Top Fans ของเมมเบอร์ (จะแสดงเมื่อเรียกฟังก์ชันดูเมมเบอร์) -->
+  <div id="member-stats-section" style="display:none;">
+      <div class="top-fans-title"><i class="fas fa-heart" style="color:var(--primary-pink)"></i> Member's Top Fans</div>
+      <div id="member-fans-content"></div>
   </div>
   
   <!-- Login Modal -->
@@ -405,22 +418,30 @@ async function showHistory() {
     const userData = JSON.parse(session).data;
     const username = userData.username; 
 
+    // --- ✨ ส่วนสำคัญ: เคลียร์หน้าจอก่อนแสดงผล ---
     document.getElementById('modal-overlay').style.display = 'block';
     document.getElementById('stats-form').style.display = 'block';
+    
+    // 🚩 สั่งซ่อนส่วน Top Fans ของเมมเบอร์ทันที เพื่อไม่ให้โผล่มาในหน้าประวัติ
+    const memberFansSection = document.getElementById('member-fans-section');
+    if (memberFansSection) {
+        memberFansSection.style.display = 'none'; 
+    }
+
     document.getElementById('stats-content').innerHTML = "กำลังดึงข้อมูลให้นะคะ...";
 
     try {
+        // ตรวจสอบชื่อตัวแปร SCRIPT_URL ให้ตรงกับที่ตั้งไว้ใน CONFIG นะครับ
         const response = await fetch(`${scriptURL}?action=getMyHistory&username=${username}`);
         const res = await response.json();
         
         if (res.status === "success") {
-            let html = `<h2 style="color:var(--primary-pink)">My History</h2>`;
+            let html = `<h2 style="color:var(--primary-pink); text-align:center;">My History</h2>`;
             
-            // --- 🛒 ประวัติการช้อปปิ้ง ---
+            // --- 🛒 ส่วนที่ 1: ประวัติการช้อปปิ้ง ---
             html += `<div style="text-align:left; margin-top:20px;">
                         <h4 style="border-bottom: 2px solid var(--soft-pink); padding-bottom:5px;">🛒 ประวัติการช้อปปิ้ง</h4>`;
             
-            // เช็คชื่อตัวแปร purchaseHistory ให้ตรงกับ GAS
             if (res.purchaseHistory && res.purchaseHistory.length > 0) {
                 res.purchaseHistory.forEach(log => {
                     html += `
@@ -433,15 +454,14 @@ async function showHistory() {
                         </div>`;
                 });
             } else {
-                html += `<p style="font-size:12px; color:#ccc; text-align:center;">ยังไม่มีประวัติการซื้อไอเทมงับ</p>`;
+                html += `<p style="font-size:12px; color:#ccc; text-align:center; padding:10px;">ยังไม่มีประวัติการซื้อไอเทมงับ</p>`;
             }
             html += `</div>`;
 
-            // --- 💖 ประวัติการส่งกำลังใจ ---
+            // --- 💖 ส่วนที่ 2: ประวัติการส่งกำลังใจ ---
             html += `<div style="text-align:left; margin-top:25px;">
                         <h4 style="border-bottom: 2px solid var(--soft-pink); padding-bottom:5px;">💖 ประวัติการส่งกำลังใจ</h4>`;
             
-            // *** แก้ไขจุดนี้: เปลี่ยนจาก giveHistory เป็น giveLogs ตามที่ส่งมาจาก GAS ***
             if (res.giveLogs && res.giveLogs.length > 0) {
                 res.giveLogs.forEach(log => {
                     html += `
@@ -454,16 +474,23 @@ async function showHistory() {
                         </div>`;
                 });
             } else {
-                html += `<p style="font-size:12px; color:#ccc; text-align:center;">ยังไม่เคยปาคุกกี้เลยงับ</p>`;
+                html += `<p style="font-size:12px; color:#ccc; text-align:center; padding:10px;">ยังไม่เคยปาคุกกี้เลยงับ</p>`;
             }
             html += `</div>`;
             
+            // นำ HTML ที่สร้างเสร็จใส่กลับเข้าไป
             document.getElementById('stats-content').innerHTML = html;
         }
     } catch (e) {
         console.error(e);
         document.getElementById('stats-content').innerHTML = "เกิดข้อผิดพลาดในการโหลดข้อมูลประวัติ";
     }
+}
+
+  function closeModal() {
+    document.getElementById('modal-overlay').style.display = 'none';
+    document.getElementById('stats-form').style.display = 'none';
+    document.getElementById('history-form').style.display = 'none';
 }
 
 // --- ปิด Splash Screen เมื่อโหลดข้อมูลเสร็จ ---
@@ -698,15 +725,22 @@ function renderGlobalFans(rawData) {
   });
 }
 
- // --- Interaction Functions (คงความสามารถเดิม พร้อมอัปเดตชื่อแฟนคลับ) ---
-    async function showStats(name) {
+// --- Interaction Functions (คงความสามารถเดิม พร้อมอัปเดตชื่อแฟนคลับ) ---
+async function showStats(name) {
     const m = currentRankingData.find(x => x.name === name);
     if(!m) return; 
     
     document.getElementById('modal-overlay').style.display = 'block';
     document.getElementById('stats-form').style.display = 'block';
     document.getElementById('login-form').style.display = 'none';
-   document.getElementById('stats-content').innerHTML = `
+
+    // ✨ จุดสำคัญ: สั่งให้แสดงส่วน Top Fans ของเมมเบอร์
+    const memberFansSection = document.getElementById('member-fans-section');
+    if (memberFansSection) {
+        memberFansSection.style.display = 'block';
+    }
+
+    document.getElementById('stats-content').innerHTML = `
     <div class="stats-header">
       <img src="${getImg(m.profile_img)}" class="stats-avatar">
       <div class="stats-name">${m.name}</div>
@@ -732,12 +766,10 @@ function renderGlobalFans(rawData) {
     if(fans.length === 0) {
       fanContainer.innerHTML = '<div style="padding:20px; color:#bbb; font-size:13px;">ยังไม่มีแฟนคลับปาคุกกี้ให้ในเดือนนี้</div>';
     } else {
-      // แสดง Top 10 แฟนคลับ โดยใช้ชื่อ (f.name) แทน username
       fans.slice(0, 10).forEach((f, idx) => { 
         const row = document.createElement('div');
         row.className = 'fan-row';
         
-        // จุดที่แก้ไข: เปลี่ยนจาก f.username เป็น f.name เพื่อแสดงชื่อแฟนคลับ
         const fanDisplayName = f.name || f.username;
 
         row.innerHTML = `
@@ -751,7 +783,7 @@ function renderGlobalFans(rawData) {
         fanContainer.appendChild(row);
       });
     } 
-  }
+}
 
  async function giveCookie(memberName) {
   if (!user) return openLogin();
