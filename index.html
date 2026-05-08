@@ -260,6 +260,33 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
   backdrop-filter: blur(2px);
   z-index: 1999;
 }
+    
+    /* คุมความสูงของคอนเทนเนอร์รายชื่อแฟนคลับ */
+#member-fans-content {
+    max-height: 240px; /* ปรับค่านี้ตามความสูงของ fan-row (ประมาณ 3-4 แถว) */
+    overflow-y: auto;  /* เปิดการเลื่อนในแนวตั้ง */
+    overflow-x: hidden;
+    padding-right: 5px; /* กันเนื้อหาโดน scrollbar ทับ */
+}
+
+/* ตกแต่ง Scrollbar ให้ดูสวยงาม (Minimalist) */
+#member-fans-content::-webkit-scrollbar {
+    width: 5px;
+}
+
+#member-fans-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+#member-fans-content::-webkit-scrollbar-thumb {
+    background: #ffb7c5; /* สีชมพูตามธีม */
+    border-radius: 10px;
+}
+
+#member-fans-content::-webkit-scrollbar-thumb:hover {
+    background: #ff8fa3;
+}
 
     /* Responsive */
     @media (max-width: 600px) {
@@ -295,6 +322,42 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
   letter-spacing: 4px;
   margin-bottom: 20px;
   text-shadow: 0 4px 10px rgba(255, 133, 162, 0.2);
+}
+    
+    /* สมมติว่าคลาสของลิสต์คือ .fan-list */
+.fan-list {
+  max-height: 280px; /* ปรับค่าความสูงให้พอดีกับการแสดงผล 3 คนแรก */
+  overflow-y: auto;
+  padding-right: 8px; /* เว้นที่ให้ scrollbar เล็กน้อย */
+}
+
+/* ปรับแต่ง Scrollbar ให้ดู Minimal (Optional) */
+.fan-list::-webkit-scrollbar {
+  width: 4px;
+}
+.fan-list::-webkit-scrollbar-thumb {
+  background: #ffb7c5; /* สีชมพูอ่อนให้เข้ากับธีม */
+  border-radius: 10px;
+}
+    
+    .history-scroll-container {
+    max-height: 200px; /* ปรับให้แสดงประมาณ 3-4 แถว */
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 5px;
+    margin-top: 10px;
+}
+
+/* ใช้ Scrollbar สไตล์เดียวกับ Top Fans เพื่อความสวยงาม */
+.history-scroll-container::-webkit-scrollbar {
+    width: 4px;
+}
+.history-scroll-container::-webkit-scrollbar-track {
+    background: #f9f9f9;
+}
+.history-scroll-container::-webkit-scrollbar-thumb {
+    background: #ffb7c5;
+    border-radius: 10px;
 }
 
 .loader-circle {
@@ -502,11 +565,9 @@ async function showHistory() {
     const userData = JSON.parse(session).data;
     const username = userData.username; 
 
-    // --- ✨ ส่วนสำคัญ: เคลียร์หน้าจอก่อนแสดงผล ---
     document.getElementById('modal-overlay').style.display = 'block';
     document.getElementById('stats-form').style.display = 'block';
     
-    // 🚩 สั่งซ่อนส่วน Top Fans ของเมมเบอร์ทันที เพื่อไม่ให้โผล่มาในหน้าประวัติ
     const memberFansSection = document.getElementById('member-fans-section');
     if (memberFansSection) {
         memberFansSection.style.display = 'none'; 
@@ -515,7 +576,6 @@ async function showHistory() {
     document.getElementById('stats-content').innerHTML = "กำลังดึงข้อมูลให้นะคะ...";
 
     try {
-        // ตรวจสอบชื่อตัวแปร SCRIPT_URL ให้ตรงกับที่ตั้งไว้ใน CONFIG นะครับ
         const response = await fetch(`${scriptURL}?action=getMyHistory&username=${username}`);
         const res = await response.json();
         
@@ -524,7 +584,8 @@ async function showHistory() {
             
             // --- 🛒 ส่วนที่ 1: ประวัติการช้อปปิ้ง ---
             html += `<div style="text-align:left; margin-top:20px;">
-                        <h4 style="border-bottom: 2px solid var(--soft-pink); padding-bottom:5px;">🛒 ประวัติการช้อปปิ้ง</h4>`;
+                        <h4 style="border-bottom: 2px solid var(--soft-pink); padding-bottom:5px;">🛒 ประวัติการช้อปปิ้ง</h4>
+                        <div class="history-scroll-container">`; // เริ่ม Container สำหรับ Scroll
             
             if (res.purchaseHistory && res.purchaseHistory.length > 0) {
                 res.purchaseHistory.forEach(log => {
@@ -540,11 +601,12 @@ async function showHistory() {
             } else {
                 html += `<p style="font-size:12px; color:#ccc; text-align:center; padding:10px;">ยังไม่มีประวัติการซื้อไอเทมงับ</p>`;
             }
-            html += `</div>`;
+            html += `   </div> </div>`;
 
             // --- 💖 ส่วนที่ 2: ประวัติการส่งกำลังใจ ---
             html += `<div style="text-align:left; margin-top:25px;">
-                        <h4 style="border-bottom: 2px solid var(--soft-pink); padding-bottom:5px;">💖 ประวัติการส่งกำลังใจ</h4>`;
+                        <h4 style="border-bottom: 2px solid var(--soft-pink); padding-bottom:5px;">💖 ประวัติการส่งกำลังใจ</h4>
+                        <div class="history-scroll-container">`; // เริ่ม Container สำหรับ Scroll
             
             if (res.giveLogs && res.giveLogs.length > 0) {
                 res.giveLogs.forEach(log => {
@@ -560,9 +622,8 @@ async function showHistory() {
             } else {
                 html += `<p style="font-size:12px; color:#ccc; text-align:center; padding:10px;">ยังไม่เคยปาคุกกี้เลยงับ</p>`;
             }
-            html += `</div>`;
+            html += `   </div> </div>`;
             
-            // นำ HTML ที่สร้างเสร็จใส่กลับเข้าไป
             document.getElementById('stats-content').innerHTML = html;
         }
     } catch (e) {
@@ -652,59 +713,82 @@ window.onload = () => {
     } catch(e) { console.error("Load Error:", e); }
   }
 
-  // --- UI Rendering ---
-  function updateUI() {
-    const bar = document.getElementById('user-bar');
-    if (!bar) return; // กัน Error ถ้า Element ยังไม่โหลด
-    
-    if (user) {
-  const isMember = isUserMember();
-      const hasClaimedThisMonth = user.hasClaimedMonthly || false;
-  
-  // 1. แสดงคามิโอชิ (เหมือนเดิม)
-  const kamiTag = user.kamioshi ? 
-    `<span class="tag tag-kami" onclick="confirmRemoveOshi('kami', '${user.kamioshi}')">
-      <i class="fas fa-crown"></i> ${user.kamioshi} 
-    </span>` : '';
+ // --- UI Rendering ---
+function updateUI() {
+  const bar = document.getElementById('user-bar');
+  if (!bar) return; // กัน Error ถ้า Element ยังไม่โหลด
 
-  // 2. แสดงรายการโอชิทั้งหมด (รองรับการมีกี่คนก็ได้)
-  // ตรวจสอบว่า user.oshis เป็น Array และกรองเอาเฉพาะค่าที่ไม่ว่างออก
-  const oshiList = Array.isArray(user.oshis) ? user.oshis.filter(o => o && o.trim() !== "") : [];
-  
-  const oshiTags = oshiList.map(o => 
-    `<span class="tag tag-oshi" onclick="confirmRemoveOshi('oshi', '${o}')"><i class="fas fa-heart"></i> ${o} </i></span>`).join('');
-      
-  bar.innerHTML = `
-    <div class="user-info-header">
-      <div class="profile-img-container">
-        <img src="${getImg(user.profile_img)}" class="user-avatar-img">
-        <div class="edit-photo-btn" onclick="document.getElementById('profile-upload').click()"><i class="fas fa-camera"></i></div>
-      </div>
-      <div style="flex:1">
-        <div class="user-name">
-          <span id="user-display-name">${user.name}</span> 
-          ${user.role.toLowerCase() === 'user' ? `<i class="fas fa-edit" style="cursor:pointer; font-size:12px; color:#ff85a2; margin-left:5px;" onclick="updateDisplayName()"></i>` : ''}
-          <span class="role-badge">${user.role}</span>
-        </div>
-      </div>
-    </div>
-            <div class="oshi-list">${kamiTag}${oshiTags}</div>
-          </div>
-        </div>
-        <div class="wallet">
-          <div class="wallet-item"><div style="font-size:10px; color:#aaa;">Tokens</div><i class="fas fa-coins" style="color: #ffb347;"></i>  ${Number(user.token || 0).toLocaleString()}</div>
-          <div class="wallet-item"><div style="font-size:10px; color:#aaa;">Cookies</div><i class="fas fa-cookie-bite" style="color: #d2691e;"></i> ${Number(user.cookie || 0).toLocaleString()}</div>
-          <div class="wallet-item"><div style="font-size:10px; color:#aaa;">GE Tokens</div><i class="fas fa-gem" style="color: #4dabf7;"></i> ${Number(user.geToken || 0).toLocaleString()}</div>
-        </div>
-       <div class="bonus-container">
-          <button onclick="${isMember ? "Swal.fire('ขออภัย','เมมเบอร์รับคุกกี้ฟรีไม่ได้ค่ะ','info')" : "claimMonthly()"}" class="btn-bonus btn-monthly ${isMember ? 'btn-locked' : ''}"><i class="fas fa-gift"></i> รับคุกกี้รายเดือน</button>
-          <button onclick="redeemCode()" class="btn-bonus btn-redeem"><i class="fas fa-ticket-alt"></i> Redeem</button>
-        </div>
-`; 
+  // --- ส่วนที่ 1: การจัดการ Top Fans (ย้ายการล้างค่ามาไว้ข้างบนสุด) ---
+  // หมายเหตุ: ฟังก์ชันนี้จะทำงานได้ต้องมีตัวแปร 'name' ส่งเข้ามาด้วย 
+  // หากเป็นหน้า Profile รวม อาจต้องระบุชื่อเมมเบอร์ให้ชัดเจน
+  const fanContainer = document.getElementById('member-fans-content');
+  if (fanContainer) {
+    fanContainer.innerHTML = ''; // ล้างข้อมูลเก่าก่อนเริ่ม Loop ใหม่
+    const fans = (typeof name !== 'undefined' && currentTopFansData[name]) ? currentTopFansData[name] : [];
+
+    if (fans.length === 0) {
+      fanContainer.innerHTML = '<div style="padding:20px; color:#bbb; font-size:13px;">ยังไม่มีแฟนคลับปาคุกกี้ให้ในเดือนนี้</div>';
     } else {
-      bar.innerHTML = `<button onclick="openLogin()" class="btn-bonus btn-monthly" style="width:100%; height:60px; font-size:18px; letter-spacing:2px;">LOG IN TO BLM48</button>`;
+      // แสดงทุกคนเพื่อให้ใช้ CSS Scroll ที่เราตั้งค่าไว้ (max-height)
+      fans.forEach((f, idx) => {
+        const row = document.createElement('div');
+        row.className = 'fan-row';
+        const fanDisplayName = f.name || f.username;
+
+        row.innerHTML = `
+          <div class="fan-rank">${idx + 1}</div>
+          <img src="${getImg(f.img)}" class="fan-img" onerror="this.src='https://via.placeholder.com/150'">
+          <div class="fan-info">
+            <div class="fan-name">${fanDisplayName}</div>
+            <div class="fan-cookies"><i class="fas fa-cookie-bite" style="color: #d2691e;"></i> ${f.total.toLocaleString()} Cookies</div>
+          </div>
+        `;
+        fanContainer.appendChild(row);
+      });
     }
   }
+
+  // --- ส่วนที่ 2: การจัดการ User Bar (Login/Profile) ---
+  if (user) {
+    const isMember = isUserMember();
+    const kamiTag = user.kamioshi ? 
+      `<span class="tag tag-kami" onclick="confirmRemoveOshi('kami', '${user.kamioshi}')">
+        <i class="fas fa-crown"></i> ${user.kamioshi} 
+      </span>` : '';
+
+    const oshiList = Array.isArray(user.oshis) ? user.oshis.filter(o => o && o.trim() !== "") : [];
+    const oshiTags = oshiList.map(o => 
+      `<span class="tag tag-oshi" onclick="confirmRemoveOshi('oshi', '${o}')"><i class="fas fa-heart"></i> ${o}</span>`).join('');
+
+    bar.innerHTML = `
+      <div class="user-info-header">
+        <div class="profile-img-container">
+          <img src="${getImg(user.profile_img)}" class="user-avatar-img">
+          <div class="edit-photo-btn" onclick="document.getElementById('profile-upload').click()"><i class="fas fa-camera"></i></div>
+        </div>
+        <div style="flex:1">
+          <div class="user-name">
+            <span id="user-display-name">${user.name}</span> 
+            ${user.role.toLowerCase() === 'user' ? `<i class="fas fa-edit" style="cursor:pointer; font-size:12px; color:#ff85a2; margin-left:5px;" onclick="updateDisplayName()"></i>` : ''}
+            <span class="role-badge">${user.role}</span>
+          </div>
+          <div class="oshi-list">${kamiTag}${oshiTags}</div>
+        </div>
+      </div>
+      <div class="wallet">
+        <div class="wallet-item"><div style="font-size:10px; color:#aaa;">Tokens</div><i class="fas fa-coins" style="color: #ffb347;"></i> ${Number(user.token || 0).toLocaleString()}</div>
+        <div class="wallet-item"><div style="font-size:10px; color:#aaa;">Cookies</div><i class="fas fa-cookie-bite" style="color: #d2691e;"></i> ${Number(user.cookie || 0).toLocaleString()}</div>
+        <div class="wallet-item"><div style="font-size:10px; color:#aaa;">GE Tokens</div><i class="fas fa-gem" style="color: #4dabf7;"></i> ${Number(user.geToken || 0).toLocaleString()}</div>
+      </div>
+      <div class="bonus-container">
+        <button onclick="${isMember ? "Swal.fire('ขออภัย','เมมเบอร์รับคุกกี้ฟรีไม่ได้ค่ะ','info')" : "claimMonthly()"}" class="btn-bonus btn-monthly ${isMember ? 'btn-locked' : ''}"><i class="fas fa-gift"></i> รับคุกกี้รายเดือน</button>
+        <button onclick="redeemCode()" class="btn-bonus btn-redeem"><i class="fas fa-ticket-alt"></i> Redeem</button>
+      </div>
+    `;
+  } else {
+    bar.innerHTML = `<button onclick="openLogin()" class="btn-bonus btn-monthly" style="width:100%; height:60px; font-size:18px; letter-spacing:2px;">LOG IN TO BLM48</button>`;
+  }
+}
 
 function renderRanking(data) {
   const list = document.getElementById('ranking-list');
