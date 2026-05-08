@@ -716,80 +716,46 @@ window.onload = () => {
  // --- UI Rendering ---
 function updateUI() {
   const bar = document.getElementById('user-bar');
-  if (!bar) return; // กัน Error ถ้า Element ยังไม่โหลด
+  if (!bar || !user) return; 
 
-  // --- ส่วนที่ 1: การจัดการ Top Fans (ย้ายการล้างค่ามาไว้ข้างบนสุด) ---
-  // หมายเหตุ: ฟังก์ชันนี้จะทำงานได้ต้องมีตัวแปร 'name' ส่งเข้ามาด้วย 
-  // หากเป็นหน้า Profile รวม อาจต้องระบุชื่อเมมเบอร์ให้ชัดเจน
-  const fanContainer = document.getElementById('member-fans-content');
-  if (fanContainer) {
-    fanContainer.innerHTML = ''; // ล้างข้อมูลเก่าก่อนเริ่ม Loop ใหม่
-    const fans = (typeof name !== 'undefined' && currentTopFansData[name]) ? currentTopFansData[name] : [];
+  const isMember = isUserMember();
+  const kamiTag = user.kamioshi ? 
+    `<span class="tag tag-kami" onclick="confirmRemoveOshi('kami', '${user.kamioshi}')">
+      <i class="fas fa-crown"></i> ${user.kamioshi} 
+    </span>` : '';
 
-    if (fans.length === 0) {
-      fanContainer.innerHTML = '<div style="padding:20px; color:#bbb; font-size:13px;">ยังไม่มีแฟนคลับปาคุกกี้ให้ในเดือนนี้</div>';
-    } else {
-      // แสดงทุกคนเพื่อให้ใช้ CSS Scroll ที่เราตั้งค่าไว้ (max-height)
-      fans.forEach((f, idx) => {
-        const row = document.createElement('div');
-        row.className = 'fan-row';
-        const fanDisplayName = f.name || f.username;
+  const oshiList = Array.isArray(user.oshis) ? user.oshis.filter(o => o && o.trim() !== "") : [];
+  const oshiTags = oshiList.map(o => 
+    `<span class="tag tag-oshi" onclick="confirmRemoveOshi('oshi', '${o}')"><i class="fas fa-heart"></i> ${o}</span>`).join('');
 
-        row.innerHTML = `
-          <div class="fan-rank">${idx + 1}</div>
-          <img src="${getImg(f.img)}" class="fan-img" onerror="this.src='https://via.placeholder.com/150'">
-          <div class="fan-info">
-            <div class="fan-name">${fanDisplayName}</div>
-            <div class="fan-cookies"><i class="fas fa-cookie-bite" style="color: #d2691e;"></i> ${f.total.toLocaleString()} Cookies</div>
-          </div>
-        `;
-        fanContainer.appendChild(row);
-      });
-    }
-  }
-
-  // --- ส่วนที่ 2: การจัดการ User Bar (Login/Profile) ---
-  if (user) {
-    const isMember = isUserMember();
-    const kamiTag = user.kamioshi ? 
-      `<span class="tag tag-kami" onclick="confirmRemoveOshi('kami', '${user.kamioshi}')">
-        <i class="fas fa-crown"></i> ${user.kamioshi} 
-      </span>` : '';
-
-    const oshiList = Array.isArray(user.oshis) ? user.oshis.filter(o => o && o.trim() !== "") : [];
-    const oshiTags = oshiList.map(o => 
-      `<span class="tag tag-oshi" onclick="confirmRemoveOshi('oshi', '${o}')"><i class="fas fa-heart"></i> ${o}</span>`).join('');
-
-    bar.innerHTML = `
-      <div class="user-info-header">
-        <div class="profile-img-container">
-          <img src="${getImg(user.profile_img)}" class="user-avatar-img">
-          <div class="edit-photo-btn" onclick="document.getElementById('profile-upload').click()"><i class="fas fa-camera"></i></div>
+  // อัปเดตเฉพาะส่วน User Bar
+  bar.innerHTML = `
+    <div class="user-info-header">
+      <div class="profile-img-container">
+        <img src="${getImg(user.profile_img)}" class="user-avatar-img">
+        <div class="edit-photo-btn" onclick="document.getElementById('profile-upload').click()"><i class="fas fa-camera"></i></div>
+      </div>
+      <div style="flex:1">
+        <div class="user-name">
+          <span id="user-display-name">${user.name}</span> 
+          ${user.role.toLowerCase() === 'user' ? `<i class="fas fa-edit" style="cursor:pointer; font-size:12px; color:#ff85a2; margin-left:5px;" onclick="updateDisplayName()"></i>` : ''}
+          <span class="role-badge">${user.role}</span>
         </div>
-        <div style="flex:1">
-          <div class="user-name">
-            <span id="user-display-name">${user.name}</span> 
-            ${user.role.toLowerCase() === 'user' ? `<i class="fas fa-edit" style="cursor:pointer; font-size:12px; color:#ff85a2; margin-left:5px;" onclick="updateDisplayName()"></i>` : ''}
-            <span class="role-badge">${user.role}</span>
-          </div>
-          <div class="oshi-list">${kamiTag}${oshiTags}</div>
-        </div>
+        <div class="oshi-list">${kamiTag}${oshiTags}</div>
       </div>
-      <div class="wallet">
-        <div class="wallet-item"><div style="font-size:10px; color:#aaa;">Tokens</div><i class="fas fa-coins" style="color: #ffb347;"></i> ${Number(user.token || 0).toLocaleString()}</div>
-        <div class="wallet-item"><div style="font-size:10px; color:#aaa;">Cookies</div><i class="fas fa-cookie-bite" style="color: #d2691e;"></i> ${Number(user.cookie || 0).toLocaleString()}</div>
-        <div class="wallet-item"><div style="font-size:10px; color:#aaa;">GE Tokens</div><i class="fas fa-gem" style="color: #4dabf7;"></i> ${Number(user.geToken || 0).toLocaleString()}</div>
-      </div>
-      <div class="bonus-container">
-        <button onclick="${isMember ? "Swal.fire('ขออภัย','เมมเบอร์รับคุกกี้ฟรีไม่ได้ค่ะ','info')" : "claimMonthly()"}" class="btn-bonus btn-monthly ${isMember ? 'btn-locked' : ''}"><i class="fas fa-gift"></i> รับคุกกี้รายเดือน</button>
-        <button onclick="redeemCode()" class="btn-bonus btn-redeem"><i class="fas fa-ticket-alt"></i> Redeem</button>
-      </div>
-    `;
-  } else {
-    bar.innerHTML = `<button onclick="openLogin()" class="btn-bonus btn-monthly" style="width:100%; height:60px; font-size:18px; letter-spacing:2px;">LOG IN TO BLM48</button>`;
-  }
+    </div>
+    <div class="wallet">
+      <div class="wallet-item"><div style="font-size:10px; color:#aaa;">Tokens</div><i class="fas fa-coins" style="color: #ffb347;"></i> ${Number(user.token || 0).toLocaleString()}</div>
+      <div class="wallet-item"><div style="font-size:10px; color:#aaa;">Cookies</div><i class="fas fa-cookie-bite" style="color: #d2691e;"></i> ${Number(user.cookie || 0).toLocaleString()}</div>
+      <div class="wallet-item"><div style="font-size:10px; color:#aaa;">GE Tokens</div><i class="fas fa-gem" style="color: #4dabf7;"></i> ${Number(user.geToken || 0).toLocaleString()}</div>
+    </div>
+    <div class="bonus-container">
+      <button onclick="${isMember ? "Swal.fire('ขออภัย','เมมเบอร์รับคุกกี้ฟรีไม่ได้ค่ะ','info')" : "claimMonthly()"}" class="btn-bonus btn-monthly ${isMember ? 'btn-locked' : ''}"><i class="fas fa-gift"></i> รับคุกกี้รายเดือน</button>
+      <button onclick="redeemCode()" class="btn-bonus btn-redeem"><i class="fas fa-ticket-alt"></i> Redeem</button>
+    </div>
+  `;
 }
-
+  
 function renderRanking(data) {
   const list = document.getElementById('ranking-list');
   if (!list) return;
@@ -1364,20 +1330,21 @@ window.addEventListener('pageshow', function(event) {
     refreshAppData();
 });
 
-  // --- Initial Load Strategy (Speed up!) ---
- window.addEventListener('DOMContentLoaded', () => {
-    // 0. ตรวจสอบเวอร์ชันก่อนเลย ถ้าไม่ตรงระบบจะรีเฟรชหน้าใหม่ทันที
+window.addEventListener('DOMContentLoaded', () => {
     checkVersion(); 
 
-    // 1. แสดงผลจาก Cache ทันที (ถ้ามี) เพื่อความเร็ว
-    updateUI();
+    // 1. วาด UI ทันทีจากข้อมูลเก่าในเครื่อง (ถ้ามี)
+    if (user) updateUI();
     if (currentRankingData.length > 0) renderRanking(currentRankingData);
     if (Object.keys(currentTopFansData).length > 0) renderGlobalFans(currentTopFansData);
     
-    // 2. ดึงข้อมูลใหม่มาอัปเดตแบบเงียบๆ
+    // 2. ซ่อน Loading Screen ทันทีที่ของในเครื่องแสดงผลเสร็จ
+    hideAppLoading();
+
+    // 3. ดึงข้อมูลใหม่เงียบๆ มาอัปเดตภายหลัง
     loadData();
     if(user) syncUserData(); 
-  });
+});
 
   // ลดความถี่ในการสร้างคุกกี้ร่วงเพื่อลดภาระ CPU
   setInterval(() => {
