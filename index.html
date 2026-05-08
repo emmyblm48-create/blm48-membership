@@ -260,33 +260,6 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
   backdrop-filter: blur(2px);
   z-index: 1999;
 }
-    
-    /* คุมความสูงของคอนเทนเนอร์รายชื่อแฟนคลับ */
-#member-fans-content {
-    max-height: 240px; /* ปรับค่านี้ตามความสูงของ fan-row (ประมาณ 3-4 แถว) */
-    overflow-y: auto;  /* เปิดการเลื่อนในแนวตั้ง */
-    overflow-x: hidden;
-    padding-right: 5px; /* กันเนื้อหาโดน scrollbar ทับ */
-}
-
-/* ตกแต่ง Scrollbar ให้ดูสวยงาม (Minimalist) */
-#member-fans-content::-webkit-scrollbar {
-    width: 5px;
-}
-
-#member-fans-content::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-}
-
-#member-fans-content::-webkit-scrollbar-thumb {
-    background: #ffb7c5; /* สีชมพูตามธีม */
-    border-radius: 10px;
-}
-
-#member-fans-content::-webkit-scrollbar-thumb:hover {
-    background: #ff8fa3;
-}
 
     /* Responsive */
     @media (max-width: 600px) {
@@ -323,42 +296,6 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
   margin-bottom: 20px;
   text-shadow: 0 4px 10px rgba(255, 133, 162, 0.2);
 }
-    
-    /* สมมติว่าคลาสของลิสต์คือ .fan-list */
-.fan-list {
-  max-height: 280px; /* ปรับค่าความสูงให้พอดีกับการแสดงผล 3 คนแรก */
-  overflow-y: auto;
-  padding-right: 8px; /* เว้นที่ให้ scrollbar เล็กน้อย */
-}
-
-/* ปรับแต่ง Scrollbar ให้ดู Minimal (Optional) */
-.fan-list::-webkit-scrollbar {
-  width: 4px;
-}
-.fan-list::-webkit-scrollbar-thumb {
-  background: #ffb7c5; /* สีชมพูอ่อนให้เข้ากับธีม */
-  border-radius: 10px;
-}
-    
-    .history-scroll-container {
-    max-height: 200px; /* ปรับให้แสดงประมาณ 3-4 แถว */
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding-right: 5px;
-    margin-top: 10px;
-}
-
-/* ใช้ Scrollbar สไตล์เดียวกับ Top Fans เพื่อความสวยงาม */
-.history-scroll-container::-webkit-scrollbar {
-    width: 4px;
-}
-.history-scroll-container::-webkit-scrollbar-track {
-    background: #f9f9f9;
-}
-.history-scroll-container::-webkit-scrollbar-thumb {
-    background: #ffb7c5;
-    border-radius: 10px;
-}
 
 .loader-circle {
   font-size: 30px;
@@ -383,34 +320,69 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
   letter-spacing: 1px;
 }
     
-    /* ล็อกการเลื่อนพื้นหลัง */
-body.modal-open {
-    overflow: hidden !important;
+ /* สมมติว่าคลาสของลิสต์คือ .fan-list */
+.fan-list {
+  max-height: 280px; /* ปรับค่าความสูงให้พอดีกับการแสดงผล 3 คนแรก */
+  overflow-y: auto;
+  padding-right: 8px; /* เว้นที่ให้ scrollbar เล็กน้อย */
 }
 
-/* คอนเทนเนอร์สำหรับ Scroll ใน Modal (ทั้ง Top Fans และ History) */
-.scroll-container {
-    max-height: 240px; /* แสดงประมาณ 3-4 แถว */
+/* ปรับแต่ง Scrollbar ให้ดู Minimal (Optional) */
+.fan-list::-webkit-scrollbar {
+  width: 4px;
+}
+.fan-list::-webkit-scrollbar-thumb {
+  background: #ffb7c5; /* สีชมพูอ่อนให้เข้ากับธีม */
+  border-radius: 10px;
+}
+
+    /* คุมความสูงของคอนเทนเนอร์รายชื่อแฟนคลับ */
+#member-fans-content {
+    max-height: 240px; /* ปรับค่านี้ตามความสูงของ fan-row (ประมาณ 3-4 แถว) */
+    overflow-y: auto;  /* เปิดการเลื่อนในแนวตั้ง */
+    overflow-x: hidden;
+    padding-right: 5px; /* กันเนื้อหาโดน scrollbar ทับ */
+}
+
+/* ตกแต่ง Scrollbar ให้ดูสวยงาม (Minimalist) */
+#member-fans-content::-webkit-scrollbar {
+    width: 5px;
+}
+
+#member-fans-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+#member-fans-content::-webkit-scrollbar-thumb {
+    background: #ffb7c5; /* สีชมพูตามธีม */
+    border-radius: 10px;
+}
+
+#member-fans-content::-webkit-scrollbar-thumb:hover {
+    background: #ff8fa3;
+}
+    
+.history-scroll-container {
+    max-height: 200px; /* ปรับให้แสดงประมาณ 3-4 แถว */
     overflow-y: auto;
     overflow-x: hidden;
     padding-right: 5px;
     margin-top: 10px;
-    text-align: left;
 }
 
-/* ปรับแต่ง Scrollbar ให้ Minimal */
-.scroll-container::-webkit-scrollbar {
-    width: 5px;
+/* ใช้ Scrollbar สไตล์เดียวกับ Top Fans เพื่อความสวยงาม */
+.history-scroll-container::-webkit-scrollbar {
+    width: 4px;
 }
-.scroll-container::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
+.history-scroll-container::-webkit-scrollbar-track {
+    background: #f9f9f9;
 }
-.scroll-container::-webkit-scrollbar-thumb {
+.history-scroll-container::-webkit-scrollbar-thumb {
     background: #ffb7c5;
     border-radius: 10px;
 }
-
+    
 /* อนิเมชั่นเด้งดึ๋งแบบนุ่มนวล */
 @keyframes bounce {
   0%, 100% { transform: translateY(0) scale(1); }
@@ -503,26 +475,38 @@ body.modal-open {
 </div>
 
 <!-- Modal -->
-<div id="modal-overlay" onclick="closeModalOutside(event)">
-    
-    <div class="modal-box" id="stats-form" style="display:none;" onclick="event.stopPropagation()">
-        <div id="stats-content"></div> 
-        
-        <div class="top-fans-list" id="member-fans-section" style="display:none;">
-            <div class="top-fans-title"><i class="fas fa-heart" style="color:var(--primary-pink)"></i> Top Fans</div>
-            <div id="member-fans-content" class="scroll-container"></div>
-        </div>
-        
-        <button onclick="closeModal()" style="margin-top:25px; width:100%; background: #f5f5f5; border: none; padding: 12px; border-radius: 15px; cursor: pointer; color: #666;">Close</button>
+<div id="modal-overlay">
+ <!-- Stats Modal -->
+<div class="modal-box" id="history-form" style="display:none;">
+    <div id="history-content"></div> <!-- ใช้ ID เฉพาะสำหรับประวัติ -->
+    <button onclick="closeModal()" style="margin-top:25px; width:100%; background: #f5f5f5; border: none; padding: 12px; border-radius: 15px; cursor: pointer; color: #666;">Close</button>
+</div>
+  
+<div class="modal-box" id="stats-form" style="display:none;">
+    <div id="stats-content"></div> 
+    <div class="top-fans-list" id="member-fans-section">
+        <div class="top-fans-title"><i class="fas fa-heart" style="color:var(--primary-pink)"></i> Top Fans</div>
+        <div id="member-fans-content"></div>
     </div>
+    <button onclick="closeModal()" style="margin-top:25px; width:100%; background: #f5f5f5; border: none; padding: 12px; border-radius: 15px; cursor: pointer; color: #666;">Close</button>
+</div>
+  <!-- ส่วนนี้สำหรับโชว์ประวัติส่วนตัว (History) -->
+  <div id="stats-content"></div> 
 
-    <div class="modal-box" id="login-form" style="display:none;" onclick="event.stopPropagation()">
-        <h2 style="color: var(--primary-pink); margin-bottom: 25px;">BLM48 Login</h2>
-        <input type="text" id="login-user" class="login-input" placeholder="ชื่อผู้ใช้ (Username)">
-        <input type="password" id="login-pass" class="login-input" placeholder="รหัสผ่าน (Password)">
-        <button onclick="doLogin()" style="width:100%; background:var(--primary-pink); color:white; border:none; padding:14px; border-radius:12px; cursor:pointer; font-weight:700; margin-top:15px;">LOGIN</button>
-        <button onclick="closeModal()" style="width:100%; background:none; color:#aaa; border:none; padding:12px; border-radius:12px; cursor:pointer; font-size:13px; margin-top:10px;">Cancel</button>
-    </div>
+  <!-- ส่วนนี้สำหรับโชว์ Top Fans ของเมมเบอร์ (จะแสดงเมื่อเรียกฟังก์ชันดูเมมเบอร์) -->
+  <div id="member-stats-section" style="display:none;">
+      <div class="top-fans-title"><i class="fas fa-heart" style="color:var(--primary-pink)"></i> Member's Top Fans</div>
+      <div id="member-fans-content"></div>
+  </div>
+  
+  <!-- Login Modal -->
+  <div class="modal-box" id="login-form" style="display:none;">
+    <h2 style="color: var(--primary-pink); margin-bottom: 25px;">BLM48 Login</h2>
+    <input type="text" id="login-user" class="login-input" placeholder="ชื่อผู้ใช้ (Username)">
+    <input type="password" id="login-pass" class="login-input" placeholder="รหัสผ่าน (Password)">
+    <button onclick="doLogin()" style="width:100%; background:var(--primary-pink); color:white; border:none; padding:14px; border-radius:12px; cursor:pointer; font-weight:700; margin-top:15px; box-shadow: 0 4px 10px rgba(255,133,162,0.3);">LOGIN</button>
+    <button onclick="closeModal()" style="width:100%; background:none; color:#aaa; border:none; padding:12px; border-radius:12px; cursor:pointer; font-size:13px; margin-top:10px;">Cancle</button>
+  </div>
 </div>
   
   <!-- ไอคอนดินสอ จะแสดงเฉพาะ role user เท่านั้น -->
@@ -581,9 +565,14 @@ async function showHistory() {
     const userData = JSON.parse(session).data;
     const username = userData.username; 
 
-    openModalEffect();
+    document.getElementById('modal-overlay').style.display = 'block';
     document.getElementById('stats-form').style.display = 'block';
-    document.getElementById('member-fans-section').style.display = 'none'; // ซ่อนส่วนของเมมเบอร์
+    
+    const memberFansSection = document.getElementById('member-fans-section');
+    if (memberFansSection) {
+        memberFansSection.style.display = 'none'; 
+    }
+
     document.getElementById('stats-content').innerHTML = "กำลังดึงข้อมูลให้นะคะ...";
 
     try {
@@ -593,57 +582,60 @@ async function showHistory() {
         if (res.status === "success") {
             let html = `<h2 style="color:var(--primary-pink); text-align:center;">My History</h2>`;
             
-            // ประวัติช้อปปิ้ง
+            // --- 🛒 ส่วนที่ 1: ประวัติการช้อปปิ้ง ---
             html += `<div style="text-align:left; margin-top:20px;">
                         <h4 style="border-bottom: 2px solid var(--soft-pink); padding-bottom:5px;">🛒 ประวัติการช้อปปิ้ง</h4>
-                        <div class="scroll-container">`;
-            if (res.purchaseHistory?.length > 0) {
+                        <div class="history-scroll-container">`; // เริ่ม Container สำหรับ Scroll
+            
+            if (res.purchaseHistory && res.purchaseHistory.length > 0) {
                 res.purchaseHistory.forEach(log => {
-                    html += `<div class="fan-row">
-                        <div class="fan-info"><div class="fan-name">${log.action}: ${log.target}</div>
-                        <div style="font-size:10px; color:#aaa;">${new Date(log.timestamp).toLocaleString()}</div></div>
-                        <div class="fan-cookies" style="color:#4dabf7">${log.amount}</div></div>`;
+                    html += `
+                        <div class="fan-row">
+                            <div class="fan-info">
+                                <div class="fan-name">${log.action}: ${log.target}</div>
+                                <div style="font-size:10px; color:#aaa;">${new Date(log.timestamp).toLocaleString()}</div>
+                            </div>
+                            <div class="fan-cookies" style="color:#4dabf7">${log.amount}</div>
+                        </div>`;
                 });
-            } else { html += `<p style="font-size:12px; color:#ccc; text-align:center;">ยังไม่มีประวัติ</p>`; }
-            html += `</div></div>`;
+            } else {
+                html += `<p style="font-size:12px; color:#ccc; text-align:center; padding:10px;">ยังไม่มีประวัติการซื้อไอเทมงับ</p>`;
+            }
+            html += `   </div> </div>`;
 
-            // ประวัติการส่งกำลังใจ
+            // --- 💖 ส่วนที่ 2: ประวัติการส่งกำลังใจ ---
             html += `<div style="text-align:left; margin-top:25px;">
                         <h4 style="border-bottom: 2px solid var(--soft-pink); padding-bottom:5px;">💖 ประวัติการส่งกำลังใจ</h4>
-                        <div class="scroll-container">`;
-            if (res.giveLogs?.length > 0) {
+                        <div class="history-scroll-container">`; // เริ่ม Container สำหรับ Scroll
+            
+            if (res.giveLogs && res.giveLogs.length > 0) {
                 res.giveLogs.forEach(log => {
-                    html += `<div class="fan-row">
-                        <div class="fan-info"><div class="fan-name">ปาให้: ${log.member}</div>
-                        <div style="font-size:10px; color:#aaa;">${new Date(log.timestamp).toLocaleString()}</div></div>
-                        <div class="fan-cookies">${log.amount} 🍪</div></div>`;
+                    html += `
+                        <div class="fan-row">
+                            <div class="fan-info">
+                                <div class="fan-name">ปาให้: ${log.member}</div>
+                                <div style="font-size:10px; color:#aaa;">${new Date(log.timestamp).toLocaleString()}</div>
+                            </div>
+                            <div class="fan-cookies">${log.amount} 🍪</div>
+                        </div>`;
                 });
-            } else { html += `<p style="font-size:12px; color:#ccc; text-align:center;">ยังไม่มีประวัติ</p>`; }
-            html += `</div></div>`;
+            } else {
+                html += `<p style="font-size:12px; color:#ccc; text-align:center; padding:10px;">ยังไม่เคยปาคุกกี้เลยงับ</p>`;
+            }
+            html += `   </div> </div>`;
             
             document.getElementById('stats-content').innerHTML = html;
         }
     } catch (e) {
-        document.getElementById('stats-content').innerHTML = "เกิดข้อผิดพลาด";
+        console.error(e);
+        document.getElementById('stats-content').innerHTML = "เกิดข้อผิดพลาดในการโหลดข้อมูลประวัติ";
     }
-}
-  
-function openModalEffect() {
-    document.getElementById('modal-overlay').style.display = 'block';
-    document.body.classList.add('modal-open');
 }
 
-function closeModal() {
+  function closeModal() {
     document.getElementById('modal-overlay').style.display = 'none';
     document.getElementById('stats-form').style.display = 'none';
-    document.getElementById('login-form').style.display = 'none';
-    document.body.classList.remove('modal-open');
-}
-  
- function closeModalOutside(event) {
-    if (event.target.id === 'modal-overlay') {
-        closeModal();
-    }
+    document.getElementById('history-form').style.display = 'none';
 }
 
 // --- ปิด Splash Screen เมื่อโหลดข้อมูลเสร็จ ---
@@ -721,12 +713,11 @@ window.onload = () => {
     } catch(e) { console.error("Load Error:", e); }
   }
 
- // --- UI Rendering ---
+  // --- UI Rendering ---
 function updateUI() {
   const bar = document.getElementById('user-bar');
-  if (!bar) return;
-  
-if (user) {
+  if (!bar || !user) return; 
+
   const isMember = isUserMember();
   const kamiTag = user.kamioshi ? 
     `<span class="tag tag-kami" onclick="confirmRemoveOshi('kami', '${user.kamioshi}')">
@@ -763,16 +754,6 @@ if (user) {
       <button onclick="redeemCode()" class="btn-bonus btn-redeem"><i class="fas fa-ticket-alt"></i> Redeem</button>
     </div>
   `;
-  } else {
-    bar.innerHTML = `
-            <div style="padding: 10px;">
-                <button onclick="openLogin()" class="btn-bonus btn-monthly" 
-                    style="width:100%; height:60px; font-size:18px; letter-spacing:2px; display: flex; align-items: center; justify-content: center; gap: 10px;">
-                    <i class="fas fa-sign-in-alt"></i> LOG IN TO BLM48
-                </button>
-            </div>
-        `;
-    }
 }
 
 function renderRanking(data) {
@@ -881,9 +862,7 @@ function renderGlobalFans(rawData) {
 async function showStats(name) {
     const m = currentRankingData.find(x => x.name === name);
     if(!m) return; 
-     
-    openModalEffect(); // เรียกใช้แทนการสั่ง display = 'block' ตรงๆ
-    document.getElementById('stats-form').style.display = 'block';
+    
     document.getElementById('modal-overlay').style.display = 'block';
     document.getElementById('stats-form').style.display = 'block';
     document.getElementById('login-form').style.display = 'none';
@@ -1272,13 +1251,9 @@ async function setOshi(type, memberName) {
   }
   
   function openLogin() { 
-    document.getElementById('login-user').value = '';
-    document.getElementById('login-pass').value = '';
     document.getElementById('modal-overlay').style.display = 'block'; 
+    document.getElementById('login-form').style.display = 'block'; 
     document.getElementById('stats-form').style.display = 'none'; 
-    openModalEffect();
-    document.getElementById('login-form').style.display = 'block';
-    document.getElementById('stats-form').style.display = 'none';
   }
   
   // หลังจาก Login หรือดึงข้อมูลผู้ใช้สำเร็จ
@@ -1355,6 +1330,7 @@ window.addEventListener('pageshow', function(event) {
     refreshAppData();
 });
 
+  // --- Initial Load Strategy (Speed up!) ---
 window.addEventListener('DOMContentLoaded', () => {
     checkVersion(); 
 
