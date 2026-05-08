@@ -724,8 +724,9 @@ window.onload = () => {
  // --- UI Rendering ---
 function updateUI() {
   const bar = document.getElementById('user-bar');
-  if (!bar || !user) return; 
-
+  if (!bar) return;
+  
+if (user) {
   const isMember = isUserMember();
   const kamiTag = user.kamioshi ? 
     `<span class="tag tag-kami" onclick="confirmRemoveOshi('kami', '${user.kamioshi}')">
@@ -762,8 +763,18 @@ function updateUI() {
       <button onclick="redeemCode()" class="btn-bonus btn-redeem"><i class="fas fa-ticket-alt"></i> Redeem</button>
     </div>
   `;
+  } else {
+    bar.innerHTML = `
+            <div style="padding: 10px;">
+                <button onclick="openLogin()" class="btn-bonus btn-monthly" 
+                    style="width:100%; height:60px; font-size:18px; letter-spacing:2px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                    <i class="fas fa-sign-in-alt"></i> LOG IN TO BLM48
+                </button>
+            </div>
+        `;
+    }
 }
-  
+
 function renderRanking(data) {
   const list = document.getElementById('ranking-list');
   if (!list) return;
@@ -1261,11 +1272,13 @@ async function setOshi(type, memberName) {
   }
   
   function openLogin() { 
+    document.getElementById('login-user').value = '';
+    document.getElementById('login-pass').value = '';
     document.getElementById('modal-overlay').style.display = 'block'; 
-    document.getElementById('login-form').style.display = 'block'; 
     document.getElementById('stats-form').style.display = 'none'; 
     openModalEffect();
     document.getElementById('login-form').style.display = 'block';
+    document.getElementById('stats-form').style.display = 'none';
   }
   
   // หลังจาก Login หรือดึงข้อมูลผู้ใช้สำเร็จ
