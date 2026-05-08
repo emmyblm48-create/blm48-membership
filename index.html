@@ -270,12 +270,76 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
       .img-wrapper { width: 85px; height: 85px; }
       .rank-1 .img-wrapper { width: 100px; height: 100px; }
     }
+    
+    #app-loading-screen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: radial-gradient(circle, #ffffff 0%, #fff5f7 100%);
+  z-index: 10000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.loader-content {
+  text-align: center;
+}
+
+.loader-brand {
+  font-family: 'Quicksand', sans-serif;
+  font-size: 42px;
+  font-weight: 700;
+  color: #ff85a2;
+  letter-spacing: 4px;
+  margin-bottom: 20px;
+  text-shadow: 0 4px 10px rgba(255, 133, 162, 0.2);
+}
+
+.loader-circle {
+  font-size: 30px;
+  color: #d2691e; /* สีคุกกี้ */
+  width: 80px;
+  height: 80px;
+  background: white;
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+  border: 3px solid #ff85a2;
+  animation: bounce 1.5s infinite ease-in-out;
+}
+
+.loader-text {
+  font-family: 'Kanit', sans-serif;
+  font-size: 14px;
+  color: #ffb6c1;
+  letter-spacing: 1px;
+}
+
+/* อนิเมชั่นเด้งดึ๋งแบบนุ่มนวล */
+@keyframes bounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-15px) scale(1.05); }
+}
 
     .cookie-fall { position: fixed; top: -50px; z-index: -1; color: #e6b38a; pointer-events: none; animation: falling linear forwards; opacity: 0.6; }
     @keyframes falling { to { transform: translateY(110vh) rotate(360deg); } }
   </style>
 </head>
 <body>
+<div id="app-loading-screen">
+  <div class="loader-content">
+    <div class="loader-brand">BLM48</div>
+    <div class="loader-circle">
+      <i class="fas fa-cookie-bite"></i>
+    </div>
+    <div class="loader-text">กำลังรวบรวมคุกกี้...</div>
+  </div>
+</div>
 
 <!-- 2. Sidebar (Slicer Menu) -->
 <div id="sidebar">
@@ -1165,6 +1229,56 @@ function setupUserProfile(user) {
     if (url.startsWith('data:image')) return url;
     return url;
   }
+  
+  // ฟังก์ชันแสดงหน้าโหลด
+function showAppLoading() {
+  const loader = document.getElementById('app-loading-screen');
+  if (loader) {
+    loader.style.display = 'flex';
+    loader.style.opacity = '1';
+  }
+}
+
+// ฟังก์ชันซ่อนหน้าโหลด
+function hideAppLoading() {
+  const loader = document.getElementById('app-loading-screen');
+  if (loader) {
+    loader.style.opacity = '0';
+    setTimeout(() => { loader.style.display = 'none'; }, 500);
+  }
+}
+
+// ฟังก์ชันรีเฟรชข้อมูลทั้งหมด
+async function refreshAppData() {
+  showAppLoading();
+  try {
+    // โหลดข้อมูล Ranking และ Top Fans ใหม่
+    await loadData(); 
+    // ถ้ามี User ล็อกอินอยู่ ให้ซิงค์ข้อมูลกระเป๋าเงินด้วย
+    if (typeof user !== 'undefined' && user) {
+      await syncUserData();
+    }
+    console.log("Data Refreshed!");
+  } catch (error) {
+    console.error("Refresh Error:", error);
+  } finally {
+    // หน่วงเวลาเล็กน้อยเพื่อให้ดูเหมือนแอปกำลังโหลดจริงๆ (เลือกปรับได้)
+    setTimeout(hideAppLoading, 1000);
+  }
+}
+
+// ดักจับเหตุการณ์เมื่อผู้ใช้สลับแอปกลับมาที่ Browser
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible') {
+    console.log('กลับเข้าสู่แอป - กำลังอัปเดตข้อมูลล่าสุด...');
+    refreshAppData();
+  }
+});
+
+// ดักจับเมื่อมีการโหลดหน้าเว็บครั้งแรกหรือกด Refresh
+window.addEventListener('pageshow', function(event) {
+    refreshAppData();
+});
 
   // --- Initial Load Strategy (Speed up!) ---
  window.addEventListener('DOMContentLoaded', () => {
