@@ -539,6 +539,7 @@ function checkVersion() {
 }
   
   // --- CONFIG & CONSTANTS ---
+  let user = getUserSession();
   const scriptURL = 'https://script.google.com/macros/s/AKfycbz-3938AGxrmvVHCjDdea5KGv-DHtB9txP3UQfjY4nGNEsi1LiNWOoNPEnvofOGCOBU/exec'; 
   
   // --- ฟังก์ชันควบคุม Sidebar ---
@@ -640,9 +641,12 @@ async function showHistory() {
 
 // --- ปิด Splash Screen เมื่อโหลดข้อมูลเสร็จ ---
 function hideSplashScreen() {
-  const splash = document.getElementById('splash-screen');
-  splash.style.opacity = '0';
-  setTimeout(() => splash.style.display = 'none', 500);
+  const splash = document.getElementById('splash-screen'); // หรือ ID ที่คุณใช้
+  if (splash) {
+    splash.style.display = 'none';
+  } else {
+    console.warn("หา splash-screen ไม่เจอค่ะ!");
+  }
 }
 
 // โหลดการตั้งค่าธีมเมื่อเริ่มแอป
@@ -653,7 +657,6 @@ window.onload = () => {
 };
    
   // ใช้หุ้มข้อมูลเพื่อลด Global Variable รบกวนกัน
-  let user = getUserSession();
   let currentRankingData = JSON.parse(localStorage.getItem('bnl_ranking_cache')) || [];
   let currentTopFansData = JSON.parse(localStorage.getItem('bnl_topfans_cache')) || {};
 
@@ -713,23 +716,45 @@ window.onload = () => {
     } catch(e) { console.error("Load Error:", e); }
   }
 
-  // --- UI Rendering ---
 function updateUI() {
   const bar = document.getElementById('user-bar');
-  if (!bar || !user) return; 
+  if (!bar) return; // ถ้าหาแถบโปรไฟล์ไม่เจอ ให้หยุดทำงานทันที ไม่ต้องทำต่อ
+
+  // 1. ดึงปุ่มต่างๆ มาเก็บไว้ (ถ้าหาไม่เจอจะเป็น null)
+  const logoutBtn = document.querySelector('button[onclick="confirmLogout()"]');
+  const loginBtn = document.getElementById('login-btn');
+
+  if (!user) {
+    // --- กรณี Guest (ไม่ได้ Login) ---
+    
+    // เช็คก่อนว่ามีปุ่มไหม ถ้ามีค่อยสั่งซ่อน/แสดง
+    if (logoutBtn) logoutBtn.style.display = 'none'; 
+    if (loginBtn) loginBtn.style.display = 'block';
+
+    bar.innerHTML = `
+      <div class="guest-container" style="text-align: center; padding: 30px 15px; border-radius: 15px; background: rgba(255, 255, 255, 0.5); border: 2px dashed #ffc2d1;">
+        <i class="fas fa-user-circle" style="font-size: 40px; color: #ffc2d1; margin-bottom: 10px;"></i>
+        <p style="font-size: 14px; color: #888; margin-bottom: 15px;">ยินดีต้อนรับสู่ BLM48 ค่ะ<br>เข้าสู่ระบบเพื่อสะสมคุกกี้กันนะ!</p>
+        <button class="btn-login-main" onclick="openLogin()" 
+                style="background: #ff85a2; color: white; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(255, 133, 162, 0.3);">
+          <i class="fas fa-sign-in-alt"></i> เข้าสู่ระบบ
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  // --- กรณี Member (Login แล้ว) ---
+  
+  // เช็คก่อนว่ามีปุ่มไหม ถ้ามีค่อยสั่งแสดง/ซ่อน
+  if (logoutBtn) logoutBtn.style.display = 'inline-block'; 
+  if (loginBtn) loginBtn.style.display = 'none';
 
   const isMember = isUserMember();
-  const kamiTag = user.kamioshi ? 
-    `<span class="tag tag-kami" onclick="confirmRemoveOshi('kami', '${user.kamioshi}')">
-      <i class="fas fa-crown"></i> ${user.kamioshi} 
-    </span>` : '';
+  const kamiTag = user.kamioshi ? `<span class="tag tag-kami"><i class="fas fa-crown"></i> ${user.kamioshi}</span>` : '';
+  const oshiTags = (user.oshis || []).map(o => `<span class="tag tag-oshi"><i class="fas fa-heart"></i> ${o}</span>`).join('');
 
-  const oshiList = Array.isArray(user.oshis) ? user.oshis.filter(o => o && o.trim() !== "") : [];
-  const oshiTags = oshiList.map(o => 
-    `<span class="tag tag-oshi" onclick="confirmRemoveOshi('oshi', '${o}')"><i class="fas fa-heart"></i> ${o}</span>`).join('');
-
-  // อัปเดตเฉพาะส่วน User Bar
-  bar.innerHTML = `
+ bar.innerHTML = `
     <div class="user-info-header">
       <div class="profile-img-container">
         <img src="${getImg(user.profile_img)}" class="user-avatar-img">
@@ -941,7 +966,7 @@ async function showStats(name) {
     // --- เพิ่ม Alert ยืนยันขั้นสุดท้าย ---
     const confirmResult = await Swal.fire({
       title: 'ยืนยันการส่ง?',
-      text: `คุณกำลังจะส่งคุกกี้จำนวน ${numAmount.toLocaleString()} ชิ้น ให้กับ ${memberName}`,
+      text: `ส่งคุกกี้จำนวน ${numAmount.toLocaleString()} ชิ้น ให้กับ ${memberName}`,
       icon: 'question',
       showCancelButton: true,
       confirmButtonColor: '#ff85a2',
