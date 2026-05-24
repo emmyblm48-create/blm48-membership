@@ -77,8 +77,10 @@
 
 /* ปรับแต่งปุ่มไอคอนที่มีอยู่แล้ว */
 .nav-icons {
-    display: flex;
     gap: 10px;
+    text-decoration: none; /* เอาขีดเส้นใต้ออก */
+    display: inline-block;  /* ทำให้มันจัดตำแหน่งได้เหมือน div */
+    color: inherit;         /* ป้องกันไม่ให้สีเปลี่ยนเป็นสีน้ำเงินของลิงก์ */
 }
 
     /* Navbar */
@@ -122,6 +124,37 @@
   background: #ff85a2; /* ชมพูเข้มขึ้นเล็กน้อย */
 }
     
+    .public-member-widget {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid #ffe4e1; /* ปรับสีให้เข้ากับธีม Cute/Minimal */
+    border-radius: 12px;
+    padding: 10px 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(5px);
+    margin: 10px;
+}
+.public-member-widget .widget-icon {
+    font-size: 20px;
+    color: #ffb6c1;
+    margin-right: 12px;
+}
+.public-member-widget .widget-info {
+    display: flex;
+    flex-direction: column;
+}
+.public-member-widget .widget-label {
+    font-size: 11px;
+    color: #8c8c8c;
+    letter-spacing: 0.5px;
+}
+.public-member-widget .widget-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #4a4a4a;
+}
+    
     /* Dark Mode Classes */
 body.dark-mode {
   --bg-color: #1a1a1a;
@@ -163,38 +196,127 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     .btn-locked { background: #ccc !important; cursor: not-allowed; opacity: 0.7; }
 
     /* Ranking & Lists */
-    .section-title { font-family: 'Kanit'; font-weight: 600; color: #444; margin: 30px 0 15px 20px; font-size: 18px; border-left: 5px solid var(--primary-pink); padding-left: 12px; }
-    .ranking-wrapper { width: 100%; overflow-x: auto; padding-bottom: 15px; -webkit-overflow-scrolling: touch; }
-    .horizontal-list { display: flex; gap: 18px; padding: 10px 20px; min-width: max-content; align-items: flex-end; }
+   /* 1. สไตล์หลัก (ใช้สำหรับ Desktop/Tablet) */
+.section-title { 
+  font-family: 'Kanit', sans-serif; font-weight: 600; color: #444; 
+  margin: 30px 0 15px 20px; font-size: 18px; 
+  border-left: 5px solid var(--primary-pink); padding-left: 12px; 
+}
+.ranking-wrapper { 
+  width: 100%; 
+  overflow-x: auto; 
+  padding: 15px 10px; 
+  display: flex; 
+  -webkit-overflow-scrolling: touch; 
+  gap: 10px; /* ระยะห่างระหว่างการ์ด */
+}
+.horizontal-list { 
+  display: flex; gap: 12px; padding: 10px 20px; 
+  align-items: flex-end; margin: 0 auto;
+}
+.member-card { 
+  width: 85px; /* ปรับให้พอดี */
+  text-align: center; 
+  background: white; 
+  padding: 10px 5px 12px 5px; /* ลด Padding ให้ชิดขึ้น */
+  border-radius: 40px 40px 15px 15px; /* หัวโค้งมนแบบเต็มวง */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04); 
+  border: 1px solid #f2f2f2; /* ขอบบางๆ สไตล์มินิมอล */
+  transition: 0.3s ease; 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  position: relative;
+  flex: 0 0 85px; /* ล็อกขนาดไม่ให้ยืด */
+}
+.member-card:hover { 
+      transform: translateY(-8px); 
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+.rank-1 { height: 190px; border-color: var(--gold); background: linear-gradient(to bottom, #fffef0, #ffffff); }
+.rank-2 { height: 180px; border-color: var(--silver); }
+.rank-3 { height: 170px; border-color: var(--bronze); }
+.rank-other {
+    height: 160px; 
+    border: 1px solid #e0e0e0;
+    background: #ffffff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 10px;
+}
+.img-wrapper { 
+    position: relative; 
+    width: 60px; 
+    height: 60px; 
+    margin: 0 auto 8px; 
+    border-radius: 50%; 
+    background: #fcfcfc;
+    border: 1px solid #eee; 
+    cursor: pointer;
+    overflow: visible; /* เปลี่ยนจาก hidden เป็น visible เพื่อให้ไอคอนแสดงผลเต็มที่ */
+    flex-shrink: 0;
+}
 
-    /* Member Card */
-    .member-card { width: 170px; text-align: center; background: white; padding: 25px 15px; border-radius: 30px; box-shadow: 0 8px 20px rgba(0,0,0,0.04); border: 2.5px solid transparent; transition: 0.3s ease; }
-    .member-card:hover { transform: translateY(-8px); box-shadow: 0 12px 25px rgba(0,0,0,0.08); }
-    .rank-1 { height: 310px; border-color: var(--gold); background: linear-gradient(to bottom, #fffef0, #ffffff); }
-    .rank-2 { height: 280px; border-color: var(--silver); }
-    .rank-3 { height: 260px; border-color: var(--bronze); }
-    .rank-other { height: 240px; border-color: #f5f5f5; }
-
-    .img-wrapper { position: relative; width: 100px; height: 100px; margin: 0 auto 12px; border-radius: 50%; padding: 4px; background: white; border: 3px solid var(--violet-border); cursor: pointer; }
-    .rank-1 .img-wrapper { width: 115px; height: 115px; border-color: var(--gold); }
-    .img-wrapper img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-    
-    .rank-badge { position: absolute; bottom: -5px; right: -5px; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2.5px solid white; box-shadow: 0 3px 6px rgba(0,0,0,0.1); font-size: 13px; }
-    .rank-1 .rank-badge { background: var(--gold); color: white; width: 38px; height: 38px; }
-    .rank-2 .rank-badge { background: var(--silver); color: white; }
-    .rank-3 .rank-badge { background: var(--bronze); color: white; }
-    .rank-other .rank-badge { background: #eee; color: #888; }
-
-    .name-text { font-weight: 700; color: #333; font-size: 16px; text-transform: uppercase; margin-bottom: 2px; }
-    .gen-text { font-size: 10px; color: #bbb; letter-spacing: 1px; margin-bottom: 8px; font-weight: 500; }
-    .cookie-text { font-size: 16px; color: var(--primary-pink); font-weight: 800; margin-bottom: 12px; }
-
-    .btn-group { display: flex; justify-content: center; gap: 5px; }
-    .btn-action { border: none; border-radius: 8px; padding: 6px 10px; font-size: 10px; font-family: 'Kanit'; cursor: pointer; font-weight: 600; transition: 0.2s; }
-    .btn-kami { background: #fff0f3; color: var(--primary-pink); }
-    .btn-oshi { background: #eef9ff; color: #0077b6; }
-    .btn-give { background: #fffceb; color: #b08d00; }
-    .btn-action:hover { filter: brightness(0.95); transform: scale(1.05); }
+/* 2. กำหนดให้รูปข้างใน เต็มกรอบเสมอ (แก้จุดที่ทำให้งง) */
+.img-wrapper img { 
+    width: 100% !important; 
+    height: 100% !important; 
+    border-radius: 50% !important; 
+    object-fit: cover !important; 
+    display: block;
+}
+.rank-1 .img-wrapper { width: 75px !important; height: 75px !important; border-color: var(--gold); }
+.rank-2 .img-wrapper { width: 75px !important; height: 75px !important; border-color: var(--silver); }
+.rank-3 .img-wrapper { width: 75px !important; height: 75px !important; border-color: var(--bronze); }
+.rank-other .img-wrapper {
+    border: 1px solid #f0f0f0;
+    box-shadow: 0 0 0 1px #eee;
+}
+.img-wrapper img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; }
+.rank-badge { 
+    position: absolute; 
+    bottom: -2px; 
+    right: -2px; 
+    width: 18px; 
+    height: 18px; 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-weight: 700; 
+    font-size: 9px; 
+    border: 2px solid white; 
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2); /* เพิ่มเงาให้ดูมีมิติ */
+    z-index: 10; /* สำคัญ: ให้ไอคอนอยู่ชั้นบนสุด */
+    background: white; /* ใส่พื้นหลังให้ไอคอนทึบ */
+}
+.rank-1 .rank-badge { background: var(--gold); color: white; }
+.rank-2 .rank-badge { background: var(--silver); color: white; }
+.rank-3 .rank-badge { background: var(--bronze); color: white; }
+.rank-other .rank-badge { 
+    background: #f8f8f8; 
+    color: #999; 
+    border: 1.5px solid #fff;
+    font-size: 8px;
+    font-weight: 600;
+}
+.name-text { 
+  font-weight: 600; 
+  color: #333; 
+  font-size: 12px; 
+  margin-bottom: 2px; 
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+  width: 90%; 
+}
+.cookie-text { 
+  font-size: 12px; 
+  color: var(--primary-pink); 
+  font-weight: 700; 
+  margin-bottom: 6px; /* ดันปุ่มลงเล็กน้อย */
+}
     
     /* Modals & Stats */
     #modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(6px); z-index: 1000; overflow-y: auto; padding: 40px 10px; box-sizing: border-box; }
@@ -391,9 +513,201 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
 
     .cookie-fall { position: fixed; top: -50px; z-index: -1; color: #e6b38a; pointer-events: none; animation: falling linear forwards; opacity: 0.6; }
     @keyframes falling { to { transform: translateY(110vh) rotate(360deg); } }
+    
+    /* ชื่อหัวข้อหลักด้านบนสุด */
+.history-main-title {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #ff8da1;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* หัวข้อแบ่งส่วนประวัติ */
+.history-section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #4a4a4a;
+    margin: 15px 0 10px 0;
+    display: flex;
+    align-items: center;
+    border-left: 4px solid #ff8da1;
+    padding-left: 8px;
+}
+
+/* แถวรายการแต่ละแถว */
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 6px;
+    border-bottom: 1px dashed #ffe3e7; /* เส้นประสีชมพูบางๆ */
+}
+
+.history-item:last-child {
+    border-bottom: none;
+}
+
+/* การจัดข้อความและวันเวลาฝั่งซ้าย */
+.history-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    text-align: left;
+}
+
+.history-title {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #333333;
+}
+
+.history-date {
+    font-size: 0.75rem;
+    color: #b0b0b0;
+}
+
+/* ตัวเลขและแคปซูลแสดงแต้มฝั่งขวา */
+.history-badge-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.history-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 4px 14px;
+    border-radius: 20px;
+    min-width: 55px;
+    text-align: center;
+}
+
+/* ชิปสีแดง/ชมพู เมื่อโดนหัก Token */
+.history-value.minus {
+    color: #ff6b81;
+    background: #fff0f2;
+}
+
+/* ชิปสีเขียว เมื่อได้รับ Cookie เพิ่ม */
+.history-value.plus {
+    color: #2ecc71;
+    background: #e8f8f5;
+}
+
+/* ข้อความเมื่อไม่มีข้อมูล */
+.history-empty-text {
+    text-align: center;
+    color: #c0c0c0;
+    font-size: 0.85rem;
+    padding: 25px 0;
+}
+      
+/* คุมให้ประวัติยาวสูงสุดประมาณ 3-4 รายการแล้วเกิด Scroll ย่อยด้านใน */
+.history-scroll-container {
+    max-height: 200px; /* สามารถปรับความสูงตรงนี้ได้ตามใจชอบเลยครับ */
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+/* 🧼 แต่งหน้าตาตัวเลื่อน Scrollbar ของประวัติให้ดูนุ่มนวลขึ้น */
+.history-scroll-container::-webkit-scrollbar {
+    width: 5px;
+}
+.history-scroll-container::-webkit-scrollbar-track {
+    background: #fff5f6;
+    border-radius: 10px;
+}
+.history-scroll-container::-webkit-scrollbar-thumb {
+    background: #ffc2cc;
+    border-radius: 10px;
+}
+.history-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: #ff99aa;
+}
+
+    /* =========================================
+       👑 CHAMP OF THE MONTH BANNER (HOME PAGE)
+       ========================================= */
+    .champ-banner {
+      background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
+      border: 2px solid #d4af37; /* ขอบสีทอง */
+      border-radius: 20px;
+      padding: 15px 20px;
+      margin: 15px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      box-shadow: 0 10px 20px rgba(212, 175, 55, 0.2);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s;
+    }
+    .champ-banner:active { transform: scale(0.98); }
+    
+    /* เอฟเฟกต์แสงวิบวับพื้นหลัง */
+    .champ-banner::before {
+      content: '';
+      position: absolute;
+      top: -50%; left: -50%; width: 200%; height: 200%;
+      background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, transparent 60%);
+      animation: rotateGlow 10s linear infinite;
+    }
+    @keyframes rotateGlow { 100% { transform: rotate(360deg); } }
+
+    .champ-info {
+      position: relative;
+      z-index: 2;
+      color: #fff;
+      flex: 1;
+    }
+    .champ-badge {
+      font-size: 12px;
+      color: #d4af37;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    .champ-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .champ-month {
+      font-size: 12px;
+      color: #aaaaaa;
+    }
+    .champ-btn-view {
+      margin-top: 10px;
+      background: #d4af37;
+      color: #111;
+      border: none;
+      padding: 5px 12px;
+      border-radius: 15px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .champ-img-container {
+      position: relative;
+      z-index: 2;
+      width: 70px;
+      height: 70px;
+    }
+    .champ-img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #d4af37;
+    }
+    
   </style>
 </head>
 <body>
+
 <div id="app-loading-screen">
   <div class="loader-content">
     <div class="loader-brand">BLM48</div>
@@ -404,33 +718,68 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
   </div>
 </div>
 
-<!-- 2. Sidebar (Slicer Menu) -->
 <div id="sidebar">
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
     <div class="brand" style="font-size: 20px;">BLM48 MENU</div>
     <i class="fas fa-times" onclick="toggleSidebar()" style="cursor:pointer; color:#ccc; font-size: 20px;"></i>
   </div>
   
-  <div class="sidebar-links">
-    <a href="index.html" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0;">
-      <i class="fas fa-home" style="width:20px;"></i> HOME
-    </a>
-    <a href="shop.html" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0;">
-      <i class="fas fa-shopping-cart" style="width:20px;"></i> SHOP
-    </a>
-    <a href="#" onclick="showHistory(); toggleSidebar();" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0;">
-      <i class="fas fa-history" style="width:20px;"></i> HISTORY
-    </a>
-    <a href="https://sites.google.com/view/blm48/home" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0;">
-      <i class="fas fa-globe" style="width:20px;"></i> OFFICIAL SITE
-    </a>
+  <div class="sidebar-links" style="display: flex; flex-direction: column; height: calc(100% - 60px); justify-content: space-between;">
     
-    <hr style="border: 0.5px solid #f0f0f0; margin: 10px 0;">
-    
-    <div onclick="toggleDarkMode();" class="nav-link" style="display:flex; justify-content:space-between; align-items:center; padding:15px 0; cursor:pointer;">
-       <span>DARK MODE</span>
-       <i class="fas fa-moon" id="dark-mode-icon"></i>
+    <div>
+      <a href="index.html" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0;">
+        <i class="fas fa-home" style="width:20px;"></i> HOME
+      </a>
+      <a href="shop.html" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0;">
+        <i class="fas fa-shopping-cart" style="width:20px;"></i> SHOP
+      </a>
+      <a href="inventory.html" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0;">
+        <i class="fas fa-briefcase" style="width:20px;"></i> INVENTORY
+      </a>
+      <a href="kami.html" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0;">
+        <i class="fa-solid fa-star" style="width:20px;"></i> My Kami-Oshi Members
+      </a>
+      <a href="#" onclick="showHistory(); toggleSidebar();" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0;">
+        <i class="fas fa-history" style="width:20px;"></i> HISTORY
+      </a>
+      <a href="https://sites.google.com/view/blm48/home" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0;">
+        <i class="fas fa-globe" style="width:20px;"></i> OFFICIAL SITE
+      </a>
+      
+      <a href="#" onclick="refreshPage()" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0;">
+         <i class="fas fa-sync-alt" style="width:20px;"></i> REFRESH
+      </a>
+      
+      <a href="#" onclick="confirmLogout()" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0; color: #ff6b6b;">
+         <i class="fas fa-sign-out-alt" style="width:20px;"></i> LOGOUT
+      </a>
+      
+      <hr style="border: 0.5px solid #f0f0f0; margin: 10px 0;">
+      
+      
+      <div onclick="toggleDarkMode();" class="nav-link" style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; cursor:pointer;">
+         <span>DARK MODE</span>
+         <i class="fas fa-moon" id="dark-mode-icon"></i>
+      </div>
+      
     </div>
+
+    <div class="public-member-widget" style="background: linear-gradient(135deg, #fffcfd 0%, #ffeef2 100%); border: 1px solid #ffe1e7; padding: 12px 15px; border-radius: 16px; display: flex; align-items: center; justify-content: space-between; margin-top: 20px; box-shadow: 0 4px 12px rgba(255,133,162,0.03);">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="color: #ff85a2; font-size: 14px; background: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(255,133,162,0.1);">
+                <i class="fas fa-users"></i>
+            </div>
+            <div style="display: flex; flex-direction: column; text-align: left;">
+                <span style="font-size: 11px; color: #a39095; font-weight: 600;">สมาชิกทั้งหมด</span>
+                <span style="font-size: 9px; color: #ccb2b7;">Official Membership</span>
+            </div>
+        </div>
+        <div style="background: white; padding: 2px 10px; border-radius: 8px; border: 1px solid #ffe6eb;">
+            <span id="total-members-count" style="font-size: 15px; font-weight: 700; color: #ff6b8b;">...</span>
+            <span style="font-size: 11px; color: #ff85a2; font-weight: 600; margin-left: 1px;">คน</span>
+        </div>
+    </div>
+
   </div>
 </div>
 
@@ -444,25 +793,39 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
       <i class="fas fa-bars"></i>
     </button>
     <div class="brand">BLM48</div>
+</div>
   </div>
   
   <div class="nav-btns">
-    <!-- ปุ่มประวัติแบบไอคอน -->
-    <button onclick="showHistory()" class="nav-icon" title="History">
-      <i class="fas fa-history"></i>
-    </button>
+    <!-- ปุ่มกระเป๋าแบบไอคอน -->
+     <a href="inventory.html" class="nav-icon" title="Inventory">
+      <i class="fas fa-briefcase"></i>
+    </a>
     <!-- ปุ่ม Shop กระโดดไป shop.html -->
     <a href="shop.html" class="nav-icon" title="Shop">
       <i class="fas fa-shopping-cart"></i>
     </a>
-    <button onclick="refreshPage()" class="nav-icon" title="Refresh"><i class="fas fa-sync-alt"></i></button>
-    <button onclick="confirmLogout()" class="nav-icon" title="Logout">
-      <i class="fas fa-sign-out-alt"></i>
-    </button>
-  </div>
+    <a href="profile.html" class="nav-icon" title="Profile">
+     <i class="fas fa-user"></i>
+    </a>
+    <a href="search.html" class="nav-icon" title="Profile">
+    <i class="fas fa-search"></i> </a>
+    </div>
 </nav>
 
 <div id="user-bar" class="user-profile-bar"></div>
+  
+<div class="champ-banner" onclick="window.location.href='champ.html'">
+      <div class="champ-info">
+        <div class="champ-badge"><i class="fas fa-crown"></i> Champ of the Month</div>
+        <div class="champ-title" id="home-champ-name">Mushroom</div>
+        <div class="champ-month" id="home-champ-month">ประจำเดือนกุมภาพันธ์</div>
+        <button class="champ-btn-view">view more <i class="fas fa-chevron-right"></i></button>
+      </div>
+      <div class="champ-img-container">
+        <img src="https://lh3.googleusercontent.com/d/1h1eW8OP8UOaJm8kRK-13t-1Z_WhNluy9=s400" id="home-champ-img" class="champ-img" alt="Champ">
+      </div>
+    </div>
 
 <div class="section-title">🏆 Member Ranking</div>
 <div class="ranking-wrapper">
@@ -474,54 +837,54 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
   <div id="global-fan-list" class="horizontal-list"></div>
 </div>
 
-<!-- Modal -->
-<div id="modal-overlay">
- <!-- Stats Modal -->
-<div class="modal-box" id="history-form" style="display:none;">
-    <div id="history-content"></div> <!-- ใช้ ID เฉพาะสำหรับประวัติ -->
-    <button onclick="closeModal()" style="margin-top:25px; width:100%; background: #f5f5f5; border: none; padding: 12px; border-radius: 15px; cursor: pointer; color: #666;">Close</button>
-</div>
-  
-<div class="modal-box" id="stats-form" style="display:none;">
-    <div id="stats-content"></div> 
-    <div class="top-fans-list" id="member-fans-section">
-        <div class="top-fans-title"><i class="fas fa-heart" style="color:var(--primary-pink)"></i> Top Fans</div>
-        <div id="member-fans-content"></div>
+<div id="modal-overlay" style="display:none;">
+    
+    <div class="modal-box custom-history-modal" id="history-form" style="display:none;">
+    <h2 class="history-main-title">My History</h2>
+    <div id="history-content"></div> 
+    <button onclick="closeModal()" style="margin-top: 25px; width: 100%; background: #fdf6f7; border: none; padding: 12px; border-radius: 12px; cursor: pointer; color: var(--primary-pink); font-weight: 600; transition: all 0.2s;">Close</button>
     </div>
-    <button onclick="closeModal()" style="margin-top:25px; width:100%; background: #f5f5f5; border: none; padding: 12px; border-radius: 15px; cursor: pointer; color: #666;">Close</button>
-</div>
-  <!-- ส่วนนี้สำหรับโชว์ประวัติส่วนตัว (History) -->
-  <div id="stats-content"></div> 
+    
+    <div class="modal-box" id="inventory-form" style="display:none;">
+        <h2 style="font-family: 'Kanit', sans-serif; font-weight: 600; color: var(--primary-pink); margin-bottom: 15px;">
+            <i class="fas fa-briefcase"></i> My Inventory
+        </h2>
+        <div id="inventory-content" style="max-height: 400px; overflow-y: auto;"></div>
+        <button onclick="closeModal()" style="margin-top: 25px; width: 100%; background: #fdf6f7; border: none; padding: 12px; border-radius: 12px; cursor: pointer; color: var(--primary-pink); font-weight: 600; transition: all 0.2s;">Close</button>
+    </div>
+    
+    <div class="modal-box" id="stats-form" style="display:none;">
+        <div id="stats-content"></div> 
+        <div class="top-fans-list" id="member-fans-section">
+            <div class="top-fans-title" style="font-family: 'Kanit', sans-serif; font-weight: 600;">
+                <i class="fas fa-heart" style="color: var(--primary-pink);"></i> Top Fans
+            </div>
+            <div id="member-fans-content"></div>
+        </div>
+        <button onclick="closeModal()" style="margin-top: 25px; width: 100%; background: #f5f5f5; border: none; padding: 12px; border-radius: 12px; cursor: pointer; color: #666; font-weight: 600;">Close</button>
+    </div>
+    
+    <div class="modal-box" id="login-form" style="display:none; padding: 30px 25px; border-radius: 20px;">
+        <h2 style="font-family: 'Kanit', sans-serif; font-weight: 700; color: var(--primary-pink); margin-bottom: 25px; text-align: center;">BLM48 Login</h2>
+        <input type="text" id="login-user" class="login-input" placeholder="ชื่อผู้ใช้ (Username)" style="width: 100%; box-sizing: border-box;">
+        <input type="password" id="login-pass" class="login-input" placeholder="รหัสผ่าน (Password)" style="width: 100%; box-sizing: border-box;">
+        
+        <button onclick="doLogin()" style="width: 100%; background: var(--primary-pink); color: white; border: none; padding: 14px; border-radius: 12px; cursor: pointer; font-weight: 700; margin-top: 20px; box-shadow: 0 4px 12px rgba(255, 133, 162, 0.35); transition: all 0.2s;">LOGIN</button>
+        <button onclick="closeModal()" style="width: 100%; background: none; color: #bbb; border: none; padding: 12px; border-radius: 12px; cursor: pointer; font-size: 13px; margin-top: 8px; transition: color 0.2s;">Cancel</button>
+    </div>
 
-  <!-- ส่วนนี้สำหรับโชว์ Top Fans ของเมมเบอร์ (จะแสดงเมื่อเรียกฟังก์ชันดูเมมเบอร์) -->
-  <div id="member-stats-section" style="display:none;">
-      <div class="top-fans-title"><i class="fas fa-heart" style="color:var(--primary-pink)"></i> Member's Top Fans</div>
-      <div id="member-fans-content"></div>
-  </div>
-  
-  <!-- Login Modal -->
-  <div class="modal-box" id="login-form" style="display:none;">
-    <h2 style="color: var(--primary-pink); margin-bottom: 25px;">BLM48 Login</h2>
-    <input type="text" id="login-user" class="login-input" placeholder="ชื่อผู้ใช้ (Username)">
-    <input type="password" id="login-pass" class="login-input" placeholder="รหัสผ่าน (Password)">
-    <button onclick="doLogin()" style="width:100%; background:var(--primary-pink); color:white; border:none; padding:14px; border-radius:12px; cursor:pointer; font-weight:700; margin-top:15px; box-shadow: 0 4px 10px rgba(255,133,162,0.3);">LOGIN</button>
-    <button onclick="closeModal()" style="width:100%; background:none; color:#aaa; border:none; padding:12px; border-radius:12px; cursor:pointer; font-size:13px; margin-top:10px;">Cancle</button>
-  </div>
-</div>
-  
-  <!-- ไอคอนดินสอ จะแสดงเฉพาะ role user เท่านั้น -->
-  <i class="fas fa-pencil-alt edit-icon" id="edit-name-btn" onclick="updateDisplayName()" style="display: none;"></i>
 </div>
 
+<i class="fas fa-pencil-alt edit-icon" id="edit-name-btn" onclick="updateDisplayName()" style="display: none;"></i>
 <input type="file" id="profile-upload" style="display:none" accept="image/*" onchange="handleImageUpload(event, user.username)">
 
-<footer style="padding: 50px 20px; text-align: center; color: #bbb; font-size: 12px;">
-  <div style="font-weight: 700; color: #888; margin-bottom: 5px;">BLM48 MEMBERSHIP</div>
-  <div>© 2026 Virtual Idol Cover Group</div>
+<footer style="padding: 60px 20px 40px 20px; text-align: center; color: #c5c5c5; font-size: 11px; letter-spacing: 0.5px; line-height: 1.6;">
+    <div style="font-family: 'Kanit', sans-serif; font-weight: 700; color: #999; margin-bottom: 6px; letter-spacing: 1px;">BLM48 MEMBERSHIP</div>
+    <div>© 2026 Virtual Idol Cover Group. All Rights Reserved.</div>
 </footer>
 
 
-<script>
+<script >
   // --- CONFIG & CONSTANTS ---
 const APP_VERSION = '1.0.5'; // ✨ เปลี่ยนเลขเวอร์ชันทุกครั้งที่คุณเอ็มมี่มีการอัปเดตโค้ดสำคัญ
 
@@ -540,7 +903,7 @@ function checkVersion() {
   
   // --- CONFIG & CONSTANTS ---
   let user = getUserSession();
-  const scriptURL = 'https://script.google.com/macros/s/AKfycbz-3938AGxrmvVHCjDdea5KGv-DHtB9txP3UQfjY4nGNEsi1LiNWOoNPEnvofOGCOBU/exec'; 
+  const scriptURL = 'https://script.google.com/macros/s/AKfycbxF5G3E1HWhVTQOVGzWtsqSCZfXkq8ZrX6DqGKt_pcicYbi2_59B-ecEeeTU6-aqBEf/exec'; 
   
   // --- ฟังก์ชันควบคุม Sidebar ---
 function toggleSidebar() { 
@@ -559,6 +922,7 @@ function toggleDarkMode() {
   document.getElementById('dark-mode-btn').innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
 }
 
+// --- แสดงประวัติประใจ ---
 async function showHistory() {
     const session = localStorage.getItem('bnl_session');
     if (!session) return Swal.fire('เข้าสู่ระบบก่อนนะงับ', 'กรุณาล็อกอินก่อน', 'warning');
@@ -566,27 +930,38 @@ async function showHistory() {
     const userData = JSON.parse(session).data;
     const username = userData.username; 
 
-    document.getElementById('modal-overlay').style.display = 'block';
-    document.getElementById('stats-form').style.display = 'block';
+    // 1. เปิดม่าน Overlay หลัก (ใช้ flex เพื่อให้กล่องอยู่กึ่งกลางสวยๆ แบบรูปแรก)
+    const modalOverlay = document.getElementById('modal-overlay');
+    if(modalOverlay) modalOverlay.style.display = 'flex';
     
-    const memberFansSection = document.getElementById('member-fans-section');
-    if (memberFansSection) {
-        memberFansSection.style.display = 'none'; 
-    }
-
-    document.getElementById('stats-content').innerHTML = "กำลังดึงข้อมูลให้นะคะ...";
+    // 2. 🚩 ดักปิดฟอร์มอื่นเพื่อแก้บั๊กซ้อนกันเป็นแซนด์วิช
+    document.getElementById('inventory-form').style.display = 'none';
+    document.getElementById('stats-form').style.display = 'none';
+    document.getElementById('login-form').style.display = 'none';
+    
+    // 3. 🚩 เปลี่ยนจากเปิด stats-form มาเปิดกล่องประวัติตัวจริง (history-form) แทนค่ะ!
+    const historyForm = document.getElementById('history-form');
+    if(historyForm) historyForm.style.display = 'block';
+    
+    // 4. 🚩 เปลี่ยนเป้าหมายกล่องเขียนข้อมูลจาก stats-content มาเป็น history-content
+    const historyContent = document.getElementById('history-content');
+    if(historyContent) historyContent.innerHTML = "<p style='text-align:center; color:#aaa; font-family:\"Kanit\"; padding:20px;'>กำลังดึงข้อมูลให้นะคะ...</p>";
 
     try {
         const response = await fetch(`${scriptURL}?action=getMyHistory&username=${username}`);
         const res = await response.json();
         
-        if (res.status === "success") {
-            let html = `<h2 style="color:var(--primary-pink); text-align:center;">My History</h2>`;
+        // 5. 🚩 ตรวจสอบและพ่นข้อมูลลงกล่อง historyContent ตัวจริง
+        if (res.status === "success" && historyContent) {
+            let html = ``; // เอาหัวข้อ H2 ออกเพราะใน HTML หลักของเอ็มมี่มี "My History" อยู่แล้ว
             
-            // --- 🛒 ส่วนที่ 1: ประวัติการช้อปปิ้ง ---
-            html += `<div style="text-align:left; margin-top:20px;">
-                        <h4 style="border-bottom: 2px solid var(--soft-pink); padding-bottom:5px;">🛒 ประวัติการช้อปปิ้ง</h4>
-                        <div class="history-scroll-container">`; // เริ่ม Container สำหรับ Scroll
+            // ==========================================
+            // 🛒 หมวดหมู่ที่ 1: ประวัติการช้อปปิ้ง
+            // ==========================================
+            html += `
+                <div style="text-align:left; margin-top:15px;">
+                    <h4 style="border-bottom: 2px solid var(--soft-pink); padding-bottom:5px; margin-bottom: 10px;">🛒 ประวัติการช้อปปิ้ง</h4>
+                    <div class="history-scroll-container">`;
             
             if (res.purchaseHistory && res.purchaseHistory.length > 0) {
                 res.purchaseHistory.forEach(log => {
@@ -600,14 +975,18 @@ async function showHistory() {
                         </div>`;
                 });
             } else {
-                html += `<p style="font-size:12px; color:#ccc; text-align:center; padding:10px;">ยังไม่มีประวัติการซื้อไอเทมงับ</p>`;
+                html += `<p style="font-size:12px; color:#ccc; text-align:center; padding:15px 0;">ยังไม่มีประวัติการซื้อไอเทมงับ</p>`;
             }
-            html += `   </div> </div>`;
+            html += `
+                    </div> </div>`;
 
-            // --- 💖 ส่วนที่ 2: ประวัติการส่งกำลังใจ ---
-            html += `<div style="text-align:left; margin-top:25px;">
-                        <h4 style="border-bottom: 2px solid var(--soft-pink); padding-bottom:5px;">💖 ประวัติการส่งกำลังใจ</h4>
-                        <div class="history-scroll-container">`; // เริ่ม Container สำหรับ Scroll
+            // ==========================================
+            // 💖 หมวดหมู่ที่ 2: ประวัติการส่งกำลังใจ
+            // ==========================================
+            html += `
+                <div style="text-align:left; margin-top:20px;">
+                    <h4 style="border-bottom: 2px solid var(--soft-pink); padding-bottom:5px; margin-bottom: 10px;">💖 ประวัติการส่งกำลังใจ</h4>
+                    <div class="history-scroll-container">`;
             
             if (res.giveLogs && res.giveLogs.length > 0) {
                 res.giveLogs.forEach(log => {
@@ -621,24 +1000,31 @@ async function showHistory() {
                         </div>`;
                 });
             } else {
-                html += `<p style="font-size:12px; color:#ccc; text-align:center; padding:10px;">ยังไม่เคยปาคุกกี้เลยงับ</p>`;
+                html += `<p style="font-size:12px; color:#ccc; text-align:center; padding:15px 0;">ยังไม่เคยปาคุกกี้เลยงับ</p>`;
             }
-            html += `   </div> </div>`;
+            html += `
+                    </div> </div>`;
             
-            document.getElementById('stats-content').innerHTML = html;
+            // พ่นลงกล่องประวัติ
+            historyContent.innerHTML = html;
         }
     } catch (e) {
         console.error(e);
-        document.getElementById('stats-content').innerHTML = "เกิดข้อผิดพลาดในการโหลดข้อมูลประวัติ";
+        if(historyContent) historyContent.innerHTML = "เกิดข้อผิดพลาดในการโหลดข้อมูลประวัติ";
     }
 }
 
   function closeModal() {
+    // ซ่อนม่าน Overlay หลัก
     document.getElementById('modal-overlay').style.display = 'none';
-    document.getElementById('stats-form').style.display = 'none';
+    
+    // สั่งซ่อนทุกกล่องฟอร์มด้านในเพื่อ Reset สถานะสำหรับรอบหน้า
     document.getElementById('history-form').style.display = 'none';
+    document.getElementById('inventory-form').style.display = 'none';
+    document.getElementById('stats-form').style.display = 'none';
+    document.getElementById('login-form').style.display = 'none';
 }
-
+  
 // --- ปิด Splash Screen เมื่อโหลดข้อมูลเสร็จ ---
 function hideSplashScreen() {
   const splash = document.getElementById('splash-screen'); // หรือ ID ที่คุณใช้
@@ -714,9 +1100,11 @@ window.onload = () => {
       renderRanking(currentRankingData);
       renderGlobalFans(currentTopFansData);
     } catch(e) { console.error("Load Error:", e); }
-  }
-
+  }  
+ 
 function updateUI() {
+  console.log("ฟังก์ชัน updateUI ทำงาน! ค่า user ณ ตอนนี้คือ:", user);
+
   const bar = document.getElementById('user-bar');
   if (!bar) return; // ถ้าหาแถบโปรไฟล์ไม่เจอ ให้หยุดทำงานทันที ไม่ต้องทำต่อ
 
@@ -726,8 +1114,6 @@ function updateUI() {
 
   if (!user) {
     // --- กรณี Guest (ไม่ได้ Login) ---
-    
-    // เช็คก่อนว่ามีปุ่มไหม ถ้ามีค่อยสั่งซ่อน/แสดง
     if (logoutBtn) logoutBtn.style.display = 'none'; 
     if (loginBtn) loginBtn.style.display = 'block';
 
@@ -745,28 +1131,41 @@ function updateUI() {
   }
 
   // --- กรณี Member (Login แล้ว) ---
-  
-  // เช็คก่อนว่ามีปุ่มไหม ถ้ามีค่อยสั่งแสดง/ซ่อน
   if (logoutBtn) logoutBtn.style.display = 'inline-block'; 
   if (loginBtn) loginBtn.style.display = 'none';
 
   const isMember = isUserMember();
-  const kamiTag = user.kamioshi ? `<span class="tag tag-kami"><i class="fas fa-crown"></i> ${user.kamioshi}</span>` : '';
-  const oshiTags = (user.oshis || []).map(o => `<span class="tag tag-oshi"><i class="fas fa-heart"></i> ${o}</span>`).join('');
 
- bar.innerHTML = `
+  // 🌸 จัดการเลย์เอาต์การแสดงผล คามิโอชิ และ โอชิ
+  const kamiTag = user.kamioshi ? `
+    <span class="tag tag-kami" style="display: inline-flex; align-items: center; gap: 5px; background: #ffd700; color: #333; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 12px; margin: 3px;">
+      <i class="fas fa-crown"></i> ${user.kamioshi}
+      <i class="fas fa-times-circle" onclick="removeOshiFromUI('kami', '${user.kamioshi}')" style="cursor: pointer; color: rgba(0,0,0,0.5); margin-left: 4px;"></i>
+    </span>
+  ` : '';
+
+  const sortedOshis = (user.oshi || [])
+    .map(o => o ? o.toString().trim() : "")
+    .filter(o => o !== "" && o.toLowerCase() !== (user.kamioshi || "").toLowerCase())
+    .sort((a, b) => a.localeCompare(b, 'th', { sensitivity: 'base' }));
+
+  const oshiTags = sortedOshis.map(o => `
+    <span class="tag tag-oshi" style="display: inline-flex; align-items: center; gap: 5px; background: #87ceeb; color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; margin: 3px;">
+      <i class="fas fa-heart"></i> ${o}
+      <i class="fas fa-times-circle" onclick="removeOshiFromUI('oshi', '${o}')" style="cursor: pointer; color: rgba(255,255,255,0.7); margin-left: 4px;"></i>
+    </span>
+  `).join('');
+
+  bar.innerHTML = `
     <div class="user-info-header">
-      <div class="profile-img-container">
-        <img src="${getImg(user.profile_img)}" class="user-avatar-img">
-        <div class="edit-photo-btn" onclick="document.getElementById('profile-upload').click()"><i class="fas fa-camera"></i></div>
-      </div>
+           <a href="profile.html" class="profile-img-container nav-icon" title="Profile">
+          <img src="${getImg(user.profile_img)}" class="user-avatar-img">
+      </a>
       <div style="flex:1">
         <div class="user-name">
           <span id="user-display-name">${user.name}</span> 
-          ${user.role.toLowerCase() === 'user' ? `<i class="fas fa-edit" style="cursor:pointer; font-size:12px; color:#ff85a2; margin-left:5px;" onclick="updateDisplayName()"></i>` : ''}
           <span class="role-badge">${user.role}</span>
         </div>
-        <div class="oshi-list">${kamiTag}${oshiTags}</div>
       </div>
     </div>
     <div class="wallet">
@@ -778,7 +1177,67 @@ function updateUI() {
       <button onclick="${isMember ? "Swal.fire('ขออภัย','เมมเบอร์รับคุกกี้ฟรีไม่ได้ค่ะ','info')" : "claimMonthly()"}" class="btn-bonus btn-monthly ${isMember ? 'btn-locked' : ''}"><i class="fas fa-gift"></i> รับคุกกี้รายเดือน</button>
       <button onclick="redeemCode()" class="btn-bonus btn-redeem"><i class="fas fa-ticket-alt"></i> Redeem</button>
     </div>
-  `;
+  `;}
+
+
+// 💔 ฟังก์ชันสำหรับกดลบคามิ/โอชิจากหน้าจอ แล้วยิงไปอัปเดต Google Sheet ทันทีผ่าน action: removeOshi ที่มีอยู่เดิม
+async function removeOshiFromUI(type, memberName) {
+  const typeText = type === 'kami' ? 'คามิโอชิหลัก' : 'โอชิ';
+  
+  // แจ้งเตือนยืนยันการลบแบบน่ารักๆ สไตล์ BLM48
+  const confirm = await Swal.fire({
+    title: `แน่ใจไหมงับ?`,
+    text: `คุณต้องการลบ ${memberName} ออกจากรายการ${typeText}ใช่ไหม?`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#ff85a2',
+    cancelButtonColor: '#aaa',
+    confirmButtonText: 'ใช่, ลบเลย!',
+    cancelButtonText: 'ยกเลิก'
+  });
+
+  if (!confirm.isConfirmed) return;
+
+  Swal.fire({
+    title: 'กำลังอัปเดตฐานข้อมูล...',
+    allowOutsideClick: false,
+    didOpen: () => { Swal.showLoading(); }
+  });
+
+  try {
+    // ดึง URL ของ Apps Script จากที่คุณเอ็มมี่ตั้งค่าไว้ในโค้ดส่วนอื่น (ในที่นี้อ้างอิงตามมาตรฐานเดิมของคุณเอ็มมี่)
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxF5G3E1HWhVTQOVGzWtsqSCZfXkq8ZrX6DqGKt_pcicYbi2_59B-ecEeeTU6-aqBEf/exec';
+    
+    // ยิง POST Request ส่ง action ไปที่ระบบหลังบ้านตัวเดิมที่คุณเอ็มมี่เขียนรอไว้แล้ว
+    const response = await fetch(scriptURL, {
+      method: 'POST',
+      body: new URLSearchParams({
+        action: 'removeOshi',
+        username: user.username, // ส่ง username ปัจจุบันไปหาแถว
+        type: type,              // 'kami' หรือ 'oshi'
+        memberName: memberName   // ชื่อเมมเบอร์ที่ต้องการลบ
+      })
+    });
+
+    const res = await response.json();
+
+    if (res.status === 'success') {
+      Swal.fire('สำเร็จ!', `ลบ ${memberName} เรียบร้อยแล้วค่ะ`, 'success');
+      
+      // อัปเดตตัวแปร user ในหน้าบ้าน เพื่อให้หน้าเว็บทำการดึงและวาด UI ใหม่ทันที
+      if (typeof window.syncUserData === 'function') {
+        window.syncUserData(); // เรียกฟังก์ชันซิงค์ข้อมูลใหม่
+      } else {
+        // หากไม่มีฟังก์ชันซิงค์ ให้ทำการดึงใหม่ง่ายๆ ตามโครงสร้างเดิม
+        location.reload(); 
+      }
+    } else {
+      Swal.fire('เกิดข้อผิดพลาด', res.message || 'ไม่สามารถลบข้อมูลได้', 'error');
+    }
+  } catch (error) {
+    console.error(error);
+    Swal.fire('เกิดข้อผิดพลาด!', 'เซิร์ฟเวอร์ไม่ตอบสนอง กรุณาลองใหม่อีกครั้งนะงับ', 'error');
+  }
 }
 
 function renderRanking(data) {
@@ -798,7 +1257,7 @@ function renderRanking(data) {
     card.className = `member-card ${rankClass}`;
     
     card.innerHTML = `
-      <div class="img-wrapper" onclick="showStats('${m.name}')">
+     <div class="img-wrapper" onclick="openMemberProfile('${m.name}')">
         <img src="${getImg(m.profile_img)}" loading="lazy">
         <div class="rank-badge">${badgeContent}</div>
       </div>
@@ -807,12 +1266,6 @@ function renderRanking(data) {
       <div class="cookie-text" style="margin-bottom: 15px;">
         <i class="fas fa-cookie-bite" style="color: #d2691e;"></i> 
         ${Number(m.monthly_cookies || 0).toLocaleString()}
-      </div>
-
-      <div class="btn-group">
-        <button class="btn-action btn-kami ${isMember ? 'btn-locked' : ''}" onclick="setOshi('kami', '${m.name}')">KAMI</button>
-        <button class="btn-action btn-oshi ${isMember ? 'btn-locked' : ''}" onclick="setOshi('oshi', '${m.name}')">OSHI</button>
-        <button class="btn-action btn-give ${isMember ? 'btn-locked' : ''}" onclick="giveCookie('${m.name}')">SEND</button>
       </div>
     `;
     list.appendChild(card);
@@ -883,116 +1336,22 @@ function renderGlobalFans(rawData) {
   });
 }
 
-// --- Interaction Functions (คงความสามารถเดิม พร้อมอัปเดตชื่อแฟนคลับ) ---
-async function showStats(name) {
-    const m = currentRankingData.find(x => x.name === name);
-    if(!m) return; 
+// เอาฟังก์ชันนี้ไปวางใน <script> ของหน้า index.html แทนตัวเดิมนะงับ
+function openMemberProfile(name) {
+  // 1. ค้นหาข้อมูลสถิติล่าสุดของเมมเบอร์คนนี้
+  const m = currentRankingData.find(x => x.name === name);
+  // 2. ดึงรายชื่อแฟนคลับที่ปาคุกกี้ให้
+  const fans = currentTopFansData[name] || [];
+  
+  if (m) {
+    // เซฟข้อมูลลงคลังชั่วคราวเพื่อให้หน้า member.html ดึงไปใช้ต่อได้
+    localStorage.setItem('current_member_stats', JSON.stringify(m));
+    localStorage.setItem('current_member_fans', JSON.stringify(fans));
     
-    document.getElementById('modal-overlay').style.display = 'block';
-    document.getElementById('stats-form').style.display = 'block';
-    document.getElementById('login-form').style.display = 'none';
-
-    // ✨ จุดสำคัญ: สั่งให้แสดงส่วน Top Fans ของเมมเบอร์
-    const memberFansSection = document.getElementById('member-fans-section');
-    if (memberFansSection) {
-        memberFansSection.style.display = 'block';
-    }
-
-    document.getElementById('stats-content').innerHTML = `
-    <div class="stats-header">
-      <img src="${getImg(m.profile_img)}" class="stats-avatar">
-      <div class="stats-name">${m.name}</div>
-      <div style="font-size:12px; color:#aaa; letter-spacing:2px;">BLM48 MEMBER</div>
-    </div>
-    <div class="stats-summary">
-      <div class="stat-item"><span class="stat-label">Kami</span><span class="stat-val">${m.total_kami || 0}</span></div>
-      <div class="stat-item" style="border-left: 1px solid #ffdce3; border-right: 1px solid #ffdce3;"><span class="stat-label">Oshi</span><span class="stat-val">${m.total_oshi || 0}</span></div>
-      
-      <div class="stat-item">
-        <span class="stat-label">Total Cookies</span>
-        <span class="stat-val" style="color:var(--primary-pink)">
-          ${Number(m.all_time_total || 0).toLocaleString()}
-        </span>
-      </div>
-    </div>
-  `;
-    
-    const fans = currentTopFansData[name] || [];
-    const fanContainer = document.getElementById('member-fans-content');
-    fanContainer.innerHTML = '';
-
-    if(fans.length === 0) {
-      fanContainer.innerHTML = '<div style="padding:20px; color:#bbb; font-size:13px;">ยังไม่มีแฟนคลับปาคุกกี้ให้ในเดือนนี้</div>';
-    } else {
-      fans.slice(0, 10).forEach((f, idx) => { 
-        const row = document.createElement('div');
-        row.className = 'fan-row';
-        
-        const fanDisplayName = f.name || f.username;
-
-        row.innerHTML = `
-          <div class="fan-rank">${idx + 1}</div>
-          <img src="${getImg(f.img)}" class="fan-img" onerror="this.src='https://via.placeholder.com/150'">
-          <div class="fan-info">
-            <div class="fan-name">${fanDisplayName}</div>
-            <div class="fan-cookies"><i class="fas fa-cookie-bite" style="color: #d2691e;"></i>  ${f.total.toLocaleString()} Cookies</div>
-          </div>
-        `;
-        fanContainer.appendChild(row);
-      });
-    } 
-}
-
- async function giveCookie(memberName) {
-  if (!user) return openLogin();
-  if (isUserMember()) return Swal.fire('ขออภัย', 'เมมเบอร์ไม่สามารถปาคุกกี้ได้ค่ะ', 'warning');
-
-  const { value: amount } = await Swal.fire({
-    title: `ปาคุกกี้ให้ ${memberName}`,
-    input: 'number',
-    inputLabel: `ยอดคุกกี้ของคุณ: ${Number(user.cookie).toLocaleString()} ชิ้น`,
-    inputPlaceholder: 'ใส่จำนวนที่ต้องการส่ง...',
-    showCancelButton: true,
-    confirmButtonColor: '#ff85a2',
-    cancelButtonText: 'ยกเลิก',
-    confirmButtonText: 'ถัดไป'
-  }); 
-
-  if (amount) {
-    const numAmount = parseInt(amount);
-    if (numAmount <= 0) return Swal.fire('ผิดพลาด', 'กรุณาใส่จำนวนที่มากกว่า 0', 'error');
-    if (numAmount > user.cookie) return Swal.fire('คุกกี้ไม่พอ', 'ยอดคุกกี้ของคุณไม่เพียงพอครับ', 'error');
-
-    // --- เพิ่ม Alert ยืนยันขั้นสุดท้าย ---
-    const confirmResult = await Swal.fire({
-      title: 'ยืนยันการส่ง?',
-      text: `ส่งคุกกี้จำนวน ${numAmount.toLocaleString()} ชิ้น ให้กับ ${memberName}`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#ff85a2',
-      confirmButtonText: 'ยืนยันการส่ง',
-      cancelButtonText: 'เปลี่ยนใจแล้ว'
-    });
-
-    if (confirmResult.isConfirmed) {
-      Swal.fire({ title: 'กำลังปาคุ้กกี้...', didOpen: () => Swal.showLoading() });
-      try {
-        const resp = await fetch(scriptURL, {
-          method: 'POST', 
-          body: JSON.stringify({
-            action: 'giveCookie',
-            username: user.username,
-            memberName: memberName,
-            amount: numAmount
-          }) 
-        });
-        const res = await resp.json();
-        if (res.status === 'success' || Array.isArray(res)) {
-          Swal.fire('สำเร็จ!', `ส่งคุกกี้ให้ ${memberName} เรียบร้อยแล้วค่ะ`, 'success');
-          syncUserData(); loadData();  
-        } else { Swal.fire('Error', res.message, 'error'); }
-      } catch (err) { Swal.fire('Error', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'error'); }
-    }
+    // พาวาร์ปไปหน้าโปรไฟล์แยก
+    window.location.href = `member.html?name=${encodeURIComponent(name)}`;
+  } else {
+    Swal.fire('ผิดพลาด', 'ไม่พบข้อมูลเมมเบอร์คนนี้ในระบบค่ะ', 'error');
   }
 }
 
@@ -1004,7 +1363,7 @@ async function setOshi(type, memberName) {
   
   // ใช้ข้อมูลจาก Object user ที่เราจัดระเบียบไว้แล้วใน doGet
   const currentKamioshi = (user.kamioshi || "").toString().toLowerCase();
-  const oshiArray = Array.isArray(user.oshis) ? user.oshis.map(s => s.toLowerCase()) : [];
+  const oshiArray = Array.isArray(user.oshi) ? user.oshi.map(s => s.toLowerCase()) : [];
   const isAlreadyOshi = oshiArray.includes(searchName);
 
   let action = "";
@@ -1093,19 +1452,42 @@ async function setOshi(type, memberName) {
     } catch (error) { Swal.fire('ผิดพลาด', 'ไม่สามารถดึงข้อมูลล่าสุดได้', 'error'); }
   }
 
-  function confirmLogout() {
-    if(!user) return openLogin();
-    Swal.fire({
-      title: 'ออกจากระบบ?', icon: 'warning', showCancelButton: true,
-      confirmButtonColor: '#ff85a2', confirmButtonText: 'ออกจากระบบ'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        localStorage.removeItem('bnl_session');
-        user = null; updateUI();
-        Swal.fire('Logout!', 'ออกจากระบบเรียบร้อยแล้วค่ะ', 'success').then(() => openLogin());
-      }
-    });
-  }
+ function confirmLogout() {
+  // 1. ถ้าไม่มี user ล็อกอินอยู่แล้ว ให้เปิดหน้าล็อกอินขึ้นมาทันที
+  if (!user) return openLogin();
+
+  // 2. แสดงกล่องยืนยันการออกจากระบบ
+  Swal.fire({
+    title: 'ต้องการออกจากระบบใช่ไหมคะ?',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#ff85a2',
+    confirmButtonText: 'ตกลง',
+    cancelButtonText: 'ยกเลิก'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // 3. ลบ Session ในเครื่องออกให้หมดจด (ใช้คีย์ bnl_session ตามระบบของคุณ)
+      localStorage.removeItem('bnl_session');
+      sessionStorage.clear();
+
+      // 4. ล้างค่าตัวแปรกลางใน RAM เป็น null ทันที (แก้บั๊กโปรไฟล์ค้าง)
+      user = null; 
+
+      // 5. สั่งอัปเดตหน้าจอทันที แถบโปรไฟล์จะถูกล้างค่าเป็น Guest
+      updateUI(); 
+
+      // 6. แจ้งเตือนสำเร็จ และเมื่อกดตกลงปิดแจ้งเตือน จะเปิดหน้าต่างล็อกอินรูปที่ 2 ขึ้นมา
+      Swal.fire({
+        title: 'สำเร็จ!',
+        text: 'ออกจากระบบเรียบร้อยแล้วค่ะ',
+        icon: 'success',
+        confirmButtonColor: '#ff85a2'
+      }).then(() => {
+        openLogin(); // เด้งหน้าต่างล็อกอิน (รูปที่ 2) ขึ้นมาบล็อกหน้าจอต่อทันที
+      });
+    }
+  });
+}
 
  async function claimMonthly() {
   if (!user) return openLogin();
@@ -1189,53 +1571,6 @@ async function setOshi(type, memberName) {
   }
 }
   
-  async function updateDisplayName() {
-  // เปลี่ยน currentUser เป็น user ให้เหมือนตัวแปรหลักด้านบน
-  if (!user || user.role.toLowerCase() !== "user") {
-    Swal.fire('ขออภัย', 'เฉพาะผู้ใช้งานทั่วไปเท่านั้นที่สามารถเปลี่ยนชื่อได้ค่ะ', 'info');
-    return;
-  }
-
-  const { value: newName } = await Swal.fire({
-    title: 'แก้ไขชื่อของคุณ',
-    input: 'text',
-    inputLabel: 'กรอกชื่อใหม่ที่ต้องการ',
-    inputValue: user.name, // ใช้ user.name
-    showCancelButton: true,
-    confirmButtonColor: '#ff85a2',
-    inputValidator: (value) => {
-      if (!value) return 'กรุณากรอกชื่อด้วยนะคะ'
-      if (value.length > 20) return 'ชื่อยาวเกินไปหน่อยค่ะ'
-    }
-  });
-
-  if (newName) {
-    Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-
-    try {
-      // ใช้ fetch แบบปกติ (ไม่ใช่ no-cors) เพื่อให้รับ status กลับมาเช็คได้
-      const response = await fetch(scriptURL, {
-        method: 'POST',
-        body: JSON.stringify({
-          action: 'updateName',
-          username: user.username,
-          newName: newName
-        })
-      });
-
-      const res = await response.json();
-      if (res.status === "success") {
-        user.name = newName; // อัปเดตตัวแปรในเครื่อง
-        saveUserSession(user); // บันทึกลง LocalStorage
-        updateUI(); // สั่งวาด UI ใหม่ ชื่อจะเปลี่ยนทันที
-        Swal.fire('สำเร็จ!', 'เปลี่ยนชื่อเรียบร้อยแล้วค่ะ', 'success');
-      }
-    } catch (error) {
-      Swal.fire('Error', 'ไม่สามารถเปลี่ยนชื่อได้ในขณะนี้', 'error');
-    }
-  }
-}
-
   async function redeemCode() {
     if (!user) return openLogin();
     const { value: code } = await Swal.fire({ 
@@ -1322,7 +1657,7 @@ function hideAppLoading() {
     setTimeout(() => { loader.style.display = 'none'; }, 500);
   }
 }
-
+  
 // ฟังก์ชันรีเฟรชข้อมูลทั้งหมด
 async function refreshAppData() {
   showAppLoading();
@@ -1331,7 +1666,7 @@ async function refreshAppData() {
     await loadData(); 
     // ถ้ามี User ล็อกอินอยู่ ให้ซิงค์ข้อมูลกระเป๋าเงินด้วย
     if (typeof user !== 'undefined' && user) {
-      await syncUserData();
+      await syncUserData(); 
     }
     console.log("Data Refreshed!");
   } catch (error) {
@@ -1339,14 +1674,23 @@ async function refreshAppData() {
   } finally {
     // หน่วงเวลาเล็กน้อยเพื่อให้ดูเหมือนแอปกำลังโหลดจริงๆ (เลือกปรับได้)
     setTimeout(hideAppLoading, 1000);
-  }
+  } 
 }
 
-// ดักจับเหตุการณ์เมื่อผู้ใช้สลับแอปกลับมาที่ Browser
-document.addEventListener('visibilitychange', function() {
-  if (document.visibilityState === 'visible') {
-    console.log('กลับเข้าสู่แอป - กำลังอัปเดตข้อมูลล่าสุด...');
-    refreshAppData();
+// ใส่ดักจับตอนหน้าเว็บโหลดเสร็จสมบูรณ์
+document.addEventListener("DOMContentLoaded", () => {
+  
+  // 1. 👑 เรียกใช้ฟังก์ชันแกะเซสชันที่คุณเอ็มมี่เขียนไว้ได้เลย (มันจะเช็คคีย์ bnl_session และเช็ควันหมดอายุให้อัตโนมัติ!)
+  user = getUserSession(); 
+  
+  // 2. สั่งรันฟังก์ชันวาดหน้าจอทันที! ถ้ามีข้อมูลผู้ใช้ค้างอยู่ หน้าโปรไฟล์ก็จะขึ้นสวยงาม ไม่หลุดเป็น Guest แล้วค่ะ
+  updateUI();
+  
+  // 3. ⚡ ซ่อนหน้า Loading Screen และสั่งซิงค์ข้อมูลใหม่ล่าสุดจากระบบหลังบ้านเงียบๆ
+  hideAppLoading(); 
+  loadData();
+  if (user) {
+    syncUserData(); 
   }
 });
 
@@ -1381,14 +1725,35 @@ window.addEventListener('DOMContentLoaded', () => {
     c.style.animationDuration = (Math.random() * 3 + 4) + 's';
     document.body.appendChild(c);
     setTimeout(() => c.remove(), 6000);
-  }, 5000);
+  }, 5000);  
+  
+// 2. ⚡ ดักจับตอนหน้าเว็บโหลดโครงสร้างเสร็จสมบูรณ์
+document.addEventListener("DOMContentLoaded", () => {
+  
+  // ดึงข้อมูลเซสชันล็อกอินจากคีย์ bnl_session ที่ถูกต้อง
+  user = getUserSession(); 
+  
+  // สั่งวาดหน้าจอแสดงโปรไฟล์/หน้าล็อกอินทันที
+  updateUI();
+  
+  // 🔥 สั่งปิดหน้าโหลดสีขาวชมพูตรงนี้! หน้าเว็บหลักจะแสดงผลขึ้นมาอย่างนุ่มนวล
+  hideAppLoading(); 
+  
+  // ดึงข้อมูลอันดับและซิงค์ข้อมูลผู้ใช้จากระบบหลังบ้านแบบเงียบๆ เบื้องหลัง
+  loadData();
+  if (user) {
+    syncUserData(); 
+  }
+});
 </script>
 
 
 <script type="module">
+  // 1. นำเข้าฟังก์ชันจาก Firebase (เก็บไว้เพราะอาจใช้ Sync ข้อมูลส่วนอื่น)
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-  import { getDatabase, ref, update } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-database.js";
+  import { getDatabase, ref, update, onValue } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-database.js";
 
+  // 2. ตั้งค่า Configuration ของ Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyAx5JlVGm_IpuOhksQMTA6qli9vR-5rNas",
     authDomain: "blm48-official-site.firebaseapp.com",
@@ -1399,175 +1764,35 @@ window.addEventListener('DOMContentLoaded', () => {
     appId: "1:924510827472:web:d2a5b5dcf0683a5c73ffd5"
   };
 
+  // 3. เริ่มต้นเปิดใช้งาน Firebase
   const app = initializeApp(firebaseConfig);
   const database = getDatabase(app);
 
-  window.handleImageUpload = async function(event, username) {
-    // ดึง username จาก Global ถ้าไม่มีการส่งค่ามา
-    const finalUsername = username || (window.user ? window.user.username : null);
+  // 🎯 ระบบดึงสถิติจำนวนสมาชิก (เก็บไว้)
+  function refreshCountFromSheets() {
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxF5G3E1HWhVTQOVGzWtsqSCZfXkq8ZrX6DqGKt_pcicYbi2_59B-ecEeeTU6-aqBEf/exec?action=getMemberCount';
+    const countElement = document.getElementById('total-members-count');
+    
+    if (!countElement) return;
 
-    if (!finalUsername || finalUsername === 'undefined') {
-        Swal.fire('ไม่พบชื่อผู้ใช้', 'กรุณาเข้าสู่ระบบใหม่อีกครั้งนะงับ', 'error');
-        return;
-    }
-
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const result = await Swal.fire({
-      title: 'เปลี่ยนรูปโปรไฟล์?',
-      text: `คุณต้องการใช้รูปนี้ใช่หรือไม่?`, 
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#ff85a2', // สีชมพู BLM48
-      confirmButtonText: 'ตกลง',
-      cancelButtonText: 'ยกเลิก'
-    });
-
-    if (result.isConfirmed) {
-      Swal.fire({
-        title: 'กำลังอัปโหลด...',
-        allowOutsideClick: false,
-        didOpen: () => { Swal.showLoading(); }
-      });
-
-      try {
-        // 1. อัปโหลดไป ImgBB
-        const imageUrl = await uploadToStorage(file); 
-        
-        // 2. อัปเดตลง Firebase Realtime Database
-        const updates = {};
-        updates['/users/' + finalUsername + '/profile_img'] = imageUrl;
-        await update(ref(database), updates);
-
-        // 3. ส่งไป Google Sheets (เปลี่ยนเป็น finalUsername)
-        await sendToGoogleSheets(finalUsername, imageUrl);
-
-        // 4. สำเร็จและอัปเดตหน้าจอทันที
-        Swal.fire('สำเร็จ!', 'อัปเดตรูปโปรไฟล์เรียบร้อยแล้วค่ะ', 'success');
-        
-        // ถ้ามีฟังก์ชัน syncUserData ในหน้าหลัก ให้เรียกใช้ที่นี่
-        if (typeof window.syncUserData === 'function') {
-            window.syncUserData();
-        }
-
-      } catch (error) {
-        Swal.fire('เกิดข้อผิดพลาด!', error.message, 'error');
-      }
-    }
-  };
-
-  async function uploadToStorage(file) {
-    const apiKey = '80ad839da07973eeefee57af54fc9f6d'; 
-    const formData = new FormData();
-    formData.append('image', file);
-
-    const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
-      method: 'POST',
-      body: formData
-    });
-
-    const data = await response.json();
-    if (data.success) {
-      return data.data.url;
-    } else {
-      throw new Error("อัปโหลดไม่สำเร็จ: " + data.error.message);
-    }
-  }
-
-    async function compressImage(file) {
-    return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = (event) => {
-            const img = new Image();
-            img.src = event.target.result;
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 400; // ขนาดที่พอดีสำหรับรูปโปรไฟล์
-                const scaleSize = MAX_WIDTH / img.width;
-                canvas.width = MAX_WIDTH;
-                canvas.height = img.height * scaleSize;
-
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                
-                canvas.toBlob((blob) => {
-                    resolve(blob);
-                }, 'image/jpeg', 0.8); // บีบอัดคุณภาพเหลือ 80%
-            };
-        };
-    });
-}
-
-window.handleImageUpload = async function(event, username) {
-    const finalUsername = username || (window.user ? window.user.username : null);
-
-    if (!finalUsername || finalUsername === 'undefined') {
-        Swal.fire('ไม่พบชื่อผู้ใช้', 'กรุณาเข้าสู่ระบบใหม่อีกครั้งนะงับ', 'error');
-        return;
-    }
-
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const result = await Swal.fire({
-        title: 'เปลี่ยนรูปโปรไฟล์?',
-        text: `คุณต้องการใช้รูปนี้ใช่หรือไม่?`, 
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#ff85a2',
-        confirmButtonText: 'ตกลง',
-        cancelButtonText: 'ยกเลิก'
-    });
-
-    if (result.isConfirmed) {
-        Swal.fire({
-            title: 'กำลังประมวลผล...',
-            allowOutsideClick: false,
-            didOpen: () => { Swal.showLoading(); }
-        });
-
-        try {
-            // บีบอัดรูปก่อนส่ง
-            const compressedFile = await compressImage(file);
-
-            // 1. อัปโหลดไป ImgBB
-            const imageUrl = await uploadToStorage(compressedFile); 
-            
-            // 2. อัปเดตลง Firebase และ Google Sheets แบบพร้อมกัน (Parallel) เพื่อความรวดเร็ว
-            const updates = {};
-            updates['/users/' + finalUsername + '/profile_img'] = imageUrl;
-            
-            await Promise.all([
-                update(ref(database), updates),
-                sendToGoogleSheets(finalUsername, imageUrl)
-            ]);
-
-            Swal.fire('สำเร็จ!', 'อัปเดตรูปโปรไฟล์เรียบร้อยแล้วค่ะ', 'success');
-            
-            if (typeof window.syncUserData === 'function') {
-                window.syncUserData();
+    fetch(scriptURL)
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.success) {
+                countElement.textContent = Number(data.total).toLocaleString();
+            } else {
+                console.error("Sheets Counter Error:", data.error);
+                countElement.textContent = "0";
             }
-
-        } catch (error) {
-            Swal.fire('เกิดข้อผิดพลาด!', 'ระบบขัดข้องนิดหน่อย ลองใหม่อีกครั้งนะงับ', 'error');
-            console.error(error);
-        }
-    }
-};
-
-  async function sendToGoogleSheets(username, url) { 
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbz-3938AGxrmvVHCjDdea5KGv-DHtB9txP3UQfjY4nGNEsi1LiNWOoNPEnvofOGCOBU/exec';
-    await fetch(scriptURL, {
-      method: 'POST',
-      body: JSON.stringify({
-        action: 'updateProfileImage',
-        username: username,
-        imageUrl: url
-      })
-    });
+        })
+        .catch(error => {
+            console.error("เกิดข้อผิดพลาดในการเชื่อมต่อ Google Sheets:", error);
+            countElement.textContent = "...";
+        });
   }
+
+  // สั่งให้ทำงานทันทีเมื่อโหลดหน้าเว็บ
+  refreshCountFromSheets();
 </script>
 </body>
 </html>

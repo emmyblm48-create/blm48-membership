@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <title>BLM48 Membership | Inventory</title>
+  <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s32">
+    <meta name="theme-color" content="#ffc0cb">
+    <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s180">
+    <link rel="icon" sizes="192x192" href="https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s192">
+    <meta name="apple-mobile-web-app-title" content="BLM48">   
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary-pink: #ff85a2;
+            --soft-bg: #fffbfd;
+            --card-border: #ffeef2;
+            --text-dark: #444;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Quicksand', 'Kanit', sans-serif;
+            background-color: #fff6f8;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            color: var(--text-dark);
+        }
+
+        /* ปรับ Layout ให้กางเต็มจอ 100% ลบข้อจำกัด max-width ออกทั้งหมดเพื่อความเต็มตา */
+        .app-wrapper {
+            width: 100%;
+            min-height: 100vh;
+            background: #ffffff;
+            padding: 20px 40px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (max-width: 768px) {
+            .app-wrapper {
+                padding: 16px;
+            }
+        }
+
+        /* แถบด้านบนสุด: รวมปุ่มย้อนกลับและโปรไฟล์ผู้ใช้แบบแสดงรูปภาพ + ชื่อ */
+        .top-navigation-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #ffeef2 0%, #fff6f8 100%);
+            border-radius: 20px;
+            padding: 10px 20px;
+            margin-bottom: 30px;
+            border: 1px solid var(--card-border);
+            gap: 15px;
+        }
+
+        .btn-back-top {
+            background: white;
+            color: var(--primary-pink);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 14px;
+            border: 1px solid var(--card-border);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 6px rgba(255,133,162,0.05);
+            transition: 0.2s;
+        }
+
+        .btn-back-top:hover {
+            background: var(--primary-pink);
+            color: white;
+            transform: translateX(-3px);
+        }
+
+        .user-profile-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar-img {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary-pink);
+            background: #fff;
+        }
+
+        .user-profile-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-display-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            line-height: 1.2;
+        }
+
+        .user-role-tag {
+            font-size: 11px;
+            color: #888;
+        }
+
+        .header-title-zone {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .header-title-zone h1 {
+            color: var(--primary-pink);
+            font-size: 28px;
+            margin: 0 0 6px 0;
+            font-weight: 700;
+        }
+
+        .header-title-zone p {
+            color: #999;
+            font-size: 13px;
+            margin: 0;
+        }
+
+        /* ✨ เพิ่มสไตล์สำหรับปุ่มสลับเลือกดูทีละคอลเลกชัน */
+        .collection-tabs-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            padding-bottom: 8px;
+            overflow-x: auto;
+            white-space: nowrap;
+            /* ซ่อน Scrollbar */
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        .collection-tabs-container::-webkit-scrollbar {
+            display: none; /* Chrome, Safari and Opera */
+        }
+
+        .btn-tab {
+            background: white;
+            color: #666;
+            border: 1px solid var(--card-border);
+            padding: 8px 16px;
+            border-radius: 16px;
+            font-family: 'Kanit', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+
+        .btn-tab:hover {
+            border-color: var(--primary-pink);
+            color: var(--primary-pink);
+        }
+
+        .btn-tab.active {
+            background: var(--primary-pink);
+            color: white;
+            border-color: var(--primary-pink);
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(255,133,162,0.2);
+        }
+      
+            #tabs-container {
+    display: flex;
+    overflow-x: auto; /* ทำให้เลื่อนซ้ายขวาได้ */
+    white-space: nowrap; /* ไม่ให้ปุ่มขึ้นบรรทัดใหม่ */
+    padding: 10px;
+    background: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid #eee;
+    scrollbar-width: none; /* ซ่อน scrollbar ใน Firefox */
+    }
+    #tabs-container::-webkit-scrollbar {
+        display: none; /* ซ่อน scrollbar ใน Chrome/Safari */
+    }
+
+        /* คอลเลกชันกล่องเก็บการ์ดแบบ Responsive ขยายตามขนาดจอ */
+        .collection-section {
+            background: #fffcfd;
+            border: 1px solid #ffeef2;
+            border-radius: 22px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(255, 133, 162, 0.02);
+        }
+
+        .collection-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary-pink);
+            margin-bottom: 16px;
+            padding-left: 6px;
+            border-left: 4px solid var(--primary-pink);
+            line-height: 1.2;
+        }
+
+        /* ระบบ Grid อัจฉริยะ แสดงเป็นแถวเรียงสวยงามตามความกว้างของคอมพิวเตอร์และมือถือ */
+        .item-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 16px;
+        }
+
+        .item-card {
+            background: white;
+            border: 1.5px solid var(--card-border);
+            border-radius: 18px;
+            padding: 14px;
+            text-align: center;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.01);
+        }
+
+        .item-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary-pink);
+            box-shadow: 0 6px 15px rgba(255, 133, 162, 0.08);
+        }
+
+        .item-qty {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, #ff85a2 0%, #ff6b8b 100%);
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(255,133,162,0.3);
+        }
+
+        .item-img {
+            width: 100%;
+            height: 110px;
+            object-fit: contain;
+            margin: 8px auto;
+            display: block;
+            border-radius: 10px;
+        }
+
+        .item-name {
+            font-size: 12px;
+            font-weight: 500;
+            color: #555;
+            margin-top: 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Modal หน้าจอดูป๊อปอัพขยายภาพเต็ม + เพิ่มปุ่มเซฟรูป */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+            padding: 20px;
+        }
+
+        .modal-body-content {
+            background: white;
+            padding: 24px;
+            border-radius: 28px;
+            max-width: 380px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            border: 3px solid #ffeef2;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.2);
+            animation: zoomInSubtle 0.25s ease-out;
+        }
+
+        @keyframes zoomInSubtle {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-body-content img {
+            width: 100%;
+            max-height: 320px;
+            object-fit: contain;
+            border-radius: 18px;
+            background: #fafafa;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .modal-action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn-close-modal {
+            background: #eee;
+            color: #666;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-family: 'Kanit';
+            font-size: 13px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+        /* ปุ่มเซฟรูปภาพสไตล์หวานละมุนเหมือนหน้า Shop */
+        .btn-save-image {
+            background: linear-gradient(135deg, #ff85a2 0%, #ff6b8b 100%);
+            color: white;
+            text-decoration: none;
+            padding: 10px 24px;
+            border-radius: 20px;
+            font-family: 'Kanit';
+            font-size: 13px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(255,133,162,0.3);
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-save-image:hover {
+            transform: scale(1.03);
+            box-shadow: 0 6px 15px rgba(255,133,162,0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-wrapper">
+        <div class="top-navigation-bar">
+            <a href="index.html" class="btn-back-top"><i class="fa-solid fa-house"></i> กลับหน้าหลัก</a>
+            <div class="user-profile-box">
+                <img id="user-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" alt="Profile" class="user-avatar-img">
+                <div class="user-profile-info">
+                    <span id="user-display-name" class="user-display-name">กำลังโหลด...</span>
+                    <span id="user-role" class="user-role-tag"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="header-title-zone">
+            <h1>My Inventory</h1>
+            <p>คอลเลกชันดิจิทัลไอเทมทั้งหมดของคุณ</p>
+        </div>
+
+        <div id="tabs-container" class="collection-tabs-container"></div> 
+    
+        <div id="inventory-container">
+            <p style="text-align:center; color:#aaa; font-size:13px;">กำลังหาคอลเลกชันของคุณ...</p>
+        </div>
+    </div>
+
+    <div id="previewModal" class="modal-overlay" onclick="closePreview()">
+        <div class="modal-body-content" onclick="event.stopPropagation()">
+            <img id="previewImg" src="" alt="Item Preview">
+            <div class="modal-action-buttons">
+                <button type="button" class="btn-close-modal" onclick="closePreview()">ปิด</button>
+                <a id="saveImgBtn" href="" target="_blank" download="blm48_reward.png" class="btn-save-image">
+                    <i class="fa-solid fa-download"></i> บันทึกรูปภาพ
+                </a>
+            </div>
+        </div>
+    </div>
+  <footer style="padding: 50px 20px; text-align: center; color: #bbb; font-size: 12px;">
+  <div style="font-weight: 700; color: #888; margin-bottom: 5px;">BLM48 MEMBERSHIP</div>
+  <div>© 2026 Virtual Idol Cover Group</div>
+</footer>
+
+    <script>
+       const scriptURL = 'https://script.google.com/macros/s/AKfycbxF5G3E1HWhVTQOVGzWtsqSCZfXkq8ZrX6DqGKt_pcicYbi2_59B-ecEeeTU6-aqBEf/exec';
+        
+        function getUserSession() {
+            const sessionStr = localStorage.getItem('bnl_session');
+            if (!sessionStr) return null;
+            const session = JSON.parse(sessionStr);
+            if (new Date().getTime() > session.expiry) {
+                localStorage.removeItem('bnl_session');
+                localStorage.removeItem(`blm48_inventory_cache_${session.data?.username}`);
+                localStorage.removeItem(`blm48_inventory_time_${session.data?.username}`);
+                return null;
+            }
+            return session.data;
+        }
+
+        let user = getUserSession();
+        let currentUsername = user ? user.username : "";
+        
+        // ตัวแปรเก็บข้อมูลตู้ทั้งหมด และชื่อตู้ที่กำลังเลือกเปิดดูอยู่
+        let globalInventoryData = null;
+        let currentActiveTab = "all";
+
+        window.onload = async () => {
+            if (!user || !currentUsername) {
+                Swal.fire('กรุณาเข้าสู่ระบบ', 'ไม่พบสิทธิ์การใช้งานกระเป๋า กรุณาล็อกอินก่อนนะงับ', 'error').then(() => {
+                    window.location.href = 'index.html';
+                });
+                return;
+            }
+            
+            if (user.profile_img && user.profile_img.toString().trim() !== "") {
+                document.getElementById('user-avatar').src = user.profile_img;
+            } else {
+                document.getElementById('user-avatar').src = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150";
+            }
+            
+            document.getElementById('user-display-name').textContent = user.name || "BLM48 MEMBER";
+            
+            const userRole = user.role || user.position || "BLM48 Member";
+            document.getElementById('user-role').textContent = userRole;
+            
+            await loadMyInventory();
+             renderTabs();
+        };
+
+        async function loadMyInventory() {
+            const container = document.getElementById('inventory-container');
+            
+            const cacheKey = `blm48_inventory_cache_${currentUsername}`;
+            const cacheTimeKey = `blm48_inventory_time_${currentUsername}`;
+            const refreshInterval = 5 * 60 * 1000; 
+            
+            const cachedData = localStorage.getItem(cacheKey);
+            const cachedTime = localStorage.getItem(cacheTimeKey);
+            const now = new Date().getTime();
+            
+            if (cachedData && cachedTime && (now - cachedTime < refreshInterval)) {
+                console.log("⚡ ดึงข้อมูลคอลเลกชัน Inventory จาก Cache สำเร็จ!");
+                globalInventoryData = JSON.parse(cachedData);
+                renderTabs(); // สร้างปุ่ม Tabs
+                renderInventoryData(); // แสดงของในตู้
+                return;
+            }
+            
+            container.innerHTML = `<p style="text-align:center; color:#aaa; font-size:13px;">กำลังเปิดค้นหากระเป๋าสะสมดิจิทัล...</p>`;
+            
+            try {
+                const response = await fetch(`${scriptURL}?action=getMyInventory&username=${encodeURIComponent(currentUsername)}`);
+                const res = await response.json();
+                
+                if (res.status === "success") {
+                    globalInventoryData = res.inventory;
+                    
+                    localStorage.setItem(cacheKey, JSON.stringify(globalInventoryData));
+                    localStorage.setItem(cacheTimeKey, now.toString());
+                    
+                    renderTabs(); // สร้างปุ่ม Tabs
+                    renderInventoryData(); // แสดงของในตู้
+                } else {
+                    container.innerHTML = `<p style="text-align:center; color:red; font-size:13px;">ดึงข้อมูลล้มเหลว: ${res.message || 'ระบุกระเป๋าไม่ถูกต้อง'}</p>`;
+                }
+            } catch (err) {
+                console.error(err);
+                if (cachedData) {
+                    console.warn("⚠️ ระบบดึงข้อมูลสดขัดข้อง ใช้ข้อมูลจาก Cache แทน");
+                    globalInventoryData = JSON.parse(cachedData);
+                    renderTabs();
+                    renderInventoryData();
+                } else {
+                    container.innerHTML = `<p style="text-align:center; color:red; font-size:13px;">โหลดข้อมูลกระเป๋าขัดข้อง กรุณาลองใหม่อีกครั้งนะงับ</p>`;
+                }
+            }
+        }
+
+        // ✨ ฟังก์ชันสร้างปุ่มเมนู Tabs สำหรับเลือกดู Collection (เวอร์ชันสร้าง Element โดยตรง)
+function renderTabs() {
+    const tabsContainer = document.getElementById('tabs-container');
+    if (!tabsContainer) return; // กัน Error กรณีหา element ไม่เจอ
+    
+    tabsContainer.innerHTML = ''; // ล้างปุ่มเก่าทิ้งก่อน
+    
+    if (!globalInventoryData || Object.keys(globalInventoryData).length === 0) return;
+
+    // 1. สร้างปุ่ม "ทั้งหมด"
+    const allBtn = document.createElement('button');
+    allBtn.className = `btn-tab ${currentActiveTab === 'all' ? 'active' : ''}`;
+    allBtn.textContent = "ทั้งหมด";
+    allBtn.onclick = () => switchTab('all');
+    tabsContainer.appendChild(allBtn);
+
+    // 2. วนลูปสร้างปุ่มคอลเลกชัน
+    Object.keys(globalInventoryData).forEach(colName => {
+        if (globalInventoryData[colName].length > 0) {
+            const btn = document.createElement('button');
+            btn.className = `btn-tab ${currentActiveTab === colName ? 'active' : ''}`;
+            btn.textContent = colName;
+            btn.onclick = () => switchTab(colName); // ผูก event ตรงนี้เลย
+            tabsContainer.appendChild(btn);
+        }
+    });
+}
+
+        // ✨ ฟังก์ชันเมื่อผู้ใช้กดคลิกเปลี่ยน Tab
+        function switchTab(tabName) {
+            currentActiveTab = tabName; // อัปเดตตู้ที่กำลังดู
+            renderTabs();               // อัปเดตสีของปุ่มที่ถูกกด
+            renderInventoryData();      // วาดหน้าจอโชว์ของใหม่
+        }
+
+        // 🛠️ ปรับปรุงฟังก์ชันวาดหน้าจอ ให้รองรับการซ่อน/โชว์ตู้ตามปุ่ม Tab
+        function renderInventoryData() {
+            const container = document.getElementById('inventory-container');
+            container.innerHTML = "";
+            
+            const inv = globalInventoryData;
+
+            if (!inv || Object.keys(inv).length === 0) {
+                container.innerHTML = `<p style="text-align:center; color:#aaa; margin-top:40px; font-size:13px;">กระเป๋ายังว่างเปล่าอยู่เลยงับ<br>ไปสุ่มลุ้นรับของรางวัลที่ร้านค้ากันเถอะ!</p>`;
+                return;
+            }
+
+            // วนลูปดึงทีละตู้คอลเลกชันออกมาวาดบนจอ
+            for (const colName in inv) {
+                // ถ้ากล่องไหนไม่มีของ ให้ข้ามไปเลย
+                if (inv[colName].length === 0) continue;
+                
+                // 🔍 ถ้ายูสเซอร์ไม่ได้เลือกดู "ทั้งหมด" และชื่อตู้ไม่ตรงกับปุ่ม Tab ที่กด ให้ข้ามการโชว์ตู้นี้ไปเลย
+                if (currentActiveTab !== 'all' && currentActiveTab !== colName) {
+                    continue; 
+                }
+
+                // ถ้าผ่านเงื่อนไขด้านบน แปลว่าให้แสดงตู้นี้
+                const section = document.createElement('div');
+                section.className = 'collection-section';
+                
+                const title = document.createElement('div');
+                title.className = 'collection-title';
+                title.textContent = colName;
+                section.appendChild(title);
+                
+                const grid = document.createElement('div');
+                grid.className = 'item-grid';
+                
+                inv[colName].forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'item-card';
+                    card.onclick = () => openPreview(item.img);
+                    
+                    card.innerHTML = `
+                        <span class="item-qty">x${item.qty}</span>
+                        <img class="item-img" src="${item.img}" alt="${item.name}">
+                        <div class="item-name">${item.name}</div>
+                    `;
+                    grid.appendChild(card);
+                });
+                
+                section.appendChild(grid);
+                container.appendChild(section);
+            }
+        }
+
+        function openPreview(src) {
+            document.getElementById('previewImg').src = src;
+            document.getElementById('saveImgBtn').href = src;
+            document.getElementById('previewModal').style.display = 'flex';
+        }
+        
+        function closePreview() {
+            document.getElementById('previewModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
