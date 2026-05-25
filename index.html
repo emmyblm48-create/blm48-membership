@@ -1749,7 +1749,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 <script type="module">
-  // 1. นำเข้าฟังก์ชันจาก Firebase (เก็บไว้เพราะอาจใช้ Sync ข้อมูลส่วนอื่น)
+  // 1. นำเข้าฟังก์ชันจาก Firebase (นำเข้าไว้บนสุดที่เดียว และดึงฟังก์ชันมาให้ครบ)
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
   import { getDatabase, ref, update, onValue } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-database.js";
 
@@ -1768,7 +1768,33 @@ document.addEventListener("DOMContentLoaded", () => {
   const app = initializeApp(firebaseConfig);
   const database = getDatabase(app);
 
-  // 🎯 ระบบดึงสถิติจำนวนสมาชิก (เก็บไว้)
+  // 🔒 ฟังก์ชันตรวจสอบสถานะผู้ใช้งาน (บังคับเด้งออก)
+  function checkUserAccess() {
+    // ⚠️ สำคัญมาก: ลองเช็คในไฟล์ login.html ของคุณดูอีกทีนะครับว่าตั้งชื่อคีย์ตอนบันทึกว่าอะไร 
+    // หากตอนล็อกอินสำเร็จเซฟด้วยชื่ออื่น เช่น 'userId' หรือ 'username' ให้เปลี่ยนคำว่า 'logged_in_user_id' ให้ตรงกันครับ
+    const userId = localStorage.getItem('logged_in_user_id'); 
+
+    if (!userId) {
+      window.location.href = 'login.html'; // ถ้าไม่มีข้อมูลการล็อกอินในเครื่อง ให้เด้งไปหน้า login ทันที
+      return;
+    }
+
+    // อ้างอิงไปยังตำแหน่งข้อมูลของผู้ใช้คนนี้ใน Firebase
+    const userRef = ref(database, 'users/' + userId);
+
+    onValue(userRef, (snapshot) => {
+      const userData = snapshot.val();
+
+      // เช็คเงื่อนไข: ถ้าหากแอดมินลบไอดีนี้ออกจากระบบ หรือคุณเปลี่ยนสถานะของเขาเป็น 'blocked' ใน Firebase
+      if (!userData || userData.status === 'blocked') { 
+        alert("สิทธิ์การใช้งานของคุณถูกระงับ หรือข้อมูลเซสชันหมดอายุ");
+        localStorage.clear(); // ล้างข้อมูลการล็อกอินที่ค้างอยู่ในเครื่องผู้ใช้ทั้งหมด
+        window.location.href = 'login.html'; // ส่งกลับไปหน้าล็อกอินเพื่อบีบให้เด้งออก
+      }
+    });
+  }
+
+  // 🎯 ระบบดึงสถิติจำนวนสมาชิกจาก Google Sheets (ของเดิม)
   function refreshCountFromSheets() {
     const scriptURL = 'https://script.google.com/macros/s/AKfycbxF5G3E1HWhVTQOVGzWtsqSCZfXkq8ZrX6DqGKt_pcicYbi2_59B-ecEeeTU6-aqBEf/exec?action=getMemberCount';
     const countElement = document.getElementById('total-members-count');
@@ -1790,9 +1816,10 @@ document.addEventListener("DOMContentLoaded", () => {
             countElement.textContent = "...";
         });
   }
-
-  // สั่งให้ทำงานทันทีเมื่อโหลดหน้าเว็บ
-  refreshCountFromSheets();
+  
+  // 🚀 สั่งให้ทุกระบบเริ่มทำงานทันทีเมื่อเปิดหน้าเว็บ
+  checkUserAccess();         // เช็คสิทธิ์และล็อกอินก่อนเพื่อความปลอดภัย
+  refreshCountFromSheets();  // ดึงสถิติจำนวนสมาชิก
 </script>
 </body>
 </html>
