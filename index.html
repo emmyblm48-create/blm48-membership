@@ -1067,18 +1067,56 @@ window.onload = () => {
     return user && user.role && user.role.toUpperCase().trim() === 'MEMBER';
   }
   
-  // แยกการ Sync User ออกมาทำงานเบื้องหลัง
+ // แยกการ Sync User ออกมาทำงานเบื้องหลัง พร้อมเช็คการเด้งออกทันที
   async function syncUserData() {
     if (!user) return;
     try {
       const resp = await fetch(`${scriptURL}?action=getUserInfo&username=${encodeURIComponent(user.username)}&_=${Date.now()}`);
       const res = await resp.json();
+      
       if (res.status === "success") {
+        
+        // 🚨 ดักจับ: หากข้อมูลใน Google Sheets ไม่มีรหัสผ่าน (ถูกลบออก)
+        // หรือกรณีรหัสผ่านเป็นช่องว่าง ให้ทำการเตะผู้ใช้ออกทันที
+        if (res.data.password === "" || res.data.password === null || res.data.password === undefined) {
+            Swal.fire({
+              icon: 'warning',
+              title: 'เซสชันหมดอายุ',
+              text: 'สิทธิ์การใช้งานถูกระงับเนื่องจากไม่มีรหัสผ่านในระบบ กรุณาเข้าสู่ระบบใหม่นะคะ',
+              confirmButtonColor: '#ff85a2',
+              allowOutsideClick: false
+            }).then(() => {
+              // 1. ลบ Session 3 เดือนในเครื่องทิ้ง
+              localStorage.removeItem('bnl_session');
+              sessionStorage.clear();
+              
+              // 2. เคลียร์ตัวแปรระบบให้เป็น Guest
+              user = null;
+              
+              // 3. รีเฟรชหน้าจอ (ปุ่มต่างๆ จะกลับเป็นหน้าของ Guest ทันที)
+              updateUI();
+              
+              // 4. เรียก Popup หน้าล็อกอินขึ้นมากลางจอ
+              openLogin();
+            });
+            return; // หยุดการทำงานของฟังก์ชันนี้ทันที
+        }
+
+        // 💖 ถ้ามีรหัสผ่านปกติ ก็ให้อัปเดตข้อมูลและยืดอายุ Session ต่อไป
         user = res.data; 
         saveUserSession(user); 
         updateUI(); // อัปเดตยอดเงิน/ข้อมูลในหน้าจอแบบไม่กวนใจ
+
+      } else {
+        // 🚨 กรณีค้นหาชื่อผู้ใช้ไม่เจอเลย (เช่น ถูกลบแถวออกไปจาก Sheet แล้ว)
+        localStorage.removeItem('bnl_session');
+        user = null;
+        updateUI();
+        openLogin();
       }
-    } catch (e) { console.error("Sync Error:", e); }
+    } catch (e) { 
+        console.error("Sync Error:", e); 
+    }
   }
 
   // ปรับการโหลดข้อมูลให้ทำงานพร้อมกัน (Parallel) และใช้ระบบ Cache
@@ -1749,7 +1787,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 <script type="module">
-  // 1. นำเข้าฟังก์ชันจาก Firebase (นำเข้าไว้บนสุดที่เดียว และดึงฟังก์ชันมาให้ครบ)
+  // 1. นำเข้าฟังก์ชันจาก Firebase (เก็บไว้เพราะอาจใช้ Sync ข้อมูลส่วนอื่น)
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
   import { getDatabase, ref, update, onValue } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-database.js";
 
@@ -1768,33 +1806,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const app = initializeApp(firebaseConfig);
   const database = getDatabase(app);
 
-  // 🔒 ฟังก์ชันตรวจสอบสถานะผู้ใช้งาน (บังคับเด้งออก)
-  function checkUserAccess() {
-    // ⚠️ สำคัญมาก: ลองเช็คในไฟล์ login.html ของคุณดูอีกทีนะครับว่าตั้งชื่อคีย์ตอนบันทึกว่าอะไร 
-    // หากตอนล็อกอินสำเร็จเซฟด้วยชื่ออื่น เช่น 'userId' หรือ 'username' ให้เปลี่ยนคำว่า 'logged_in_user_id' ให้ตรงกันครับ
-    const userId = localStorage.getItem('logged_in_user_id'); 
-
-    if (!userId) {
-      window.location.href = 'login.html'; // ถ้าไม่มีข้อมูลการล็อกอินในเครื่อง ให้เด้งไปหน้า login ทันที
-      return;
-    }
-
-    // อ้างอิงไปยังตำแหน่งข้อมูลของผู้ใช้คนนี้ใน Firebase
-    const userRef = ref(database, 'users/' + userId);
-
-    onValue(userRef, (snapshot) => {
-      const userData = snapshot.val();
-
-      // เช็คเงื่อนไข: ถ้าหากแอดมินลบไอดีนี้ออกจากระบบ หรือคุณเปลี่ยนสถานะของเขาเป็น 'blocked' ใน Firebase
-      if (!userData || userData.status === 'blocked') { 
-        alert("สิทธิ์การใช้งานของคุณถูกระงับ หรือข้อมูลเซสชันหมดอายุ");
-        localStorage.clear(); // ล้างข้อมูลการล็อกอินที่ค้างอยู่ในเครื่องผู้ใช้ทั้งหมด
-        window.location.href = 'login.html'; // ส่งกลับไปหน้าล็อกอินเพื่อบีบให้เด้งออก
-      }
-    });
-  }
-
-  // 🎯 ระบบดึงสถิติจำนวนสมาชิกจาก Google Sheets (ของเดิม)
+  // 🎯 ระบบดึงสถิติจำนวนสมาชิก (เก็บไว้)
   function refreshCountFromSheets() {
     const scriptURL = 'https://script.google.com/macros/s/AKfycbxF5G3E1HWhVTQOVGzWtsqSCZfXkq8ZrX6DqGKt_pcicYbi2_59B-ecEeeTU6-aqBEf/exec?action=getMemberCount';
     const countElement = document.getElementById('total-members-count');
@@ -1816,10 +1828,9 @@ document.addEventListener("DOMContentLoaded", () => {
             countElement.textContent = "...";
         });
   }
-  
-  // 🚀 สั่งให้ทุกระบบเริ่มทำงานทันทีเมื่อเปิดหน้าเว็บ
-  checkUserAccess();         // เช็คสิทธิ์และล็อกอินก่อนเพื่อความปลอดภัย
-  refreshCountFromSheets();  // ดึงสถิติจำนวนสมาชิก
+
+  // สั่งให้ทำงานทันทีเมื่อโหลดหน้าเว็บ
+  refreshCountFromSheets();
 </script>
 </body>
 </html>
