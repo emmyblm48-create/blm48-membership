@@ -1,1 +1,1848 @@
-<br>
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <title>BLM48 Membership</title>
+    <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s32">
+    <meta name="theme-color" content="#ffc0cb">
+    <!-- สำหรับ iOS Home Screen Icon -->
+    <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s180">
+    <!-- สำหรับ Android และ Chrome -->
+    <link rel="icon" sizes="192x192" href="https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s192">
+    <!-- กำหนดชื่อแอปที่จะขึ้นใต้ไอคอนบนหน้าจอ Home Screen -->
+    <meta name="apple-mobile-web-app-title" content="BLM48">   
+    <!-- ทำให้แถบด้านบน (Status Bar) ดูเป็นแอปมากขึ้น -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11">
+    
+  </script>
+    
+  </head>
+    
+  <body>
+ 
+  <style>
+    :root {
+      --primary-pink: #ff85a2;
+      --soft-pink: #ffe4e1;
+      --gold: #ffd700;
+      --silver: #C0C0C0;
+      --bronze: #cd7f32;
+      --bg-color: #fffdf5;
+      --violet-border: #e0c3fc;
+    }
+
+    body { 
+      font-family: 'Quicksand', 'Kanit', sans-serif; 
+      background-color: var(--bg-color); 
+      margin: 0; 
+      padding: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    .navbar {
+    display: flex;
+    justify-content: space-between; /* กระจายชื่อ เมนู และปุ่ม */
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #fff; /* หรือสีขาวอมชมพู */
+}
+
+.nav-links {
+    display: flex;
+    gap: 20px; /* ระยะห่างระหว่างเมนู */
+}
+
+.nav-link {
+    text-decoration: none;
+    color: #ff85a2; /* สีชมพู BLM48 */
+    font-weight: bold;
+    font-size: 14px;
+    transition: 0.3s; 
+}
+
+.nav-link:hover {
+    color: #ffb5c7; /* สีชมพูอ่อนตอนเอาเมาส์ไปวาง */
+    transform: translateY(-2px); /* ลอยขึ้นนิดนึงดูนุ่มนวล */
+}
+
+/* ปรับแต่งปุ่มไอคอนที่มีอยู่แล้ว */
+.nav-icons {
+    gap: 10px;
+    text-decoration: none; /* เอาขีดเส้นใต้ออก */
+    display: inline-block;  /* ทำให้มันจัดตำแหน่งได้เหมือน div */
+    color: inherit;         /* ป้องกันไม่ให้สีเปลี่ยนเป็นสีน้ำเงินของลิงก์ */
+}
+
+    /* Navbar */
+    .navbar {
+      background: white;
+      padding: 15px 20px;
+      border-bottom: 2px solid #f0f0f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .brand { font-size: 24px; font-weight: bold; color: var(--primary-pink); letter-spacing: 1px; }
+    .nav-btns { display: flex; gap: 15px; }
+    .nav-icon { background: none; border: none; color: #ffb3c1; cursor: pointer; font-size: 1.2rem; transition: 0.3s; }
+    .nav-icon:hover { color: var(--primary-pink); transform: scale(1.1); }
+    
+    /* กำหนดความกว้างของ Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+/* ส่วนพื้นหลังของ Scrollbar */
+::-webkit-scrollbar-track {
+  background: #fff5f7; 
+  border-radius: 10px;
+}
+
+/* ส่วนตัวเลื่อน (Handle) */
+::-webkit-scrollbar-thumb {
+  background: #ffb6c1; /* ชมพูอ่อนเข้ากับธีม */
+  border-radius: 10px;
+  border: 2px solid #fff5f7;
+}
+
+/* เมื่อเอาเมาส์ไปวางบนตัวเลื่อน */
+::-webkit-scrollbar-thumb:hover {
+  background: #ff85a2; /* ชมพูเข้มขึ้นเล็กน้อย */
+}
+    
+    .public-member-widget {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid #ffe4e1; /* ปรับสีให้เข้ากับธีม Cute/Minimal */
+    border-radius: 12px;
+    padding: 10px 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(5px);
+    margin: 10px;
+}
+.public-member-widget .widget-icon {
+    font-size: 20px;
+    color: #ffb6c1;
+    margin-right: 12px;
+}
+.public-member-widget .widget-info {
+    display: flex;
+    flex-direction: column;
+}
+.public-member-widget .widget-label {
+    font-size: 11px;
+    color: #8c8c8c;
+    letter-spacing: 0.5px;
+}
+.public-member-widget .widget-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #4a4a4a;
+}
+    
+    /* Dark Mode Classes */
+body.dark-mode {
+  --bg-color: #1a1a1a;
+  background-color: var(--bg-color);
+  color: #eee;
+}
+body.dark-mode .navbar, 
+body.dark-mode .user-profile-bar, 
+body.dark-mode .member-card, 
+body.dark-mode .modal-box, 
+body.dark-mode #sidebar {
+  background-color: #2d2d2d;
+  border-color: #444;
+  color: white;
+}
+body.dark-mode .name-text, body.dark-mode .section-title { color: #fff; }
+body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #444; }
+
+    /* Profile Bar */
+    .user-profile-bar { max-width: 900px; margin: 20px auto; background: white; border-radius: 24px; padding: 20px; box-shadow: 0 10px 25px rgba(255, 133, 162, 0.1); border: 2px solid var(--soft-pink); }
+    .user-info-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+    .profile-img-container { position: relative; width: 70px; height: 70px; }
+    .user-avatar-img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary-pink); }
+    .edit-photo-btn { position: absolute; bottom: 0; right: 0; width: 24px; height: 24px; background: var(--primary-pink); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; cursor: pointer; border: 2px solid white; }
+    .user-name { font-weight: 700; color: var(--primary-pink); font-size: 20px; display: flex; align-items: center; gap: 8px; }
+    .role-badge { font-size: 10px; padding: 2px 8px; border-radius: 5px; background: #f0f0f0; color: #888; text-transform: uppercase; }
+    .oshi-list { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 5px; }
+    .tag { font-size: 11px; padding: 4px 12px; border-radius: 20px; color: white; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+    .tag-kami { background: var(--primary-pink); box-shadow: 0 2px 5px rgba(255,133,162,0.3); }
+    .tag-oshi { background: #87ceeb; box-shadow: 0 2px 5px rgba(135,206,235,0.3); }
+
+    .wallet { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 15px 0; }
+    .wallet-item { background: #fffcfd; border: 1px solid #ffeef2; padding: 12px 5px; border-radius: 15px; font-size: 13px; text-align: center; font-weight: 700; color: #555; }
+    
+    .bonus-container { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .btn-bonus { height: 48px; border: none; border-radius: 14px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; color: white; }
+    .btn-monthly { background: var(--primary-pink); box-shadow: 0 4px 12px rgba(255,133,162,0.3); }
+    .btn-redeem { background: #4dabf7; box-shadow: 0 4px 12px rgba(77,171,247,0.3); }
+    .btn-locked { background: #ccc !important; cursor: not-allowed; opacity: 0.7; }
+
+    /* Ranking & Lists */
+   /* 1. สไตล์หลัก (ใช้สำหรับ Desktop/Tablet) */
+.section-title { 
+  font-family: 'Kanit', sans-serif; font-weight: 600; color: #444; 
+  margin: 30px 0 15px 20px; font-size: 18px; 
+  border-left: 5px solid var(--primary-pink); padding-left: 12px; 
+}
+.ranking-wrapper { 
+  width: 100%; 
+  overflow-x: auto; 
+  padding: 15px 10px; 
+  display: flex; 
+  -webkit-overflow-scrolling: touch; 
+  gap: 10px; /* ระยะห่างระหว่างการ์ด */
+}
+.horizontal-list { 
+  display: flex; gap: 12px; padding: 10px 20px; 
+  align-items: flex-end; margin: 0 auto;
+}
+.member-card { 
+  width: 85px; /* ปรับให้พอดี */
+  text-align: center; 
+  background: white; 
+  padding: 10px 5px 12px 5px; /* ลด Padding ให้ชิดขึ้น */
+  border-radius: 40px 40px 15px 15px; /* หัวโค้งมนแบบเต็มวง */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04); 
+  border: 1px solid #f2f2f2; /* ขอบบางๆ สไตล์มินิมอล */
+  transition: 0.3s ease; 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  position: relative;
+  flex: 0 0 85px; /* ล็อกขนาดไม่ให้ยืด */
+}
+.member-card:hover { 
+      transform: translateY(-8px); 
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+.rank-1 { height: 190px; border-color: var(--gold); background: linear-gradient(to bottom, #fffef0, #ffffff); }
+.rank-2 { height: 180px; border-color: var(--silver); }
+.rank-3 { height: 170px; border-color: var(--bronze); }
+.rank-other {
+    height: 160px; 
+    border: 1px solid #e0e0e0;
+    background: #ffffff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 10px;
+}
+.img-wrapper { 
+    position: relative; 
+    width: 60px; 
+    height: 60px; 
+    margin: 0 auto 8px; 
+    border-radius: 50%; 
+    background: #fcfcfc;
+    border: 1px solid #eee; 
+    cursor: pointer;
+    overflow: visible; /* เปลี่ยนจาก hidden เป็น visible เพื่อให้ไอคอนแสดงผลเต็มที่ */
+    flex-shrink: 0;
+}
+
+/* 2. กำหนดให้รูปข้างใน เต็มกรอบเสมอ (แก้จุดที่ทำให้งง) */
+.img-wrapper img { 
+    width: 100% !important; 
+    height: 100% !important; 
+    border-radius: 50% !important; 
+    object-fit: cover !important; 
+    display: block;
+}
+.rank-1 .img-wrapper { width: 75px !important; height: 75px !important; border-color: var(--gold); }
+.rank-2 .img-wrapper { width: 75px !important; height: 75px !important; border-color: var(--silver); }
+.rank-3 .img-wrapper { width: 75px !important; height: 75px !important; border-color: var(--bronze); }
+.rank-other .img-wrapper {
+    border: 1px solid #f0f0f0;
+    box-shadow: 0 0 0 1px #eee;
+}
+.img-wrapper img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; }
+.rank-badge { 
+    position: absolute; 
+    bottom: -2px; 
+    right: -2px; 
+    width: 18px; 
+    height: 18px; 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-weight: 700; 
+    font-size: 9px; 
+    border: 2px solid white; 
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2); /* เพิ่มเงาให้ดูมีมิติ */
+    z-index: 10; /* สำคัญ: ให้ไอคอนอยู่ชั้นบนสุด */
+    background: white; /* ใส่พื้นหลังให้ไอคอนทึบ */
+}
+.rank-1 .rank-badge { background: var(--gold); color: white; }
+.rank-2 .rank-badge { background: var(--silver); color: white; }
+.rank-3 .rank-badge { background: var(--bronze); color: white; }
+.rank-other .rank-badge { 
+    background: #f8f8f8; 
+    color: #999; 
+    border: 1.5px solid #fff;
+    font-size: 8px;
+    font-weight: 600;
+}
+.name-text { 
+  font-weight: 600; 
+  color: #333; 
+  font-size: 12px; 
+  margin-bottom: 2px; 
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+  width: 90%; 
+}
+.cookie-text { 
+  font-size: 12px; 
+  color: var(--primary-pink); 
+  font-weight: 700; 
+  margin-bottom: 6px; /* ดันปุ่มลงเล็กน้อย */
+}
+    
+    /* Modals & Stats */
+    #modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(6px); z-index: 1000; overflow-y: auto; padding: 40px 10px; box-sizing: border-box; }
+    .modal-box { background: white; width: 100%; max-width: 380px; margin: 0 auto; padding: 30px 20px; border-radius: 35px; text-align: center; position: relative; }
+    
+    .stats-header { margin-bottom: 25px; }
+    .stats-avatar { width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--primary-pink); margin-bottom: 15px; object-fit: cover; }
+    .stats-name { font-size: 24px; font-weight: 800; color: var(--primary-pink); margin-bottom: 5px; }
+    .stats-summary { display: flex; justify-content: center; gap: 20px; margin-bottom: 20px; padding: 15px; background: #fff5f7; border-radius: 20px; }
+    .stat-item { flex: 1; }
+    .stat-label { font-size: 11px; color: #888; display: block; margin-bottom: 3px; }
+    .stat-val { font-size: 18px; font-weight: 700; color: #444; }
+
+    .top-fans-list { text-align: left; margin-top: 25px; }
+    .top-fans-title { font-weight: 700; color: #555; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; padding-left: 5px; }
+    .fan-row { display: flex; align-items: center; gap: 12px; padding: 12px; border-bottom: 1px solid #f9f9f9; }
+    .fan-rank { width: 25px; font-weight: 800; color: #ccc; font-size: 14px; }
+    .fan-row:nth-child(1) .fan-rank { color: var(--gold); font-size: 18px; }
+    .fan-row:nth-child(2) .fan-rank { color: var(--silver); }
+    .fan-row:nth-child(3) .fan-rank { color: var(--bronze); }
+    .fan-img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #eee; object-fit: cover; }
+    .fan-info { flex: 1; }
+    .fan-name { font-size: 14px; font-weight: 700; color: #444; }
+    .fan-cookies { font-size: 12px; color: var(--primary-pink); font-weight: 600; }
+
+    /* Login Form */
+    .login-input { width: 100%; padding: 14px; margin: 10px 0; border: 1.5px solid #eee; border-radius: 12px; font-family: 'Kanit'; box-sizing: border-box; outline: none; transition: 0.3s; }
+    .login-input:focus { border-color: var(--primary-pink); box-shadow: 0 0 0 3px rgba(255,133,162,0.1); }
+
+    /* Float Button */
+    .btn-refresh-float { position: fixed; bottom: 25px; right: 25px; width: 55px; height: 55px; background: var(--primary-pink); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 15px rgba(255,133,162,0.4); cursor: pointer; z-index: 99; border: none; font-size: 1.2rem; transition: 0.3s; }
+    .btn-refresh-float:active { transform: scale(0.9) rotate(45deg); }
+    
+    /* ค่าเริ่มต้นของ Sidebar ให้ซ่อนไว้ทางซ้าย */
+#sidebar {
+  position: fixed;
+  left: -280px; /* ซ่อนไว้ */
+  top: 0;
+  width: 280px;
+  height: 100%;
+  background: white;
+  z-index: 2000; /* ต้องสูงกว่า Navbar */
+  transition: 0.3s ease-in-out;
+  box-shadow: 5px 0 15px rgba(0,0,0,0.1);
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* คลาสที่จะเพิ่มเข้าไปเมื่อกดปุ่ม เพื่อให้ Sidebar แสดงผล */
+#sidebar.active {
+  left: 0 !important;
+}
+
+/* ตัวบังหน้าจอเวลาเมนูเปิด */
+#sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(2px);
+  z-index: 1999;
+}
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .wallet { grid-template-columns: 1fr 1fr; }
+      .wallet-item:last-child { grid-column: span 2; }
+      .member-card { width: 150px; padding: 20px 10px; }
+      .rank-1 { height: 280px; }
+      .img-wrapper { width: 85px; height: 85px; }
+      .rank-1 .img-wrapper { width: 100px; height: 100px; }
+    }
+    
+    #app-loading-screen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: radial-gradient(circle, #ffffff 0%, #fff5f7 100%);
+  z-index: 10000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.loader-content {
+  text-align: center;
+}
+
+.loader-brand {
+  font-family: 'Quicksand', sans-serif;
+  font-size: 42px;
+  font-weight: 700;
+  color: #ff85a2;
+  letter-spacing: 4px;
+  margin-bottom: 20px;
+  text-shadow: 0 4px 10px rgba(255, 133, 162, 0.2);
+}
+
+.loader-circle {
+  font-size: 30px;
+  color: #d2691e; /* สีคุกกี้ */
+  width: 80px;
+  height: 80px;
+  background: white;
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+  border: 3px solid #ff85a2;
+  animation: bounce 1.5s infinite ease-in-out;
+}
+
+.loader-text {
+  font-family: 'Kanit', sans-serif;
+  font-size: 14px;
+  color: #ffb6c1;
+  letter-spacing: 1px;
+}
+    
+ /* สมมติว่าคลาสของลิสต์คือ .fan-list */
+.fan-list {
+  max-height: 280px; /* ปรับค่าความสูงให้พอดีกับการแสดงผล 3 คนแรก */
+  overflow-y: auto;
+  padding-right: 8px; /* เว้นที่ให้ scrollbar เล็กน้อย */
+}
+
+/* ปรับแต่ง Scrollbar ให้ดู Minimal (Optional) */
+.fan-list::-webkit-scrollbar {
+  width: 4px;
+}
+.fan-list::-webkit-scrollbar-thumb {
+  background: #ffb7c5; /* สีชมพูอ่อนให้เข้ากับธีม */
+  border-radius: 10px;
+}
+
+    /* คุมความสูงของคอนเทนเนอร์รายชื่อแฟนคลับ */
+#member-fans-content {
+    max-height: 240px; /* ปรับค่านี้ตามความสูงของ fan-row (ประมาณ 3-4 แถว) */
+    overflow-y: auto;  /* เปิดการเลื่อนในแนวตั้ง */
+    overflow-x: hidden;
+    padding-right: 5px; /* กันเนื้อหาโดน scrollbar ทับ */
+}
+
+/* ตกแต่ง Scrollbar ให้ดูสวยงาม (Minimalist) */
+#member-fans-content::-webkit-scrollbar {
+    width: 5px;
+}
+
+#member-fans-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+#member-fans-content::-webkit-scrollbar-thumb {
+    background: #ffb7c5; /* สีชมพูตามธีม */
+    border-radius: 10px;
+}
+
+#member-fans-content::-webkit-scrollbar-thumb:hover {
+    background: #ff8fa3;
+}
+    
+.history-scroll-container {
+    max-height: 200px; /* ปรับให้แสดงประมาณ 3-4 แถว */
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 5px;
+    margin-top: 10px;
+}
+
+/* ใช้ Scrollbar สไตล์เดียวกับ Top Fans เพื่อความสวยงาม */
+.history-scroll-container::-webkit-scrollbar {
+    width: 4px;
+}
+.history-scroll-container::-webkit-scrollbar-track {
+    background: #f9f9f9;
+}
+.history-scroll-container::-webkit-scrollbar-thumb {
+    background: #ffb7c5;
+    border-radius: 10px;
+}
+    
+/* อนิเมชั่นเด้งดึ๋งแบบนุ่มนวล */
+@keyframes bounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-15px) scale(1.05); }
+}
+
+    .cookie-fall { position: fixed; top: -50px; z-index: -1; color: #e6b38a; pointer-events: none; animation: falling linear forwards; opacity: 0.6; }
+    @keyframes falling { to { transform: translateY(110vh) rotate(360deg); } }
+    
+    /* ชื่อหัวข้อหลักด้านบนสุด */
+.history-main-title {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #ff8da1;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* หัวข้อแบ่งส่วนประวัติ */
+.history-section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #4a4a4a;
+    margin: 15px 0 10px 0;
+    display: flex;
+    align-items: center;
+    border-left: 4px solid #ff8da1;
+    padding-left: 8px;
+}
+
+/* แถวรายการแต่ละแถว */
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 6px;
+    border-bottom: 1px dashed #ffe3e7; /* เส้นประสีชมพูบางๆ */
+}
+
+.history-item:last-child {
+    border-bottom: none;
+}
+
+/* การจัดข้อความและวันเวลาฝั่งซ้าย */
+.history-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    text-align: left;
+}
+
+.history-title {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #333333;
+}
+
+.history-date {
+    font-size: 0.75rem;
+    color: #b0b0b0;
+}
+
+/* ตัวเลขและแคปซูลแสดงแต้มฝั่งขวา */
+.history-badge-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.history-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 4px 14px;
+    border-radius: 20px;
+    min-width: 55px;
+    text-align: center;
+}
+
+/* ชิปสีแดง/ชมพู เมื่อโดนหัก Token */
+.history-value.minus {
+    color: #ff6b81;
+    background: #fff0f2;
+}
+
+/* ชิปสีเขียว เมื่อได้รับ Cookie เพิ่ม */
+.history-value.plus {
+    color: #2ecc71;
+    background: #e8f8f5;
+}
+
+/* ข้อความเมื่อไม่มีข้อมูล */
+.history-empty-text {
+    text-align: center;
+    color: #c0c0c0;
+    font-size: 0.85rem;
+    padding: 25px 0;
+}
+      
+/* คุมให้ประวัติยาวสูงสุดประมาณ 3-4 รายการแล้วเกิด Scroll ย่อยด้านใน */
+.history-scroll-container {
+    max-height: 200px; /* สามารถปรับความสูงตรงนี้ได้ตามใจชอบเลยครับ */
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+/* 🧼 แต่งหน้าตาตัวเลื่อน Scrollbar ของประวัติให้ดูนุ่มนวลขึ้น */
+.history-scroll-container::-webkit-scrollbar {
+    width: 5px;
+}
+.history-scroll-container::-webkit-scrollbar-track {
+    background: #fff5f6;
+    border-radius: 10px;
+}
+.history-scroll-container::-webkit-scrollbar-thumb {
+    background: #ffc2cc;
+    border-radius: 10px;
+}
+.history-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: #ff99aa;
+}
+
+    /* =========================================
+       👑 CHAMP OF THE MONTH BANNER (HOME PAGE)
+       ========================================= */
+    .champ-banner {
+      background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
+      border: 2px solid #d4af37; /* ขอบสีทอง */
+      border-radius: 20px;
+      padding: 15px 20px;
+      margin: 15px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      box-shadow: 0 10px 20px rgba(212, 175, 55, 0.2);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s;
+    }
+    .champ-banner:active { transform: scale(0.98); }
+    
+    /* เอฟเฟกต์แสงวิบวับพื้นหลัง */
+    .champ-banner::before {
+      content: '';
+      position: absolute;
+      top: -50%; left: -50%; width: 200%; height: 200%;
+      background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, transparent 60%);
+      animation: rotateGlow 10s linear infinite;
+    }
+    @keyframes rotateGlow { 100% { transform: rotate(360deg); } }
+
+    .champ-info {
+      position: relative;
+      z-index: 2;
+      color: #fff;
+      flex: 1;
+    }
+    .champ-badge {
+      font-size: 12px;
+      color: #d4af37;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    .champ-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .champ-month {
+      font-size: 12px;
+      color: #aaaaaa;
+    }
+    .champ-btn-view {
+      margin-top: 10px;
+      background: #d4af37;
+      color: #111;
+      border: none;
+      padding: 5px 12px;
+      border-radius: 15px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .champ-img-container {
+      position: relative;
+      z-index: 2;
+      width: 70px;
+      height: 70px;
+    }
+    .champ-img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #d4af37;
+    }
+    
+  </style>
+</head>
+<body>
+
+<div id="app-loading-screen">
+  <div class="loader-content">
+    <div class="loader-brand">BLM48</div>
+    <div class="loader-circle">
+      <i class="fas fa-cookie-bite"></i>
+    </div>
+    <div class="loader-text">กำลังรวบรวมคุกกี้...</div>
+  </div>
+</div>
+
+<div id="sidebar">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+    <div class="brand" style="font-size: 20px;">BLM48 MENU</div>
+    <i class="fas fa-times" onclick="toggleSidebar()" style="cursor:pointer; color:#ccc; font-size: 20px;"></i>
+  </div>
+  
+  <div class="sidebar-links" style="display: flex; flex-direction: column; height: calc(100% - 60px); justify-content: space-between;">
+    
+    <div>
+      <a href="index.html" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0;">
+        <i class="fas fa-home" style="width:20px;"></i> HOME
+      </a>
+      <a href="shop.html" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0;">
+        <i class="fas fa-shopping-cart" style="width:20px;"></i> SHOP
+      </a>
+      <a href="inventory.html" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0;">
+        <i class="fas fa-briefcase" style="width:20px;"></i> INVENTORY
+      </a>
+      <a href="kami.html" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0;">
+        <i class="fa-solid fa-star" style="width:20px;"></i> My Kami-Oshi Members
+      </a>
+      <a href="#" onclick="showHistory(); toggleSidebar();" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0;">
+        <i class="fas fa-history" style="width:20px;"></i> HISTORY
+      </a>
+      <a href="https://sites.google.com/view/blm48/home" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0;">
+        <i class="fas fa-globe" style="width:20px;"></i> OFFICIAL SITE
+      </a>
+      
+      <a href="#" onclick="refreshPage()" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0;">
+         <i class="fas fa-sync-alt" style="width:20px;"></i> REFRESH
+      </a>
+      
+      <a href="#" onclick="confirmLogout()" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0; color: #ff6b6b;">
+         <i class="fas fa-sign-out-alt" style="width:20px;"></i> LOGOUT
+      </a>
+      
+      <hr style="border: 0.5px solid #f0f0f0; margin: 10px 0;">
+      
+      
+      <div onclick="toggleDarkMode();" class="nav-link" style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; cursor:pointer;">
+         <span>DARK MODE</span>
+         <i class="fas fa-moon" id="dark-mode-icon"></i>
+      </div>
+      
+    </div>
+
+    <div class="public-member-widget" style="background: linear-gradient(135deg, #fffcfd 0%, #ffeef2 100%); border: 1px solid #ffe1e7; padding: 12px 15px; border-radius: 16px; display: flex; align-items: center; justify-content: space-between; margin-top: 20px; box-shadow: 0 4px 12px rgba(255,133,162,0.03);">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="color: #ff85a2; font-size: 14px; background: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(255,133,162,0.1);">
+                <i class="fas fa-users"></i>
+            </div>
+            <div style="display: flex; flex-direction: column; text-align: left;">
+                <span style="font-size: 11px; color: #a39095; font-weight: 600;">สมาชิกทั้งหมด</span>
+                <span style="font-size: 9px; color: #ccb2b7;">Official Membership</span>
+            </div>
+        </div>
+        <div style="background: white; padding: 2px 10px; border-radius: 8px; border: 1px solid #ffe6eb;">
+            <span id="total-members-count" style="font-size: 15px; font-weight: 700; color: #ff6b8b;">...</span>
+            <span style="font-size: 11px; color: #ff85a2; font-weight: 600; margin-left: 1px;">คน</span>
+        </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Overlay สำหรับปิด Sidebar -->
+<div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<!-- 3. Navbar (ปรับปรุงปุ่ม) -->
+<nav class="navbar">
+  <div style="display: flex; align-items: center; gap: 15px;">
+    <button onclick="toggleSidebar()" class="nav-icon" style="font-size: 1.4rem;">
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="brand">BLM48</div>
+</div>
+  </div>
+  
+  <div class="nav-btns">
+    <!-- ปุ่มกระเป๋าแบบไอคอน -->
+     <a href="inventory.html" class="nav-icon" title="Inventory">
+      <i class="fas fa-briefcase"></i>
+    </a>
+    <!-- ปุ่ม Shop กระโดดไป shop.html -->
+    <a href="shop.html" class="nav-icon" title="Shop">
+      <i class="fas fa-shopping-cart"></i>
+    </a>
+    <a href="profile.html" class="nav-icon" title="Profile">
+     <i class="fas fa-user"></i>
+    </a>
+    <a href="search.html" class="nav-icon" title="Profile">
+    <i class="fas fa-search"></i> </a>
+    </div>
+</nav>
+
+<div id="user-bar" class="user-profile-bar"></div>
+  
+<div class="champ-banner" onclick="window.location.href='champ.html'">
+      <div class="champ-info">
+        <div class="champ-badge"><i class="fas fa-crown"></i> Champ of the Month</div>
+        <div class="champ-title" id="home-champ-name">Mushroom</div>
+        <div class="champ-month" id="home-champ-month">ประจำเดือนกุมภาพันธ์</div>
+        <button class="champ-btn-view">view more <i class="fas fa-chevron-right"></i></button>
+      </div>
+      <div class="champ-img-container">
+        <img src="https://lh3.googleusercontent.com/d/1h1eW8OP8UOaJm8kRK-13t-1Z_WhNluy9=s400" id="home-champ-img" class="champ-img" alt="Champ">
+      </div>
+    </div>
+
+<div class="section-title">🏆 Member Ranking</div>
+<div class="ranking-wrapper">
+  <div id="ranking-list" class="horizontal-list"></div>
+</div>
+ 
+<div class="section-title">💖 Top Fans</div>
+<div class="ranking-wrapper">
+  <div id="global-fan-list" class="horizontal-list"></div>
+</div>
+
+<div id="modal-overlay" style="display:none;">
+    
+    <div class="modal-box custom-history-modal" id="history-form" style="display:none;">
+    <h2 class="history-main-title">My History</h2>
+    <div id="history-content"></div> 
+    <button onclick="closeModal()" style="margin-top: 25px; width: 100%; background: #fdf6f7; border: none; padding: 12px; border-radius: 12px; cursor: pointer; color: var(--primary-pink); font-weight: 600; transition: all 0.2s;">Close</button>
+    </div>
+    
+    <div class="modal-box" id="inventory-form" style="display:none;">
+        <h2 style="font-family: 'Kanit', sans-serif; font-weight: 600; color: var(--primary-pink); margin-bottom: 15px;">
+            <i class="fas fa-briefcase"></i> My Inventory
+        </h2>
+        <div id="inventory-content" style="max-height: 400px; overflow-y: auto;"></div>
+        <button onclick="closeModal()" style="margin-top: 25px; width: 100%; background: #fdf6f7; border: none; padding: 12px; border-radius: 12px; cursor: pointer; color: var(--primary-pink); font-weight: 600; transition: all 0.2s;">Close</button>
+    </div>
+    
+    <div class="modal-box" id="stats-form" style="display:none;">
+        <div id="stats-content"></div> 
+        <div class="top-fans-list" id="member-fans-section">
+            <div class="top-fans-title" style="font-family: 'Kanit', sans-serif; font-weight: 600;">
+                <i class="fas fa-heart" style="color: var(--primary-pink);"></i> Top Fans
+            </div>
+            <div id="member-fans-content"></div>
+        </div>
+        <button onclick="closeModal()" style="margin-top: 25px; width: 100%; background: #f5f5f5; border: none; padding: 12px; border-radius: 12px; cursor: pointer; color: #666; font-weight: 600;">Close</button>
+    </div>
+    
+    <div class="modal-box" id="login-form" style="display:none; padding: 30px 25px; border-radius: 20px;">
+        <h2 style="font-family: 'Kanit', sans-serif; font-weight: 700; color: var(--primary-pink); margin-bottom: 25px; text-align: center;">BLM48 Login</h2>
+        <input type="text" id="login-user" class="login-input" placeholder="ชื่อผู้ใช้ (Username)" style="width: 100%; box-sizing: border-box;">
+        <input type="password" id="login-pass" class="login-input" placeholder="รหัสผ่าน (Password)" style="width: 100%; box-sizing: border-box;">
+        
+        <button onclick="doLogin()" style="width: 100%; background: var(--primary-pink); color: white; border: none; padding: 14px; border-radius: 12px; cursor: pointer; font-weight: 700; margin-top: 20px; box-shadow: 0 4px 12px rgba(255, 133, 162, 0.35); transition: all 0.2s;">LOGIN</button>
+        <button onclick="closeModal()" style="width: 100%; background: none; color: #bbb; border: none; padding: 12px; border-radius: 12px; cursor: pointer; font-size: 13px; margin-top: 8px; transition: color 0.2s;">Cancel</button>
+    </div>
+
+</div>
+
+<i class="fas fa-pencil-alt edit-icon" id="edit-name-btn" onclick="updateDisplayName()" style="display: none;"></i>
+<input type="file" id="profile-upload" style="display:none" accept="image/*" onchange="handleImageUpload(event, user.username)">
+
+<footer style="padding: 60px 20px 40px 20px; text-align: center; color: #c5c5c5; font-size: 11px; letter-spacing: 0.5px; line-height: 1.6;">
+    <div style="font-family: 'Kanit', sans-serif; font-weight: 700; color: #999; margin-bottom: 6px; letter-spacing: 1px;">BLM48 MEMBERSHIP</div>
+    <div>© 2026 Virtual Idol Cover Group. All Rights Reserved.</div>
+</footer>
+
+
+<script >
+  // --- CONFIG & CONSTANTS ---
+const APP_VERSION = '1.0.5'; // ✨ เปลี่ยนเลขเวอร์ชันทุกครั้งที่คุณเอ็มมี่มีการอัปเดตโค้ดสำคัญ
+
+function checkVersion() {
+    const savedVersion = localStorage.getItem('bnl_app_version');
+    if (savedVersion !== APP_VERSION) {
+        // ถ้าเวอร์ชันไม่ตรง ให้เคลียร์ Cache ข้อมูลเดิมทิ้ง
+        localStorage.removeItem('bnl_ranking_cache');
+        localStorage.removeItem('bnl_topfans_cache');
+        localStorage.setItem('bnl_app_version', APP_VERSION);
+        
+        // สั่งรีโหลดหน้าเว็บแบบ Hard Reload เพื่อดึงไฟล์ใหม่จากเซิร์ฟเวอร์
+        window.location.reload(true); 
+    }
+}
+  
+  // --- CONFIG & CONSTANTS ---
+  let user = getUserSession();
+  const scriptURL = 'https://script.google.com/macros/s/AKfycbxF5G3E1HWhVTQOVGzWtsqSCZfXkq8ZrX6DqGKt_pcicYbi2_59B-ecEeeTU6-aqBEf/exec'; 
+  
+  // --- ฟังก์ชันควบคุม Sidebar ---
+function toggleSidebar() { 
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  const isOpen = sidebar.style.left === '0px';
+  sidebar.style.left = isOpen ? '-280px' : '0px';
+  overlay.style.display = isOpen ? 'none' : 'block';
+}
+
+// --- ฟังก์ชัน Dark Mode ---
+function toggleDarkMode() {
+  document.body.classList.toggle('dark-mode');
+  const isDark = document.body.classList.contains('dark-mode');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  document.getElementById('dark-mode-btn').innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+}
+
+// --- แสดงประวัติประใจ ---
+async function showHistory() {
+    const session = localStorage.getItem('bnl_session');
+    if (!session) return Swal.fire('เข้าสู่ระบบก่อนนะงับ', 'กรุณาล็อกอินก่อน', 'warning');
+
+    const userData = JSON.parse(session).data;
+    const username = userData.username; 
+
+    // 1. เปิดม่าน Overlay หลัก (ใช้ flex เพื่อให้กล่องอยู่กึ่งกลางสวยๆ แบบรูปแรก)
+    const modalOverlay = document.getElementById('modal-overlay');
+    if(modalOverlay) modalOverlay.style.display = 'flex';
+    
+    // 2. 🚩 ดักปิดฟอร์มอื่นเพื่อแก้บั๊กซ้อนกันเป็นแซนด์วิช
+    document.getElementById('inventory-form').style.display = 'none';
+    document.getElementById('stats-form').style.display = 'none';
+    document.getElementById('login-form').style.display = 'none';
+    
+    // 3. 🚩 เปลี่ยนจากเปิด stats-form มาเปิดกล่องประวัติตัวจริง (history-form) แทนค่ะ!
+    const historyForm = document.getElementById('history-form');
+    if(historyForm) historyForm.style.display = 'block';
+    
+    // 4. 🚩 เปลี่ยนเป้าหมายกล่องเขียนข้อมูลจาก stats-content มาเป็น history-content
+    const historyContent = document.getElementById('history-content');
+    if(historyContent) historyContent.innerHTML = "<p style='text-align:center; color:#aaa; font-family:\"Kanit\"; padding:20px;'>กำลังดึงข้อมูลให้นะคะ...</p>";
+
+    try {
+        const response = await fetch(`${scriptURL}?action=getMyHistory&username=${username}`);
+        const res = await response.json();
+        
+        // 5. 🚩 ตรวจสอบและพ่นข้อมูลลงกล่อง historyContent ตัวจริง
+        if (res.status === "success" && historyContent) {
+            let html = ``; // เอาหัวข้อ H2 ออกเพราะใน HTML หลักของเอ็มมี่มี "My History" อยู่แล้ว
+            
+            // ==========================================
+            // 🛒 หมวดหมู่ที่ 1: ประวัติการช้อปปิ้ง
+            // ==========================================
+            html += `
+                <div style="text-align:left; margin-top:15px;">
+                    <h4 style="border-bottom: 2px solid var(--soft-pink); padding-bottom:5px; margin-bottom: 10px;">🛒 ประวัติการช้อปปิ้ง</h4>
+                    <div class="history-scroll-container">`;
+            
+            if (res.purchaseHistory && res.purchaseHistory.length > 0) {
+                res.purchaseHistory.forEach(log => {
+                    html += `
+                        <div class="fan-row">
+                            <div class="fan-info">
+                                <div class="fan-name">${log.action}: ${log.target}</div>
+                                <div style="font-size:10px; color:#aaa;">${new Date(log.timestamp).toLocaleString()}</div>
+                            </div>
+                            <div class="fan-cookies" style="color:#4dabf7">${log.amount}</div>
+                        </div>`;
+                });
+            } else {
+                html += `<p style="font-size:12px; color:#ccc; text-align:center; padding:15px 0;">ยังไม่มีประวัติการซื้อไอเทมงับ</p>`;
+            }
+            html += `
+                    </div> </div>`;
+
+            // ==========================================
+            // 💖 หมวดหมู่ที่ 2: ประวัติการส่งกำลังใจ
+            // ==========================================
+            html += `
+                <div style="text-align:left; margin-top:20px;">
+                    <h4 style="border-bottom: 2px solid var(--soft-pink); padding-bottom:5px; margin-bottom: 10px;">💖 ประวัติการส่งกำลังใจ</h4>
+                    <div class="history-scroll-container">`;
+            
+            if (res.giveLogs && res.giveLogs.length > 0) {
+                res.giveLogs.forEach(log => {
+                    html += `
+                        <div class="fan-row">
+                            <div class="fan-info">
+                                <div class="fan-name">ปาให้: ${log.member}</div>
+                                <div style="font-size:10px; color:#aaa;">${new Date(log.timestamp).toLocaleString()}</div>
+                            </div>
+                            <div class="fan-cookies">${log.amount} 🍪</div>
+                        </div>`;
+                });
+            } else {
+                html += `<p style="font-size:12px; color:#ccc; text-align:center; padding:15px 0;">ยังไม่เคยปาคุกกี้เลยงับ</p>`;
+            }
+            html += `
+                    </div> </div>`;
+            
+            // พ่นลงกล่องประวัติ
+            historyContent.innerHTML = html;
+        }
+    } catch (e) {
+        console.error(e);
+        if(historyContent) historyContent.innerHTML = "เกิดข้อผิดพลาดในการโหลดข้อมูลประวัติ";
+    }
+}
+
+  function closeModal() {
+    // ซ่อนม่าน Overlay หลัก
+    document.getElementById('modal-overlay').style.display = 'none';
+    
+    // สั่งซ่อนทุกกล่องฟอร์มด้านในเพื่อ Reset สถานะสำหรับรอบหน้า
+    document.getElementById('history-form').style.display = 'none';
+    document.getElementById('inventory-form').style.display = 'none';
+    document.getElementById('stats-form').style.display = 'none';
+    document.getElementById('login-form').style.display = 'none';
+}
+  
+// --- ปิด Splash Screen เมื่อโหลดข้อมูลเสร็จ ---
+function hideSplashScreen() {
+  const splash = document.getElementById('splash-screen'); // หรือ ID ที่คุณใช้
+  if (splash) {
+    splash.style.display = 'none';
+  } else {
+    console.warn("หา splash-screen ไม่เจอค่ะ!");
+  }
+}
+
+// โหลดการตั้งค่าธีมเมื่อเริ่มแอป
+window.onload = () => {
+  if (localStorage.getItem('theme') === 'dark') toggleDarkMode();
+  // สมมติว่าดึงข้อมูลเสร็จแล้ว
+  setTimeout(hideSplashScreen, 2000); 
+};
+   
+  // ใช้หุ้มข้อมูลเพื่อลด Global Variable รบกวนกัน
+  let currentRankingData = JSON.parse(localStorage.getItem('bnl_ranking_cache')) || [];
+  let currentTopFansData = JSON.parse(localStorage.getItem('bnl_topfans_cache')) || {};
+
+  // --- Session Management ---
+  function saveUserSession(userData) {
+    const expiry = new Date().getTime() + (90 * 24 * 60 * 60 * 1000); 
+    localStorage.setItem('bnl_session', JSON.stringify({ data: userData, expiry: expiry }));
+  }
+
+  function getUserSession() {
+    const sessionStr = localStorage.getItem('bnl_session');
+    if (!sessionStr) return null;
+    const session = JSON.parse(sessionStr);
+    if (new Date().getTime() > session.expiry) {
+      localStorage.removeItem('bnl_session');
+      return null;
+    }
+    return session.data;
+  }
+
+  function isUserMember() {
+    return user && user.role && user.role.toUpperCase().trim() === 'MEMBER';
+  }
+  
+ // แยกการ Sync User ออกมาทำงานเบื้องหลัง พร้อมเช็คการเด้งออกทันที (ฉบับแก้ไข)
+  async function syncUserData() {
+    if (!user) return;
+    try {
+      const resp = await fetch(`${scriptURL}?action=getUserInfo&username=${encodeURIComponent(user.username)}&_=${Date.now()}`);
+      const res = await resp.json();
+      
+      if (res.status === "success") {
+        
+        // 🚨 แก้ไขแล้ว: เช็คเฉพาะกรณีที่ Google Sheet ส่งค่ากลับมาเป็น "ช่องว่าง" จริงๆ เท่านั้น
+        // (ตัดเงื่อนไข undefined ออก เพื่อไม่ให้มันเข้าใจผิดตอนที่ระบบซ่อนรหัสผ่าน)
+        if (res.data.password === "") {
+            Swal.fire({
+              icon: 'warning',
+              title: 'กรุณาติดต่อ BLM48 Line Official',
+              text: 'สิทธิ์การใช้งานถูกระงับเนื่องจากไม่เข้ากลุ่ม BLM48 Membership ค่ะ',
+              confirmButtonColor: '#ff85a2',
+              allowOutsideClick: false
+            }).then(() => {
+              localStorage.removeItem('bnl_session');
+              sessionStorage.clear();
+              user = null;
+              updateUI();
+              openLogin();
+            });
+            return; // หยุดการทำงานทันที
+        }
+
+        // 💖 ถ้าไม่ได้ถูกลบรหัสผ่าน ให้อัปเดตข้อมูลใหม่ (โดยใช้วิธีรวมข้อมูล เพื่อไม่ให้รหัสผ่านในเครื่องหาย)
+        user = { ...user, ...res.data }; 
+        saveUserSession(user); 
+        updateUI(); 
+
+      } else {
+        // 🚨 กรณีค้นหาชื่อผู้ใช้ไม่เจอเลย (เช่น คุณเอ็มมี่ลบแถวของคนนี้ทิ้งไปจาก Sheet)
+        localStorage.removeItem('bnl_session');
+        user = null;
+        updateUI();
+        openLogin();
+      }
+    } catch (e) { 
+        console.error("Sync Error:", e); 
+    }
+  }
+
+  // ปรับการโหลดข้อมูลให้ทำงานพร้อมกัน (Parallel) และใช้ระบบ Cache
+  async function loadData() {
+    try {
+      // ยิง Request พร้อมกัน ไม่ต้องรอทีละตัว
+      const [rankingResp, topFansResp] = await Promise.all([
+        fetch(`${scriptURL}?_=${Date.now()}`),
+        fetch(`${scriptURL}?action=getTopFans&_=${Date.now()}`)
+      ]);
+
+      currentRankingData = await rankingResp.json();
+      currentTopFansData = await topFansResp.json();
+
+      // บันทึกลง Cache เพื่อให้เปิดเว็บครั้งหน้าโหลดได้ทันที
+      localStorage.setItem('bnl_ranking_cache', JSON.stringify(currentRankingData));
+      localStorage.setItem('bnl_topfans_cache', JSON.stringify(currentTopFansData));
+
+      renderRanking(currentRankingData);
+      renderGlobalFans(currentTopFansData);
+    } catch(e) { console.error("Load Error:", e); }
+  }  
+ 
+function updateUI() {
+  console.log("ฟังก์ชัน updateUI ทำงาน! ค่า user ณ ตอนนี้คือ:", user);
+
+  const bar = document.getElementById('user-bar');
+  if (!bar) return; // ถ้าหาแถบโปรไฟล์ไม่เจอ ให้หยุดทำงานทันที ไม่ต้องทำต่อ
+
+  // 1. ดึงปุ่มต่างๆ มาเก็บไว้ (ถ้าหาไม่เจอจะเป็น null)
+  const logoutBtn = document.querySelector('button[onclick="confirmLogout()"]');
+  const loginBtn = document.getElementById('login-btn');
+
+  if (!user) {
+    // --- กรณี Guest (ไม่ได้ Login) ---
+    if (logoutBtn) logoutBtn.style.display = 'none'; 
+    if (loginBtn) loginBtn.style.display = 'block';
+
+    bar.innerHTML = `
+      <div class="guest-container" style="text-align: center; padding: 30px 15px; border-radius: 15px; background: rgba(255, 255, 255, 0.5); border: 2px dashed #ffc2d1;">
+        <i class="fas fa-user-circle" style="font-size: 40px; color: #ffc2d1; margin-bottom: 10px;"></i>
+        <p style="font-size: 14px; color: #888; margin-bottom: 15px;">ยินดีต้อนรับสู่ BLM48 ค่ะ<br>เข้าสู่ระบบเพื่อสะสมคุกกี้กันนะ!</p>
+        
+<div class="auth-buttons-container" style="display: flex; flex-flow: row wrap; justify-content: center; gap: 15px; width: 100%; max-width: 400px; margin: 20px auto 0 auto; padding: 0 15px; box-sizing: border-box;">
+  
+  <a href="#" 
+     onclick="openLogin(); return false;" 
+     class="btn-login-main" 
+     style="display: flex; align-items: center; justify-content: center; gap: 8px; flex: 1 1 160px; height: 45px; text-decoration: none; background: #ff85a2; color: white; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(255, 133, 162, 0.3); font-size: 16px; box-sizing: border-box; transition: transform 0.2s, opacity 0.2s;">
+    <i class="fas fa-sign-in-alt"></i> เข้าสู่ระบบ
+  </a>
+
+  <a href="https://line.me/R/ti/p/@569rnpsj?from=page&liff.referrer=https%3A%2F%2Flinktr.ee%2F&searchId=569rnpsj" 
+     target="_blank" 
+     class="btn-login-main" 
+     style="display: flex; align-items: center; justify-content: center; gap: 8px; flex: 1 1 160px; height: 45px; text-decoration: none; background: #ff85a2; color: white; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(255, 133, 162, 0.3); font-size: 16px; box-sizing: border-box; transition: transform 0.2s, opacity 0.2s;">
+    <i class="fas fa-user-plus"></i> สมัครสมาชิก
+  </a>
+
+</div>
+         <p style="font-size: 12px; color: #888; margin-bottom: 15px;">หมายเหตุ : ติดต่อสมัคร BLM48 Membership ฟรี<br>ได้ทาง BLM48 Line ID : @569rnpsj</p>
+      </div>
+    `;
+    return;
+  }
+
+  // --- กรณี Member (Login แล้ว) ---
+  if (logoutBtn) logoutBtn.style.display = 'inline-block'; 
+  if (loginBtn) loginBtn.style.display = 'none';
+
+  const isMember = isUserMember();
+
+  // 🌸 จัดการเลย์เอาต์การแสดงผล คามิโอชิ และ โอชิ
+  const kamiTag = user.kamioshi ? `
+    <span class="tag tag-kami" style="display: inline-flex; align-items: center; gap: 5px; background: #ffd700; color: #333; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 12px; margin: 3px;">
+      <i class="fas fa-crown"></i> ${user.kamioshi}
+      <i class="fas fa-times-circle" onclick="removeOshiFromUI('kami', '${user.kamioshi}')" style="cursor: pointer; color: rgba(0,0,0,0.5); margin-left: 4px;"></i>
+    </span>
+  ` : '';
+
+  const sortedOshis = (user.oshi || [])
+    .map(o => o ? o.toString().trim() : "")
+    .filter(o => o !== "" && o.toLowerCase() !== (user.kamioshi || "").toLowerCase())
+    .sort((a, b) => a.localeCompare(b, 'th', { sensitivity: 'base' }));
+
+  const oshiTags = sortedOshis.map(o => `
+    <span class="tag tag-oshi" style="display: inline-flex; align-items: center; gap: 5px; background: #87ceeb; color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; margin: 3px;">
+      <i class="fas fa-heart"></i> ${o}
+      <i class="fas fa-times-circle" onclick="removeOshiFromUI('oshi', '${o}')" style="cursor: pointer; color: rgba(255,255,255,0.7); margin-left: 4px;"></i>
+    </span>
+  `).join('');
+
+  bar.innerHTML = `
+    <div class="user-info-header">
+           <a href="profile.html" class="profile-img-container nav-icon" title="Profile">
+          <img src="${getImg(user.profile_img)}" class="user-avatar-img">
+      </a>
+      <div style="flex:1">
+        <div class="user-name">
+          <span id="user-display-name">${user.name}</span> 
+          <span class="role-badge">${user.role}</span>
+        </div>
+      </div>
+    </div>
+    <div class="wallet">
+      <div class="wallet-item"><div style="font-size:10px; color:#aaa;">Tokens</div><i class="fas fa-coins" style="color: #ffb347;"></i> ${Number(user.token || 0).toLocaleString()}</div>
+      <div class="wallet-item"><div style="font-size:10px; color:#aaa;">Cookies</div><i class="fas fa-cookie-bite" style="color: #d2691e;"></i> ${Number(user.cookie || 0).toLocaleString()}</div>
+      <div class="wallet-item"><div style="font-size:10px; color:#aaa;">GE Tokens</div><i class="fas fa-gem" style="color: #4dabf7;"></i> ${Number(user.geToken || 0).toLocaleString()}</div>
+    </div>
+    <div class="bonus-container">
+      <button onclick="${isMember ? "Swal.fire('ขออภัย','เมมเบอร์รับคุกกี้ฟรีไม่ได้ค่ะ','info')" : "claimMonthly()"}" class="btn-bonus btn-monthly ${isMember ? 'btn-locked' : ''}"><i class="fas fa-gift"></i> รับคุกกี้รายเดือน</button>
+      <button onclick="redeemCode()" class="btn-bonus btn-redeem"><i class="fas fa-ticket-alt"></i> Redeem</button>
+    </div>
+  `;}
+
+
+// 💔 ฟังก์ชันสำหรับกดลบคามิ/โอชิจากหน้าจอ แล้วยิงไปอัปเดต Google Sheet ทันทีผ่าน action: removeOshi ที่มีอยู่เดิม
+async function removeOshiFromUI(type, memberName) {
+  const typeText = type === 'kami' ? 'คามิโอชิหลัก' : 'โอชิ';
+  
+  // แจ้งเตือนยืนยันการลบแบบน่ารักๆ สไตล์ BLM48
+  const confirm = await Swal.fire({
+    title: `แน่ใจไหมงับ?`,
+    text: `คุณต้องการลบ ${memberName} ออกจากรายการ${typeText}ใช่ไหม?`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#ff85a2',
+    cancelButtonColor: '#aaa',
+    confirmButtonText: 'ใช่, ลบเลย!',
+    cancelButtonText: 'ยกเลิก'
+  });
+
+  if (!confirm.isConfirmed) return;
+
+  Swal.fire({
+    title: 'กำลังอัปเดตฐานข้อมูล...',
+    allowOutsideClick: false,
+    didOpen: () => { Swal.showLoading(); }
+  });
+
+  try {
+    // ดึง URL ของ Apps Script จากที่คุณเอ็มมี่ตั้งค่าไว้ในโค้ดส่วนอื่น (ในที่นี้อ้างอิงตามมาตรฐานเดิมของคุณเอ็มมี่)
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxF5G3E1HWhVTQOVGzWtsqSCZfXkq8ZrX6DqGKt_pcicYbi2_59B-ecEeeTU6-aqBEf/exec';
+    
+    // ยิง POST Request ส่ง action ไปที่ระบบหลังบ้านตัวเดิมที่คุณเอ็มมี่เขียนรอไว้แล้ว
+    const response = await fetch(scriptURL, {
+      method: 'POST',
+      body: new URLSearchParams({
+        action: 'removeOshi',
+        username: user.username, // ส่ง username ปัจจุบันไปหาแถว
+        type: type,              // 'kami' หรือ 'oshi'
+        memberName: memberName   // ชื่อเมมเบอร์ที่ต้องการลบ
+      })
+    });
+
+    const res = await response.json();
+
+    if (res.status === 'success') {
+      Swal.fire('สำเร็จ!', `ลบ ${memberName} เรียบร้อยแล้วค่ะ`, 'success');
+      
+      // อัปเดตตัวแปร user ในหน้าบ้าน เพื่อให้หน้าเว็บทำการดึงและวาด UI ใหม่ทันที
+      if (typeof window.syncUserData === 'function') {
+        window.syncUserData(); // เรียกฟังก์ชันซิงค์ข้อมูลใหม่
+      } else {
+        // หากไม่มีฟังก์ชันซิงค์ ให้ทำการดึงใหม่ง่ายๆ ตามโครงสร้างเดิม
+        location.reload(); 
+      }
+    } else {
+      Swal.fire('เกิดข้อผิดพลาด', res.message || 'ไม่สามารถลบข้อมูลได้', 'error');
+    }
+  } catch (error) {
+    console.error(error);
+    Swal.fire('เกิดข้อผิดพลาด!', 'เซิร์ฟเวอร์ไม่ตอบสนอง กรุณาลองใหม่อีกครั้งนะงับ', 'error');
+  }
+}
+
+function renderRanking(data) {
+  const list = document.getElementById('ranking-list');
+  if (!list) return;
+  list.innerHTML = '';
+  const isMember = isUserMember();
+  
+  // กรองข้อมูลและใช้ยอดรายเดือน (monthly_cookies) ในการจัดอันดับ
+  data.filter(m => m.name).forEach((m, i) => {
+    const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-other';
+    let badgeContent = i + 1;
+    if (i === 0) badgeContent = '<i class="fas fa-crown"></i>';
+    else if (i === 1 || i === 2) badgeContent = '<i class="fas fa-medal"></i>';
+
+    const card = document.createElement('div');
+    card.className = `member-card ${rankClass}`;
+    
+    card.innerHTML = `
+     <div class="img-wrapper" onclick="openMemberProfile('${m.name}')">
+        <img src="${getImg(m.profile_img)}" loading="lazy">
+        <div class="rank-badge">${badgeContent}</div>
+      </div>
+      <div class="name-text" style="margin-bottom: 10px;">${m.name}</div>
+
+      <div class="cookie-text" style="margin-bottom: 15px;">
+        <i class="fas fa-cookie-bite" style="color: #d2691e;"></i> 
+        ${Number(m.monthly_cookies || 0).toLocaleString()}
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function renderGlobalFans(rawData) {
+  const list = document.getElementById('global-fan-list');
+  if (!list) return;
+  list.innerHTML = '';
+
+  let fansArray = [];
+  if (Array.isArray(rawData)) {
+    fansArray = rawData;
+  } else if (rawData && typeof rawData === 'object') {
+    fansArray = Object.values(rawData).flat(); // รวมข้อมูลจากทุกเมมเบอร์เป็นก้อนเดียว
+  }
+
+  if (fansArray.length === 0) {
+    list.innerHTML = '<div style="padding:20px; color:#ccc; font-size:13px; width:100%; text-align:center;">ยังไม่มีข้อมูลแฟนคลับ...</div>';
+    return;
+  }
+
+  // --- ส่วนสำคัญ: รวมยอด (Group By User) ---
+  const groupedFans = fansArray.reduce((acc, current) => {
+    const key = current.username; // ใช้ username เป็นหลักในการรวม
+    if (!acc[key]) {
+      acc[key] = { ...current, total: 0 };
+    }
+    acc[key].total += Number(current.total || 0); // รวมยอดคุกกี้เข้าด้วยกัน
+    return acc;
+  }, {});
+
+  // แปลงกลับเป็น Array และเรียงลำดับจากมากไปน้อย
+  const finalFans = Object.values(groupedFans).sort((a, b) => b.total - a.total);
+
+  // --- แสดงผล ---
+  finalFans.forEach((f, i) => {
+    const isTop3 = i < 3;
+    const rankColor = i === 0 ? '#ffd700' : i === 1 ? '#c0c0c0' : i === 2 ? '#cd7f32' : '#ffeef2';
+    const rankIcon = i === 0 ? '<i class="fas fa-crown"></i>' : (i + 1);
+
+    const card = document.createElement('div');
+    card.className = 'fan-card';
+    card.style = `
+      position: relative; min-width: 120px; background: white; 
+      padding: 20px 15px; border-radius: 25px; text-align: center;  
+      border: 2px solid ${rankColor}; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      margin: 10px 5px; flex-shrink: 0;
+    `;
+
+    card.innerHTML = `
+      <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+        background: ${rankColor}; color: ${isTop3 ? '#fff' : '#ff85a2'};
+        padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: bold;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1); white-space: nowrap;">
+        ${isTop3 ? rankIcon + ' ' : ''}อันดับ ${i + 1}
+      </div>
+      <img src="${getImg(f.img)}" style="width:65px; height:65px; border-radius:50%; border:3px solid #fef5f7; margin-top:5px; object-fit:cover;" onerror="this.src='https://via.placeholder.com/150'">
+      <div style="font-weight:700; font-size:14px; color:#444; margin-top:8px; white-space: nowrap; overflow:hidden; text-overflow:ellipsis;">
+        ${f.name || f.username}
+      </div>
+      <div style="font-size:12px; color:#ff85a2; font-weight:700; margin-top:4px;">
+        <i class="fas fa-cookie-bite" style="color: #d2691e;"></i> ${Number(f.total).toLocaleString()}
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+// เอาฟังก์ชันนี้ไปวางใน <script> ของหน้า index.html แทนตัวเดิมนะงับ
+function openMemberProfile(name) {
+  // 1. ค้นหาข้อมูลสถิติล่าสุดของเมมเบอร์คนนี้
+  const m = currentRankingData.find(x => x.name === name);
+  // 2. ดึงรายชื่อแฟนคลับที่ปาคุกกี้ให้
+  const fans = currentTopFansData[name] || [];
+  
+  if (m) {
+    // เซฟข้อมูลลงคลังชั่วคราวเพื่อให้หน้า member.html ดึงไปใช้ต่อได้
+    localStorage.setItem('current_member_stats', JSON.stringify(m));
+    localStorage.setItem('current_member_fans', JSON.stringify(fans));
+    
+    // พาวาร์ปไปหน้าโปรไฟล์แยก
+    window.location.href = `member.html?name=${encodeURIComponent(name)}`;
+  } else {
+    Swal.fire('ผิดพลาด', 'ไม่พบข้อมูลเมมเบอร์คนนี้ในระบบค่ะ', 'error');
+  }
+}
+
+  
+async function setOshi(type, memberName) {
+  if (!user) return openLogin();
+  const username = user.username;
+  const searchName = memberName.toLowerCase();
+  
+  // ใช้ข้อมูลจาก Object user ที่เราจัดระเบียบไว้แล้วใน doGet
+  const currentKamioshi = (user.kamioshi || "").toString().toLowerCase();
+  const oshiArray = Array.isArray(user.oshi) ? user.oshi.map(s => s.toLowerCase()) : [];
+  const isAlreadyOshi = oshiArray.includes(searchName);
+
+  let action = "";
+  let confirmText = "";
+  let subTitle = "";
+
+  // --- 1. วิเคราะห์สถานะเพื่อกำหนด Action (Toggle Logic) ---
+  if (type === 'kami') {
+    if (currentKamioshi === searchName) {
+      action = "removeOshi";
+      confirmText = `ลบ ${memberName} ออกจาก "คามิโอชิ" ใช่หรือไม่?`;
+      subTitle = "ยกเลิกการติดตาม";
+    } else {
+      action = "setKamioshi";
+      confirmText = `ตั้งให้ ${memberName} เป็น "คามิโอชิ" ของคุณใช่หรือไม่?`;
+      subTitle = "ยืนยันรายการ";
+    }
+  } else {
+    // ถ้าจะเพิ่มเป็นโอชิ แต่ดันเป็นคามิอยู่แล้ว ให้หยุดทันที
+    if (currentKamioshi === searchName) {
+      return Swal.fire('ข้อมูลซ้ำซ้อน', `${memberName} เป็นคามิโอชิของคุณอยู่แล้วค่ะ`, 'warning');
+    }
+
+    if (isAlreadyOshi) {
+      action = "removeOshi";
+      confirmText = `เลิกติดตาม (Un-Oshi) ${memberName} ใช่หรือไม่?`;
+      subTitle = "ยกเลิกการติดตาม";
+    } else {
+      action = "setOshi";
+      confirmText = `ติดตาม (Oshi) ${memberName} เพิ่มในลิสต์ใช่หรือไม่?`;
+      subTitle = "ยืนยันรายการ";
+    }
+  }
+
+  // --- 2. แสดง Alert ยืนยันเพียงครั้งเดียว ---
+  const finalConfirm = await Swal.fire({
+    title: subTitle,
+    text: confirmText,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#ff85a2',
+    confirmButtonText: 'ตกลง',
+    cancelButtonText: 'ยกเลิก'
+  });
+
+  if (!finalConfirm.isConfirmed) return;
+
+  // --- 3. ส่งข้อมูลไปที่ Apps Script (ใช้ POST แบบเดียวกับที่ App Script รอรับ) ---
+  Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+  try {
+    const resp = await fetch(scriptURL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: action,
+        type: type,
+        username: username,
+        memberName: memberName
+      })
+    });
+
+    const res = await resp.json();
+    if (res.status === "success") {
+      await syncUserData(); // สำคัญมาก: ต้องดึงข้อมูลล่าสุดกลับมาเก็บในตัวแปร user
+      Swal.fire({ 
+        icon: 'success', 
+        title: 'สำเร็จ!', 
+        text: res.message, 
+        timer: 1500, 
+        showConfirmButton: false 
+      });
+    } else {
+      Swal.fire('ผิดพลาด', res.message, 'error');
+    }
+  } catch (e) {
+    console.error(e);
+    Swal.fire('Error', 'การเชื่อมต่อขัดข้อง หรือ Script URL ไม่ถูกต้อง', 'error');
+  }
+}
+
+  async function refreshPage() {
+    Swal.fire({ title: 'กำลังอัปเดตข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+    try {
+      await Promise.all([loadData(), user ? syncUserData() : Promise.resolve()]);
+      Swal.close();
+    } catch (error) { Swal.fire('ผิดพลาด', 'ไม่สามารถดึงข้อมูลล่าสุดได้', 'error'); }
+  }
+
+ function confirmLogout() {
+  // 1. ถ้าไม่มี user ล็อกอินอยู่แล้ว ให้เปิดหน้าล็อกอินขึ้นมาทันที
+  if (!user) return openLogin();
+
+  // 2. แสดงกล่องยืนยันการออกจากระบบ
+  Swal.fire({
+    title: 'ต้องการออกจากระบบใช่ไหมคะ?',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#ff85a2',
+    confirmButtonText: 'ตกลง',
+    cancelButtonText: 'ยกเลิก'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // 3. ลบ Session ในเครื่องออกให้หมดจด (ใช้คีย์ bnl_session ตามระบบของคุณ)
+      localStorage.removeItem('bnl_session');
+      sessionStorage.clear();
+
+      // 4. ล้างค่าตัวแปรกลางใน RAM เป็น null ทันที (แก้บั๊กโปรไฟล์ค้าง)
+      user = null; 
+
+      // 5. สั่งอัปเดตหน้าจอทันที แถบโปรไฟล์จะถูกล้างค่าเป็น Guest
+      updateUI(); 
+
+      // 6. แจ้งเตือนสำเร็จ และเมื่อกดตกลงปิดแจ้งเตือน จะเปิดหน้าต่างล็อกอินรูปที่ 2 ขึ้นมา
+      Swal.fire({
+        title: 'สำเร็จ!',
+        text: 'ออกจากระบบเรียบร้อยแล้วค่ะ',
+        icon: 'success',
+        confirmButtonColor: '#ff85a2'
+      }).then(() => {
+        openLogin(); // เด้งหน้าต่างล็อกอิน (รูปที่ 2) ขึ้นมาบล็อกหน้าจอต่อทันที
+      });
+    }
+  });
+}
+
+ async function claimMonthly() {
+  if (!user) return openLogin();
+  
+  const btnClaim = document.querySelector('.btn-monthly');
+  if (btnClaim && btnClaim.disabled) return; 
+  if (btnClaim) btnClaim.disabled = true;
+
+  Swal.fire({ 
+    title: 'กำลังตรวจสอบสิทธิ์...', 
+    allowOutsideClick: false, 
+    didOpen: () => Swal.showLoading() 
+  });
+
+  try {
+    const resp = await fetch(scriptURL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'claimMonthlyCookie',
+        username: user.username
+      })
+    }); 
+    const res = await resp.json();
+    
+    if (res.status === "success") { 
+      await syncUserData(); 
+      Swal.fire('สำเร็จ!', res.message, 'success'); 
+      // หลังสำเร็จ ไม่ต้องเปิดปุ่มคืน (เพราะ syncUserData จะคุมสถานะปุ่มอยู่แล้ว)
+    } else { 
+      Swal.fire('ขออภัย', res.message, 'info'); 
+      if (btnClaim) btnClaim.disabled = false; 
+    }
+  } catch (e) { 
+    Swal.fire('Error', 'ระบบขัดข้อง', 'error'); 
+    if (btnClaim) btnClaim.disabled = false; // ✨ ปรับเป็น false เพื่อให้กดลองใหม่ได้หากเน็ตมีปัญหา
+  }
+}
+  
+  async function updateDisplayName() {
+  // สมมติว่าคุณเอ็มมี่เก็บข้อมูลผู้ใช้ที่ล็อกอินไว้ในตัวแปร currentUser
+  if (!currentUser || currentUser.role.toLowerCase() !== "user") {
+    alert("เฉพาะผู้ใช้งานทั่วไป (User) เท่านั้นที่สามารถเปลี่ยนชื่อได้ค่ะ");
+    return;
+  }
+
+  const { value: newName } = await Swal.fire({
+    title: 'แก้ไขชื่อของคุณ',
+    input: 'text',
+    inputLabel: 'กรอกชื่อใหม่ที่ต้องการ',
+    inputValue: currentUser.name,
+    showCancelButton: true,
+    inputValidator: (value) => {
+      if (!value) return 'กรุณากรอกชื่อด้วยนะคะ'
+      if (value.length > 20) return 'ชื่อยาวเกินไปหน่อยค่ะ (ไม่ควรเกิน 20 ตัวอักษร)'
+    }
+  });
+
+  if (newName) {
+    try {
+      // แสดง Loading
+      Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+
+      const response = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors', // หรือปรับตามการตั้งค่า Deployment ของคุณ
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `action=updateName&username=${currentUser.username}&newName=${encodeURIComponent(newName)}`
+      });
+
+      // หมายเหตุ: ถ้าใช้ no-cors จะอ่าน response ตรงๆ ไม่ได้ 
+      // แนะนำให้ใช้การแจ้งเตือนสำเร็จไปเลย หรือใช้เทคนิคอื่นในการเช็ค
+      Swal.fire('สำเร็จ!', 'เปลี่ยนชื่อเป็น ' + newName + ' เรียบร้อยแล้วค่ะ', 'success');
+      
+      // อัปเดตชื่อในหน้าเว็บทันทีโดยไม่ต้องรีโหลด
+      currentUser.name = newName;
+      document.getElementById('user-display-name').innerText = newName; 
+
+    } catch (error) {
+      Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถเปลี่ยนชื่อได้ในขณะนี้', 'error');
+    }
+  }
+}
+  
+  async function redeemCode() {
+    if (!user) return openLogin();
+    const { value: code } = await Swal.fire({ 
+      title: 'Redeem Code', 
+      input: 'text', 
+      inputPlaceholder: 'กรอกรหัสโค้ดที่นี่...', 
+      showCancelButton: true 
+    });
+    if (code) {
+      Swal.fire({ title: 'กำลังตรวจสอบโค้ด...', didOpen: () => Swal.showLoading() });
+      try {
+        const resp = await fetch(scriptURL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'redeemCode', username: user.username, code: code })
+        });
+        const res = await resp.json();
+        if (res.status === "success") { 
+          await syncUserData(); 
+          Swal.fire('สำเร็จ!', res.message, 'success'); 
+        } else { Swal.fire('ผิดพลาด', res.message, 'error'); }
+      } catch (e) { Swal.fire('Error', 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้', 'error'); }
+    }
+  }
+
+  async function doLogin() {
+    const u = document.getElementById('login-user').value;
+    const p = document.getElementById('login-pass').value;
+    if(!u || !p) return Swal.fire('เตือน', 'กรุณากรอกข้อมูลให้ครบค่ะ', 'warning');
+    Swal.fire({ title: 'กำลังเข้าสู่ระบบ...', didOpen: () => Swal.showLoading() });
+    try {
+      const resp = await fetch(`${scriptURL}?action=login&username=${encodeURIComponent(u)}&password=${encodeURIComponent(p)}`);
+      const result = await resp.json();
+      if (result.status === "success") { 
+        user = result.data; saveUserSession(user); closeModal(); updateUI(); loadData();
+        Swal.fire('ยินดีต้อนรับ', `สวัสดีค่ะคุณ ${user.name}`, 'success');
+      } else { Swal.fire('ล้มเหลว', 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง', 'error'); }
+    } catch(e) { Swal.fire('Error', 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้', 'error'); }
+  }
+  
+  function openLogin() { 
+    document.getElementById('modal-overlay').style.display = 'block'; 
+    document.getElementById('login-form').style.display = 'block'; 
+    document.getElementById('stats-form').style.display = 'none'; 
+  }
+  
+  // หลังจาก Login หรือดึงข้อมูลผู้ใช้สำเร็จ
+function setupUserProfile(user) {
+  const nameElement = document.getElementById('user-display-name');
+  const editBtn = document.getElementById('edit-name-btn');
+
+  nameElement.innerText = user.name;
+
+  // ถ้าเป็น role user ให้แสดงไอคอนดินสอ
+  if (user.role.toLowerCase() === 'user') {
+    editBtn.style.display = 'inline-block';
+  } else {
+    editBtn.style.display = 'none';
+  }
+}
+  
+  function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
+
+  function getImg(url) {
+    if (!url) return 'https://via.placeholder.com/150';
+    if (url.includes('drive.google.com')) return `https://lh3.googleusercontent.com/u/0/d/${url.match(/[-\w]{25,}/)}`;
+    if (url.startsWith('data:image')) return url;
+    return url;
+  }
+  
+  // ฟังก์ชันแสดงหน้าโหลด
+function showAppLoading() {
+  const loader = document.getElementById('app-loading-screen');
+  if (loader) {
+    loader.style.display = 'flex';
+    loader.style.opacity = '1';
+  }
+}
+
+// ฟังก์ชันซ่อนหน้าโหลด
+function hideAppLoading() {
+  const loader = document.getElementById('app-loading-screen');
+  if (loader) {
+    loader.style.opacity = '0';
+    setTimeout(() => { loader.style.display = 'none'; }, 500);
+  }
+}
+  
+// ฟังก์ชันรีเฟรชข้อมูลทั้งหมด
+async function refreshAppData() {
+  showAppLoading();
+  try {
+    // โหลดข้อมูล Ranking และ Top Fans ใหม่
+    await loadData(); 
+    // ถ้ามี User ล็อกอินอยู่ ให้ซิงค์ข้อมูลกระเป๋าเงินด้วย
+    if (typeof user !== 'undefined' && user) {
+      await syncUserData(); 
+    }
+    console.log("Data Refreshed!");
+  } catch (error) {
+    console.error("Refresh Error:", error);
+  } finally {
+    // หน่วงเวลาเล็กน้อยเพื่อให้ดูเหมือนแอปกำลังโหลดจริงๆ (เลือกปรับได้)
+    setTimeout(hideAppLoading, 1000);
+  } 
+}
+
+// ใส่ดักจับตอนหน้าเว็บโหลดเสร็จสมบูรณ์
+document.addEventListener("DOMContentLoaded", () => {
+  
+  // 1. 👑 เรียกใช้ฟังก์ชันแกะเซสชันที่คุณเอ็มมี่เขียนไว้ได้เลย (มันจะเช็คคีย์ bnl_session และเช็ควันหมดอายุให้อัตโนมัติ!)
+  user = getUserSession(); 
+  
+  // 2. สั่งรันฟังก์ชันวาดหน้าจอทันที! ถ้ามีข้อมูลผู้ใช้ค้างอยู่ หน้าโปรไฟล์ก็จะขึ้นสวยงาม ไม่หลุดเป็น Guest แล้วค่ะ
+  updateUI();
+  
+  // 3. ⚡ ซ่อนหน้า Loading Screen และสั่งซิงค์ข้อมูลใหม่ล่าสุดจากระบบหลังบ้านเงียบๆ
+  hideAppLoading(); 
+  loadData();
+  if (user) {
+    syncUserData(); 
+  }
+});
+
+// ดักจับเมื่อมีการโหลดหน้าเว็บครั้งแรกหรือกด Refresh
+window.addEventListener('pageshow', function(event) {
+    refreshAppData();
+});
+
+  // --- Initial Load Strategy (Speed up!) ---
+window.addEventListener('DOMContentLoaded', () => {
+    checkVersion(); 
+
+    // 1. วาด UI ทันทีจากข้อมูลเก่าในเครื่อง (ถ้ามี)
+    if (user) updateUI();
+    if (currentRankingData.length > 0) renderRanking(currentRankingData);
+    if (Object.keys(currentTopFansData).length > 0) renderGlobalFans(currentTopFansData);
+    
+    // 2. ซ่อน Loading Screen ทันทีที่ของในเครื่องแสดงผลเสร็จ
+    hideAppLoading();
+
+    // 3. ดึงข้อมูลใหม่เงียบๆ มาอัปเดตภายหลัง
+    loadData();
+    if(user) syncUserData(); 
+});
+
+  // ลดความถี่ในการสร้างคุกกี้ร่วงเพื่อลดภาระ CPU
+  setInterval(() => {
+    if (document.hidden) return; // ไม่ทำถ้าเปิดแท็บอื่นอยู่
+    const c = document.createElement('i');
+    c.className = 'fas fa-cookie cookie-fall';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.animationDuration = (Math.random() * 3 + 4) + 's';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 6000);
+  }, 5000);  
+  
+// 2. ⚡ ดักจับตอนหน้าเว็บโหลดโครงสร้างเสร็จสมบูรณ์
+document.addEventListener("DOMContentLoaded", () => {
+  
+  // ดึงข้อมูลเซสชันล็อกอินจากคีย์ bnl_session ที่ถูกต้อง
+  user = getUserSession(); 
+  
+  // สั่งวาดหน้าจอแสดงโปรไฟล์/หน้าล็อกอินทันที
+  updateUI();
+  
+  // 🔥 สั่งปิดหน้าโหลดสีขาวชมพูตรงนี้! หน้าเว็บหลักจะแสดงผลขึ้นมาอย่างนุ่มนวล
+  hideAppLoading(); 
+  
+  // ดึงข้อมูลอันดับและซิงค์ข้อมูลผู้ใช้จากระบบหลังบ้านแบบเงียบๆ เบื้องหลัง
+  loadData();
+  if (user) {
+    syncUserData(); 
+  }
+});
+</script>
+
+
+<script type="module">
+  // 1. นำเข้าฟังก์ชันจาก Firebase (เก็บไว้เพราะอาจใช้ Sync ข้อมูลส่วนอื่น)
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+  import { getDatabase, ref, update, onValue } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-database.js";
+
+  // 2. ตั้งค่า Configuration ของ Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyAx5JlVGm_IpuOhksQMTA6qli9vR-5rNas",
+    authDomain: "blm48-official-site.firebaseapp.com",
+    projectId: "blm48-official-site",
+    databaseURL: "https://blm48-official-site-default-rtdb.asia-southeast1.firebasedatabase.app/",
+    storageBucket: "blm48-official-site.firebasestorage.app",
+    messagingSenderId: "924510827472",
+    appId: "1:924510827472:web:d2a5b5dcf0683a5c73ffd5"
+  };
+
+  // 3. เริ่มต้นเปิดใช้งาน Firebase
+  const app = initializeApp(firebaseConfig);
+  const database = getDatabase(app);
+
+  // 🎯 ระบบดึงสถิติจำนวนสมาชิก (เก็บไว้)
+  function refreshCountFromSheets() {
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxF5G3E1HWhVTQOVGzWtsqSCZfXkq8ZrX6DqGKt_pcicYbi2_59B-ecEeeTU6-aqBEf/exec?action=getMemberCount';
+    const countElement = document.getElementById('total-members-count');
+    
+    if (!countElement) return;
+
+    fetch(scriptURL)
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.success) {
+                countElement.textContent = Number(data.total).toLocaleString();
+            } else {
+                console.error("Sheets Counter Error:", data.error);
+                countElement.textContent = "0";
+            }
+        })
+        .catch(error => {
+            console.error("เกิดข้อผิดพลาดในการเชื่อมต่อ Google Sheets:", error);
+            countElement.textContent = "...";
+        });
+  }
+
+  // สั่งให้ทำงานทันทีเมื่อโหลดหน้าเว็บ
+  refreshCountFromSheets();
+</script>
+</body>
+</html>
+    
+  </body>
+  
+</html>
