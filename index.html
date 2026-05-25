@@ -1067,7 +1067,7 @@ window.onload = () => {
     return user && user.role && user.role.toUpperCase().trim() === 'MEMBER';
   }
   
- // แยกการ Sync User ออกมาทำงานเบื้องหลัง พร้อมเช็คการเด้งออกทันที
+ // แยกการ Sync User ออกมาทำงานเบื้องหลัง พร้อมเช็คการเด้งออกทันที (ฉบับแก้ไข)
   async function syncUserData() {
     if (!user) return;
     try {
@@ -1076,39 +1076,32 @@ window.onload = () => {
       
       if (res.status === "success") {
         
-        // 🚨 ดักจับ: หากข้อมูลใน Google Sheets ไม่มีรหัสผ่าน (ถูกลบออก)
-        // หรือกรณีรหัสผ่านเป็นช่องว่าง ให้ทำการเตะผู้ใช้ออกทันที
-        if (res.data.password === "" || res.data.password === null || res.data.password === undefined) {
+        // 🚨 แก้ไขแล้ว: เช็คเฉพาะกรณีที่ Google Sheet ส่งค่ากลับมาเป็น "ช่องว่าง" จริงๆ เท่านั้น
+        // (ตัดเงื่อนไข undefined ออก เพื่อไม่ให้มันเข้าใจผิดตอนที่ระบบซ่อนรหัสผ่าน)
+        if (res.data.password === "") {
             Swal.fire({
               icon: 'warning',
               title: 'กรุณาติดต่อ BLM48 Line Official',
-              text: 'สิทธิ์การใช้งานถูกระงับค่ะ',
+              text: 'สิทธิ์การใช้งานถูกระงับเนื่องจากไม่เข้ากลุ่ม BLM48 Membership ค่ะ',
               confirmButtonColor: '#ff85a2',
               allowOutsideClick: false
             }).then(() => {
-              // 1. ลบ Session 3 เดือนในเครื่องทิ้ง
               localStorage.removeItem('bnl_session');
               sessionStorage.clear();
-              
-              // 2. เคลียร์ตัวแปรระบบให้เป็น Guest
               user = null;
-              
-              // 3. รีเฟรชหน้าจอ (ปุ่มต่างๆ จะกลับเป็นหน้าของ Guest ทันที)
               updateUI();
-              
-              // 4. เรียก Popup หน้าล็อกอินขึ้นมากลางจอ
               openLogin();
             });
-            return; // หยุดการทำงานของฟังก์ชันนี้ทันที
+            return; // หยุดการทำงานทันที
         }
 
-        // 💖 ถ้ามีรหัสผ่านปกติ ก็ให้อัปเดตข้อมูลและยืดอายุ Session ต่อไป
-        user = res.data; 
+        // 💖 ถ้าไม่ได้ถูกลบรหัสผ่าน ให้อัปเดตข้อมูลใหม่ (โดยใช้วิธีรวมข้อมูล เพื่อไม่ให้รหัสผ่านในเครื่องหาย)
+        user = { ...user, ...res.data }; 
         saveUserSession(user); 
-        updateUI(); // อัปเดตยอดเงิน/ข้อมูลในหน้าจอแบบไม่กวนใจ
+        updateUI(); 
 
       } else {
-        // 🚨 กรณีค้นหาชื่อผู้ใช้ไม่เจอเลย (เช่น ถูกลบแถวออกไปจาก Sheet แล้ว)
+        // 🚨 กรณีค้นหาชื่อผู้ใช้ไม่เจอเลย (เช่น คุณเอ็มมี่ลบแถวของคนนี้ทิ้งไปจาก Sheet)
         localStorage.removeItem('bnl_session');
         user = null;
         updateUI();
