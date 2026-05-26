@@ -863,16 +863,13 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     <a href="index.html" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0;">
       <i class="fas fa-home" style="width:20px;"></i> HOME
     </a>
-    <a href="shop.html" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0;">
-      <i class="fas fa-shopping-cart" style="width:20px;"></i> SHOP
-    </a>
     <a href="inventory.html" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0;">
   <i class="fas fa-briefcase" style="width:20px;"></i> INVENTORY
 </a>
       <a href="kami.html" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0;">
   <i class="fa-solid fa-star" style="width:20px;"></i> My Kami-Oshi Members
 </a>
-    <a href="#" onclick="showHistory(); toggleSidebar();" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0;">
+    <a href="history.html" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0;">
       <i class="fas fa-history" style="width:20px;"></i> HISTORY
     </a>
     <a href="https://sites.google.com/view/blm48/home" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0;">
@@ -883,9 +880,6 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
          <i class="fas fa-sync-alt" style="width:20px;"></i> REFRESH
       </a>
       
-      <a href="#" onclick="confirmLogout()" class="nav-link" style="display:flex; align-items:center; gap:15px; padding:15px 0; color: #ff6b6b;">
-         <i class="fas fa-sign-out-alt" style="width:20px;"></i> LOGOUT
-      </a>
 
     <hr style="border: 0.5px solid #f0f0f0; margin: 10px 0;">
     
@@ -923,51 +917,6 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     </a>
   </div>
 </nav>
-  
-  <!-- Modal -->
-<div id="modal-overlay">
- <!-- Stats Modal -->
-<div class="modal-box custom-history-modal" id="history-form" style="display:none;">
-    <h2 class="history-main-title">My History</h2>
-    
-    <div id="history-content"></div> 
-    
-    <button onclick="closeModal()" class="history-close-btn">Close</button>
-</div>
-  
-<div class="modal-box" id="inventory-form" style="display:none;">
-    <h2 style="color:var(--primary-pink); margin-bottom:15px;"><i class="fas fa-briefcase"></i> My Inventory</h2>
-    <div id="inventory-content" style="max-height: 400px; overflow-y: auto;">
-        </div>
-    <button onclick="closeModal()" style="margin-top:25px; width:100%; background: #f5f5f5; border: none; padding: 12px; border-radius: 15px; cursor: pointer; color: #666;">Close</button>
-</div>
-  
-<div class="modal-box" id="stats-form" style="display:none;">
-    <div id="stats-content"></div> 
-    <div class="top-fans-list" id="member-fans-section">
-        <div class="top-fans-title"><i class="fas fa-heart" style="color:var(--primary-pink)"></i> Top Fans</div>
-        <div id="member-fans-content"></div>
-    </div>
-    <button onclick="closeModal()" style="margin-top:25px; width:100%; background: #f5f5f5; border: none; padding: 12px; border-radius: 15px; cursor: pointer; color: #666;">Close</button>
-</div>
-  <!-- ส่วนนี้สำหรับโชว์ประวัติส่วนตัว (History) -->
-  <div id="stats-content"></div> 
-
-  <!-- ส่วนนี้สำหรับโชว์ Top Fans ของเมมเบอร์ (จะแสดงเมื่อเรียกฟังก์ชันดูเมมเบอร์) -->
-  <div id="member-stats-section" style="display:none;">
-      <div class="top-fans-title"><i class="fas fa-heart" style="color:var(--primary-pink)"></i> Member's Top Fans</div>
-      <div id="member-fans-content"></div>
-  </div>
-  
-  <!-- Login Modal -->
-  <div class="modal-box" id="login-form" style="display:none;">
-    <h2 style="color: var(--primary-pink); margin-bottom: 25px;">BLM48 Login</h2>
-    <input type="text" id="login-user" class="login-input" placeholder="ชื่อผู้ใช้ (Username)">
-    <input type="password" id="login-pass" class="login-input" placeholder="รหัสผ่าน (Password)">
-    <button onclick="doLogin()" style="width:100%; background:var(--primary-pink); color:white; border:none; padding:14px; border-radius:12px; cursor:pointer; font-weight:700; margin-top:15px; box-shadow: 0 4px 10px rgba(255,133,162,0.3);">LOGIN</button>
-    <button onclick="closeModal()" style="width:100%; background:none; color:#aaa; border:none; padding:12px; border-radius:12px; cursor:pointer; font-size:13px; margin-top:10px;">Cancle</button>
-  </div>
-</div>
 
     <div class="user-profile-bar" id="shop-wallet-bar">
         <!-- ยอดเงินจะถูกเขียนทับด้วย JavaScript -->
@@ -1009,7 +958,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
             </button>
         </div>
     </div>
-  <!-- 10000Cookie
+  <!-- 10000Cookie-->
   <div class="merch-card">
         <div class="merch-image-container">
             <img src="https://lh3.googleusercontent.com/d/15UzuRt7ArZ-wUuoLLdZfqF9pdgCJt6ZQ=s1000" alt="10,000 Cookies" class="merch-image">
@@ -1022,7 +971,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
                 <i class="fas fa-coins"></i> 1,000 Tokens
             </button>
         </div>
-    </div>-->
+    </div>
 
 </div>
 
@@ -1213,126 +1162,6 @@ function toggleDarkMode() {
   const dmBtn = document.getElementById('dark-mode-btn');
   if(dmBtn) dmBtn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
 }
-
-// --- แสดงประวัติประใจ ---
-async function showHistory() {
-    const session = localStorage.getItem('bnl_session');
-    if (!session) return Swal.fire('เข้าสู่ระบบก่อนนะงับ', 'กรุณาล็อกอินก่อน', 'warning');
-
-    const userData = JSON.parse(session).data;
-    const username = userData.username; 
-
-    const modalOverlay = document.getElementById('modal-overlay');
-    const statsForm = document.getElementById('stats-form');
-    if(modalOverlay) modalOverlay.style.display = 'block';
-    if(statsForm) statsForm.style.display = 'block';
-    
-    const memberFansSection = document.getElementById('member-fans-section');
-    if (memberFansSection) {
-        memberFansSection.style.display = 'none'; 
-    }
-
-    const statsContent = document.getElementById('stats-content');
-    if(statsContent) statsContent.innerHTML = "กำลังดึงข้อมูลให้นะคะ...";
-
-    try {
-        const response = await fetch(`${scriptURL}?action=getMyHistory&username=${username}`);
-        const res = await response.json();
-        
-        if (res.status === "success" && statsContent) {
-            let html = `<h2 style="color:var(--primary-pink); text-align:center; margin-bottom: 15px;">My History</h2>`;
-            
-            // ==========================================
-            // 🛒 หมวดหมู่ที่ 1: ประวัติการช้อปปิ้ง
-            // ==========================================
-            html += `
-                <div style="text-align:left; margin-top:15px;">
-                    <h4 style="border-bottom: 2px solid var(--soft-pink); padding-bottom:5px; margin-bottom: 10px;">🛒 ประวัติการช้อปปิ้ง</h4>
-                    <div class="history-scroll-container">`;
-            
-            if (res.purchaseHistory && res.purchaseHistory.length > 0) {
-                res.purchaseHistory.forEach(log => {
-                    html += `
-                        <div class="fan-row">
-                            <div class="fan-info">
-                                <div class="fan-name">${log.action}: ${log.target}</div>
-                                <div style="font-size:10px; color:#aaa;">${new Date(log.timestamp).toLocaleString()}</div>
-                            </div>
-                            <div class="fan-cookies" style="color:#4dabf7">${log.amount}</div>
-                        </div>`;
-                });
-            } else {
-                html += `<p style="font-size:12px; color:#ccc; text-align:center; padding:15px 0;">ยังไม่มีประวัติการซื้อไอเทมงับ</p>`;
-            }
-            html += `
-                    </div> </div>`;
-
-            // ==========================================
-            // 💖 หมวดหมู่ที่ 2: ประวัติการส่งกำลังใจ
-            // ==========================================
-            html += `
-                <div style="text-align:left; margin-top:20px;">
-                    <h4 style="border-bottom: 2px solid var(--soft-pink); padding-bottom:5px; margin-bottom: 10px;">💖 ประวัติการส่งกำลังใจ</h4>
-                    <div class="history-scroll-container">`;
-            
-            if (res.giveLogs && res.giveLogs.length > 0) {
-                res.giveLogs.forEach(log => {
-                    html += `
-                        <div class="fan-row">
-                            <div class="fan-info">
-                                <div class="fan-name">ปาให้: ${log.member}</div>
-                                <div style="font-size:10px; color:#aaa;">${new Date(log.timestamp).toLocaleString()}</div>
-                            </div>
-                            <div class="fan-cookies">${log.amount} 🍪</div>
-                        </div>`;
-                });
-            } else {
-                html += `<p style="font-size:12px; color:#ccc; text-align:center; padding:15px 0;">ยังไม่เคยปาคุกกี้เลยงับ</p>`;
-            }
-            html += `
-                    </div> </div>`;
-            
-            statsContent.innerHTML = html;
-        }
-    } catch (e) {
-        console.error(e);
-        if(statsContent) statsContent.innerHTML = "เกิดข้อผิดพลาดในการโหลดข้อมูลประวัติ";
-    }
-}
-  
-// เตรียมข้อมูลแผ่นรองแก้ว 26 ลาย
-const coasterData = [];
-for (let i = 1; i <= 26; i++) {
-    coasterData.push({
-        id: i,
-        name: `Coaster Type ${i}`,
-        img: `<img src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=600" style="width: 100%; height: auto; object-fit: cover;" id="collection-cover">`
-    });
-}
-// 📸 ฟังก์ชันสำหรับเปิดดูรูปไอเทมขนาดใหญ่ และตั้งค่าลิงก์ดาวน์โหลด
-function openImagePreview(imgSrc, itemName) {
-    const modal = document.getElementById('image-preview-modal');
-    const targetImg = document.getElementById('preview-target-img');
-    const downloadBtn = document.getElementById('download-item-btn');
-
-    if (modal && targetImg && downloadBtn) {
-        targetImg.src = imgSrc; // เปลี่ยนรูปในป็อปอัปเป็นรูปไอเทมที่กด
-        downloadBtn.href = imgSrc; // ส่งลิงก์รูปไปให้ปุ่มเซฟดาวน์โหลด
-        
-        // ตั้งชื่อไฟล์ตอนที่เซฟลงเครื่องอัตโนมัติ (เปลี่ยนช่องว่างเป็น _)
-        downloadBtn.download = `BLM48_${itemName.replace(/\s+/g, '_')}.png`; 
-        
-        modal.style.display = 'flex'; // แสดงหน้าต่างพรีวิวขึ้นมา
-    }
-}
-
-// ❌ ฟังก์ชันสำหรับปิดหน้าต่างดูรูปใหญ่
-function closeImagePreview() {
-    const modal = document.getElementById('image-preview-modal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-}
   
 async function buyGacha(collectionId) {
   if(!userData) return;
@@ -1386,6 +1215,7 @@ async function buyGacha(collectionId) {
     Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อระบบตู้สุ่มได้ในขณะนี้', 'error');
   }
 }
+  
 // ฟังก์ชันโหลดคอลเลกชันและสร้างการ์ดแบบ Dynamic (ปรับเลย์เอาต์ให้สวยเท่ากับคุกกี้ด้านบน)
 async function loadGachaCollections() {
   const container = document.getElementById("merch-container");
@@ -1437,92 +1267,6 @@ async function loadGachaCollections() {
 
 document.addEventListener("DOMContentLoaded", loadGachaCollections);
   
-// ฟังก์ชันเปิดกระเป๋าเป้ (ดึงข้อมูลแยกตาม Collections และเรียงลำดับ A-Z มาจากหลังบ้าน)
-async function showInventory() {
-    if (!userData) return Swal.fire('เข้าสู่ระบบก่อนนะงับ', 'กรุณาล็อกอินก่อน', 'warning');
-
-    const modalOverlay = document.getElementById('modal-overlay');
-    const statsForm = document.getElementById('stats-form');
-    const historyForm = document.getElementById('history-form');
-    const inventoryForm = document.getElementById('inventory-form');
-    const invContent = document.getElementById('inventory-content');
-
-    if(modalOverlay) modalOverlay.style.display = 'block';
-    if(statsForm) statsForm.style.display = 'none';
-    if(historyForm) historyForm.style.display = 'none';
-    if(inventoryForm) inventoryForm.style.display = 'block';
-    
-    if(invContent) invContent.innerHTML = "<div style='padding:30px 0; color:#888;'>กำลังค้นกระเป๋า... 🎒</div>";
-
-    try {
-        const response = await fetch(`${scriptURL}?action=getMyInventory&username=${userData.username}`);
-        const res = await response.json();
-        
-        if (res.status === "success" && invContent) {
-            let html = "";
-            const inventoryData = res.inventory; // ข้อมูลแบบ Object ที่ถูกจัดกลุ่มตามคอลเลกชันแล้ว
-            
-            // ดึงรายชื่อคอลเลกชันทั้งหมดที่มีในกระเป๋าของผู้ใช้คนนี้
-            const collections = Object.keys(inventoryData);
-            
-            if (collections.length > 0) {
-                // 🔄 วนลูปทีละคอลเลกชัน (e.g., BLM48 Limited Coaster "BINGO!", หมวดหมู่อื่นๆ / ทั่วไป)
-                collections.forEach(collectionName => {
-                    const itemsInCollection = inventoryData[collectionName];
-                    
-                    // 🎬 เพิ่มแถบหัวข้อคอลเลกชันในหน้าเว็บ
-                    html += `
-                    <div class="collection-section" style="margin-top: 25px; margin-bottom: 12px; width: 100%;">
-                        <h3 style="margin: 0; padding: 8px 12px; background-color: #fff0f2; border-left: 5px solid #ff4a6b; color: #333; font-size: 14px; font-weight: bold; border-radius: 4px; text-align: left; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
-                            Collection ${collectionName}
-                        </h3>
-                    </div>`;
-                    
-                    // เปิด Grid สำหรับไอเทมภายใต้คอลเลกชันนี้
-                    html += `
-<div class="inventory-grid" style="
-    display: flex; 
-    flex-wrap: nowrap; 
-    overflow-x: auto; 
-    gap: 12px; 
-    padding: 10px 5px; 
-    margin-bottom: 20px;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-">`;
-                    
-                    // วนลูปไอเทมที่เรียงลำดับ A-Z ภายในคอลเลกชันนี้เรียบร้อยแล้ว
-                    itemsInCollection.forEach(item => {
-                        let currentImg = item.img || 'https://placehold.co/150x200?text=BLM48';
-                        
-                        html += `
-                        <div class="inventory-item">
-                            <span class="inventory-qty">x${item.qty}</span>
-                            
-                            <img src="${currentImg}" 
-                                 class="inventory-img" 
-                                 onclick="openImagePreview('${currentImg}', '${item.name}')" 
-                                 style="cursor: pointer;" 
-                                 alt="${item.name}">
-                                 
-                            <div class="inventory-name" style="font-weight: 500;">${item.name}</div>
-                            <div style="font-size:10px; color:#aaa; margin-top:2px;">[${item.type}]</div>
-                        </div>`;
-                    });
-                    
-                    html += `</div>`; // ปิด Grid ของคอลเลกชันนี้
-                });
-            } else {
-                html = `<div style="padding:30px 0; color:#ccc; width:100%; text-align:center;">กระเป๋าว่างเปล่า...<br>ไปช้อปปิ้งกันเถอะ!</div>`;
-            }
-            
-            invContent.innerHTML = html;
-        }
-    } catch (e) {
-        console.error(e);
-        if(invContent) invContent.innerHTML = "<div style='color:red;'>เกิดข้อผิดพลาดในการดึงข้อมูล</div>";
-    }
-}
   
   // ตอนเริ่มโหลด (ถ้าเปิดหน้าเว็บมาให้ตั้ง block ไว้เลยใน HTML หรือสั่งเปิดผ่าน JS)
 document.getElementById('shop-loading-overlay').style.display = 'flex';
