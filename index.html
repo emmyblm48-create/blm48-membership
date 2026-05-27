@@ -374,6 +374,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
 .horizontal-list { 
   display: flex; gap: 12px; padding: 10px 20px; 
   align-items: flex-end; margin: 0 auto;
+  scroll-snap-type: x mandatory;
 }
 .member-card { 
   width: 85px; /* ปรับให้พอดี */
@@ -1050,6 +1051,109 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     margin-top: 20px !important;
     font-family: 'Quicksand', 'Kanit', sans-serif !important;
 }
+    /* ตกแต่งคอนเทนเนอร์หลัก */
+.trending-container {
+  margin: 20px auto;
+  padding: 15px;
+  max-width: 100%;
+}
+
+.trending-title {
+  font-size: 1.2rem;
+  color: #ff6b81; /* สีชมพูน่ารักๆ */
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+/* ตั้งค่าการเลื่อนซ้าย-ขวา */
+.mv-scroller {
+  display: flex;
+  overflow-x: auto;
+  gap: 16px;
+  padding-bottom: 10px;
+  scroll-snap-type: x mandatory;
+  /* ซ่อน Scrollbar ให้ดูคลีน */
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.mv-scroller::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* =========================================
+   ✨ TRENDING MV STYLES (สไตล์กะทัดรัดแบบ Peek เลื่อนขวา)
+   ========================================= */
+.mv-card {
+  position: relative;
+  width: 75vw;
+  max-width: 240px;
+  background: white;
+  padding: 10px;
+  border-radius: 18px;
+  
+  /* 📍 เปลี่ยนจาก center เป็น flex-start เพื่อให้เนื้อหาภายในชิดซ้าย */
+  text-align: left; 
+  
+  border: 2px solid #ffeef2;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  
+  /* 📍 เปลี่ยนเป็น flex-start ให้ Element ลูกเรียงชิดซ้ายทั้งหมด */
+  align-items: flex-start; 
+  
+  flex-shrink: 0;
+}
+
+.mv-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(255, 133, 162, 0.15);
+}
+
+/* รูปปก MV อัตราส่วน 16:9 */
+.mv-thumbnail {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  object-fit: cover;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
+/* ชื่อเพลง (บังคับพื้นที่ 2 บรรทัด + ชิดซ้าย) */
+.mv-title {
+  font-family: 'Quicksand','Kanit', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  color: #444;
+  margin-top: 8px;
+  
+  /* 📍 เทคนิคบังคับให้สูงคงที่เท่ากับ 2 บรรทัดเสมอ (fontSize * lineHeight * 2) */
+  line-height: 1.4;
+  height: calc(12px * 1.4 * 2); /* สูงประมาณ 33.6px */
+  
+  width: 100%;
+  white-space: normal;
+  word-wrap: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* ยาวเกิน 2 บรรทัดจะตัดเป็น ... */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* วันที่ลง MV */
+.mv-date {
+  font-family: 'Quicksand', 'Kanit', sans-serif;
+  font-size: 10px;
+  color: #ff85a2;
+  font-weight: 700;
+  margin-top: 4px;
+  
+  /* 📍 มั่นใจว่าชิดซ้ายแน่นอน */
+  text-align: left; 
+}
     
   </style>
 </head>
@@ -1174,14 +1278,20 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
       </div>
     </div>
 
-<div class="section-title">🏆 Member Ranking</div>
+<div class="section-title"> Member Ranking</div>
 <div class="ranking-wrapper">
   <div id="ranking-list" class="horizontal-list"></div>
 </div>
  
-<div class="section-title">💖 Top Fans</div>
+<div class="section-title"> Top Fans</div>
 <div class="ranking-wrapper">
   <div id="global-fan-list" class="horizontal-list"></div>
+</div>
+  
+<div class="section-title"> Trending MV</div>
+<div class="ranking-wrapper">
+  <div id="mv-scroller" class="horizontal-list" style="align-items: flex-start;">
+    </div>
 </div>
 
 <i class="fas fa-pencil-alt edit-icon" id="edit-name-btn" onclick="updateDisplayName()" style="display: none;"></i>
@@ -1388,6 +1498,9 @@ window.addEventListener('DOMContentLoaded', () => {
     checkVersion(); 
     if (typeof updateUI === 'function') updateUI();
     
+    // ✨ เพิ่มคำสั่งวาดหน้าต่าง Trending MV ตรงนี้ครับ ✨
+    if (typeof renderTrendingMVs === 'function') renderTrendingMVs();
+    
     // วาดตารางจากแคชในเครื่องรอทันทีเว็บจะได้ดูโหลดเร็วขึ้น
     if (Array.isArray(currentRankingData) && currentRankingData.length > 0) {
       if (typeof renderRanking === 'function') renderRanking(currentRankingData);
@@ -1476,6 +1589,80 @@ function updateUI() {
 </button>
     </div>
   `;
+}
+  
+// ข้อมูล MV ของ BLM48 (ใส่รูปปก ชื่อเพลง และลิงก์ YouTube ได้เลย)
+const blm48MVs = [
+  { 
+    title: "【Cover】Sustainable ( Thai Version ) / BLM48 ", 
+    date: "25 April 2026",
+    image: "https://lh3.googleusercontent.com/d/1WXp1ZbzQ8ib1gb3imrDGQ7KjnFJZUaOO=s1000",
+    link: "https://youtu.be/1Vwg1iQUDtc?si=kVNFI4TQdqiNF-Zs"
+  },
+  { 
+    title: "【Cover】Celebration / BLM48 ", 
+    date: "4 April 2026",
+    image: "https://lh3.googleusercontent.com/d/11zU0OJFxJ9WFzqQvfrqPJrCUUyG-KJZJ=s1000",
+    link: "https://youtu.be/TAPlWWZMGFQ?si=v7ikM7O89ftDQ2S8"
+  },
+  { 
+    title: "【Cover】Sekai no Hito e - ถึงบรรเลง..ถ้อยเพลงของเรา ( Thai ver. ) / BLM48 ", 
+    date: "21 March 2026",
+    image: "https://lh3.googleusercontent.com/d/1wD34e9W6bHHuf9SJ_qBf6I_4e-c_oLen=s1000",
+    link: "https://youtu.be/tqFr0QPgqR0?si=31bFJP2MmgCRiFre"
+  },
+  { 
+    title: "【Male Cover】Eien Pressure – ผูกพันนิรันดร์ / BLM48 ", 
+    date: "28 February 2026",
+    image: "https://lh3.googleusercontent.com/d/1-GMwAgsjKBORWgEHNKPUyecvDRo1w-Gc=s1000",
+    link: "https://www.youtube.com/watch?v=-rhmBTZoZk0"
+  },
+  { 
+    title: "【Cover】Oh my pumpkin! ( CGM48 Version ) / BLM48 ", 
+    date: "15 February 2026",
+    image: "https://lh3.googleusercontent.com/d/1RUXDQSqKG43mWcJ01uNmwDMj8ARugdwS=s1000",
+    link: "https://youtu.be/03UW5ok6de4?si=c5vM4PtXGipCbO1O"
+  },
+  { 
+    title: "【Cover】Bingo! ( Thai ver. ) / BLM48 ", 
+    date: "31 January 2026",
+    image: "https://lh3.googleusercontent.com/d/1UY2KxZBjcAQQJc2XHUvmtsGNG9rSFn5A=s1000",
+    link: "https://youtu.be/QaxSjLIxcSE?si=8G7rfyE3_mxaQ6sH"
+  },
+  { 
+    title: "【Cover】Sasameyuki Regret - ความในใจที่มี Regret ( Thai Ver. ) / BLM48 ", 
+    date: "20 December 2025",
+    image: "https://lh3.googleusercontent.com/d/15-dAe_lbzf8E5Nu1d0pCDOYsYE7dH2tK=s1000",
+    link: "https://youtu.be/Q5Chm71CyjA?si=AXAKDmY4zXjWg3eX"
+  }
+];
+
+function renderTrendingMVs() {
+  const scroller = document.getElementById('mv-scroller');
+  if (!scroller) return;
+
+  // จำกัดให้ดึงข้อมูลมาสูงสุดแค่ 7 อัน
+  const displayMVs = blm48MVs.slice(0, 7);
+
+  displayMVs.forEach(mv => {
+    // สร้างโครงสร้างการ์ด
+    const card = document.createElement('div');
+    card.className = 'mv-card';
+    
+    // ใส่รูป ชื่อเพลง และวันที่ พร้อมไอคอนปฏิทิน
+    card.innerHTML = `
+      <img src="${mv.image}" alt="MV Cover" class="mv-thumbnail">
+      <div class="mv-date"><i class="far fa-calendar-alt"></i> ${mv.date}</div>
+      <div class="mv-title">${mv.title}</div>     
+    `;
+    
+    // คำสั่งตั้งค่าให้กดที่การ์ดแล้วเปิดหน้าต่างใหม่ไปยังลิงก์ที่ตั้งไว้
+    if(mv.link) {
+      card.onclick = () => window.open(mv.link, '_blank');
+    }
+
+    scroller.appendChild(card);
+  });
 }
   
 function showMembershipCardModal() {
