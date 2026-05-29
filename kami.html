@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta charset="UTF-8">
     <title>BLM48 Membership | My Kami-Oshi Members</title>
   <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s32">
@@ -358,6 +358,101 @@
             0%, 100% { opacity: 0.6; transform: scale(1); }
             50% { opacity: 1; transform: scale(0.99); }
         }
+
+        .icon-wrapper {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .noti-badge {
+          position: absolute;
+          top: -2px;
+          right: -2px;
+          width: 8px;
+          height: 8px;
+          background-color: #ff4d6d;
+          border-radius: 50%;
+          border: 1px solid white;
+          z-index: 10;
+        }
+        /* แถบเมนูด้านล่างดีไซน์ลอยตัวแบบ Floating Island ☁️ */
+.bottom-tab-bar {
+    position: fixed;
+    bottom: 24px; /* ลอยขึ้นมาจากขอบล่างให้มีช่องไฟสวยๆ */
+    left: 50%;
+    transform: translateX(-50%); /* จัดให้อยู่กึ่งกลางหน้าจอเสมอ */
+    width: 90%; /* ความกว้างยืดหยุ่นตามหน้าจอมือถือ */
+    max-width: 440px; /* จำกัดความกว้างสูงสุดไม่ให้แผ่กว้างเกินไปบนแท็บเล็ต */
+    height: 68px;
+    background: rgba(255, 255, 255, 0.92); /* ขาวนวลแบบโปร่งแสงนิดๆ */
+    backdrop-filter: blur(10px); /* เอฟเฟกต์กระจกฝ้าเบลอหลังบ้าน */
+    -webkit-backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-radius: 35px; /* ทำขอบมนกลมแบบโค้งมนสุดๆ */
+    border: 1px solid rgba(255, 204, 213, 0.5); /* เส้นขอบชมพูบางๆ */
+    box-shadow: 0 10px 30px rgba(255, 133, 162, 0.15); /* เงาฟุ้งละมุนตา */
+    z-index: 1000;
+    padding: 0 10px;
+    box-sizing: border-box;
+    touch-action: manipulation;
+}
+
+/* สไตล์ปุ่มเมนูทั่วไป 🎀 */
+.tab-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px; /* ระยะห่างระหว่างไอคอนกับตัวหนังสือ */
+    color: #ffb3c1; /* สีชมพูพาสเทลตอนยังไม่ได้กดเลือก */
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-family: 'Quicksand', 'Kanit', sans-serif;
+    font-weight: 600;
+    padding: 10px 14px;
+    border-radius: 25px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* แอนิเมชันตอนกดสลับคลาส */
+    -webkit-tap-highlight-color: transparent;
+}
+
+.tab-item i {
+    font-size: 1.25rem;
+    transition: transform 0.2s;
+}
+
+/* ซ่อนข้อความของเมนูอื่นไว้ก่อน จะเปิดโชว์เฉพาะเมนูที่กำลังกดเลือก (Active) เท่านั้น 🌟 */
+.tab-item span {
+    display: none;
+}
+
+/* ดีไซน์เอฟเฟกต์แคปซูลเมื่อกดเลือกเมนู (Active) ❤️ */
+.tab-item.active {
+    background-color: #fff0f3; /* พื้นหลังป้ายแคปซูลสีชมพูนมระื่อๆ */
+    color: #ff85a2; /* สีชมพูเข้มเด่นชัด */
+}
+
+/* เปิดแสดงตัวหนังสือเฉพาะเมนูที่เปิดใช้อยู่ตามต้นฉบับแอปโมเดิร์น */
+.tab-item.active span {
+    display: inline-block;
+    animation: fadeInText 0.2s ease-in-out;
+}
+
+.tab-item:active i {
+    transform: scale(0.9); /* ยุบตัวลงเล็กน้อยตอนเอานิ้วกดให้ความรู้สึกสมจริง */
+}
+
+/* เพิ่มแอนิเมชันให้ตัวหนังสือค่อยๆ ปรากฏขึ้นตอนเปลี่ยนหน้า */
+@keyframes fadeInText {
+    from { opacity: 0; transform: translateX(-4px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* ดันเนื้อหาคอนเทนต์หลักขึ้นไป เพื่อไม่ให้ดีไซน์ที่ลอยอยู่ไปบังโพสต์ด้านหลัง */
+body {
+    padding-bottom: 110px !important;
+}
     </style>
 </head>
 <body>
@@ -393,7 +488,27 @@
   <div style="font-weight: 700; color: #888; margin-bottom: 5px;">BLM48 MEMBERSHIP</div>
   <div>© 2026 Virtual Idol Cover Group</div>
 </footer>
-
+    
+    <div class="bottom-tab-bar">
+      <a href="index.html" class="tab-item">
+        <i class="fa-solid fa-house"></i>
+      </a>
+      <a href="kami.html" class="tab-item active">
+        <i class="fa-solid fa-star"></i>
+      </a>
+      <a href="shop.html" class="tab-item">
+        <i class="fa-solid fa-bag-shopping"></i>
+      </a>
+      <a href="notification.html" class="tab-item">
+        <div class="icon-wrapper">
+          <i class="fa-solid fa-bell"></i>
+          <span class="noti-badge" id="noti-badge" style="display: none;"></span>
+        </div>
+      </a>
+      <a href="profile.html" class="tab-item">
+        <i class="fa-solid fa-user"></i>
+      </a>
+    </div>
     <script>
         const scriptURL = 'https://script.google.com/macros/s/AKfycbxF5G3E1HWhVTQOVGzWtsqSCZfXkq8ZrX6DqGKt_pcicYbi2_59B-ecEeeTU6-aqBEf/exec';
         
@@ -436,7 +551,7 @@
     if (user.profile_img && user.profile_img.toString().trim() !== "") {
         document.getElementById('user-avatar').src = user.profile_img;
     } else {
-        document.getElementById('user-avatar').src = "https://lh3.googleusercontent.com/d/1rebp2F8vyP0nyvsEOFD9Nw2mPcRtVqtG=s1000";
+        document.getElementById('user-avatar').src = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150";
     }
     
     // 2. ดึงชื่อเล่น/ชื่อจริงของเมมเบอร์มาแสดง
@@ -642,6 +757,22 @@
                 Swal.fire('ล้มเหลว!', 'ระบบติดต่อตารางข้อมูลขัดข้อง กรุณาลองอีกครั้งนะงับ', 'error');
             }
         }
+
+        function checkNotificationBadge() {
+  const hasNewNoti = localStorage.getItem("blm48_has_new_noti");
+  const badgeElement = document.getElementById("global-noti-badge");
+  
+  if (badgeElement) {
+    if (hasNewNoti === "true") {
+      badgeElement.style.display = "block"; // 🔴 มีแจ้งเตือนใหม่ -> แสดงจุดแดง
+    } else {
+      badgeElement.style.display = "none";  // ⚪ ไม่มีแจ้งเตือน -> ซ่อนไปเลย
+    }
+  }
+}
+
+// สั่งให้ระบบเช็กสถานะจุดแจ้งเตือนทุกครั้งที่เปิดหน้านี้ขึ้นมา
+document.addEventListener("DOMContentLoaded", checkNotificationBadge);
     </script>
 </body>
 </html>

@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Create Post | BLM48</title>
+  <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s32">
+  <meta name="theme-color" content="#ffc0cb">
+  <meta name="apple-mobile-web-app-title" content="BLM48">   
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <style>
+    body { 
+      font-family: 'Quicksand', 'Kanit', sans-serif;  
+      background-color: #fff0f5; 
+      padding: 20px; 
+      margin: 0;
+    }
+    .post-container { 
+      max-width: 500px; 
+      margin: 40px auto; 
+      background: white; 
+      padding: 24px; 
+      border-radius: 24px; 
+      box-shadow: 0 8px 24px rgba(255, 133, 162, 0.12); 
+    }
+    .header {
+      position: relative;
+      text-align: center;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #ff85a2;
+      margin-bottom: 24px;
+      letter-spacing: 0.5px;
+    }
+    .back-icon {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.2rem;
+      color: #ff85a2;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .back-icon:hover {
+      opacity: 0.6;
+    }
+    textarea { 
+      width: 100%; 
+      height: 140px; 
+      border: 1px solid #ffccd5; 
+      border-radius: 16px; 
+      padding: 16px; 
+      font-family: inherit; 
+      font-size: 0.95rem;
+      resize: none; 
+      box-sizing: border-box;
+      background-color: #fffbfb;
+      transition: all 0.2s ease;
+    }
+    textarea:focus { 
+      outline: none; 
+      border-color: #ff85a2; 
+      background-color: white;
+      box-shadow: 0 0 0 3px rgba(255, 133, 162, 0.1);
+    }
+    
+    /* Media Sections styling */
+    .media-section {
+      margin-top: 20px;
+    }
+    .section-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #ff85a2;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    /* Custom Upload Button & Wrappers */
+    .custom-file-upload {
+      border: 2px dashed #ffccd5;
+      color: #ff85a2;
+      background-color: #fffbfb;
+      padding: 12px;
+      border-radius: 14px;
+      width: 100%;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-sizing: border-box;
+      transition: all 0.2s;
+    }
+    .custom-file-upload:hover {
+      border-color: #ff85a2;
+      background-color: #fff5f7;
+    }
+    .hidden-input {
+      display: none;
+    }
+    
+    /* Image Preview Tray */
+    #image-preview-container {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      margin-top: 10px;
+      padding: 4px 0;
+    }
+    
+    /* Audio Recorder UI */
+    .audio-recorder-box {
+      background: #fff5f7;
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px dashed #ff85a2;
+      box-sizing: border-box;
+    }
+    .recorder-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .btn-record {
+      background: #ff85a2;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+    .btn-record.recording {
+      background: #6c757d;
+    }
+    .record-status {
+      font-size: 0.85rem;
+      color: #7a7a7a;
+      font-weight: 500;
+    }
+    audio {
+      margin-top: 12px;
+      width: 100%;
+      height: 36px;
+    }
+    
+    /* Action Button */
+    .btn-submit-full {
+      width: 100%;
+      height: 48px;
+      background-color: #ff85a2;
+      color: white;
+      border: none;
+      border-radius: 24px;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-top: 28px;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 12px rgba(255, 133, 162, 0.25);
+      transition: all 0.2s;
+    }
+    .btn-submit-full:hover {
+      background-color: #ff6b8b;
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body>
+
+<div class="post-container">
+  <div class="header">
+    <i class="fa-solid fa-chevron-left back-icon" onclick="window.location.href='index.html'"></i>
+    New Post
+  </div>
+  
+  <textarea id="post-content" placeholder="Share something with the community..."></textarea>
+  
+  <div class="media-section">
+    <div class="section-label">
+      <i class="fa-regular fa-image"></i> Add Gallery
+    </div>
+    <label for="post-image" class="custom-file-upload">
+      <i class="fa-solid fa-cloud-arrow-up"></i> Choose Images
+    </label>
+    <input type="file" id="post-image" class="hidden-input" accept="image/*" multiple onchange="previewMultipleImages(this)">
+    <div id="image-preview-container"></div>
+  </div>
+
+  <div class="media-section">
+    <div class="audio-recorder-box">
+      <div class="section-label">
+        <i class="fa-solid fa-microphone"></i> Voice Note
+      </div>
+      <div class="recorder-controls">
+        <button type="button" id="btn-record" class="btn-record">
+          <i class="fa-solid fa-circle" id="record-icon"></i> <span id="record-btn-text">Record</span>
+        </button>
+        <span id="record-status" class="record-status">Ready</span>
+      </div>
+      <audio id="audio-preview" controls style="display: none;"></audio>
+    </div>
+  </div>
+
+  <button class="btn-submit-full" onclick="submitPost()">Publish Post</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+
+  const SUPABASE_URL = "https://kmolgfghbviwxqlhnlku.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imttb2xnZmdoYnZpd3hxbGhubGt1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5NzE2NzgsImV4cCI6MjA5NTU0NzY3OH0.BlGST7XnJKw5aIb1mlVx9-yMtOwVmWc0gSUNZr2gqw0";
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAx5JlVGm_IpuOhksQMTA6qli9vR-5rNas",
+    authDomain: "blm48-official-site.firebaseapp.com",
+    projectId: "blm48-official-site",
+    databaseURL: "https://blm48-official-site-default-rtdb.asia-southeast1.firebasedatabase.app/",
+    storageBucket: "blm48-official-site.firebasestorage.app",
+    messagingSenderId: "924510827472",
+    appId: "1:924510827472:web:d2a5b5dcf0683a5c73ffd5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const IMGBB_API_KEY = "80ad839da07973eeefee57af54fc9f6d";
+
+  async function uploadImageToImgBB(file) {
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+      method: "POST",
+      body: formData
+    });
+
+    const result = await response.json();
+    if (result.success) {
+      return result.data.url;
+    } else {
+      throw new Error("ImgBB Upload Failed: " + result.error.message);
+    }
+  }
+
+  // ฟังก์ชันอัปโหลดไฟล์เสียงไปยัง Supabase Storage
+    async function uploadToSupabaseStorage(fileBlob, folderName, fileExtension) {
+    const fileName = `${folderName}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExtension}`;
+    
+    const { data, error } = await supabaseClient.storage
+      .from('posts-media')
+      .upload(fileName, fileBlob, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (error) throw new Error("Upload Error: " + error.message);
+
+    // 🌟 อันนี้คือตัวการสำคัญ: getPublicUrl ต้องออกมาเป็นรูปแบบไม่มี /sign/ 
+    const { data: publicUrlData } = supabaseClient.storage
+      .from('posts-media')
+      .getPublicUrl(fileName);
+
+    return publicUrlData.publicUrl; 
+  }
+  
+  function getUserSession() {
+    try {
+      const sessionStr = localStorage.getItem('bnl_session');
+      if (!sessionStr) return null;
+      
+      const session = JSON.parse(sessionStr);
+      const expiryTime = session.expiry || session.expire;
+      if (expiryTime && new Date().getTime() > expiryTime) {
+        localStorage.removeItem('bnl_session');
+        return null;
+      }
+      
+      return session.data || session.user || session;
+    } catch (e) {
+      console.error("Session Parse Error:", e);
+      return null;
+    }
+  }
+  
+  let mediaRecorder;
+  let audioChunks = [];
+  let recordedAudioBlob = null; 
+
+  const btnRecord = document.getElementById('btn-record');
+  const recordIcon = document.getElementById('record-icon');
+  const recordBtnText = document.getElementById('record-btn-text');
+  const recordStatus = document.getElementById('record-status');
+  const audioPreview = document.getElementById('audio-preview');
+
+  // Audio Recording Controller
+  btnRecord.addEventListener('click', async () => {
+    if (!mediaRecorder || mediaRecorder.state === "inactive") {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+        
+        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+        mediaRecorder.onstop = () => {
+          recordedAudioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+          audioPreview.src = URL.createObjectURL(recordedAudioBlob);
+          audioPreview.style.display = "block";
+          recordStatus.innerText = "Audio recorded successfully";
+        };
+        
+        mediaRecorder.start();
+        btnRecord.classList.add('recording');
+        recordIcon.className = "fa-solid fa-square";
+        recordBtnText.innerText = "Stop";
+        recordStatus.innerText = "Recording...";
+      } catch (err) {
+        console.error("Microphone access denied:", err);
+        Swal.fire('Permission Denied', 'Unable to access microphone.', 'error');
+      }
+    } else {
+      mediaRecorder.stop();
+      btnRecord.classList.remove('recording');
+      recordIcon.className = "fa-solid fa-circle";
+      recordBtnText.innerText = "Record";
+    }
+  });
+
+  // Image Preview Renderer
+  window.previewMultipleImages = function(input) {
+    const container = document.getElementById('image-preview-container');
+    container.innerHTML = '';
+    
+    if (input.files && input.files.length > 0) {
+      Array.from(input.files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.style.width = '80px';
+          img.style.height = '80px';
+          img.style.objectFit = 'cover';
+          img.style.borderRadius = '12px';
+          img.style.border = '1px solid #ffccd5';
+          container.appendChild(img);
+        }
+        reader.readAsDataURL(file);
+      });
+    }
+  }
+
+  // Submit Logic
+  window.submitPost = async function() {
+    const content = document.getElementById('post-content').value.trim();
+    const currentUser = getUserSession();
+
+    if (!currentUser || !currentUser.username) {
+      Swal.fire({
+        title: 'Session Expired',
+        text: 'Please log in again to continue.',
+        icon: 'warning',
+        confirmButtonColor: '#ff85a2'
+      });
+      return;
+    }
+
+    const activeUsername = currentUser.username;
+    const imageInput = document.getElementById('post-image');
+    const imageFiles = imageInput ? imageInput.files : [];
+
+    // แก้ไขเงื่อนไขการเช็กข้อมูลว่าง (ไม่มีวิดีโอแล้ว)
+    if (!content && imageFiles.length === 0 && !recordedAudioBlob) {
+      Swal.fire('Empty Content', 'Please write a message or add media before publishing.', 'info');
+      return;
+    }
+
+    Swal.fire({
+      title: 'Publishing Post',
+      text: 'Uploading media assets and updating timeline. Please wait...',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading()
+    });
+
+    let imageUrlString = "";
+    let finalAudioUrl = "";
+
+    try {
+      // 1. อัปโหลดรูปภาพเข้า ImgBB
+      if (imageFiles.length > 0) {
+        let uploadedUrls = [];
+        for (let i = 0; i < imageFiles.length; i++) {
+          try {
+            const url = await uploadImageToImgBB(imageFiles[i]);
+            if (url) uploadedUrls.push(url);
+          } catch (err) {
+            console.error(`Upload error on image ${i+1}:`, err);
+          }
+        }
+        imageUrlString = uploadedUrls.join(',');
+      }
+
+      // 2. อัปโหลดไฟล์เสียงเข้า Supabase Storage
+      if (recordedAudioBlob) {
+        finalAudioUrl = await uploadToSupabaseStorage(recordedAudioBlob, 'audios', 'mp3');
+      }
+
+      // 3. ส่งข้อมูลชุดสุดท้ายไปบันทึกที่หลังบ้าน Google App Script ของเอ็มมี่ (ส่ง videoURL เป็นค่าว่างไปเลย)
+      const scriptURL = 'https://script.google.com/macros/s/AKfycbxF5G3E1HWhVTQOVGzWtsqSCZfXkq8ZrX6DqGKt_pcicYbi2_59B-ecEeeTU6-aqBEf/exec';
+      
+      const params = new URLSearchParams();
+      params.append('action', 'createPost');
+      params.append('username', activeUsername);
+      params.append('content', content);
+      params.append('imageUrl', imageUrlString);
+      params.append('audioURL', finalAudioUrl);
+      params.append('videoURL', ''); // ส่งค่าว่างไปที่คอลัมน์วิดีโอเพื่อไม่ให้โครงสร้างสคริปต์หลังบ้านพังงับ ✨
+
+      const resp = await fetch(scriptURL, {
+        method: 'POST',
+        body: params,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      });
+
+      const data = await resp.json();
+
+      if (data.status === "success") {
+        Swal.fire({
+          title: 'Success',
+          text: 'Your post has been published successfully.',
+          icon: 'success',
+          confirmButtonColor: '#ff85a2'
+        }).then(() => {
+          window.location.href = "index.html"; 
+        });
+      } else {
+        Swal.fire('Server Error', data.message || 'Unable to complete request.', 'error');
+      }
+
+    } catch (error) {
+      console.error("Submission Failure:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error Occurred',
+        text: error.message || 'A system fault occurred during transmission. Please try again.'
+      });
+    }
+  }
+</script>
+</body>
+</html>
