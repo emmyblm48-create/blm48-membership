@@ -1162,130 +1162,6 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
   border: 1px solid white;
   z-index: 10;
 }
-    
-    /* 🌟 สไตล์กล่องโพสต์สำหรับ Champ of the Month */
-.champ-special-post {
-    background: linear-gradient(to bottom, #fffdf0, #ffffff) !important;
-    border: 2px solid #d4af37 !important; /* ขอบสีทอง */
-    box-shadow: 0 8px 20px rgba(212, 175, 55, 0.15) !important;
-    position: relative;
-    overflow: hidden;
-}
-
-/* 👑 ป้ายแบนเนอร์เล็กๆ บนโพสต์ */
-.champ-post-badge {
-    background: linear-gradient(135deg, #d4af37, #ffd700);
-    color: #fff;
-    font-size: 11px;
-    font-weight: bold;
-    padding: 4px 12px;
-    border-radius: 0 0 10px 0;
-    position: absolute;
-    top: 0;
-    left: 0;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
-    z-index: 10;
-}
-/* =========================================
-   🍪 CUTE MONTHLY COOKIE COUNTDOWN WIDGET
-   ========================================= */
-.cookie-countdown-container {
-  background: linear-gradient(135deg, #fff0f3 0%, #fffbf2 100%);
-  border: 2px dashed #ffb6c1;
-  border-radius: 24px;
-  padding: 20px;
-  margin: 15px 20px;
-  display: flex;
-  flex-direction: column; /* เรียงเป็นแนวตั้งจากบนลงล่าง */
-  align-items: center;    /* จัดทุกอย่างให้อยู่กึ่งกลางแนวนอน */
-  justify-content: center;
-  text-align: center;     /* จัดตัวหนังสือให้อยู่ตรงกลาง */
-  box-shadow: 0 8px 20px rgba(255, 133, 162, 0.08);
-  position: relative;
-  overflow: hidden;
-}
-
-/* หัวข้อหลักด้านบนสุด */
-.countdown-label {
-  font-size: 15px;
-  font-weight: 800;
-  color: #ff6b8b;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  letter-spacing: 0.5px;
-  margin-bottom: 2px;
-}
-
-.countdown-label i {
-  animation: cookieBounce 1.2s infinite ease-in-out;
-}
-
-/* รายละเอียดข้อความด้านล่างหัวข้อหลัก */
-.countdown-subtitle {
-  font-size: 11px;
-  color: #a39095;
-  font-weight: 600;
-  margin-bottom: 12px; /* เว้นระยะห่างก่อนถึงตัวเลขเวลา */
-}
-
-/* กล่องตัวเลขนับถอยหลังด้านล่างสุด */
-.countdown-timer-box {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  justify-content: center;
-}
-
-.time-segment {
-  background: #ffffff;
-  border: 1px solid #ffe1e7;
-  border-radius: 12px;
-  padding: 6px 10px;
-  min-width: 45px;
-  text-align: center;
-  box-shadow: 0 4px 8px rgba(255, 133, 162, 0.04);
-}
-
-.time-val {
-  font-family: 'Quicksand', sans-serif;
-  font-size: 17px;
-  font-weight: 700;
-  color: #ff85a2;
-  display: block;
-  line-height: 1.2;
-}
-
-.time-lbl {
-  font-size: 8px;
-  color: #ccb2b7;
-  text-transform: uppercase;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-}
-
-.time-separator {
-  color: #ffb6c1;
-  font-weight: bold;
-  font-size: 16px;
-  margin-bottom: 12px; /* ขยับจุดคู่ลำดับให้อยู่กึ่งกลางกล่องตัวเลข */
-  animation: blink 1s infinite;
-}
-
-/* แอนิเมชันดุ๊กดิ๊กน่ารักๆ */
-@keyframes cookieBounce {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-4px) rotate(15deg); }
-}
-
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
-}
   </style>
 </head>
 <body>
@@ -1330,47 +1206,14 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
 <div class="champ-banner" onclick="window.location.href='champ.html'">
       <div class="champ-info">
         <div class="champ-badge"><i class="fas fa-crown"></i> Champ of the Month</div>
-        <div class="champ-title" id="home-champ-name"></div>
-        <div class="champ-month" id="home-champ-month"></div>
+        <div class="champ-title" id="home-champ-name">Mushroom</div>
+        <div class="champ-month" id="home-champ-month">ประจำเดือนกุมภาพันธ์</div>
         <button class="champ-btn-view">view more <i class="fas fa-chevron-right"></i></button>
       </div>
       <div class="champ-img-container">
-        <img id="home-champ-img" class="champ-img" alt="Champ">
+        <img src="https://lh3.googleusercontent.com/d/1h1eW8OP8UOaJm8kRK-13t-1Z_WhNluy9=s400" id="home-champ-img" class="champ-img" alt="Champ">
       </div>
-</div>
-
-  <div class="cookie-countdown-container">
-  
-  <div class="countdown-label">
-    <i class="fas fa-cookie-bite" style="color: #d2691e;"></i> 
-    <span>MONTHLY FINALE!</span>
-  </div>
-  
-  <div class="countdown-subtitle" id="countdown-month-text">Calculating cycle...</div>
-  
-  <div class="countdown-timer-box">
-    <div class="time-segment">
-      <span class="time-val" id="cd-days">00</span>
-      <span class="time-lbl">Days</span>
     </div>
-    <span class="time-separator">:</span>
-    <div class="time-segment">
-      <span class="time-val" id="cd-hours">00</span>
-      <span class="time-lbl">Hrs</span>
-    </div>
-    <span class="time-separator">:</span>
-    <div class="time-segment">
-      <span class="time-val" id="cd-mins">00</span>
-      <span class="time-lbl">Mins</span>
-    </div>
-    <span class="time-separator">:</span>
-    <div class="time-segment">
-      <span class="time-val" id="cd-secs">00</span>
-      <span class="time-lbl">Secs</span>
-    </div>
-  </div>
-  
-</div>
 
 <div class="section-title"> Member Ranking</div>
 <div class="ranking-wrapper">
@@ -2033,91 +1876,6 @@ function renderGlobalFans(rawData) {
     list.appendChild(card);
   });
 }
-  
-  async function loadLatestChampForBanner() {
-    try {
-        const now = new Date().getTime();
-        const cacheKey = 'blm_latest_champ_data';
-        const cacheTimeKey = 'blm_latest_champ_timestamp';
-        
-        // ⏳ ตั้งเวลาล้าง Cache อัตโนมัติ (เช่น 3600000 มิลลิวินาที = 1 ชั่วโมง)
-        // ถ้าอยากให้อยู่ได้ 1 วันเต็มๆ ให้เปลี่ยนเป็น: 24 * 60 * 60 * 1000
-        const CACHE_DURATION = 1 * 60 * 60 * 1000; 
-
-        // 1. ตรวจสอบว่าเคยเซฟข้อมูลไว้ในเครื่องหรือยัง และหมดอายุหรือยัง?
-        const cachedData = localStorage.getItem(cacheKey);
-        const cachedTime = localStorage.getItem(cacheTimeKey);
-
-        if (cachedData && cachedTime && (now - cachedTime < CACHE_DURATION)) {
-            // 🔥 ดึงข้อมูลจากความจำเครื่องมาใช้ทันทีหน้าเว็บจะขึ้นไวมาก!
-            const latestChamp = JSON.parse(cachedData);
-            updateChampBannerUI(latestChamp);
-            return; // จบการทำงาน ไม่ต้องโหลดเซิร์ฟเวอร์
-        }
-
-        // 2. ถ้าไม่มีข้อมูลในเครื่อง หรือข้อมูลหมดอายุแล้ว ค่อยไปเรียก API ตัวจริง
-        const response = await fetch(`${scriptURL}?action=getChampOfTheMonth`);
-        const result = await response.json();
-
-        if (result.status === "success" && result.data.length > 0) {
-            const latestChamp = result.data[0]; 
-            
-            // 💾 เซฟข้อมูลและเวลาปัจจุบันเก็บลงเครื่องผู้ใช้
-            localStorage.setItem(cacheKey, JSON.stringify(latestChamp));
-            localStorage.setItem(cacheTimeKey, now.toString());
-
-            // สั่งอัปเดตหน้าจอ
-            updateChampBannerUI(latestChamp);
-        }
-    } catch (error) {
-        console.error("Load Champ Banner Error:", error);
-    }
-}
-
-function updateChampBannerUI(latestChamp) {
-    // 1. ใส่ชื่อและเดือนสแตนด์บายไว้ก่อนเลย
-    document.getElementById('home-champ-name').innerText = latestChamp.name || latestChamp.Name || "";
-    document.getElementById('home-champ-month').innerText = latestChamp.monthYear || latestChamp.Month_Year || "";
-    
-    // 2. ตรวจสอบคอลัมน์รูปภาพจากข้อมูลหลังบ้าน (เช็กทั้ง postimage และคอลัมน์ภาษาไทย)
-    let imgUrl = latestChamp.postimage || latestChamp.profileImage || latestChamp.profile || latestChamp.รูปจากไดร์ฟ || latestChamp.ImageURL;
-    const imgElement = document.getElementById('home-champ-img');
-
-    if (imgElement) {
-        if (imgUrl && imgUrl.trim() !== "") {
-            imgUrl = imgUrl.trim();
-
-            // 🔥 [ทีเด็ด] ถ้าตรวจพบว่าเป็นลิงก์ Google Drive ทั่วไป แปลงเป็น Direct Link ให้โหลดเร็วขึ้นทันที
-            if (imgUrl.includes('drive.google.com')) {
-                const driveIdMatch = imgUrl.match(/\/d\/([^/]+)/) || imgUrl.match(/id=([^&]+)/);
-                if (driveIdMatch && driveIdMatch[1]) {
-                    // แปลงรูปแบบลิงก์ให้กลายเป็น CDN ของ Google ที่โหลดรูปภาพได้ไวที่สุด
-                    imgUrl = `https://lh3.googleusercontent.com/d/${driveIdMatch[1]}`;
-                }
-            }
-
-            // สั่งโหลดรูปภาพจริง
-            imgElement.src = imgUrl;
-
-            // 🛠️ ถ้ารูปภาพโหลดนานเกินไปแล้วพัง หรือลิงก์เสีย ดักให้เปลี่ยนเป็นรูป Default ทันทีหน้าเว็บจะไม่ค้าง
-            imgElement.onerror = function() {
-                this.src = "https://i.ibb.co/Q7xY9sX9/profile.jpg"; // ใส่ URL รูปภาพเริ่มต้นของคุณตรงนี้
-            };
-
-        } else {
-            // ถ้าระบบหลังบ้านไม่มีข้อมูลรูปภาพ ให้แสดงรูป Default
-            imgElement.src = "https://i.ibb.co/Q7xY9sX9/profile.jpg";
-        }
-    }
-
-    // 3. ตั้งค่าปุ่มลิงก์เปลี่ยนหน้า
-    const champBanner = document.querySelector('.champ-banner');
-    if (champBanner) {
-        champBanner.onclick = () => {
-            window.location.href = `specialthanks.html?index=0&name=${encodeURIComponent(latestChamp.name || latestChamp.Name)}`;
-        };
-    }
-}
 
 // เอาฟังก์ชันนี้ไปวางใน <script> ของหน้า index.html แทนตัวเดิมนะงับ
 function openMemberProfile(name) {
@@ -2299,24 +2057,6 @@ function renderPost(post) {
   const displayImage = post.imageUrl || post.imageURL || '';
   const heartClass = post.isLiked ? 'fa-solid' : 'fa-regular';
 
-  // =========================================================================
-  // 👑 [ตรวจสอบเงื่อนไขและเตรียมป้ายพิเศษสำหรับ Champ of the Month]
-  // =========================================================================
-  const isChampPost = post.isSpecialThanks === true || post.type === 'special_thanks';
-  const postContainerClass = isChampPost ? 'post-card champ-special-post' : 'post-card';
-  
-  // สร้างริบบิ้นแบนเนอร์สีทองติดที่มุมซ้ายบนของโพสต์
-  const specialBadge = isChampPost ? `
-    <div class="champ-post-badge" style="background: linear-gradient(135deg, #d4af37, #ffd700); color: #fff; font-size: 11px; font-weight: bold; padding: 5px 12px; border-radius: 0 0 10px 0; position: absolute; top: 0; left: 0; display: inline-flex; align-items: center; gap: 5px; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); z-index: 10;">
-      <i class="fas fa-crown"></i> Champ of the Month Special Thanks
-    </div>
-  ` : '';
-
-  // กำหนดสไตล์ของการ์ดโพสต์ (ถ้าเป็นแชมป์ จะได้การ์ดธีมทอง-ครีม ไล่เฉดสีหรูหรา)
-  const champCardStyle = isChampPost 
-    ? `background: linear-gradient(to bottom, #fffdf0, #ffffff); border: 2px solid #d4af37; box-shadow: 0 8px 20px rgba(212, 175, 55, 0.15); margin-top: 25px; overflow: hidden;` 
-    : `background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05);`;
-
   const verifiedBadgeIcon = `
     <svg style="width: 14px; height: 14px; fill: #0095f6; vertical-align: middle; margin-left: 4px; display: inline-block;" viewBox="0 0 24 24" title="Verified Member">
       <path d="M23,12L20.56,9.22L20.9,5.54L17.29,4.72L15.4,1.54L12,3L8.6,1.54L6.71,4.72L3.1,5.53L3.44,9.21L1,12L3.44,14.78L3.1,18.47L6.71,19.29L8.6,22.47L12,21L15.4,22.46L17.29,19.28L20.9,18.46L20.56,14.78L23,12M10,17 L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9L10,17Z"/>
@@ -2373,12 +2113,14 @@ function renderPost(post) {
     const visibleImages = imageUrls.slice(0, 4);
     
     if (imageUrls.length === 1) {
+      // 🌟 กรณีมีรูปเดียว: แสดงเต็มความกว้างและจัดกึ่งกลาง
       imagesHtml += `
         <div class="post-gallery-single" style="margin-top: 10px; width: 100%;">
           <img src="${imageUrls[0]}" onclick="openImageViewer(0, ['${imageUrls[0]}'])" style="width: 100%; max-height: 450px; object-fit: cover; border-radius: 12px; cursor: pointer; display: block; margin: 0 auto;">
         </div>
       `;
     } else {
+      // 🌟 กรณีมีหลายรูป: ใช้ Grid แบบ 2 คอลัมน์เหมือนเดิม
       imagesHtml += `<div class="post-gallery" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px;">`;
       visibleImages.forEach((url, index) => {
         imagesHtml += `<div style="position: relative; aspect-ratio: 1 / 1;">`;
@@ -2392,9 +2134,8 @@ function renderPost(post) {
     }
   }
 
-  // ขยับปุ่มจัดการลงมานิดหน่อยถ้าเป็นโพสต์ของแชมป์ เพื่อไม่ให้ปุ่มทับริบบิ้นทอง
   const actionMenu = canManage ? `
-    <div style="position: absolute; top: ${isChampPost ? '35px' : '15px'}; right: 15px; display: flex; gap: 10px; z-index: 11;">
+    <div style="position: absolute; top: 15px; right: 15px; display: flex; gap: 10px;">
       <button onclick="editPostUi('${postId}', '${encodeURIComponent(postContent)}')" style="background: none; border: none; color: gray; cursor: pointer;"><i class="fa-solid fa-pen"></i></button>
       <button onclick="deletePostUi('${postId}')" style="background: none; border: none; color: #ff85a2; cursor: pointer;"><i class="fa-solid fa-trash"></i></button>
     </div>
@@ -2403,11 +2144,9 @@ function renderPost(post) {
   const authorProfileImg = post.profile_img || 'https://via.placeholder.com/40';
 
   return `
-    <div class="${postContainerClass}" id="post-${postId}" style="position: relative; border-radius: 15px; padding: 15px; margin-bottom: 20px; ${champCardStyle}">
-      ${specialBadge}
+    <div class="post-card" id="post-${postId}" style="position: relative; background: white; border-radius: 15px; padding: 15px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
       ${actionMenu}
-      
-      <div class="post-header" style="display: flex; align-items: center; margin-bottom: 10px; margin-top: ${isChampPost ? '12px' : '0px'};">
+      <div class="post-header" style="display: flex; align-items: center; margin-bottom: 10px;">
         <img src="${authorProfileImg}" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; object-fit: cover;">
         <div>
           <b style="color: #ff85a2;">${authorName} ${isPostVerified}</b>
@@ -2612,65 +2351,6 @@ async function editPostUi(postId, encodedContent) {
 
 // สั่งให้รันเช็กทันทีตอนโหลดหน้าเสร็จ
 document.addEventListener("DOMContentLoaded", window.checkNotificationBadge);
-
-// =========================================
-// ⏰ INTERNATIONAL COOKIE COUNTDOWN SYSTEM
-// =========================================
-function startCookieCountdown() {
-  const monthNamesEn = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
-
-  function updateTimer() {
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth(); // 0 = Jan, 11 = Dec
-
-    // Set deadline to the last second of the current month (23:59:59)
-    const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59);
-    
-    // Dynamically update the subtitle text in English
-    const monthTextElem = document.getElementById('countdown-month-text');
-    if (monthTextElem) {
-      monthTextElem.innerText = `${monthNamesEn[currentMonth]} voting ends in`;
-    }
-
-    const diff = lastDayOfMonth - now;
-
-    if (diff <= 0) {
-      // Time is up for this month
-      document.getElementById('cd-days').innerText = "00";
-      document.getElementById('cd-hours').innerText = "00";
-      document.getElementById('cd-mins').innerText = "00";
-      document.getElementById('cd-secs').innerText = "00";
-      return;
-    }
-
-    // Calculate time metrics
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const secs = Math.floor((diff % (1000 * 60)) / 1000);
-
-    // Render values with padded leading zeros
-    document.getElementById('cd-days').innerText = String(days).padStart(2, '0');
-    document.getElementById('cd-hours').innerText = String(hours).padStart(2, '0');
-    document.getElementById('cd-mins').innerText = String(mins).padStart(2, '0');
-    document.getElementById('cd-secs').innerText = String(secs).padStart(2, '0');
-  }
-
-  // Execute immediately and then update every single second
-  updateTimer();
-  setInterval(updateTimer, 1000);
-}
-
-// Initialize countdown when DOM is fully loaded
-window.addEventListener('DOMContentLoaded', () => {
-  if (typeof startCookieCountdown === 'function') {
-    startCookieCountdown();
-  }
-});
   
   // 🌟 ฟังก์ชัน เล่น/หยุด เสียงสไตล์ BLM48
 function toggleBlmAudio(postId) {
@@ -2920,9 +2600,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (user) {
     syncUserData(); 
   }
-
-  // 👑 เรียกใช้งานฟังก์ชันโหลดป้าย Champ of the Month ตรงนี้เลยงับ!
-  loadLatestChampForBanner();
 });
 </script>
 <script type="module">
