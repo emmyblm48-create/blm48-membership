@@ -807,7 +807,7 @@
             
             memberChamps.forEach(champ => {
                 const formatCookie = Number(champ.totalCookie).toLocaleString();
-                const thankYouMessage = champ.message ? champ.message : "ขอบคุณสำหรับทุกๆ คะแนนโหวตและทุกแรงสนับสนุนที่ส่งมาให้กันในเดือนนี้นะ 💕";
+                const thankYouMessage = champ.message ? champ.message : "";
                 
                 let imgHtml = '';
                 if (champ.postImage && champ.postImage.trim() !== "") {
