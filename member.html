@@ -140,11 +140,16 @@
         padding: 0 24px 35px 24px !important;
         margin-top: -50px !important;
       }
+      .back-circle-btn {
+        position: absolute; /* บน PC ให้กลับไปอิงตามกรอบมือถือ */
+        top: 20px;
+        left: 20px;
+      }
     }
 
     /* ปุ่มย้อนกลับ */
     .back-circle-btn {
-      position: absolute;
+      position: fixed; /* 🌟 เปลี่ยนจาก absolute เป็น fixed เพื่อให้ปุ่มลอยตามจอ */
       top: 20px;
       left: 20px;
       background: rgba(255, 255, 255, 0.9);
@@ -158,7 +163,7 @@
       color: var(--blmem-pink);
       cursor: pointer;
       backdrop-filter: blur(8px);
-      z-index: 10;
+      z-index: 999; /* 🌟 ใส่ค่า z-index สูงๆ เพื่อให้ปุ่มอยู่บนสุดเสมอ */
       box-shadow: 0 4px 12px rgba(0,0,0,0.08);
       transition: 0.2s;
     }
@@ -400,6 +405,75 @@
     box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
     z-index: 10;
 }
+    /* 🌟 ปรับกล่องให้อยู่ในแถวแนวนอน (Horizontal Scroll) */
+    #champ-thanks-content {
+        display: flex;
+        overflow-x: auto;
+        gap: 15px;
+        padding-bottom: 10px;
+        scroll-snap-type: x mandatory;
+    }
+    /* 🌟 สไตล์กล่อง Special Thanks ประจำตัวเมมเบอร์ */
+    .member-thanks-card {
+        flex: 0 0 85%; /* ให้การ์ดกว้าง 85% ของหน้าจอ */
+        scroll-snap-align: center;
+        background: linear-gradient(to bottom, #fffdf0, #ffffff);
+        border: 2px solid #d4af37;
+        border-radius: 20px;
+        padding: 20px;
+        margin-bottom: 16px;
+        box-shadow: 0 8px 20px rgba(212, 175, 55, 0.15);
+        text-align: center;
+        position: relative;
+    }
+    .member-thanks-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #fff9db;
+        color: #d4af37;
+        padding: 5px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        margin-bottom: 12px;
+        border: 1px solid #fce899;
+    }
+    .member-thanks-msg {
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: #555;
+        background: #fff;
+        padding: 16px;
+        border-radius: 12px;
+        border-left: 4px solid #d4af37;
+        text-align: left;
+        margin-bottom: 15px;
+        white-space: pre-line;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
+        display: -webkit-box;
+        -webkit-line-clamp: 3; /* โชว์แค่ 3 บรรทัดแรก */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    .member-thanks-msg.expanded {
+        -webkit-line-clamp: unset; /* ถ้ากดแล้วให้แสดงทั้งหมด */
+    }
+    .member-thanks-img {
+        width: 100%;
+        border-radius: 12px;
+        object-fit: cover;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+  .more-btn {
+        color: #d4af37;
+        font-size: 0.8rem;
+        cursor: pointer;
+        font-weight: bold;
+        margin-top: 5px;
+        display: inline-block;
+    }
 </style>
 </head>
 <body>
@@ -449,6 +523,11 @@
       <div class="leaderboard-section">
         <div class="leaderboard-title"><i class="fas fa-trophy"></i> Top Fans</div>
         <div id="member-fans-content" class="fan-list"></div>
+      </div>
+      
+      <div id="champ-thanks-container" style="display: none; margin-top: 25px;">
+        <div class="leaderboard-title"><i class="fas fa-crown" style="color: #d4af37;"></i>Special Fans Day</div>
+        <div id="champ-thanks-content"></div>
       </div>
       
       <div class="member-feed-section" style="margin-top: 25px;">
@@ -627,7 +706,7 @@
       if(document.getElementById('mb-name')) document.getElementById('mb-name').innerText = memberName;
     }
 
-   function loadMemberData() {
+  function loadMemberData() {
       if (!memberName) { window.location.href = 'index.html'; return; }
       user = getUserSession();
       
@@ -657,7 +736,10 @@
 
       updateButtonStyles();
       fetchLatestMemberStats(); // แอบดึงยอดอัปเดตล่าสุดเบื้องหลังเงียบๆ
-      loadMemberTimelinePosts(); // โหลดโพสต์แบบมีแคช (ฟังก์ชันที่เราทำไปก่อนหน้า)
+      loadMemberTimelinePosts(); // โหลดโพสต์แบบมีแคช
+      
+      // ✨ วางตรงนี้ค่ะ! ให้มันโหลดประวัติแชมป์พร้อมๆ กับโพสต์ไทม์ไลน์
+      loadMemberSpecialThanks(); 
     }
 
     function updateButtonStyles() {
@@ -687,8 +769,80 @@
         btnOshi.style.backgroundColor = ""; btnOshi.style.color = ""; btnOshi.style.borderColor = "";
       }
     }
+  
+    // =========================================================================
+    // 👑 ดึงประวัติแชมป์และข้อความ Special Thanks ประจำตัวเมมเบอร์
+    // =========================================================================
+    async function loadMemberSpecialThanks() {
+        const container = document.getElementById('champ-thanks-container');
+        const content = document.getElementById('champ-thanks-content');
+        if (!container || !content || !memberName) return;
 
-    function goBack() { window.location.href = 'index.html'; }
+        let champData = [];
+        // โหลดจาก Cache ในเครื่องก่อนเพื่อความไว (เหมือนหน้า champ.html)
+        const localData = sessionStorage.getItem('blm_champ_history');
+        
+        if (localData) {
+            champData = JSON.parse(localData);
+        } else {
+            try {
+                const response = await fetch(`${scriptURL}?action=getChampOfTheMonth`);
+                const result = await response.json();
+                if (result.status === "success" && result.data) {
+                    champData = result.data;
+                    sessionStorage.setItem('blm_champ_history', JSON.stringify(champData));
+                }
+            } catch (e) {
+                console.error("Failed to load champ history", e);
+            }
+        }
+
+        // คัดกรองเฉพาะข้อมูลของเมมเบอร์คนที่กำลังเปิดหน้านี้อยู่
+        const memberChamps = champData.filter(c => c.name && c.name.toLowerCase() === memberName.toLowerCase());
+
+        // ถ้าเมมเบอร์คนนี้เคยได้เป็นแชมป์ ให้แสดงกล่องข้อความ
+        if (memberChamps.length > 0) {
+            container.style.display = 'block';
+            content.innerHTML = '';
+            
+            memberChamps.forEach(champ => {
+                const formatCookie = Number(champ.totalCookie).toLocaleString();
+                const thankYouMessage = champ.message ? champ.message : "ขอบคุณสำหรับทุกๆ คะแนนโหวตและทุกแรงสนับสนุนที่ส่งมาให้กันในเดือนนี้นะ 💕";
+                
+                let imgHtml = '';
+                if (champ.postImage && champ.postImage.trim() !== "") {
+                    imgHtml = `<img src="${champ.postImage}" class="member-thanks-img" alt="Special Thanks Art">`;
+                }
+
+                const card = `
+        <div class="member-thanks-card">
+            <div class="member-thanks-badge"><i class="fas fa-crown"></i> ${champ.monthYear}</div>
+            <div class="member-thanks-msg" id="msg-${champ.monthYear.replace(/\s/g, '')}">
+                ${thankYouMessage}
+            </div>
+            <div class="more-btn" onclick="toggleMsg('${champ.monthYear.replace(/\s/g, '')}')">แสดงเพิ่มเติม</div>
+            ${imgHtml}
+        </div>
+    `;
+                content.insertAdjacentHTML('beforeend', card);
+            });
+        }
+    }
+  
+   function toggleMsg(id) {
+        const el = document.getElementById('msg-' + id);
+        const btn = el.nextElementSibling;
+        el.classList.toggle('expanded');
+        btn.innerText = el.classList.contains('expanded') ? 'แสดงน้อยลง' : 'แสดงเพิ่มเติม';
+    }
+
+    function goBack() { 
+      if (window.history.length > 1) {
+        window.history.back(); // ย้อนกลับไปหน้าก่อนหน้า
+      } else {
+        window.location.href = 'index.html'; // ถ้าไม่มีประวัติให้กลับหน้าแรก
+      }
+    }
 
     async function setOshi(type) {
       if (!checkLoginStatus()) return;

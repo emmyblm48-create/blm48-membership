@@ -741,19 +741,19 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
 }
     
     /* =========================================
-       👑 CHAMP OF THE MONTH BANNER (HOME PAGE)
+       👑 CHAMP OF THE MONTH BANNER (EXTRA BIG SIZE)
        ========================================= */
     .champ-banner {
       background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
-      border: 2px solid #d4af37; /* ขอบสีทอง */
-      border-radius: 20px;
-      padding: 15px 20px;
+      border: 2px solid #d4af37;
+      border-radius: 26px; /* เพิ่มความมนของกล่องให้รับกับรูปที่ใหญ่ขึ้น */
+      padding: 25px 25px; /* ขยายพื้นที่บนล่างให้กว้างขึ้น */
       margin: 15px 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       cursor: pointer;
-      box-shadow: 0 10px 20px rgba(212, 175, 55, 0.2);
+      box-shadow: 0 12px 25px rgba(212, 175, 55, 0.25);
       position: relative;
       overflow: hidden;
       transition: transform 0.2s;
@@ -777,45 +777,56 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
       flex: 1;
     }
     .champ-badge {
-      font-size: 12px;
+      font-size: 13px;
       color: #d4af37;
-      font-weight: 600;
+      font-weight: 700;
       letter-spacing: 1px;
       text-transform: uppercase;
-      margin-bottom: 5px;
+      margin-bottom: 6px;
     }
     .champ-title {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 2px;
+      font-size: 26px; /* ขยายชื่อแชมป์ขึ้นอีกนิดให้รับกับรูป (จาก 24px เป็น 26px) */
+      font-weight: 700;
+      margin-bottom: 4px;
+      letter-spacing: 0.5px;
     }
     .champ-month {
-      font-size: 12px;
-      color: #aaaaaa;
+      font-size: 13px;
+      color: #cccccc;
     }
     .champ-btn-view {
-      margin-top: 10px;
+      margin-top: 12px;
       background: #d4af37;
       color: #111;
       border: none;
-      padding: 5px 12px;
-      border-radius: 15px;
-      font-size: 12px;
-      font-weight: 600;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
       cursor: pointer;
+      transition: all 0.2s;
     }
+    .champ-btn-view:hover {
+      background: #f4c842;
+      transform: translateY(-2px);
+    }
+    
+    /* 🌟 ส่วนที่ปรับให้รูปใหญ่กระแทกตา 🌟 */
     .champ-img-container {
       position: relative;
       z-index: 2;
-      width: 70px;
-      height: 70px;
+      width: 120px; /* ขยายจาก 95px เป็น 120px ใหญ่เบิ้มๆ! */
+      height: 120px;
+      margin-left: 15px; 
+      flex-shrink: 0; /* สำคัญมาก: ป้องกันไม่ให้รูปโดนบีบเป็นวงรีเวลาข้อความยาว */
     }
     .champ-img {
       width: 100%;
       height: 100%;
       border-radius: 50%;
       object-fit: cover;
-      border: 2px solid #d4af37;
+      border: 4px solid #d4af37; /* เพิ่มความหนาขอบทองให้สมกับขนาดรูป */
+      box-shadow: 0 0 20px rgba(212, 175, 55, 0.5); /* เพิ่มเงาฟุ้งออร่าให้ใหญ่ขึ้น */
     }
     
 /* ===================================================
@@ -1163,53 +1174,54 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
   z-index: 10;
 }
 /* =========================================
-   🍪 CUTE MONTHLY COOKIE COUNTDOWN WIDGET
+   🍪 CUTE MONTHLY COOKIE COUNTDOWN (COMPACT & MINIMAL)
    ========================================= */
 .cookie-countdown-container {
   background: linear-gradient(135deg, #fff0f3 0%, #fffbf2 100%);
-  border: 2px dashed #ffb6c1;
-  border-radius: 24px;
-  padding: 20px;
-  margin: 15px 20px;
+  border: 1.5px dashed #ffb6c1; /* ลดความหนาของเส้นประให้ดูเบาบางลง */
+  border-radius: 18px; /* ปรับความมนให้รับกับกล่องที่เล็กลง */
+  padding: 12px 15px; /* ลด Padding ให้กล่องกระชับขึ้น */
+  margin: 10px 20px; /* ลดระยะห่างบนล่าง */
   display: flex;
-  flex-direction: column; /* เรียงเป็นแนวตั้งจากบนลงล่าง */
-  align-items: center;    /* จัดทุกอย่างให้อยู่กึ่งกลางแนวนอน */
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  text-align: center;     /* จัดตัวหนังสือให้อยู่ตรงกลาง */
-  box-shadow: 0 8px 20px rgba(255, 133, 162, 0.08);
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(255, 133, 162, 0.05); /* ลดเงาให้ซอฟต์ลง ไม่แย่งซีน */
   position: relative;
   overflow: hidden;
 }
 
 /* หัวข้อหลักด้านบนสุด */
 .countdown-label {
-  font-size: 15px;
+  font-size: 13px; /* เล็กลงจาก 15px */
   font-weight: 800;
   color: #ff6b8b;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 5px;
   letter-spacing: 0.5px;
   margin-bottom: 2px;
 }
 
 .countdown-label i {
+  font-size: 12px; /* ลดขนาดไอคอนคุกกี้ */
   animation: cookieBounce 1.2s infinite ease-in-out;
 }
 
 /* รายละเอียดข้อความด้านล่างหัวข้อหลัก */
 .countdown-subtitle {
-  font-size: 11px;
+  font-size: 10px; /* เล็กลงจาก 11px */
   color: #a39095;
   font-weight: 600;
-  margin-bottom: 12px; /* เว้นระยะห่างก่อนถึงตัวเลขเวลา */
+  margin-bottom: 8px; /* เว้นระยะห่างก่อนถึงตัวเลขเวลานิดหน่อย */
 }
 
 /* กล่องตัวเลขนับถอยหลังด้านล่างสุด */
 .countdown-timer-box {
   display: flex;
-  gap: 6px;
+  gap: 4px; /* ลดช่องว่างระหว่างตัวเลขแต่ละกล่อง */
   align-items: center;
   justify-content: center;
 }
@@ -1217,42 +1229,42 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
 .time-segment {
   background: #ffffff;
   border: 1px solid #ffe1e7;
-  border-radius: 12px;
-  padding: 6px 10px;
-  min-width: 45px;
+  border-radius: 10px;
+  padding: 4px 6px; /* ลด Padding ให้กล่องตัวเลขเล็กลง */
+  min-width: 38px; /* ลดความกว้างขั้นต่ำของแต่ละช่องลง */
   text-align: center;
-  box-shadow: 0 4px 8px rgba(255, 133, 162, 0.04);
+  box-shadow: 0 2px 4px rgba(255, 133, 162, 0.03); /* ลดเงากล่อง */
 }
 
 .time-val {
   font-family: 'Quicksand', sans-serif;
-  font-size: 17px;
+  font-size: 14px; /* ลดขนาดตัวเลขหลักจาก 17px เป็น 14px */
   font-weight: 700;
   color: #ff85a2;
   display: block;
-  line-height: 1.2;
+  line-height: 1.1;
 }
 
 .time-lbl {
-  font-size: 8px;
+  font-size: 7px; /* ลดขนาดตัวหนังสือบอกหน่วย (Days, Hrs) */
   color: #ccb2b7;
   text-transform: uppercase;
   font-weight: 700;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 }
 
 .time-separator {
   color: #ffb6c1;
   font-weight: bold;
-  font-size: 16px;
-  margin-bottom: 12px; /* ขยับจุดคู่ลำดับให้อยู่กึ่งกลางกล่องตัวเลข */
+  font-size: 14px; /* ลดขนาดจุดคู่ลำดับ */
+  margin-bottom: 10px; /* ขยับจุดให้บาลานซ์กับกล่องตัวเลขที่เล็กลง */
   animation: blink 1s infinite;
 }
 
-/* แอนิเมชันดุ๊กดิ๊กน่ารักๆ */
+/* แอนิเมชันดุ๊กดิ๊กน่ารักๆ (ใช้ของเดิมได้เลย) */
 @keyframes cookieBounce {
   0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-4px) rotate(15deg); }
+  50% { transform: translateY(-3px) rotate(10deg); }
 }
 
 @keyframes blink {
@@ -1290,28 +1302,23 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
      <a href="inventory.html" class="nav-icon" title="Inventory">
       <i class="fas fa-briefcase"></i>
     </a>
-    <a href="profile.html" class="nav-icon" title="Profile">
-     <i class="fas fa-user"></i>
-    </a>
     <a href="search.html" class="nav-icon" title="Profile">
     <i class="fas fa-search"></i> </a>
     </div>
 </nav>
-
-<div id="user-bar" class="user-profile-bar"></div>
   
-<div class="champ-banner" onclick="window.location.href='champ.html'">
+<div class="champ-banner" onclick="window.location.href='specialthanks.html?index=0'">
       <div class="champ-info">
         <div class="champ-badge"><i class="fas fa-crown"></i> Champ of the Month</div>
         <div class="champ-title" id="home-champ-name">Mushroom</div>
         <div class="champ-month" id="home-champ-month">ประจำเดือนกุมภาพันธ์</div>
-        <button class="champ-btn-view">view more <i class="fas fa-chevron-right"></i></button>
+        <button class="champ-btn-view">view special thanks <i class="fas fa-chevron-right"></i></button>
       </div>
       <div class="champ-img-container">
         <img src="https://lh3.googleusercontent.com/d/1h1eW8OP8UOaJm8kRK-13t-1Z_WhNluy9=s400" id="home-champ-img" class="champ-img" alt="Champ">
       </div>
-    </div>
-
+</div>
+  
 <div class="cookie-countdown-container">
   
   <div class="countdown-label">
@@ -1544,8 +1551,9 @@ async function refreshAppData() {
 // 👑 6. APP LIFECYCLE LISTENERS (ระบบควบคุมการโหลดหน้าจอ)
 // ==========================================
 window.addEventListener('pageshow', function(event) {
-  if (user && typeof refreshAppData === 'function') {
-    refreshAppData();
+  if (event.persisted && user) {
+    loadData();
+    syncUserData();
   }
 });
 
@@ -1597,82 +1605,21 @@ window.addEventListener('load', () => {
 });
  
 function updateUI() {
-  console.log("ฟังก์ชัน updateUI ทำงาน! ค่า user ณ ตอนนี้คือ:", user);
-
-  const bar = document.getElementById('user-bar');
-  if (!bar) return; // ถ้าหาแถบโปรไฟล์ไม่เจอ ให้หยุดทำงานทันที ไม่ต้องทำต่อ
-
-  // 🎯 หากไม่มีข้อมูลผู้ใช้ (เช่น กำลังเปลี่ยนหน้าไป Login) ให้หยุดทำงานทันที ไม่ต้องแสดงหน้า Guest อีกต่อไป
   if (!user) return;
-
-  // 1. ดึงปุ่ม Logout มาจัดการแสดงผล
-  const logoutBtn = document.querySelector('button[onclick="confirmLogout()"]');
-  if (logoutBtn) logoutBtn.style.display = 'inline-block'; 
 
   const isMember = isUserMember();
 
-  // =========================================================================
-  // 🌸 [จุดเพิ่มใหม่] ระบบเปิด-ปิดปุ่มสร้างโพสต์ตามสิทธิ์เมมเบอร์ BLM48
-  // =========================================================================
+  // 1. ระบบเปิด-ปิดปุ่มสร้างโพสต์ตามสิทธิ์เมมเบอร์
   const btnCreatePost = document.getElementById('btn-create-post');
   if (btnCreatePost) {
-    if (isMember) { 
-      // ถ้าเป็นเมมเบอร์ ให้แสดงปุ่มไอคอน + ขึ้นมางับ
-      btnCreatePost.style.display = 'inline-block';
-    } else {
-      // ถ้าเป็น User/แฟนคลับทั่วไป ให้ซ่อนปุ่มนี้ไว้
-      btnCreatePost.style.display = 'none';
-    }
+    btnCreatePost.style.display = isMember ? 'inline-block' : 'none';
   }
-  // =========================================================================
 
-  // 🌸 จัดการเลย์เอาต์การแสดงผล คามิโอชิ และ โอชิ
-  const kamiTag = user.kamioshi ? `
-    <span class="tag tag-kami" style="display: inline-flex; align-items: center; gap: 5px; background: #ffd700; color: #333; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 12px; margin: 3px;">
-      <i class="fas fa-crown"></i> ${user.kamioshi}
-      <i class="fas fa-times-circle" onclick="removeOshiFromUI('kami', '${user.kamioshi}')" style="cursor: pointer; color: rgba(0,0,0,0.5); margin-left: 4px;"></i>
-    </span>
-  ` : '';
-
-  const sortedOshis = (user.oshi || [])
-    .map(o => o ? o.toString().trim() : "")
-    .filter(o => o !== "" && o.toLowerCase() !== (user.kamioshi || "").toLowerCase())
-    .sort((a, b) => a.localeCompare(b, 'th', { sensitivity: 'base' }));
-
-  const oshiTags = sortedOshis.map(o => `
-    <span class="tag tag-oshi" style="display: inline-flex; align-items: center; gap: 5px; background: #87ceeb; color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; margin: 3px;">
-      <i class="fas fa-heart"></i> ${o}
-      <i class="fas fa-times-circle" onclick="removeOshiFromUI('oshi', '${o}')" style="cursor: pointer; color: rgba(255,255,255,0.7); margin-left: 4px;"></i>
-    </span>
-  `).join('');
-
-  // 👑 วาดหน้าจอแสดงผลข้อมูลโปรไฟล์ บัญชีผู้ใช้ และ กระเป๋าเงิน
-  bar.innerHTML = `
-    <div class="user-info-header">
-      <a href="profile.html" class="profile-img-container nav-icon" title="Profile">
-        <img src="${getImg(user.profile_img)}" class="user-avatar-img">
-      </a>
-      <div style="flex:1">
-        <div class="user-name">
-          <span id="user-display-name">${user.name}</span> 
-          <span class="role-badge">${user.role}</span>
-        </div>
-      </div>
-    </div>
-    <div class="wallet">
-      <div class="wallet-item"><div style="font-size:10px; color:#aaa;">Tokens</div><i class="fas fa-coins" style="color: #ffb347;"></i> ${Number(user.token || 0).toLocaleString()}</div>
-      <div class="wallet-item"><div style="font-size:10px; color:#aaa;">Cookies</div><i class="fas fa-cookie-bite" style="color: #d2691e;"></i> ${Number(user.cookie || 0).toLocaleString()}</div>
-      <div class="wallet-item"><div style="font-size:10px; color:#aaa;">GE Tokens</div><i class="fas fa-gem" style="color: #4dabf7;"></i> ${Number(user.geToken || 0).toLocaleString()}</div>
-    </div>
-    <div class="bonus-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-      <button onclick="${isMember ? "Swal.fire('ขออภัย','เมมเบอร์รับคุกกี้ฟรีไม่ได้ค่ะ','info')" : "claimMonthly()"}" class="btn-bonus btn-monthly ${isMember ? 'btn-locked' : ''}"><i class="fas fa-gift"></i> รับคุกกี้รายเดือน</button>
-      <button onclick="redeemCode()" class="btn-bonus btn-redeem"><i class="fas fa-ticket-alt"></i> Redeem</button>
-      
-      <button onclick="showMembershipCardModal()" class="btn-bonus btn-membership" style="grid-column: span 2; background: linear-gradient(135deg, #e0b953 0%, #fff5c3 45%, #fff5c3 55%, #cba034 100%); box-shadow: 0 4px 12px rgba(224, 185, 83, 0.4); color: #5e470c; border: 1px solid #fce899; font-weight: bold;">
-        <i class="fas fa-id-card"></i> Membership Card
-      </button>
-    </div>
-  `;
+  // 2. อัปเดตรูปโปรไฟล์ตรง Tab Bar ด้านล่างให้เป็นรูปของผู้ใช้
+  const tabProfileImg = document.getElementById('tab-profile-img');
+  if (tabProfileImg && user.profile_img) {
+    tabProfileImg.src = getImg(user.profile_img);
+  }
 }
   
 // ข้อมูล MV ของ BLM48 (ใส่รูปปก ชื่อเพลง และลิงก์ YouTube ได้เลย)
@@ -2918,7 +2865,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = snapshot.val();
       
       if (!data) {
-        commentListEl.innerHTML = `<div id="no-comment-${postId}" style="color: gray; font-size: 0.8rem; text-align: center; margin: 10px 0;">ยังไม่มีคอมเมนต์ มาประเดิมคนแรกกันเถอะงับ!</div>`;
+        commentListEl.innerHTML = `<div id="no-comment-${postId}" style="color: gray; font-size: 0.8rem; text-align: center; margin: 10px 0;">NOT COMMENTS YET.</div>`;
         if (commentCountEl) commentCountEl.innerText = "0";
         return;
       }
@@ -3119,8 +3066,8 @@ document.addEventListener("DOMContentLoaded", () => {
       <span>Notification</span>
     </div>
   </a>
-  <a href="profile.html" class="tab-item">
-    <i class="fa-solid fa-user"></i>
+ <a href="profile.html" class="tab-item">
+    <img id="tab-profile-img" src="https://via.placeholder.com/30" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 2px solid #ffb3c1;">
     <span>Profile</span>
   </a>
 </div>
