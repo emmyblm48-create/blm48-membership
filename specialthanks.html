@@ -293,7 +293,7 @@
         </div>
     </div>
 
-    <script>
+   <script>
         // API ประจำโปรเจกต์
         const scriptURL = 'https://script.google.com/macros/s/AKfycbxF5G3E1HWhVTQOVGzWtsqSCZfXkq8ZrX6DqGKt_pcicYbi2_59B-ecEeeTU6-aqBEf/exec';
 
@@ -310,31 +310,30 @@
             const targetIndex = Number(indexParam);
             let champData = null;
 
-            // 1. ดึงข้อมูลจาก sessionStorage ดูก่อนเพื่อความไวสูงสูด (UX สมูท)
-            const localData = sessionStorage.getItem('blm_champ_history');
-            if (localData) {
-                const parsed = JSON.parse(localData);
-                if (parsed && parsed[targetIndex]) {
-                    champData = parsed[targetIndex];
+            try {
+                // 1. ดึงข้อมูลสดใหม่จาก Google Sheet เสมอ เพื่อให้อัปเดตทันที (Real-time)
+                const response = await fetch(`${scriptURL}?action=getChampOfTheMonth`);
+                const result = await response.json();
+                
+                if (result.status === "success" && result.data && result.data[targetIndex]) {
+                    champData = result.data[targetIndex];
+                    // เซฟเก็บลง session ไว้เป็นข้อมูลสำรองเผื่อเน็ตหลุด
+                    sessionStorage.setItem('blm_champ_history', JSON.stringify(result.data));
                 }
-            }
-
-            // 2. Fallback: ถ้าเปิดลิงก์ตรงๆ หรือกด Refresh หน้าเว็บ ข้อมูลใน session จะดึงสดจาก Google Sheet ทันที
-            if (!champData) {
-                try {
-                    const response = await fetch(`${scriptURL}?action=getChampOfTheMonth`);
-                    const result = await response.json();
-                    if (result.status === "success" && result.data && result.data[targetIndex]) {
-                        champData = result.data[targetIndex];
-                        // เซฟเก็บลง session เผื่อเรียกซ้ำคราวหน้า
-                        sessionStorage.setItem('blm_champ_history', JSON.stringify(result.data));
+            } catch (error) {
+                console.error("Fetch API error:", error);
+                
+                // 2. Fallback: ถ้าโหลดข้อมูลใหม่ไม่สำเร็จ ค่อยดึงข้อมูลเก่าจาก session มาแสดงขัดตาทัพ
+                const localData = sessionStorage.getItem('blm_champ_history');
+                if (localData) {
+                    const parsed = JSON.parse(localData);
+                    if (parsed && parsed[targetIndex]) {
+                        champData = parsed[targetIndex];
                     }
-                } catch (error) {
-                    console.error("Fetch API error:", error);
                 }
             }
 
-            // 3. แสดงผลข้อมูลของเมมเบอร์ตาม Index ที่ส่งมา ล็อคเป้าหมายคนนี้ไว้คนเดียวอย่างปลอดภัย
+            // 3. แสดงผลข้อมูลของเมมเบอร์ตาม Index
             if (champData) {
                 renderSpecialThanks(champData);
             } else {
@@ -379,7 +378,7 @@
                 </div>
             `;
 
-            // ตรวจสอบโพสต์รูปภาพเฉลิมฉลอง ถ้ามีลิงก์และระบุอยู่จริงค่อยแสดงผล
+            // ตรวจสอบโพสต์รูปภาพเฉลิมฉลอง
             if (data.postImage && data.postImage.trim() !== "") {
                 document.getElementById('artwork-wrapper').style.display = "block";
             }
