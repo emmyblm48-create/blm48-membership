@@ -1187,7 +1187,69 @@ body {
     <!-- เพิ่มสินค้า -->
     
     </div>
-</div>
+  
+    <!--<div class="section-title">
+     <i class="fas fa-coffee" style="color: #d2b48c;"></i> BLM48 Cafe
+  </div>
+  <div class="shop-container">
+      <div class="merch-card">
+          <div class="merch-image-container">
+              <img src="https://lh3.googleusercontent.com/d/1ig130ag_DyBwJTLzf0lk5oLvwMCEhDH2=s1000" alt="Suiito Matcha" class="merch-image">
+          </div>
+          <div class="merch-info">
+              <span class="merch-category" style="color: #a8e6cf;">[BLM48 Cafe]</span>
+              <h3 class="merch-title">Suiito Matcha</h3>
+              <p class="merch-subtitle">いちごミニパフェ</p>
+              <button class="merch-button" onclick="buyCafeItem('cafe_matcha_01', 5, 'Suiito Matcha', 'https://lh3.googleusercontent.com/d/1thW4VJVyFLsgMQNI0wAFaIC7gsqnATeM=s1000')">
+                  <i class="fas fa-coins"></i> 5 Tokens
+              </button>
+          </div>
+      </div>
+
+      <div class="merch-card">
+          <div class="merch-image-container">
+              <img src="https://lh3.googleusercontent.com/d/1sgmtNIU6vHkWnWoaXFA_JKN9Upfl6tvh=s1000" alt="Pinku Milk" class="merch-image">
+          </div>
+          <div class="merch-info">
+              <span class="merch-category" style="color: #d4a5a5;">[BLM48 Cafe]</span>
+              <h3 class="merch-title">Pinku Milk</h3>
+              <p class="merch-subtitle">ピンクミルク</p>
+              <button class="merch-button" onclick="buyCafeItem('cafe_pinkmilk_01', 5, 'Pinku Milk', 'https://lh3.googleusercontent.com/d/1b_wl3lpi_QPd9-9nXBofw5mBL-jUu0Hn=s1000')">
+                  <i class="fas fa-coins"></i> 5 Tokens
+              </button>
+          </div>
+      </div>
+    
+      <div class="merch-card">
+          <div class="merch-image-container">
+              <img src="https://lh3.googleusercontent.com/d/19e7Jvgs02H8j3UEgeRxPSo5o7xZ_Q5bl=s1000" alt="Koi Cocoa" class="merch-image">
+          </div>
+          <div class="merch-info">
+              <span class="merch-category" style="color: #d4a5a5;">[BLM48 Cafe]</span>
+              <h3 class="merch-title">Koi Cocoa</h3>
+              <p class="merch-subtitle">濃いココア</p>
+              <button class="merch-button" onclick="buyCafeItem('cafe_cocoa_01', 5, 'Koi Cocoa', 'https://lh3.googleusercontent.com/d/1fHP-8N6VcRalynHDEZZWrjWhd7zYyHfF=s1000')">
+                  <i class="fas fa-coins"></i> 5 Tokens
+              </button>
+          </div>
+      </div>
+    
+      <div class="merch-card">
+          <div class="merch-image-container">
+              <img src="https://lh3.googleusercontent.com/d/1mHiJ-gc1FHXU8qLmqwEzeiPURcDvC16I=s1000" alt="Thai Miruku Tea" class="merch-image">
+          </div>
+          <div class="merch-info">
+              <span class="merch-category" style="color: #d4a5a5;">[BLM48 Cafe]</span>
+              <h3 class="merch-title">Thai Miruku Tea</h3>
+              <p class="merch-subtitle">タイミルクティー</p>
+              <button class="merch-button" onclick="buyCafeItem('cafe_thaimirukutea_01', 5, 'Thai Miruku Tea', 'https://lh3.googleusercontent.com/d/1HBOXvqFCL_-wrxbZlaEf15JvrGDUurhf=s1000')">
+                  <i class="fas fa-coins"></i> 5 Tokens
+              </button>
+          </div>
+      </div>
+    
+  </div>
+</div>-->
       
 <footer style="padding: 50px 20px; text-align: center; color: #bbb; font-size: 12px;">
   <div style="font-weight: 700; color: #888; margin-bottom: 5px;">BLM48 MEMBERSHIP</div>
@@ -1608,7 +1670,7 @@ async function buyGacha(collectionId) {
   }
 }
   
-// 📦 7. โหลดคอลเลกชันตู้สุ่มมาแสดงผลบนหน้าเว็บ
+// 📦 7. โหลดคอลเลกชันตู้สุ่มมาแสดงผลบนหน้าเว็บ (แก้ไขเพื่อซ่อนคอลเลกชันที่เป็นของซื้อตรง/คลังสะสม)
 async function loadGachaCollections() {
   const container = document.getElementById("merch-container");
   if(!container) return;
@@ -1619,12 +1681,18 @@ async function loadGachaCollections() {
     
     container.innerHTML = ""; 
     
-    if (collections.length === 0) {
+    // 🔍 [แก้ไขจุดสำคัญ]: กรองเอาเฉพาะคอลเลกชันที่เป็นตู้สุ่มกาชาจริง ๆ (ID ขึ้นต้นด้วย gacha_)
+    // การทำแบบนี้จะทำให้ 'coll_cafe' ถูกคัดออกไปโดยอัตโนมัติ ไม่มาโชว์เป็นตู้สุ่มให้แฟน ๆ สับสนค่ะ
+    const gachaOnly = collections.filter(col => col.CollectionID && col.CollectionID.startsWith('gacha_'));
+    
+    // เปลี่ยนมาเช็กเงื่อนไขจากตัวแปร gachaOnly ที่กรองแล้วแทน
+    if (gachaOnly.length === 0) {
       container.innerHTML = `<p style="color: #a0a0a0; text-align: center; grid-column: 1/-1; font-family:'Kanit';">ตอนนี้ยังไม่มีตู้สุ่มเปิดให้บริการค่ะ</p>`;
       return;
     }
 
-    collections.forEach(col => {
+    // เปลี่ยนมาวนลูปเฉพาะ gachaOnly
+    gachaOnly.forEach(col => {
       const coverImg = col.CoverImage ? col.CoverImage : "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500";
       
       const cardHTML = `
@@ -1649,9 +1717,119 @@ async function loadGachaCollections() {
     console.error("Error loading gacha collections:", error);
     container.innerHTML = `<p style="color: #ff5376; text-align: center; grid-column: 1/-1; font-family:'Kanit';">เกิดข้อผิดพลาดในการโหลดข้อมูลตู้สุ่ม กรุณาลองใหม่อีกครั้งค่ะ</p>`;
   } finally {
-    // ✨ [แก้ไขจุดที่ 1]: สั่งปิดหน้าจอ Loading Overlay ทุกครั้งเมื่อทำงานเสร็จสิ้น ป้องกันจอขาวค้าง
+    // สั่งปิดหน้าจอ Loading Overlay ทุกครั้งเมื่อทำงานเสร็จสิ้น ป้องกันจอขาวค้าง
     hideAppLoading();
   }
+}
+  
+// ☕ 7. ระบบสั่งซื้อสินค้า BLM48 Cafe (เวอร์ชันใช้ไอคอนเวกเตอร์ คลีนมินิมอล ไม่มีอิโมจิ)
+async function buyCafeItem(itemId, price, itemName, itemImg) {
+    if (!userData) return;
+
+    // 🎨 นิยามชุดไอคอน SVG ดีไซน์มินิมอลพาสเทล (จัดวางกึ่งกลางตัวอักษรพอดี สวยงามคมชัด)
+    const iconCafe = `<svg width="20" height="20" viewBox="0 0 24 24" fill="#ff69b4" style="display: inline-block; vertical-align: middle; margin: 0 4px;"><path d="M2 21h18v-2H2v2zM20 8h-2V5h2v3zm2-5H4v13c0 2.21 1.79 4 4 4h8c2.21 0 4-1.79 4-4v-3h2c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2zM16 16H8V5h8v11z"/></svg>`;
+    const iconHeartPink = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#ff69b4" style="display: inline-block; vertical-align: middle; margin: 0 4px;"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`;
+
+    // 1. ตรวจสอบ Token ว่าเพียงพอหรือไม่
+    if (Number(userData.token) < price) {
+        Swal.fire({
+            title: 'Token ไม่พอค่ะ',
+            html: '<div style="font-size: 14px; color: #666;">ไปเติม Token ก่อนมาอุดหนุนคาเฟ่นะงับ</div>',
+            icon: 'error',
+            confirmButtonColor: '#ff5376',
+            background: '#ffffff',
+            borderRadius: '24px'
+        });
+        return;
+    }
+
+    // 2. หน้าต่างยืนยันการสั่งซื้อแบบมินิมอล คลีนๆ สบายตา
+    const confirmResult = await Swal.fire({
+        title: `${iconCafe} รับ ${itemName} ไหมคะ?`,
+        html: `<div style="font-size: 14px; color: #666; margin-top: 5px;">ใช้ <b>${price} Tokens</b> สำหรับเมนูนี้<br><span style="color: #999; font-size: 12px;">(ไอเทมจะถูกเก็บเข้า Inventory ทันที)</span></div>`,
+        imageAlt: itemName,
+        showCancelButton: true,
+        confirmButtonColor: '#ff69b4',
+        cancelButtonColor: '#e0e0e0',
+        confirmButtonText: 'ยืนยันสั่งซื้อ',
+        cancelButtonText: 'ยกเลิก',
+        background: '#ffffff',
+        borderRadius: '24px',
+        customClass: {
+            image: 'blm-cafe-popup-img'
+        }
+    });
+
+    if (!confirmResult.isConfirmed) return;
+
+    showAppLoading(); // เปิดหน้าจอโหลดของแอป
+
+    try {
+        // 💡 [ส่งข้อมูลจัดหมวดหมู่]: เพิ่มการส่งข้อมูล collectionId ไปยังหลังบ้านเพื่อใช้แยกประเภทในคลังสะสม
+        const response = await fetch(scriptURL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                action: 'buyDirectItem',
+                username: userData.username,
+                itemId: itemId,
+                itemName: itemName,
+                itemImg: itemImg,
+                price: price,
+                itemType: 'Merchandise Official',   // ซ้อนในหมวดหมู่หลัก Merchandise Official ตามที่ต้องการ
+                collectionId: 'coll_cafe',           // กำหนด ID พิเศษสำหรับแยกกลุ่มในคลังสะสม
+                collectionName: 'BLM48 Cafe'         // ชื่อคอลเลกชันสำหรับนำไปแสดงผลพาดหัวกลุ่ม
+            })
+        });
+
+        const res = await response.json();
+
+        if (res.status === "success") {
+            // อัปเดต Token ในระบบผู้ใช้
+            userData.token = res.newToken !== undefined ? res.newToken : (userData.token - price);
+            
+            // อัปเดต LocalStorage เซสชัน
+            const newSession = JSON.parse(localStorage.getItem('bnl_session'));
+            newSession.data = userData;
+            localStorage.setItem('bnl_session', JSON.stringify(newSession));
+            
+            // ล้างแคช Inventory เพื่อให้ระบบดึงข้อมูลคลังแสงใหม่ล่าสุดมาแสดง
+            localStorage.removeItem(`blm48_inventory_cache_${userData.username}`);
+            
+            updateWalletUI(); // รีเฟรชยอด Token บนหน้าจอหลัก
+            
+            // หน้าต่างแจ้งเตือนสำเร็จ (แก้ไข Tag </div> เรียบร้อยค่ะ)
+            Swal.fire({
+                title: `${iconHeartPink} เสิร์ฟเรียบร้อย!`,
+                html: `<div style="font-size: 14px; color: #555;">ได้รับ <b>${itemName}</b> เรียบร้อยแล้วค่ะ<br>สามารถตรวจสอบได้ที่ Inventory ได้เลยค่ะ</div>`,
+                icon: 'success',
+                confirmButtonColor: '#ff5376',
+                background: '#ffffff',
+                borderRadius: '24px'
+            });
+        } else {
+            Swal.fire({
+                title: 'เกิดข้อผิดพลาด',
+                text: res.message,
+                icon: 'error',
+                confirmButtonColor: '#ff5376',
+                background: '#ffffff',
+                borderRadius: '24px'
+            });
+        }
+    } catch (error) {
+        console.error("Error buying cafe item:", error);
+        Swal.fire({
+            title: 'เกิดข้อผิดพลาด',
+            text: 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่นะคะ',
+            icon: 'error',
+            confirmButtonColor: '#ff5376',
+            background: '#ffffff',
+            borderRadius: '24px'
+        });
+    } finally {
+        hideAppLoading(); // ปิดหน้าจอโหลดของแอป
+    }
 }
 
 // ⏳ 8. ระบบจัดการหน้าจอ Loading หน้าเว็บ
@@ -1750,6 +1928,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }, remainingTime);
     }
 });
+  
   
   // ฟังก์ชันกลางในการเรียกใช้ Popup ยืนยันการซื้อ
 function openConfirmModal(title, detail, onConfirmCallback) {
