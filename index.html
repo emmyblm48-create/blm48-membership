@@ -1378,6 +1378,10 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
 </div>
   
   <div class="nav-btns">
+    <!-- ปุ่มตั๋วคอนเสิร์ตที่เพิ่มใหม่ -->
+    <a href="ticket.html" class="nav-icon" title="Tickets">
+      <i class="fas fa-ticket-alt"></i>
+    </a>
     <!-- ปุ่มกระเป๋าแบบไอคอน -->
      <a href="inventory.html" class="nav-icon" title="Inventory">
       <i class="fas fa-briefcase"></i>
@@ -1539,42 +1543,76 @@ function hideSplashScreen() {
 // 👑 5. ASYNC DATA SYNC (ระบบดึงข้อมูล Google Sheets)
 // ==========================================
 async function syncUserData() {
-  if (!user) return;
+  // 1. ดึงข้อมูลเซสชันล่าสุดในเครื่องขึ้นมาเช็กก่อน
+  const sessionData = localStorage.getItem('bnl_session');
+  if (!sessionData) {
+    window.location.replace('login.html');
+    return;
+  }
+  
+  let currentUser;
   try {
-    const resp = await fetch(`${scriptURL}?action=getUserInfo&username=${encodeURIComponent(user.username)}&_=${Date.now()}`);
-    const res = await resp.json();
-    
-    if (res.status === "success") {
-      // ดักเคสถ้ายูสเซอร์ไม่มีพาสเวิร์ด (โดนแบน / ไม่ได้เข้ากลุ่ม)
-      if (res.data.password === "") {
+    currentUser = JSON.parse(sessionData);
+  } catch(e) {
+    localStorage.removeItem('bnl_session');
+    window.location.replace('login.html');
+    return;
+  }
+  
+  // ตรวจสอบดักหา username (รองรับโครงสร้างข้อมูลเซสชันทุกแบบ)
+  const currentUsername = currentUser.username || (currentUser.data && currentUser.data.username);
+  
+  if (!currentUsername) {
+    localStorage.removeItem('bnl_session');
+    window.location.replace('login.html');
+    return;
+  }
+
+  try {
+    // 2. ยิงไปถามหลังบ้านเพื่อดึงสถานะล่าสุดจาก Google Sheets
+    const response = await fetch(`${scriptURL}?action=getUserInfo&username=${encodeURIComponent(currentUsername)}`);
+    const result = await response.json();
+
+    // 🔍 ดักจับตรวจสอบ: ข้อมูลที่ส่งกลับมามีรหัสผ่าน และรหัสผ่านต้องไม่ใช่ค่าว่าง (พ่นช่องว่างทิ้งด้วย .trim())
+    const hasPassword = result.data && 
+                        result.data.password !== undefined && 
+                        result.data.password !== null && 
+                        String(result.data.password).trim() !== "";
+
+    // เคสปกติ: ข้อมูลในชีทยังอยู่ครบถ้วน ปลอดภัยดี และมีรหัสผ่านระบุอยู่
+    if (result.success && result.status === "success" && hasPassword) {
+      localStorage.setItem('bnl_session', JSON.stringify(result.data));
+      user = result.data; // อัปเดตตัวแปร Global ในหน้าเว็บ
+      if (typeof updateUI === 'function') updateUI(); // อัปเดตแต้ม/รูปโปรไฟล์ล่าสุดบนหน้าจอ
+    } 
+    // เคสโดนเตะ: 🚨 แอดมินลบชื่อ, ลบรหัสผ่านออก (พาสเวิร์ดว่าง), หรือลบทั้งแถว
+    else {
+      localStorage.removeItem('bnl_session'); // 🚫 ล้างข้อมูลการเข้าสู่ระบบในเครื่องทิ้งทันที!
+      
+      // ข้อความแจ้งเตือนเปลี่ยนตามเคส (โดนลบรหัสผ่าน หรือ บัญชีหาย)
+      const alertMessage = (!hasPassword && result.success) 
+        ? 'บัญชีของคุณถูกระงับการใช้งานชั่วคราว (รหัสผ่านถูกเพิกถอน)' 
+        : (result.message || 'บัญชีของคุณถูกระงับการใช้งานแล้ว');
+
+      // แสดงกล่องแจ้งเตือนผู้ใช้ก่อนดีดออก (เช็กว่าหน้าเว็บใช้ SweetAlert2 ไหม ถ้าไม่มีจะใช้ alert ปกติ)
+      if (typeof Swal !== 'undefined') {
         Swal.fire({
-          icon: 'warning',
-          title: 'กรุณาติดต่อ BLM48 Line Official',
-          text: 'สิทธิ์การใช้งานถูกระงับเนื่องจากไม่เข้ากลุ่ม BLM48 Membership ค่ะ',
-          confirmButtonColor: '#ff85a2',
+          icon: 'error',
+          title: 'คุณถูกระงับบัญชี',
+          text: alertMessage,
+          confirmButtonColor: '#ffb3c1',
           allowOutsideClick: false
         }).then(() => {
-          localStorage.removeItem('bnl_session');
-          sessionStorage.clear();
-          user = null;
-          if (typeof updateUI === 'function') updateUI();
-          window.location.href = 'login.html'; 
+          window.location.replace('login.html'); // เตะไปหน้า login
         });
-        return;
+      } else {
+        alert(alertMessage);
+        window.location.replace('login.html'); // เตะไปหน้า login
       }
-
-      user = { ...user, ...res.data }; 
-      saveUserSession(user); 
-      if (typeof updateUI === 'function') updateUI(); 
-
-    } else {
-      localStorage.removeItem('bnl_session');
-      user = null;
-      if (typeof updateUI === 'function') updateUI();
-      window.location.href = 'login.html';
     }
-  } catch (e) { 
-    console.error("Sync User Error:", e); 
+  } catch (error) {
+    console.error("ระบบตรวจสอบสถานะผู้ใช้เบื้องหลังขัดข้อง:", error);
+    // กรณีเน็ตหลุดชั่วคราว ไม่ต้องเตะออก ให้รอรอบตรวจสอบถัดไปทำงานแทน
   }
 }
 
@@ -1628,29 +1666,26 @@ async function refreshAppData() {
 }
 
 // ==========================================
-// 👑 6. APP LIFECYCLE LISTENERS (ระบบควบคุมการโหลดหน้าจอ)
+// 👑 6. APP LIFECYCLE LISTENERS (ระบบควบคุมการโหลดหน้าจอและเซสชันอย่างเป็นระเบียบ)
 // ==========================================
-window.addEventListener('pageshow', function(event) {
-  if (event.persisted && user) {
-    loadData();
-    syncUserData();
-  }
-});
 
-window.addEventListener('DOMContentLoaded', () => {
+// ✨ จุดที่ 1: ดักจับตอนโครงสร้างหน้าเว็บโหลดเสร็จ (ทำงานรอบเดียว เรียงลำดับด้วย await ไม่ตีกันเอง)
+document.addEventListener('DOMContentLoaded', async () => {
   try {
-    // 🔐 ตรวจสอบเซสชันผู้ใช้
+    // 🔐 1. ตรวจสอบเซสชันผู้ใช้เบื้องต้นจากตัวเครื่องก่อน
     user = getUserSession(); 
 
-    if (!user) {
-      window.location.href = 'login.html';
+    // 🚨 ดักจับ: ถ้าไม่มี user หรือ username เป็นค่าว่าง ให้เตะออกทันทีป้องกันการแอบเข้ามาหน้าแรก
+    if (!user || !user.username || user.username.trim() === "") {
+      localStorage.removeItem('bnl_session'); // ล้างเซสชันขยะทิ้ง
+      window.location.replace('login.html'); // ใช้ .replace() เพื่อไม่ให้กดย้อนกลับมาได้
       return; 
     }
 
-    // 🔄 ตรวจสอบเวอร์ชันแอป
+    // 🔄 2. ตรวจสอบเวอร์ชันแอปเพื่อเคลียร์แคชเก่าอัตโนมัติ
     checkVersion(); 
     
-    // 🎨 1. วาดหน้าจอด้วยข้อมูลจาก Cache ทันที (แอปเข้าปุ๊บติดปั๊บ)
+    // 🎨 3. วาดหน้าจอแสดงผลด้วยข้อมูลเก่าจาก Cache ทันทีเพื่อให้แอปเปิดไวแบบไม่ต้องรอโหลดซิงค์ข้อมูล
     if (typeof updateUI === 'function') updateUI();
     if (typeof renderTrendingMVs === 'function') renderTrendingMVs();
     if (Array.isArray(currentRankingData) && currentRankingData.length > 0) {
@@ -1660,14 +1695,14 @@ window.addEventListener('DOMContentLoaded', () => {
       renderGlobalFans(currentTopFansData);
     }
 
-    // 🚀 2. ซ่อนหน้าต่างโหลดเพื่อให้ผู้ใช้ใช้งานได้ทันที
+    // 🚀 4. ซ่อนหน้าต่างโหลด เพื่อให้ผู้ใช้กดปุ่มใช้งานเมนูต่างๆ บนหน้าเว็บได้ทันที
     if (typeof hideAppLoading === 'function') hideAppLoading();
 
-    // 📡 3. แอบดึงข้อมูลสดจาก Sheets และโหลดข้อมูลไทม์ไลน์เบื้องหลัง
-    if (typeof loadData === 'function') loadData();
-    if (typeof syncUserData === 'function') syncUserData(); 
+    // 📡 5. ซิงค์ข้อมูลสดจาก Google Sheets (ฟังก์ชันนี้จะเช็กเองว่าชื่อยูสเซอร์โดนลบ หรือรหัสโดนถอดไหม)
+    await syncUserData();       
     
-    // 🔥 เรียกใช้งานฟังก์ชันโหลดฟีดโพสต์ไทม์ไลน์เมมเบอร์ BLM48 ตรงนี้เลยงับ!
+    // 6. แอบโหลดข้อมูลอันดับและฟีดโพสต์ไทม์ไลน์เบื้องหลังแบบเงียบๆ
+    if (typeof loadData === 'function') await loadData();
     if (typeof loadTimelinePosts === 'function') {
       loadTimelinePosts(); 
     }
@@ -1678,10 +1713,24 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// ตรวจสอบธีมและปิด Splash Screen โหลดตอนเริ่มรอบแรก
+// ✨ จุดที่ 2: ดักจับตอนไฟล์ทั้งหมด (รวมถึงรูปภาพ) โหลดเสร็จสมบูรณ์ (ใช้จัดการธีมและปิด Splash Screen หน้าแรกสุด)
 window.addEventListener('load', () => {
-  if (localStorage.getItem('theme') === 'dark') toggleDarkMode();
-  setTimeout(hideSplashScreen, 2000); 
+  // ตรวจสอบระบบ Dark Mode
+  if (localStorage.getItem('theme') === 'dark' && typeof toggleDarkMode === 'function') {
+    toggleDarkMode();
+  }
+  // หน่วงเวลา 2 วินาทีแล้วปิด Splash Screen ตัวโหลดสีขาวชมพูเริ่มต้น
+  if (typeof hideSplashScreen === 'function') {
+    setTimeout(hideSplashScreen, 2000); 
+  }
+});
+
+// ✨ จุดที่ 3: ดักจับตอนผู้ใช้กดย้อนกลับมาจากหน้าอื่น (Pageshow) ให้ทำการซิงค์ข้อมูลใหม่
+window.addEventListener('pageshow', function(event) {
+  if (event.persisted && user) {
+    if (typeof loadData === 'function') loadData();
+    if (typeof syncUserData === 'function') syncUserData();
+  }
 });
  
 function updateUI() {
@@ -2285,7 +2334,9 @@ function renderPost(post) {
   // =========================================================================
   let commentsHtml = `<div id="no-comment-${postId}" style="color: gray; font-size: 0.8rem; text-align: center; margin: 10px 0;">Loading comments...</div>`;
   setTimeout(() => {
-    listenToCommentsRealtime(`${postId}`);
+   if (typeof window.listenForComments === 'function') {
+      window.listenForComments(`${postId}`);
+    }
   }, 100);
 
   // =========================================================================
@@ -2851,8 +2902,20 @@ document.addEventListener("DOMContentLoaded", () => {
   
   // ดึงข้อมูลอันดับและซิงค์ข้อมูลผู้ใช้จากระบบหลังบ้านแบบเงียบๆ เบื้องหลัง
   loadData();
+  
+  // ถ้ามีผู้ใช้ล็อกอินอยู่ ให้รันระบบเช็กข้อมูลและระบบเตะอัตโนมัติ
   if (user) {
+    // 1) สั่งซิงค์ข้อมูลเพื่อตรวจสอบความถูกต้องรอบแรกทันทีที่โหลดหน้าเว็บเสร็จ
     syncUserData(); 
+    
+    // 2) 🔄 ระบบ Background Auto-Kick (คอยตรวจจับสถานะบัญชีสดๆ จากชีท)
+    // สั่งให้หน้าบ้านแอบส่งสัญญาณไปเช็กข้อมูลใน Google Sheets ทุกๆ 45 วินาที
+    // หากแอดมินลบ Username หรือ Password ออกตอนไหน ระบบจะเตะผู้ใช้ออกเองทันทีโดยไม่ต้องรีเฟรชหน้าเว็บ!
+    setInterval(async () => {
+      if (localStorage.getItem('bnl_session')) {
+        await syncUserData();
+      }
+    }, 45000); // 45000 มิลลิวินาที = 45 วินาที (สามารถปรับเพิ่มหรือลดเวลาได้ตามใจชอบครับ)
   }
 });
 </script>
