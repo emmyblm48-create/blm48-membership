@@ -713,12 +713,12 @@
         return url;
     }
 
-    function renderMemberStatsAndFans() {
+   function renderMemberStatsAndFans() {
       const savedStats = localStorage.getItem('current_member_stats');
       if (savedStats) {
         const m = JSON.parse(savedStats);
         
-        // 🎯 เช็กสถานะแกรดเพื่อเปิด-ปิด การแสดงผลป้ายดีไซน์ตามรูปแบบภาพ image_9089a3.jpg
+        // 🎯 เช็กสถานะแกรดเพื่อเปิด-ปิด การแสดงผลป้ายดีไซน์
         const gradBadge = document.getElementById('mb-grad-badge');
         const gradAvatarIcon = document.getElementById('avatar-grad-icon');
         const btnCookie = document.getElementById('btn-cookie-trigger');
@@ -739,16 +739,18 @@
         const avatarEl = document.getElementById('mb-avatar');
         if (avatarEl) avatarEl.src = getImg(m.profile_img);
 
+        // 🌟 แก้ไขตรงนี้: ถ้ายังไม่มีค่า ให้ขึ้น ... แทน 0
         const kamiEl = document.getElementById('mb-kami');
-        if (kamiEl) kamiEl.innerText = m.total_kami || 0;
+        if (kamiEl) kamiEl.innerText = (m.total_kami !== undefined && m.total_kami !== null) ? m.total_kami : '...';
 
         const oshiEl = document.getElementById('mb-oshi');
-        if (oshiEl) oshiEl.innerText = m.total_oshi || 0;
+        if (oshiEl) oshiEl.innerText = (m.total_oshi !== undefined && m.total_oshi !== null) ? m.total_oshi : '...';
 
         const scoreEl = document.getElementById('mb-score');
         if (scoreEl) scoreEl.innerText = formatMemberScore(m.all_time_total || 0);
       }
 
+      // ... (โค้ดส่วน fanContainer ด้านล่างปล่อยไว้เหมือนเดิมครับ) ...
       const savedFans = localStorage.getItem('current_member_fans');
       const fanContainer = document.getElementById('member-fans-content');
       
@@ -796,14 +798,15 @@
       const nameEl = document.getElementById('mb-name');
       if (nameEl) { nameEl.innerText = 'กำลังโหลด...'; nameEl.classList.add('skeleton', 'skeleton-text'); }
 
+      // 🌟 แก้ไขตรงนี้: โชว์ ... ระหว่างโหลด
       const kamiEl = document.getElementById('mb-kami');
-      if (kamiEl) { kamiEl.innerText = '0'; kamiEl.classList.add('skeleton', 'skeleton-stat'); }
+      if (kamiEl) { kamiEl.innerText = '...'; kamiEl.classList.add('skeleton', 'skeleton-stat'); }
       
       const oshiEl = document.getElementById('mb-oshi');
-      if (oshiEl) { oshiEl.innerText = '0'; oshiEl.classList.add('skeleton', 'skeleton-stat'); }
+      if (oshiEl) { oshiEl.innerText = '...'; oshiEl.classList.add('skeleton', 'skeleton-stat'); }
       
       const scoreEl = document.getElementById('mb-score');
-      if (scoreEl) { scoreEl.innerText = '0'; scoreEl.classList.add('skeleton', 'skeleton-stat'); }
+      if (scoreEl) { scoreEl.innerText = '...'; scoreEl.classList.add('skeleton', 'skeleton-stat'); }
 
       const fanContainer = document.getElementById('member-fans-content');
       if (fanContainer) {
@@ -842,7 +845,9 @@
       if (savedStatsStr) {
         try {
           const savedStats = JSON.parse(savedStatsStr);
-          if (savedStats && savedStats.name && savedStats.name.toLowerCase() === memberName.toLowerCase()) {
+          // 🎯 จุดสำคัญ: เช็คว่าแคชต้องมี "total_kami" อยู่ด้วย ถึงจะยอมให้โชว์ข้อมูล
+          // ถ้าไม่มี (เช่น ข้ามมาจากหน้า Ranking) ให้มันตกไปที่โหมด Skeleton (กำลังโหลด...) ทันที
+          if (savedStats && savedStats.name && savedStats.name.toLowerCase() === memberName.toLowerCase() && savedStats.total_kami !== undefined) {
              hasValidCache = true;
           }
         } catch(e) {}
@@ -852,13 +857,46 @@
         removeSkeleton();
         renderMemberStatsAndFans(); 
       } else {
-        showSkeleton();
+        showSkeleton(); // 🌟 แสดงแถบกระพริบโหลด (...) รอจนกว่า Apps Script จะส่งข้อมูลมาครบทั้งหมด
       }
 
       updateButtonStyles();
       fetchLatestMemberStats(); 
       loadMemberTimelinePosts(); 
       loadMemberSpecialThanks(); 
+    }
+  
+async function fetchLatestMemberStats() {
+      if (!memberName) return;
+      
+      const scriptURL = 'https://script.google.com/macros/s/AKfycbxF5G3E1HWhVTQOVGzWtsqSCZfXkq8ZrX6DqGKt_pcicYbi2_59B-ecEeeTU6-aqBEf/exec'; 
+
+      try {
+        const resp = await fetch(`${scriptURL}?action=getMemberDetail&name=${encodeURIComponent(memberName)}&_=${Date.now()}`);
+        const res = await resp.json();
+        
+        if (res.status === "success") {
+          const oldStats = localStorage.getItem('current_member_stats');
+          const oldFans = localStorage.getItem('current_member_fans');
+          
+          // ตรวจสอบว่าข้อมูลมีอัปเดตไหม ถ้ามีค่อยอัปเดต Cache และ Render ใหม่
+          if (oldStats !== JSON.stringify(res.stats) || oldFans !== JSON.stringify(res.fans)) {
+            if (res.stats) localStorage.setItem('current_member_stats', JSON.stringify(res.stats));
+            if (res.fans) localStorage.setItem('current_member_fans', JSON.stringify(res.fans));
+            
+            if (typeof removeSkeleton === "function") removeSkeleton(); 
+            renderMemberStatsAndFans(); 
+          } else {
+             // ถ้าข้อมูลเหมือนเดิมเป๊ะ ให้แค่ลบ Skeleton ออกเฉยๆ
+             if (typeof removeSkeleton === "function") removeSkeleton();
+          }
+        } else {
+          if (typeof removeSkeleton === "function") removeSkeleton();
+        }
+      } catch (e) {
+        console.error("Error fetching latest member stats:", e);
+        if (typeof removeSkeleton === "function") removeSkeleton();
+      }
     }
 
     function updateButtonStyles() {
@@ -1033,19 +1071,19 @@
       return number.toLocaleString(); 
     }
 
-    function actionCookie() {
+function actionCookie() {
       if (!checkLoginStatus()) return;
 
       if (!user || !user.role || user.role.toLowerCase() !== 'user') {
-        Swal.fire({ title: 'สิทธิ์ไม่ถูกต้อง', text: 'ขออภัยด้วยนะงับ ฟังก์ชันปาคุกกี้เปิดให้ใช้งานเฉพาะบัญชีประเภททั่วไปเท่านั้นค่ะ', icon: 'error', confirmButtonColor: '#ff85a2' });
+        Swal.fire({ title: 'คำเตือน', text: 'คุณไม่สามารถปาคุกกี้ได้ เนื่องจากคุณเป็นเมมเบอร์หรือแอดมิน', icon: 'error', confirmButtonColor: '#ff85a2' });
         return;
       }
 
       const btnCookie = document.getElementById('btn-cookie-trigger');
       if (btnCookie && btnCookie.getAttribute('data-graduated') === 'true') {
         Swal.fire({ 
-          title: 'จบการศึกษาแล้ว 🎓', 
-          text: 'เมมเบอร์คนนี้จบการศึกษาไปแล้วงับ ไม่สามารถส่งคุกกี้ให้ได้แล้วนะคะ แต่ยังสนับสนุนด้วยการกดเป็น Oshi หรือ Kami ได้อยู่ค่ะ!', 
+          title: 'GRADUATED', 
+          text: 'เมมเบอร์คนนี้จบการศึกษาแล้ว ไม่สามารถส่งคุกกี้ให้ได้ แต่ยังสนับสนุนด้วยการกดเป็น Oshi หรือ Kami ได้อยู่ค่ะ!', 
           icon: 'info', 
           confirmButtonColor: '#ff85a2' 
         });
@@ -1076,16 +1114,28 @@
             const res = await resp.json();
 
             if (res.status === "success") {
-              const scoreElement = document.getElementById('mb-score');
-              if (scoreElement) {
-                let currentScore = parseInt(scoreElement.innerText.replace(/,/g, '')) || 0;
-                scoreElement.innerText = formatMemberScore(currentScore + amountSent);
+              // 🌟 [แก้บั๊กตรงนี้] ดึงคะแนนดิบๆ จาก LocalStorage มาบวกแทนการดึงจากหน้าจอ
+              const savedStatsStr = localStorage.getItem('current_member_stats');
+              if (savedStatsStr) {
+                try {
+                  const m = JSON.parse(savedStatsStr);
+                  const currentRawScore = m.all_time_total || 0;
+                  const newScore = currentRawScore + amountSent;
+                  
+                  // อัปเดตตัวเลขให้เนียนตา ก่อนรอโหลดข้อมูลจริงจากเซิร์ฟเวอร์
+                  const scoreElement = document.getElementById('mb-score');
+                  if (scoreElement) scoreElement.innerText = formatMemberScore(newScore);
+                  
+                  // เซฟค่าใหม่ลง Cache ชั่วคราวไปเลย
+                  m.all_time_total = newScore;
+                  localStorage.setItem('current_member_stats', JSON.stringify(m));
+                } catch(e) { console.error(e); }
               }
 
               await syncUserData(); 
-              showSkeleton();
-              await fetchLatestMemberStats(); 
-
+              // ✨ ลบ showSkeleton() ออกตรงนี้ เพื่อไม่ให้จอกระพริบ (ให้เลขมันขึ้นไปเลย แล้วไปโหลดเงียบๆ เบื้องหลัง)
+              fetchLatestMemberStats(); // ปล่อยให้ไปดึงข้อมูลจริงเงียบๆ เบื้องหลัง
+              
               Swal.fire({ title: 'ขอบคุณสำหรับแรงสนับสนุนนะคะ', text: `ส่งคุกกี้จำนวน ${amountSent.toLocaleString()} ชิ้นให้ ${memberName} สำเร็จแล้วงับ! 🍪✨`, icon: 'success', confirmButtonColor: '#ff85a2' });
             } else { Swal.fire('ผิดพลาด', res.message || 'ไม่สามารถทำรายการได้', 'error'); }
           } catch (e) { Swal.fire('เกิดข้อผิดพลาด!', 'เซิร์ฟเวอร์ไม่ตอบสนอง', 'error'); }
