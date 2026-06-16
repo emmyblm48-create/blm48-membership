@@ -210,47 +210,91 @@
       margin-bottom: 12px;
     }
 
-    /* Floating Tab-bar 🎀 */
-    .bottom-tab-bar {
-        position: fixed;
-        bottom: 24px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 90%;
-        max-width: 440px;
-        height: 68px;
-        background: rgba(255, 255, 255, 0.92);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        border-radius: 35px;
-        border: 1px solid rgba(255, 204, 213, 0.5);
-        box-shadow: 0 10px 30px rgba(255, 133, 162, 0.15);
-        z-index: 1000;
-        padding: 0 10px;
-        box-sizing: border-box;
-    }
-    .tab-item {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        color: #ffb3c1;
-        text-decoration: none;
-        font-size: 0.85rem;
-        font-family: 'Quicksand', 'Kanit', sans-serif;
-        font-weight: 600;
-        padding: 10px 14px;
-        border-radius: 25px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        -webkit-tap-highlight-color: transparent;
-    }
-    .tab-item i { font-size: 1.25rem; }
-    .tab-item span { display: none; }
-    .tab-item.active { background-color: #fff0f3; color: #ff85a2; }
-    .tab-item.active span { display: inline-block; }
+.bottom-tab-bar {
+  /* 👑 Layer 1: ชั้นโปร่งใสล่างสุด ขยายความสูงรวมเพิ่มขึ้นเป็น 110px ให้ Nav ดูสูงเด่น */
+  height: calc(110px + env(safe-area-inset-bottom, 0px)); 
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 999;
+  background: transparent; 
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end; /* ยึดฐานปุ่มจากขอบล่างสุด */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-sizing: border-box;
+}
+
+.bottom-tab-bar::before {
+  content: "";
+  position: absolute;
+  /* 👑 Layer 2: ขยับท็อปลงมาที่ 60px เพื่อให้เหลือเนื้อผ้าสีขาวหนา 50px (เกือบครึ่งหนึ่งของความสูงรวม 110px) */
+  top: 60px; 
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #ffffff; 
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+  border-radius: 28px 28px 0 0; /* เพิ่มความโค้งมนให้ดูละมุนรับกับบาร์ที่สูงขึ้น */
+  box-shadow: 0 -12px 35px rgba(0, 0, 0, 0.08); /* เพิ่มมิติเงาให้ดูลอยแยกชั้นชัดเจน */
+  z-index: 1;
+}
+
+.tab-item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 20%;
+  height: 50px; /* ปรับความสูงบล็อกกดให้บาลานซ์กับ Layer สีขาว */
+  position: relative;
+  z-index: 2; 
+  text-decoration: none;
+  color: #8e8e93; 
+  
+  /* 🚀 ดันไอคอนให้เลื่อนสูงขึ้นไปข้างบน 30px ทะลุเลเยอร์สีขาวขึ้นไปลอยเด่นอยู่บนชั้นโปร่งใสครึ่งตัวพอดี */
+  transform: translateY(-30px); 
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* ปรับสปริงให้เด้งนุ่มนวลขึ้น */
+}
+
+/* 🌟 เอฟเฟกต์ตอนเอานิ้วจิ้มปุ่มปกติ */
+.tab-item:active {
+  transform: translateY(-30px) scale(0.85);
+  opacity: 0.8;
+}
+
+/* 👑 ปุ่มสถานะ Active (หน้าปัจจุบัน): ดีดตัวลอยสูงเด่นขึ้นไปอีกที่ 45px กลายเป็นปุ่มฮีโร่ลอยเด่นสะดุดตา */
+.tab-item.active {
+  color: #ffb3c1; 
+  transform: translateY(-45px); 
+}
+/* เอฟเฟกต์ตอนเอานิ้วจิ้มปุ่มที่ Active อยู่ */
+.tab-item.active:active {
+  transform: translateY(-45px) scale(0.85);
+}
+
+/* ขยายขนาดไอคอน FontAwesome (34px เท่าเดิม แต่ใส่เงาให้ลอยตามบาร์) */
+.tab-item i {
+  font-size: 34px;
+  filter: drop-shadow(0 6px 8px rgba(0,0,0,0.08)); 
+}
+
+/* ขยายขนาดรูปไอคอนแชมป์สั่งทำ (44px เท่าเดิม พร้อมเพิ่มเงาตกกระทบลงบนเลเยอร์สีขาว) */
+.tab-item img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 12px rgba(0,0,0,0.12)); 
+}
+
+/* ปรับแต่งวงกลมรูปโปรไฟล์ให้ลอยขึ้นมาอย่างสมดุล */
+#tab-profile-img {
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 50%;
+  border: 2px solid #ffb3c1;
+  box-sizing: border-box;
+}
     
     .icon-wrapper {
       position: relative;
@@ -307,40 +351,42 @@
 
 <div class="bottom-tab-bar">
   <a href="index.html" class="tab-item">
-    <i class="fa-solid fa-house"></i>
-    <span>Home</span>
+    <i id="nav-home-fallback" class="fa-solid fa-house"></i>
+    <img id="nav-home" src="" alt="Home" style="display: none;">
   </a>
   <a href="kami.html" class="tab-item">
-    <i class="fa-solid fa-star"></i>
-    <span>My Oshi</span>
+    <i id="nav-kami-fallback" class="fa-solid fa-star"></i>
+    <img id="nav-kami" src="" alt="My Oshi" style="display: none;">
   </a>
   <a href="shop.html" class="tab-item">
-    <i class="fa-solid fa-bag-shopping"></i>
-    <span>Shop</span>
+    <i id="nav-cart-fallback" class="fa-solid fa-bag-shopping"></i>
+    <img id="nav-cart" src="" alt="Shop" style="display: none;">
   </a>
-  <a href="notification.html" class="tab-item active">
-    <div class="icon-wrapper">
-      <i class="fa-solid fa-bell"></i>
+  <a href="notification.html" class="tab-item">
+    <div class="icon-wrapper" style="position: relative; display: flex; justify-content: center; align-items: center;">
+      <i id="nav-noti-fallback" class="fa-solid fa-bell"></i>
+      <img id="nav-noti" src="" alt="Notification" style="display: none;">
       <span class="noti-badge" id="noti-badge" style="display: none;"></span>
-      <span>Notification</span>
     </div>
   </a>
   <a href="profile.html" class="tab-item">
-    <img id="tab-profile-img" src="https://via.placeholder.com/30" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 2px solid #ffb3c1;">
-    <span>Profile</span>
+    <img id="tab-profile-img" src="https://via.placeholder.com/30" style="border-radius: 50%; object-fit: cover;">
   </a>
 </div>
 
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", () => {
     const notiListContainer = document.getElementById("noti-list");
     const btnAdd = document.getElementById("btn-add");
     const btnReset = document.getElementById("btn-reset");
     const btnRefresh = document.getElementById("btn-refresh");
     const adminInputBox = document.getElementById("admin-input-box");
 
-    // ลิงก์ Google Apps Script Web App ของคุณ
+    // 1. ย้ายลิงก์ Google Apps Script ขึ้นมาประกาศไว้ก่อน
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxF5G3E1HWhVTQOVGzWtsqSCZfXkq8ZrX6DqGKt_pcicYbi2_59B-ecEeeTU6-aqBEf/exec";
+
+    // 2. เรียกฟังก์ชันโดยส่ง SCRIPT_URL เข้าไปในวงเล็บด้วย
+    loadChampThemeSubPage(SCRIPT_URL);
 
     // =========================================================
     // 📦 1. ดึงข้อมูลเซสชันผู้ใช้
@@ -513,6 +559,54 @@
         btnRefresh.querySelector('i').classList.remove('fa-spin');
       }
     };
+    
+// ฟังก์ชันโหลดและซิงค์ธีมผู้ชนะ (เวอร์ชันอัปเกรดเปิดรับพารามิเตอร์)
+function loadChampThemeSubPage(customURL) {
+  const CACHE_KEY = "bnl_winner_theme_cache";
+  
+  // 1. ดึงจากแคชเก่าในเครื่องมาแสดงรอก่อนทันที (เร็วที่สุด)
+  const cachedData = localStorage.getItem(CACHE_KEY);
+  if (cachedData) {
+    try { applySubPageTheme(JSON.parse(cachedData)); } catch (e) {}
+  }
+
+  // 2. เลือกใช้ URL: ถ้าส่งมาในวงเล็บให้ใช้ก่อน ถ้าไม่มีให้ไปหาตัวแปร Global
+  const finalURL = customURL || (typeof scriptURL !== 'undefined' ? scriptURL : (typeof SCRIPT_URL !== 'undefined' ? SCRIPT_URL : ''));
+  if (!finalURL) return; // ถ้าไม่เจอ URL เลย ให้ยกเลิกทำงานพาร์ท Fetch หลังบ้าน
+
+  // 3. แอบไปเช็กข้อมูลใหม่เงียบๆ
+  fetch(`${finalURL}?action=getWinnerTheme`)
+    .then(response => response.json())
+    .then(newData => {
+      if (newData && newData.name && cachedData !== JSON.stringify(newData)) {
+        localStorage.setItem(CACHE_KEY, JSON.stringify(newData));
+        applySubPageTheme(newData); // อัปเดตทันทีถ้าหลังบ้านเปลี่ยนคนชนะ
+      }
+    }).catch(e => console.error(e));
+}
+
+function applySubPageTheme(champData) {
+  if (!champData) return;
+  updateSubPageIcon('nav-home', 'nav-home-fallback', champData.homeIcon);
+  updateSubPageIcon('nav-kami', 'nav-kami-fallback', champData.kamiIcon);
+  updateSubPageIcon('nav-cart', 'nav-cart-fallback', champData.cartIcon);
+  updateSubPageIcon('nav-noti', 'nav-noti-fallback', champData.notiIcon);
+}
+
+function updateSubPageIcon(imgId, fallbackId, iconUrl) {
+  const imgElement = document.getElementById(imgId);
+  const fallbackElement = document.getElementById(fallbackId);
+  if (imgElement && fallbackElement) {
+    if (iconUrl && iconUrl.trim() !== "") {
+      imgElement.src = iconUrl;
+      imgElement.style.display = 'block';
+      fallbackElement.style.display = 'none';
+    } else {
+      imgElement.style.display = 'none';
+      fallbackElement.style.display = 'block';
+    }
+  }
+}
     
     // =========================================================
     // 🎨 5. ฟังก์ชันจัดหน้า UI แสดงรายการแจ้งเตือน
