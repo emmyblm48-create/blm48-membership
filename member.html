@@ -681,8 +681,11 @@
       } catch (e) { console.error("Sync Error:", e); }
     }
 
-    async function fetchLatestMemberStats() {
+async function fetchLatestMemberStats() {
       if (!memberName) return;
+      
+      // เอา const scriptURL เดิมตรงบรรทัดนี้ออกได้เลยครับ เพราะใช้ตัวแปรด้านบนแทนแล้ว ✨
+
       try {
         const resp = await fetch(`${scriptURL}?action=getMemberDetail&name=${encodeURIComponent(memberName)}&_=${Date.now()}`);
         const res = await resp.json();
@@ -691,23 +694,21 @@
           const oldStats = localStorage.getItem('current_member_stats');
           const oldFans = localStorage.getItem('current_member_fans');
           
-          // 🌸 ตรวจสอบข้อมูลอัปเดตจาก Google Sheet: ถ้าค่าเปลี่ยนไปจากแคชเดิม ให้ล้าง session แคชเก่าทิ้งทันที
           if (oldStats !== JSON.stringify(res.stats) || oldFans !== JSON.stringify(res.fans)) {
-            localStorage.removeItem('current_member_stats');
-            localStorage.removeItem('current_member_fans');
+            if (res.stats) localStorage.setItem('current_member_stats', JSON.stringify(res.stats));
+            if (res.fans) localStorage.setItem('current_member_fans', JSON.stringify(res.fans));
+            
+            if (typeof removeSkeleton === "function") removeSkeleton(); 
+            renderMemberStatsAndFans(); 
+          } else {
+             if (typeof removeSkeleton === "function") removeSkeleton();
           }
-          
-          if (res.stats) localStorage.setItem('current_member_stats', JSON.stringify(res.stats));
-          if (res.fans) localStorage.setItem('current_member_fans', JSON.stringify(res.fans));
-          
-          removeSkeleton(); 
-          renderMemberStatsAndFans(); 
         } else {
-          removeSkeleton();
+          if (typeof removeSkeleton === "function") removeSkeleton();
         }
       } catch (e) {
         console.error("Error fetching latest member stats:", e);
-        removeSkeleton();
+        if (typeof removeSkeleton === "function") removeSkeleton();
       }
     }
 
@@ -717,72 +718,87 @@
         return url;
     }
 
-   function renderMemberStatsAndFans() {
-      const savedStats = localStorage.getItem('current_member_stats');
-      if (savedStats) {
-        const m = JSON.parse(savedStats);
-        
-        // 🎯 เช็กสถานะแกรดเพื่อเปิด-ปิด การแสดงผลป้ายดีไซน์
-        const gradBadge = document.getElementById('mb-grad-badge');
-        const gradAvatarIcon = document.getElementById('avatar-grad-icon');
-        const btnCookie = document.getElementById('btn-cookie-trigger');
-        const nameEl = document.getElementById('mb-name');
-        
-        if (nameEl) nameEl.innerText = m.name || memberName;
+function renderMemberStatsAndFans() {
+  const savedStats = localStorage.getItem('current_member_stats');
+  if (savedStats) {
+    const m = JSON.parse(savedStats);
+    
+    // 🎯 เช็กสถานะแกรดเพื่อเปิด-ปิด การแสดงผลป้ายดีไซน์
+    const gradBadge = document.getElementById('mb-grad-badge');
+    const gradAvatarIcon = document.getElementById('avatar-grad-icon');
+    const btnCookie = document.getElementById('btn-cookie-trigger');
+    const nameEl = document.getElementById('mb-name');
+    
+    if (nameEl) nameEl.innerText = m.name || memberName;
 
-        if (m.status === 'Graduated' || m.status === 'graduated') {
-          if (gradBadge) gradBadge.style.display = 'inline-flex';
-          if (gradAvatarIcon) gradAvatarIcon.style.display = 'flex';
-          if (btnCookie) btnCookie.setAttribute('data-graduated', 'true');
-        } else {
-          if (gradBadge) gradBadge.style.display = 'none';
-          if (gradAvatarIcon) gradAvatarIcon.style.display = 'none';
-          if (btnCookie) btnCookie.setAttribute('data-graduated', 'false');
-        }
-
-        const avatarEl = document.getElementById('mb-avatar');
-        if (avatarEl) avatarEl.src = getImg(m.profile_img);
-
-        // 🌟 แก้ไขตรงนี้: ถ้ายังไม่มีค่า ให้ขึ้น ... แทน 0
-        const kamiEl = document.getElementById('mb-kami');
-        if (kamiEl) kamiEl.innerText = (m.total_kami !== undefined && m.total_kami !== null) ? m.total_kami : '...';
-
-        const oshiEl = document.getElementById('mb-oshi');
-        if (oshiEl) oshiEl.innerText = (m.total_oshi !== undefined && m.total_oshi !== null) ? m.total_oshi : '...';
-
-        const scoreEl = document.getElementById('mb-score');
-        if (scoreEl) scoreEl.innerText = formatMemberScore(m.all_time_total || 0);
-        
-        const likesEl = document.getElementById('mb-likes');
-        if (likesEl) likesEl.innerText = formatMemberScore(m.total_likes || 0);
-      }
-
-      // ... (โค้ดส่วน fanContainer ด้านล่างปล่อยไว้เหมือนเดิมครับ) ...
-      const savedFans = localStorage.getItem('current_member_fans');
-      const fanContainer = document.getElementById('member-fans-content');
-      
-      if (savedFans && fanContainer) {
-        fanContainer.innerHTML = '';
-        const fans = JSON.parse(savedFans);
-        if (fans.length === 0) {
-          fanContainer.innerHTML = '<div style="padding:20px 0; color:#bbb; font-size:12px; text-align:center;">ยังไม่มีแฟนคลับปาคุกกี้ให้ในเดือนนี้</div>';
-        } else {
-          fans.slice(0, 10).forEach((f, idx) => {
-            const row = document.createElement('div');
-            row.className = 'fan-row';
-            row.innerHTML = `
-              <div class="fan-rank">${idx + 1}</div>
-              <img src="${getImg(f.img)}" class="fan-avatar" onerror="this.src='assets/images/default-profile.png'"> 
-              <div class="fan-meta">
-                <div class="fan-name">${f.name || f.username}</div>
-                <div class="fan-amount"><i class="fas fa-cookie-bite"></i> ${Number(f.total || 0).toLocaleString()} Cookies</div>
-              </div>
-            `;
-            fanContainer.appendChild(row);
-          });
-        }
-      }
+    if (m.status === 'Graduated' || m.status === 'graduated') {
+      if (gradBadge) gradBadge.style.display = 'inline-flex';
+      if (gradAvatarIcon) gradAvatarIcon.style.display = 'flex';
+      if (btnCookie) btnCookie.setAttribute('data-graduated', 'true');
+    } else {
+      if (gradBadge) gradBadge.style.display = 'none';
+      if (gradAvatarIcon) gradAvatarIcon.style.display = 'none';
+      if (btnCookie) btnCookie.setAttribute('data-graduated', 'false');
     }
+
+    const avatarEl = document.getElementById('mb-avatar');
+    if (avatarEl) avatarEl.src = getImg(m.profile_img);
+
+    // 🌟 แสดงผลและลบคลาส Skeleton ออกทันทีที่ดึงค่าจากแคชได้
+    const kamiEl = document.getElementById('mb-kami');
+    if (kamiEl) {
+      kamiEl.innerText = (m.total_kami !== undefined && m.total_kami !== null) ? m.total_kami : '0';
+      kamiEl.classList.remove('skeleton-stat', 'skeleton'); // เคลียร์หลอดดาวน์โหลด
+    }
+
+    const oshiEl = document.getElementById('mb-oshi');
+    if (oshiEl) {
+      oshiEl.innerText = (m.total_oshi !== undefined && m.total_oshi !== null) ? m.total_oshi : '0';
+      oshiEl.classList.remove('skeleton-stat', 'skeleton'); // เคลียร์หลอดดาวน์โหลด
+    }
+
+    const scoreEl = document.getElementById('mb-score');
+    if (scoreEl) {
+      scoreEl.innerText = formatMemberScore(m.all_time_total || m.monthly_cookies || 0);
+      scoreEl.classList.remove('skeleton-stat', 'skeleton'); // เคลียร์หลอดดาวน์โหลด
+    }
+    
+   const likesEl = document.getElementById('mb-likes');
+    if (likesEl) {
+      // ดักรับค่าจากแคช เผื่อหน้าแรกส่งมาในชื่อ total_likes หรือหลังบ้านดึงสดเป็น totalLikes
+      const liveLikes = m.total_likes !== undefined ? m.total_likes : (m.totalLikes !== undefined ? m.totalLikes : 0);
+
+      likesEl.innerText = formatMemberScore(liveLikes);
+      likesEl.classList.remove('skeleton-stat', 'skeleton'); // เคลียร์หลอดดาวน์โหลดทันที!
+    }
+  }
+
+  // 📦 (โค้ดส่วน fanContainer ด้านล่างคงไว้ตามสไตล์น่ารักๆ ของเอ็มมี่งับ)
+  const savedFans = localStorage.getItem('current_member_fans');
+  const fanContainer = document.getElementById('member-fans-content');
+  
+  if (savedFans && fanContainer) {
+    fanContainer.innerHTML = '';
+    const fans = JSON.parse(savedFans);
+    if (fans.length === 0) {
+      fanContainer.innerHTML = '<div style="padding:20px 0; color:#bbb; font-size:12px; text-align:center;">ยังไม่มีแฟนคลับปาคุกกี้ให้ในเดือนนี้</div>';
+    } else {
+      fans.slice(0, 10).forEach((f, idx) => {
+        const row = document.createElement('div');
+        row.className = 'fan-row';
+        row.innerHTML = `
+          <div class="fan-rank">${idx + 1}</div>
+          <img src="${getImg(f.img)}" class="fan-avatar" onerror="this.src='https://raw.githubusercontent.com/Chatchapong-Sing/stockManagement/main/default-profile.png'"> 
+          <div class="fan-meta">
+            <div class="fan-name">${f.name || f.username}</div>
+            <div class="fan-amount"><i class="fas fa-cookie-bite"></i> ${Number(f.total || 0).toLocaleString()} Cookies</div>
+          </div>
+        `;
+        fanContainer.appendChild(row);
+      });
+    }
+  }
+}
 
     function checkLoginStatus() {
       if (!user) {
@@ -937,7 +953,7 @@ async function fetchLatestMemberStats() {
       }
     }
   
-    async function loadMemberSpecialThanks() {
+ async function loadMemberSpecialThanks() {
         const container = document.getElementById('champ-thanks-container');
         const content = document.getElementById('champ-thanks-content');
         if (!container || !content || !memberName) return;
@@ -949,6 +965,7 @@ async function fetchLatestMemberStats() {
             champData = JSON.parse(localData);
         } else {
             try {
+                // 👍 ตรงนี้จะเรียกใช้งาน scriptURL จากด้านบนสุดได้ฉลุย ไม่เออร์เรอร์แล้วครับ!
                 const response = await fetch(`${scriptURL}?action=getChampOfTheMonth`);
                 const result = await response.json();
                 if (result.status === "success" && result.data) {
@@ -1631,6 +1648,26 @@ document.addEventListener('click', function() {
     function closeImageViewer() { document.getElementById('image-viewer-modal').style.display = 'none'; }
 
     window.onload = loadMemberData;
+  
+    document.addEventListener("DOMContentLoaded", function() {
+    // ดึงค่าจาก localStorage ออกมาเก็บในตัวแปร (ถ้าไม่มีค่าให้ใช้ค่าเริ่มต้น)
+    const storedKamiOshi = localStorage.getItem('kamiOshi') || 'ยังไม่ได้เลือก';
+    const storedOshi = localStorage.getItem('oshi') || 'ยังไม่ได้เลือก';
+    const storedCookie = localStorage.getItem('cookie') || '0';
+    const storedLike = localStorage.getItem('like') || '0';
+
+    // ค้นหา Element ตาม ID ที่กำหนดไว้ข้างบน
+    const kamiEl = document.getElementById('member-kami-oshi');
+    const oshiEl = document.getElementById('member-oshi');
+    const cookieEl = document.getElementById('member-cookie');
+    const likeEl = document.getElementById('member-like');
+
+    // ส่งค่าไปแทนที่ข้อความบนหน้าเว็บเพื่อแสดงผลพร้อมกัน
+    if (kamiEl) kamiEl.innerText = storedKamiOshi;
+    if (oshiEl) oshiEl.innerText = storedOshi;
+    if (cookieEl) cookieEl.innerText = storedCookie;
+    if (likeEl) likeEl.innerText = storedLike;
+});
 </script>
 
 <!-- =========================================================================
