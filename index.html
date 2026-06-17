@@ -24,6 +24,7 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script> 
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
     
   </head>
     
@@ -1478,17 +1479,9 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     <div class="loader-text">กำลังรวบรวมคุกกี้...</div>
   </div>
 </div>
-<div id="splash-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.4s ease;">
-    
-    <div style="position: relative; width: 85%; max-width: 340px; aspect-ratio: 2/3; background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 12px 30px rgba(0,0,0,0.4); display: flex; flex-direction: column; animation: popupScale 0.3s ease-out;">
-        
-        <div onclick="closeChampSplash()" style="position: absolute; top: 14px; right: 14px; width: 32px; height: 32px; background: rgba(0, 0, 0, 0.5); color: #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; font-family: Arial, sans-serif; font-size: 20px; line-height: 1; z-index: 10; transition: background 0.2s;" onmouseover="this.style.background='rgba(0,0,0,0.7)'" onmouseout="this.style.background='rgba(0,0,0,0.5)'">
-          &times;
-        </div>
-        
-        <img id="main-splash" src="images/default-splash.jpg" style="width: 100%; height: 100%; object-fit: cover;">
-        
-    </div>
+<div id="splash-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: #000; display: none; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.5s ease; opacity: 1;">
+    <!-- ดึงรูปภาพกางเต็มจอ 100% สัดส่วนไม่เพี้ยนด้วย object-fit: cover -->
+    <img id="main-splash" src="images/default-splash.jpg" style="width: 100%; height: 100%; object-fit: cover;">
 </div>
 
 <!-- Overlay สำหรับปิด Sidebar -->
@@ -1895,29 +1888,28 @@ function hideThemeLoadingScreen() {
   if (appLoading) appLoading.style.display = 'none';
 }
 
-// ==========================================
-// 👑 6. APP LIFECYCLE LISTENERS (ระบบควบคุมการโหลดหน้าจอและเซสชันอย่างเป็นระเบียบ)
-// ==========================================
+// =========================================================================
+// 👑 6. APP LIFECYCLE LISTENERS (ระบบควบคุมการโหลดหน้าจอและเซสชันเวอร์ชันเคลียร์บั๊ก)
+// =========================================================================
 
-// ✨ จุดที่ 1: ดักจับตอนโครงสร้างหน้าเว็บโหลดเสร็จ (ทำงานรอบเดียว เรียงลำดับด้วย await ไม่ตีกันเอง)
-// ✨ จุดที่ 1: ดักจับตอนโครงสร้างหน้าเว็บโหลดเสร็จ (เวอร์ชันแก้ไขให้โพสต์ขึ้นค้างทันที ไม่รอกระพริบโหลด)
+// ✨ จุดที่ 1: ดักจับตอนโครงสร้างหน้าเว็บโหลดเสร็จ (ยุบรวมโลจิกทั้งหมดไว้ที่นี่เพื่อเรียงลำดับ)
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     // 🔐 1. ตรวจสอบเซสชันผู้ใช้เบื้องต้นจากตัวเครื่องก่อน
     user = getUserSession(); 
 
-    // 🚨 ดักจับ: ถ้าไม่มี user หรือ username เป็นค่าว่าง ให้เตะออกทันทีป้องกันการแอบเข้ามาหน้าแรก
+    // 🚨 ดักจับ: ถ้าไม่มี user ให้เตะออกไปหน้า Login ทันที
     if (!user || !user.username || user.username.trim() === "") {
-      localStorage.removeItem('bnl_session'); // ล้างเซสชันขยะทิ้ง
-      window.location.replace('login.html'); // ใช้ .replace() เพื่อไม่ให้กดย้อนกลับมาได้
+      localStorage.removeItem('bnl_session'); 
+      window.location.replace('login.html'); 
       return; 
     }
 
-    // 🔄 2. ตรวจสอบเวอร์ชันแอปเพื่อเคลียร์แคชเก่าอัตโนมัติ
+    // 🔄 2. ตรวจสอบเวอร์ชันแอปและโหลดข้อมูลแชมป์
     checkVersion(); 
     loadChampOfTheMonth();
     
-    // 🎨 3. วาดหน้าจอแสดงผลด้วยข้อมูลเก่าจาก Cache ทันทีเพื่อให้แอปเปิดไวแบบไม่ต้องรอโหลดซิงค์ข้อมูล
+    // 🎨 3. วาดหน้าจอแสดงผลด้วยข้อมูลเก่าจาก Cache ทันที เพื่อให้แอปเปิดไว
     if (typeof updateUI === 'function') updateUI();
     if (typeof renderTrendingMVs === 'function') renderTrendingMVs();
     if (Array.isArray(currentRankingData) && currentRankingData.length > 0) {
@@ -1927,16 +1919,40 @@ document.addEventListener('DOMContentLoaded', async () => {
       renderGlobalFans(currentTopFansData);
     }
 
-    // 🌸 [แก้ไขจุดนี้] สั่งโหลดโพสต์ไทม์ไลน์ขึ้นมาค้างบนหน้าจอทันทีจาก Cache!
-    // ฟังก์ชันนี้จะดึงโพสต์ใน localStorage ขึ้นมาโชว์ทันทีในเสี้ยววินาทีแรก และแอบยิงเช็กโพสต์ใหม่ไปพร้อมๆ กัน
+    // 🌸 สั่งโหลดโพสต์ไทม์ไลน์ขึ้นมาค้างบนหน้าจอทันทีจาก Cache
     if (typeof loadTimelinePosts === 'function') {
       loadTimelinePosts(); 
     }
 
-    // 🚀 4. ซ่อนหน้าต่างโหลด เพื่อให้ผู้ใช้กดปุ่มใช้งานเมนูต่างๆ บนหน้าเว็บได้ทันที
+    // 🚀 4. ซ่อนหน้าต่างโหลดตัวเล็ก (App Loading) เพื่อให้ระบบเบื้องหลังพร้อมทำงาน
     if (typeof hideAppLoading === 'function') hideAppLoading();
 
-    // 📡 5. ซิงค์ข้อมูลสดจาก Google Sheets ย้ายมาทำงานด้านหลัง (หลังจากโชว์ข้อมูลแคชเรียบร้อยแล้ว)
+    /* =========================================================================
+       🎬 [ระบบควบคุม FULLSCREEN SPLASH SCREEN 5 วินาที]
+       ========================================================================= */
+    const splashScreen = document.getElementById('splash-screen');
+    if (splashScreen) {
+      const hasShownSplash = sessionStorage.getItem('blm48_splash_shown');
+
+      if (!hasShownSplash) {
+        // ครั้งแรกของเซสชัน -> สั่งโชว์เต็มจอ 5 วินาที
+        splashScreen.style.display = 'flex';
+        sessionStorage.setItem('blm48_splash_shown', 'true');
+
+        setTimeout(() => {
+          splashScreen.style.opacity = '0'; // ค่อยๆ เฟดจางลงเพื่อความละมุน
+          setTimeout(() => {
+            splashScreen.style.display = 'none';
+          }, 500); 
+        }, 5000); // ⏱️ ตั้งเวลาให้โชว์ค้างไว้ 5 วินาทีตรงนี้งับ
+
+      } else {
+        // เคยโชว์ไปแล้วในเซสชันนี้ -> ปิดตายทันที แฟนคลับใช้งานเว็บต่อได้เลย ไม่หน่วงเวลา
+        splashScreen.style.display = 'none';
+      }
+    }
+
+    // 📡 5. ซิงค์ข้อมูลสดจาก Google Sheets / หลังบ้าน (ทำงานแบบ Background Sync อยู่ใต้รูป Splash)
     await syncUserData();       
     
     // 6. แอบโหลดข้อมูลอันดับเบื้องหลังแบบเงียบๆ
@@ -1948,16 +1964,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// ✨ จุดที่ 2: ดักจับตอนไฟล์ทั้งหมด (รวมถึงรูปภาพ) โหลดเสร็จสมบูรณ์ (ใช้จัดการธีมและปิด Splash Screen หน้าแรกสุด)
+// ✨ จุดที่ 2: ดักจับตอนไฟล์ทั้งหมด (รวมถึงรูปภาพ) โหลดเสร็จสมบูรณ์
 window.addEventListener('load', () => {
   // ตรวจสอบระบบ Dark Mode
   if (localStorage.getItem('theme') === 'dark' && typeof toggleDarkMode === 'function') {
     toggleDarkMode();
   }
-  // หน่วงเวลา 2 วินาทีแล้วปิด Splash Screen ตัวโหลดสีขาวชมพูเริ่มต้น
-  if (typeof hideSplashScreen === 'function') {
-    setTimeout(hideSplashScreen, 2000); 
-  }
+  
+  // 💡 หมายเหตุ: ถอดระบบเปิด-ปิด hideSplashScreen ตัวเก่าออกแล้ว เพื่อไม่ให้ไปแย่งเวลา 5 วินาทีของตัวใหม่ครับ
 });
 
 // ✨ จุดที่ 3: ดักจับตอนผู้ใช้กดย้อนกลับมาจากหน้าอื่น (Pageshow) ให้ทำการซิงค์ข้อมูลใหม่
@@ -2941,7 +2955,6 @@ document.addEventListener('click', function() {
   });
 });
 
-// ฟังก์ชันลบโพสต์ (อัปเดตให้ส่ง Role ไปหลังบ้าน)
 async function deletePostUi(postId) {
   const result = await Swal.fire({
     title: 'ลบโพสต์นี้หรือไม่?',
@@ -2955,21 +2968,28 @@ async function deletePostUi(postId) {
 
   if (result.isConfirmed) {
     const currentUser = getUserSession();
-    const userRole = currentUser ? (currentUser.role || "") : ""; // 🌟 ดึง role จาก session ปัจจุบัน
     
-    // ✨ ทำการส่ง &role เพิ่มเติมเข้าไปใน URL
+    // 🌟 [เพิ่มจุดดักแครช] เช็กก่อนว่าล็อกอินอยู่จริงไหม
+    if (!currentUser || !currentUser.username) {
+      Swal.fire('เอ๊ะ!', 'เซสชันหมดอายุ กรุณาล็อกอินใหม่อีกครั้งครับ', 'error');
+      return;
+    }
+
+    const userRole = currentUser.role || ""; 
+    
+    // ✨ ยิง Fetch อย่างปลอดภัยเพราะมั่นใจว่า currentUser ไม่เป็น null แน่นอน
     const response = await fetch(`${scriptURL}?action=deletePost&postId=${postId}&username=${currentUser.username}&role=${encodeURIComponent(userRole)}`);
     const data = await response.json();
     
     if (data.status === 'success') {
-      document.getElementById(`post-${postId}`).remove(); // เตะการ์ดออกจากหน้าจอทันที
+      document.getElementById(`post-${postId}`).remove(); 
       Swal.fire('ลบแล้ว!', 'ลบโพสต์เรียบร้อย', 'success');
     } else {
       Swal.fire('เอ๊ะ!', 'เกิดข้อผิดพลาด หรือคุณไม่มีสิทธิ์ในการลบโพสต์นี้', 'error');
     }
   }
 }
-
+  
 // ฟังก์ชันแก้ไขโพสต์ (อัปเดตให้ส่ง Role ไปหลังบ้าน)
 async function editPostUi(postId, encodedContent) {
   const oldContent = decodeURIComponent(encodedContent);
@@ -3318,10 +3338,11 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 <script type="module">
-  // 1. นำเข้าฟังก์ชันจาก Firebase v10.10.0 (รวมเอาไว้ที่บนสุดทั้งหมดงับ) 🌟
+  // 1. นำเข้าฟังก์ชันจาก Firebase v10.10.0 (รวมเอาไว้ที่บนสุดทั้งหมดและเพิ่มสคริปต์สำหรับระบบแจ้งเตือน) 🌟
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-  import { getDatabase, ref as dbRef, push, onChildAdded, get, onValue } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-database.js";
+  import { getDatabase, ref as dbRef, push, onChildAdded, get, onValue, set, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-database.js";
   import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-storage.js";
+  import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-messaging.js";
 
   // 2. ตั้งค่า Configuration ของ Firebase (ชุดหลักของ BLM48)
   const firebaseConfig = {
@@ -3338,6 +3359,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const app = initializeApp(firebaseConfig);
   const database = getDatabase(app);
   const storage = getStorage(app);
+  const messaging = getMessaging(app); // เปิดใช้งาน Messaging ระบบ v10 มินิมอล
 
   // ส่งค่าออกไปที่ window ให้ระบบรอบนอกเรียกใช้ได้ปลอดภัย
   window.firebaseApp = app;
@@ -3383,7 +3405,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-/* ==========================================
+  /* ==========================================
      💖 ระบบกดใจโพสต์ (ซิงค์หลังบ้าน Google Sheets) - เวอร์ชันเสถียร
      ========================================== */
   window.likePost = async function(postId) {
@@ -3397,15 +3419,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const heartIcon = document.querySelector(`#post-${postId} .fa-heart`);
     if (!heartIcon || !likeSpan) return;
     
-    // 1. ป้องกันการกดรัว (Spam Click) ถ้ากำลังส่งข้อมูลอยู่ให้ข้ามไปเลย
     if (heartIcon.dataset.loading === "true") return;
-    heartIcon.dataset.loading = "true"; // ตั้งสถานะว่ากำลังทำงานอยู่
+    heartIcon.dataset.loading = "true";
 
-    // ดึงค่าปัจจุบันเก็บไว้เป็น Snapshot สำหรับทำ Rollback
     const isCurrentlyLiked = heartIcon.classList.contains('fa-solid');
     const currentLikes = parseInt(likeSpan.innerText) || 0;
     
-    // 2. Optimistic UI Update: เปลี่ยนสถานะหน้าจอทันทีเพื่อความสมูท
     heartIcon.classList.toggle('fa-solid', !isCurrentlyLiked);
     heartIcon.classList.toggle('fa-regular', isCurrentlyLiked);
     likeSpan.innerText = isCurrentlyLiked ? Math.max(0, currentLikes - 1) : currentLikes + 1;
@@ -3417,7 +3436,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const result = await response.json();
       
       if (result.status === "success") {
-        // 3. เมื่อระบบหลังบ้านสำเร็จ ให้อัปเดตค่าจริงที่ส่งกลับมาจาก Server
         likeSpan.innerText = result.likes;
         heartIcon.classList.toggle('fa-solid', result.isLiked);
         heartIcon.classList.toggle('fa-regular', !result.isLiked);
@@ -3425,13 +3443,11 @@ document.addEventListener("DOMContentLoaded", () => {
         throw new Error(result.message);
       }
     } catch (error) {
-      // 4. Rollback ย้อนค่าเดิมกลับมาแบบปลอดภัยหากเกิด Error หลังบ้าน
       heartIcon.classList.toggle('fa-solid', isCurrentlyLiked);
       heartIcon.classList.toggle('fa-regular', !isCurrentlyLiked);
-      likeSpan.innerText = currentLikes; // ใช้ Snapshot ที่เซฟไว้แทนการคำนวณซ้ำ
+      likeSpan.innerText = currentLikes;
       console.error("Like Error:", error);
     } finally {
-      // 5. ปลดล็อกปุ่มให้กดต่อได้เมื่อจบการทำงานทั้งหมด (ไม่ว่าจะสำเร็จหรือล้มเหลว)
       delete heartIcon.dataset.loading;
     }
   }
@@ -3544,7 +3560,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       await pushFunc(commentPostRef, newCommentData);
 
-      // ซิงค์สำรองข้อมูลลง Google Sheets เบื้องหลัง
       const scriptURL = 'https://script.google.com/macros/s/AKfycbzPrX6DqGKt_pcicYbi2_59B-ecEeeTU6-aqBEf/exec';
       fetch(scriptURL, {
         method: 'POST',
@@ -3572,7 +3587,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
     
-  // ระบบดึงสถิติจำนวนสมาชิกจาก Google Sheets
+// 📊 ระบบดึงสถิติจำนวนสมาชิกจาก Google Sheets (เก็บไว้)
   async function refreshCountFromSheets() {
     const scriptURL = 'https://script.google.com/macros/s/AKfycbxF5G3E1HWhVTQOVGzWtsqSCZfXkq8ZrX6DqGKt_pcicYbi2_59B-ecEeeTU6-aqBEf/exec?action=getMemberCount';
     const countElement = document.getElementById('total-members-count');
@@ -3594,7 +3609,7 @@ document.addEventListener("DOMContentLoaded", () => {
   refreshCountFromSheets();
 
   /* =========================================================================
-     🔍 [ระบบ Auto-Scanner ส่องจับโพสต์ใหม่เพื่อผูกระบบ Realtime อัตโนมัติ]
+     🔍 [ระบบ Auto-Scanner ส่องจับโพสต์ใหม่เพื่อผูกระบบ Realtime อัตโนมัติ] (เก็บไว้)
      ========================================================================= */
   setInterval(() => {
     document.querySelectorAll('.post-card:not([data-firebase-ready="true"])').forEach(card => {
@@ -3607,35 +3622,27 @@ document.addEventListener("DOMContentLoaded", () => {
   }, 300);
 
   /* =========================================================================
-     🔔 [ระบบ Realtime Notification Listener สำหรับ Kami / Oshi]
+     🔔 [ระบบ Realtime Notification Listener สำหรับ Kami / Oshi] (เก็บไว้ทำ In-App Notification)
      ========================================================================= */
-  // บันทึกเวลาที่ผู้ใช้เปิดหน้าเว็บ เพื่อไม่ให้เอาโพสต์ในอดีตมาแจ้งเตือนซ้ำงับ
   const pageLoadTime = Date.now(); 
 
-  // เปิดระบบดักฟังข้อมูลใน Node 'notifications' แบบ Real-time ตัวแปรใช้ตามชุดหลัก
   onChildAdded(dbRef(database, 'notifications'), (snapshot) => {
     const notiData = snapshot.val();
     if (!notiData) return;
 
-    // ดึงรายชื่อคามิ/โอชิ จากเครื่องของผู้ใช้คนนี้มาเช็ก
     const savedKami = JSON.parse(localStorage.getItem("kami_members") || '[]');
-    
-    // เช็กชื่อตัวเองเพื่อไม่ให้มันเด้งเตือนเวลาตัวเองโพสต์
     const session = getUserSession();
     const myName = session ? session.username : "";
 
-    // เงื่อนไข: ต้องเป็นโพสต์ใหม่หลังเปิดจอ + เป็นคนที่เรากด Kami/Oshi ไว้ + ไม่ใช่โพสต์ตัวเอง
+    // ถ้ามีการโพสต์ใหม่หลังจากเปิดเว็บ และเป็นโอชิของเรา จะเปิดจุดแจ้งเตือนสีแดงทันที!
     if (notiData.timestamp > pageLoadTime && savedKami.includes(notiData.writer) && notiData.writer !== myName) {
-      
-      // สั่งเปิดสถานะว่า "มีแจ้งเตือนใหม่นะ!" เก็บไว้ในเครื่อง
       localStorage.setItem("blm48_has_new_noti", "true");
-      
-      // สั่งให้ฟังก์ชันแสดงจุดสีแดง 🔴 ทำงานทันที
       if (typeof window.checkNotificationBadge === 'function') {
         window.checkNotificationBadge();
       }
     }
   });
+
 </script>
 <div class="bottom-tab-bar">
   
