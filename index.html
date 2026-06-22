@@ -16,9 +16,6 @@
     <!-- ทำให้แถบด้านบน (Status Bar) ดูเป็นแอปมากขึ้น -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -1611,6 +1608,24 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     0% { transform: scale(0.9); opacity: 0; }
     100% { transform: scale(1); opacity: 1; }
   }
+    /* ซ่อนแถบ Scrollbar ของตัวสไลด์แบนเนอร์ */
+    #autoBannerContainer::-webkit-scrollbar {
+        display: none;
+    }
+    /* สไตล์ของจุด Indicator บอกตำแหน่งป้าย */
+    .banner-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        transition: all 0.3s ease;
+    }
+    /* สไตล์ของจุด Indicator เมื่อเป็นป้ายปัจจุบัน (ยืดออกสีชมพูเด่นขึ้น) */
+    .banner-dot.active {
+        background: #ff85a2;
+        width: 16px;
+        border-radius: 4px;
+    }
   </style>
 </head>
 <body>
@@ -1642,6 +1657,9 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
 </div>
   
   <div class="nav-btns">
+    <a href="majorvote.html" class="nav-icon" title="Major Vote">
+        <i class="fas fa-vote-yea"></i>
+    </a>
     <!-- ปุ่มกระเป๋าแบบไอคอน -->
      <a href="inventory.html" class="nav-icon" title="Inventory">
       <i class="fas fa-briefcase"></i>
@@ -1706,16 +1724,36 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
   <div id="ranking-list" class="horizontal-list" style="position: relative; z-index: 2;"></div>
 </div>
  
-<div class="section-title"> Top Fans</div>
-<div class="ranking-wrapper">
-  <div id="global-fan-list" class="horizontal-list"></div>
+  
+<div class="shop-banner-slider-wrapper" style="position: relative; margin: 20px 15px; border-radius: 16px; overflow: hidden;">
+    
+    <div id="autoBannerContainer" style="display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; background-color: #ffeef2;">
+        
+        <a href="shop.html" class="auto-banner-item" style="flex: 0 0 100%; min-width: 100%; scroll-snap-align: start; text-decoration: none; display: block;">
+            <img src="https://lh3.googleusercontent.com/d/1vP3dLFNLlaECTHi6DgxlM_Wk5Jtz-PZO=s1000" alt="BLM48 Shop Banner" style="width: 100%; height: auto; display: block; object-fit: cover;">
+        </a>
+        
+        <a href="majorvote.html" class="auto-banner-item" style="flex: 0 0 100%; min-width: 100%; scroll-snap-align: start; text-decoration: none; display: block;">
+            <img src="https://lh3.googleusercontent.com/d/1dQ_OqzkEujL4Acx-DQJv6hmQvMq2c4Pw=s1000" alt="BLM48 Campaign Banner" style="width: 100%; height: auto; display: block; object-fit: cover;">
+        </a>
+
+    </div>
+    
+    <div id="bannerDotsContainer" style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 10; background: rgba(0, 0, 0, 0.15); padding: 5px 8px; border-radius: 10px; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);"></div>
 </div>
   
-<a href="shop.html" class="shop-banner-container" style="display: block; margin: 20px 15px; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 15px rgba(255, 179, 193, 0.2); text-decoration: none;">
-  <img src="https://lh3.googleusercontent.com/d/1k6idD4aBIXCkCfTTk3PtEkUkQWcvp8c4=s1000" alt="BLM48 Shop Banner" style="width: 100%; height: auto; display: block; object-fit: cover;">
-</a>
+  <div class="section-title" onclick="toggleTopFans()" style="cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding-right: 15px; user-select: none;">
+  <span>Top Fans</span>
+  <div style="display: flex; align-items: center; gap: 10px; margin-left: auto; padding-right: 10px;">
+    <div id="top-fans-preview-zone" style="display: flex; align-items: center; direction: rtl; opacity: 1; transition: opacity 0.3s ease;"></div>
+  </div>
+  <i id="top-fans-arrow" class="fas fa-chevron-right" style="font-size: 14px; color: #888; transition: transform 0.3s ease;"></i>
+</div>
+<div id="top-fans-wrapper" class="ranking-wrapper" style="max-height: 0px; opacity: 0; padding: 0px 15px; overflow: hidden; transition: max-height 0.3s ease-in-out, opacity 0.3s ease, padding 0.3s ease;">
+  <div id="global-fan-list" class="horizontal-list"></div>
+</div>
 
-        <div class="public-member-widget" style="background: linear-gradient(135deg, #fffcfd 0%, #ffeef2 100%); border: 1px solid #ffe1e7; padding: 12px 15px; border-radius: 16px; display: flex; align-items: center; justify-content: space-between; margin-top: 20px; box-shadow: 0 4px 12px rgba(255,133,162,0.03);">
+    <div class="public-member-widget" style="background: linear-gradient(135deg, #fffcfd 0%, #ffeef2 100%); border: 1px solid #ffe1e7; padding: 12px 15px; border-radius: 16px; display: flex; align-items: center; justify-content: space-between; margin-top: 20px; box-shadow: 0 4px 12px rgba(255,133,162,0.03);">
         <div style="display: flex; align-items: center; gap: 10px;">
             <div style="color: #ff85a2; font-size: 14px; background: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(255,133,162,0.1);">
                 <i class="fas fa-users"></i>
@@ -2030,6 +2068,18 @@ function hideThemeLoadingScreen() {
   if (appLoading) appLoading.style.display = 'none';
 }
 
+  window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+        // หากผู้ใช้กดย้อนกลับมาหน้านี้ (ดึงจาก bfcache) 
+        // ให้ซ่อน Splash Screen เพื่อความสมูท และแค่ดึงยอดเงินมาอัปเดตเงียบๆ
+        const splash = document.getElementById('splash-screen');
+        if(splash) splash.style.display = 'none';
+        
+        // อัปเดตข้อมูลเงียบๆ (ถ้ามีฟังก์ชัน)
+        if(typeof loadWalletFromCache === "function") loadWalletFromCache();
+    }
+});
+
 // =========================================================================
 // 👑 6. APP LIFECYCLE LISTENERS (ระบบควบคุมการโหลดหน้าจอและเซสชันเวอร์ชันเคลียร์บั๊ก)
 // =========================================================================
@@ -2308,6 +2358,34 @@ function renderRanking(data) {
     list.appendChild(card);
   });
 }
+  
+function toggleTopFans() {
+    const wrapper = document.getElementById("top-fans-wrapper");
+    const arrow = document.getElementById("top-fans-arrow");
+    const list = document.getElementById("global-fan-list");
+    const previewZone = document.getElementById("top-fans-preview-zone"); // ดึงกล่องรูปมินิมาควบคุม
+    
+    if (wrapper.style.maxHeight === "0px" || !wrapper.style.maxHeight) {
+        // ⚡ ตอนเปิด: ยืดแผงกางออกมา
+        const contentHeight = list ? (list.scrollHeight + 40) : 250;
+        wrapper.style.maxHeight = contentHeight + "px";
+        wrapper.style.opacity = "1";
+        wrapper.style.padding = "15px";
+        arrow.style.transform = "rotate(90deg)";
+        
+        // ⚡ สั่งให้รูปวงกลมมินิหายไปตอนกางออก
+        if (previewZone) previewZone.style.opacity = "0";
+    } else {
+        // ⚡ ตอนปิด: พับเก็บแนบสนิท
+        wrapper.style.maxHeight = "0px";
+        wrapper.style.opacity = "0";
+        wrapper.style.padding = "0px 15px";
+        arrow.style.transform = "rotate(0deg)";
+        
+        // ⚡ สั่งให้รูปวงกลมมินิเฟดกลับคืนมาโชว์ใหม่ตอนพับปิด
+        if (previewZone) previewZone.style.opacity = "1";
+    }
+}
 
 function renderGlobalFans(rawData) {
   const list = document.getElementById('global-fan-list');
@@ -2318,7 +2396,7 @@ function renderGlobalFans(rawData) {
   if (Array.isArray(rawData)) {
     fansArray = rawData;
   } else if (rawData && typeof rawData === 'object') {
-    fansArray = Object.values(rawData).flat(); // รวมข้อมูลจากทุกเมมเบอร์เป็นก้อนเดียว
+    fansArray = Object.values(rawData).flat();
   }
 
   if (fansArray.length === 0) {
@@ -2326,20 +2404,42 @@ function renderGlobalFans(rawData) {
     return;
   }
 
-  // --- ส่วนสำคัญ: รวมยอด (Group By User) ---
+  // --- รวมยอด (Group By User) ---
   const groupedFans = fansArray.reduce((acc, current) => {
-    const key = current.username; // ใช้ username เป็นหลักในการรวม
+    const key = current.username;
     if (!acc[key]) {
       acc[key] = { ...current, total: 0 };
     }
-    acc[key].total += Number(current.total || 0); // รวมยอดคุกกี้เข้าด้วยกัน
+    acc[key].total += Number(current.total || 0);
     return acc;
   }, {});
 
-  // แปลงกลับเป็น Array และเรียงลำดับจากมากไปน้อย
   const finalFans = Object.values(groupedFans).sort((a, b) => b.total - a.total);
 
-  // --- แสดงผล ---
+  // --- วาดรูปมินิกรอบทอง-เงิน-ทองแดง ไว้ด้านบนแผง ---
+  const previewZone = document.getElementById('top-fans-preview-zone');
+  if (previewZone) {
+    previewZone.innerHTML = '';
+    const top3Preview = finalFans.slice(0, 3).reverse();
+    
+    top3Preview.forEach((f, index) => {
+      const actualRank = top3Preview.length - 1 - index; 
+      const miniBorderColor = actualRank === 0 ? '#ffd700' : actualRank === 1 ? '#c0c0c0' : actualRank === 2 ? '#cd7f32' : '#ffeef2';
+      
+      const miniAvatar = document.createElement('img');
+      miniAvatar.src = getImg(f.img);
+      miniAvatar.style = `
+        width: 26px; height: 26px; border-radius: 50%; 
+        border: 2px solid ${miniBorderColor}; object-fit: cover;
+        margin-left: -6px; background: white;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      `;
+      miniAvatar.onerror = function() { this.src = 'https://via.placeholder.com/150'; };
+      previewZone.appendChild(miniAvatar);
+    });
+  }
+
+  // --- แสดงผลการ์ดด้านล่าง ---
   finalFans.forEach((f, i) => {
     const isTop3 = i < 3;
     const rankColor = i === 0 ? '#ffd700' : i === 1 ? '#c0c0c0' : i === 2 ? '#cd7f32' : '#ffeef2';
@@ -2371,6 +2471,11 @@ function renderGlobalFans(rawData) {
     `;
     list.appendChild(card);
   });
+
+  const wrapper = document.getElementById("top-fans-wrapper");
+  if (wrapper && wrapper.style.maxHeight !== "0px" && wrapper.style.maxHeight !== "") {
+      wrapper.style.maxHeight = (list.scrollHeight + 40) + "px";
+  }
 }
 
 function openMemberProfile(name) {
@@ -3126,6 +3231,84 @@ function changeImage(step) {
 function closeImageViewer() {
   document.getElementById('image-viewer-modal').style.display = 'none';
 }
+  
+  (function() {
+    const container = document.getElementById('autoBannerContainer');
+    const items = container.querySelectorAll('.auto-banner-item');
+    const dotsContainer = document.getElementById('bannerDotsContainer');
+    const totalBanners = items.length;
+    let currentIndex = 0;
+    let autoSlideTimer;
+
+    if (totalBanners === 0) return;
+
+    // 1. สร้างจุดไข่ปลาบอกตำแหน่งข้างล่างแบบไดนามิกตามจริง
+    items.forEach((_, idx) => {
+        const dot = document.createElement('div');
+        dot.className = `banner-dot ${idx === 0 ? 'active' : ''}`;
+        dotsContainer.appendChild(dot);
+    });
+
+    const dots = dotsContainer.querySelectorAll('.banner-dot');
+
+    // 2. ฟังก์ชันช่วยปรับความสว่างของจุดให้ตรงกับแผ่นปัจจุบัน
+    function updateDots(index) {
+        dots.forEach((dot, idx) => {
+            if (idx === index) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        });
+    }
+
+    // 3. ฟังก์ชันสั่งเลื่อนหน้าสไลด์ถัดไป
+    function slideNext() {
+        if (totalBanners <= 1) return;
+        currentIndex = (currentIndex + 1) % totalBanners;
+        const slideWidth = container.clientWidth;
+        
+        container.scrollTo({
+            left: currentIndex * slideWidth,
+            behavior: 'smooth'
+        });
+        updateDots(currentIndex);
+    }
+
+    // 4. สั่งให้ระบบเริ่มนับเวลาเลื่อนอัตโนมัติ (สไลด์ทุกๆ 3.5 วินาที)
+    function startAutoSlide() {
+        autoSlideTimer = setInterval(slideNext, 3500);
+    }
+
+    startAutoSlide();
+
+    // 5. ระบบตรวจจับความเคลื่อนไหวเวลามีคนเอานิ้วมาปัด (Scroll)
+    container.addEventListener('scroll', () => {
+        const slideWidth = container.clientWidth;
+        if (slideWidth > 0) {
+            const scrolledIndex = Math.round(container.scrollLeft / slideWidth);
+            if (scrolledIndex !== currentIndex && scrolledIndex < totalBanners) {
+                currentIndex = scrolledIndex;
+                updateDots(currentIndex);
+            }
+        }
+    });
+
+    // 6. ฟังก์ชันเคลียร์ไทม์เมอร์เมื่อผู้ใช้สัมผัสหน้าจอ และนับต่อทันทีเมื่อปล่อยมือ
+    const clearTimer = () => clearInterval(autoSlideTimer);
+    const resetTimer = () => {
+        clearInterval(autoSlideTimer); 
+        startAutoSlide(); 
+    };
+
+    // รองรับบนสมาร์ตโฟน (Touch)
+    container.addEventListener('touchstart', clearTimer);
+    container.addEventListener('touchend', resetTimer);
+
+    // รองรับบนคอมพิวเตอร์ (Mouse)
+    container.addEventListener('mousedown', clearTimer);
+    container.addEventListener('mouseup', resetTimer);
+})();
   
   async function redeemCode() {
     if (!user) return openLogin();
