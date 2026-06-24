@@ -114,6 +114,73 @@
         .card-footer-action { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #f5f5f5; font-size: 12px; color: #888; }
         .go-vote-btn { color: var(--blm-pink); font-weight: 600; display: flex; align-items: center; gap: 4px; }
         .loading-text { text-align: center; width: 100%; color: #999; padding: 40px 20px; font-size: 14px; }
+      
+      /* 🧁 โครงสร้างโซนปุ่ม Action วงกลมใต้กระเป๋าเงิน */
+.wallet-actions-container {
+    display: flex;
+    justify-content: center;
+    gap: 32px; /* ระยะห่างระหว่าง 2 ปุ่ม */
+    margin-top: 20px;
+    margin-bottom: 15px;
+}
+
+.circle-action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: none;
+    border: none;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.circle-action-btn:active {
+    transform: scale(0.92); /* เอฟเฟกต์ตอนกดแล้วยุบตัวนิด ๆ */
+}
+
+.circle-action-btn .circle-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%; /* บังคับวงกลมแท้ 100% */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    color: #ffffff;
+    transition: all 0.2s ease;
+}
+
+/* 🎟️ ปุ่ม Redeem Code (โทนสีชมพูพาสเทลหวาน ๆ เข้ากับธีมหลัก) */
+.btn-redeem-code .circle-icon {
+    background-color: #e6fcf5 !important; /* เขียวมิ้นท์อ่อนโปร่งแสง */
+    color: #20c997 !important;            /* ไอคอนสีมิ้นท์สดใส เข้มพอให้เห็นชัด */
+    box-shadow: 0 4px 12px rgba(32, 201, 151, 0.2);
+}
+
+/* 🎒 ปุ่ม Inventory (โทนสีฟ้าพาสเทลสดชื่น) */
+.btn-inventory .circle-icon {
+    background-color: #e7f5ff !important; /* ฟ้าอ่อนโปร่งแสง */
+    color: #4dabf7 !important;            /* ไอคอนสีฟ้าสด */
+    box-shadow: 0 4px 12px rgba(77, 171, 247, 0.2);
+}
+
+/* 📜 ปุ่ม History (โทนสีม่วงพาสเทลลาเวนเดอร์น่ารัก) */
+.btn-history-log .circle-icon {
+    background-color: #f3f0ff !important; /* ม่วงอ่อนโปร่งแสง */
+    color: #9775fa !important;            /* ไอคอนสีม่วงสด */
+    box-shadow: 0 4px 12px rgba(151, 117, 250, 0.2);
+}
+
+.circle-action-btn .circle-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #3a3a3a;
+    margin-top: 8px;
+    font-family: 'Quicksand', 'Kanit', sans-serif;
+}
+
     </style>
 </head>
 <body>
@@ -151,6 +218,23 @@
             </div>
         </div>
     </div>
+  
+<div class="wallet-actions-container">
+    <button onclick="redeemCode()" class="circle-action-btn btn-redeem-code" type="button">
+        <div class="circle-icon"><i class="fas fa-ticket-alt"></i></div>
+        <span class="circle-label">Redeem</span>
+    </button>
+    
+    <a href="inventory.html" class="circle-action-btn btn-inventory">
+        <div class="circle-icon"><i class="fas fa-briefcase"></i></div>
+        <span class="circle-label">Inventory</span>
+    </a>
+    
+    <a href="history.html" class="circle-action-btn btn-history-log">
+        <div class="circle-icon"><i class="fas fa-history"></i></div>
+        <span class="circle-label">History</span>
+    </a>
+</div>
 
     <div class="section-title"> Major Vote</div>
     <div class="ranking-wrapper">
@@ -186,11 +270,12 @@
         const savedVersion = localStorage.getItem('bnl_app_version');
         if (savedVersion !== APP_VERSION) {
             localStorage.removeItem('blm48_major_votes_cache');
-            localStorage.removeItem('bnl_vote_wallet_cache'); // ล้าง Cache ยอดเงินแยกเฉพาะของหน้านี้
+            localStorage.removeItem('bnl_vote_wallet_cache'); 
             localStorage.setItem('bnl_app_version', APP_VERSION);
         }
     }
 
+    // 🌟 ตัวแปรหลักที่ใช้เก็บชื่อผู้ใช้ของหน้านี้คือ username
     const username = getUsernameFromSession(); 
 
     async function initPage() {
@@ -201,16 +286,13 @@
         }
         checkAppVersion();
         
-        // 1. ดึง Cache เฉพาะกลุ่มของหน้านี้มาแสดงผลล่วงหน้า ป้องกันการสับสนกับข้อมูลหน้าหลัก
         loadWalletFromCache();
         
-        // 2. โหลดข้อมูลสดใหม่จากเซิร์ฟเวอร์
         await Promise.all([loadUserBalancesRealTime(), loadVoteCampaigns()]);
     }
 
     function loadWalletFromCache() {
         try {
-            // ⚡ เปลี่ยนมาดึง Cache ส่วนตัว บันทึกไม่ปนกับ bnl_user_data_cache
             const cachedUserData = localStorage.getItem('bnl_vote_wallet_cache');
             if (cachedUserData) {
                 const user = JSON.parse(cachedUserData);
@@ -219,7 +301,6 @@
                 document.getElementById("token-balance").textContent = Number(tokenVal).toLocaleString();
                 document.getElementById("getoken-balance").textContent = Number(geTokenVal).toLocaleString();
             } else {
-                // ถ้ายังไม่เคยมี Cache หน้านี้เลย ให้ดึงของเก่าจากหน้าหลักมาตั้งต้นก่อนในครั้งแรกสุด
                 const primaryCache = localStorage.getItem('bnl_user_data_cache');
                 if (primaryCache) {
                     const user = JSON.parse(primaryCache);
@@ -245,7 +326,6 @@
                 document.getElementById("token-balance").textContent = Number(tokenValue).toLocaleString();
                 document.getElementById("getoken-balance").textContent = Number(geTokenValue).toLocaleString();
                 
-                // ⚡ จัดการบันทึก Cache แยกตัวแปรไว้ใน 'bnl_vote_wallet_cache' จะได้ไม่ส่งผลย้อนกลับไปแก้ข้อมูลหน้า index.html งับ
                 localStorage.setItem('bnl_vote_wallet_cache', JSON.stringify(result.data));
             }
         } catch (error) { 
@@ -339,6 +419,47 @@
             container.innerHTML = `<div class="loading-text">ไม่มีการกิจกรรมโหวตในขณะนี้</div>`;
         }
     }
+  
+    // 🎟️ ฟังก์ชัน Redeem Code ที่แก้ไขตัวแปรเรียบร้อยแล้วค่ะ
+    async function redeemCode() {
+        if (!username) { // ✨ แก้ไขจาก !user เป็น !username
+            Swal.fire('ไม่พบเซสชัน', 'กรุณาเข้าสู่ระบบใหม่อีกครั้งนะคะ', 'error');
+            return;
+        }
+
+        const { value: code } = await Swal.fire({ 
+            title: 'Redeem Code', 
+            input: 'text', 
+            inputPlaceholder: 'กรอกรหัสโค้ดที่นี่...', 
+            showCancelButton: true,
+            confirmButtonColor: '#ff85a2',
+            cancelButtonText: 'ยกเลิก',
+            confirmButtonText: 'ยืนยัน'
+        });
+
+        if (code) {
+            Swal.fire({ title: 'กำลังตรวจสอบโค้ด...', didOpen: () => Swal.showLoading(), allowOutsideClick: false });
+            try {
+                const resp = await fetch(scriptURL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'redeemCode', username: username, code: code }) // ✨ เปลี่ยนเป็น username
+                });
+                const res = await resp.json();
+              
+                if (res.status === "success") { 
+                    Swal.fire('สำเร็จ!', res.message, 'success').then(() => {
+                        // ⚡ เรียกฟังก์ชันนี้เพื่อดึงยอดเงินล่าสุดมาแสดงทันทีโดยไม่ต้อง Refresh หน้าเว็บให้สะดุด
+                        loadUserBalancesRealTime();
+                    });
+                } else { 
+                    Swal.fire('ผิดพลาด', res.message, 'error'); 
+                }
+            } catch (e) { 
+                console.error(e);
+                Swal.fire('Error', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ในขณะนี้งับ', 'error'); 
+            }
+        }
+    }
 
     async function handleManualRefresh() {
         const refreshBtn = document.getElementById("refresh-btn");
@@ -355,7 +476,6 @@
         }, 400);
     }
 
-    // ⚡ แก้ไขจุดนี้: เปลี่ยนจาก DOMContentLoaded เป็น pageshow เพื่อให้หน้าเว็บดึงข้อมูลใหม่ทุกครั้งที่กดย้อนกลับ (แก้ปัญหา BFCache บนนมือถือ)
     window.addEventListener("pageshow", function(event) {
         initPage();
     });
