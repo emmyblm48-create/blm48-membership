@@ -818,7 +818,6 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
       align-items: center;
       justify-content: space-between;
       cursor: pointer;
-      box-shadow: 0 12px 25px rgba(212, 175, 55, 0.25);
       position: relative;
       overflow: hidden;
       transition: transform 0.2s;
@@ -1464,19 +1463,21 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
 .d4 { bottom: 10%; right: 5%; transform: rotate(-25deg); }
 .d5 { top: 40%; left: 60%; transform: rotate(45deg); opacity: 0.3; }
 
-.monthly-tracker-container {
-    background: #ffffff;
-    border-radius: 20px;
-    padding: 20px;
-    box-shadow: 0 4px 15px rgba(255, 179, 193, 0.4);
-    margin: 15px auto;
-    max-width: 400px;
-    font-family: inherit;
+  .monthly-tracker-container {
+  background: transparent; /* ลบกล่องขาวและเงาออก */
+  border-radius: 20px;
+  padding: 0;
+  margin: 15px auto;
+  width: 100%;             /* 👈 ยืดเต็มจอซ้ายขวาเวลาเปิดในมือถือ */
+  max-width: 420px;        /* 👈 ล็อกขนาดไม่ให้กางกว้างเกินไปเวลาเปิดใน iPad หรือคอม */
+  box-sizing: border-box;
+  font-family: inherit;
   }
+
   
+  /* 2. หาตัวนี้ แล้วสั่งซ่อนตัวหนังสือหัวข้อไปเลยครับ */
   .tracker-header {
-    text-align: center;
-    margin-bottom: 20px;
+      display: none;          /* 👈 เพิ่มบรรทัดนี้เข้าไป เพื่อซ่อน June - Week 4 */
   }
   
   .countdown-label {
@@ -1497,7 +1498,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
   }
 
   .week-block {
-    margin-bottom: 10px;
+    width: 100%;
   }
 
   .week-label {
@@ -1506,39 +1507,54 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     color: #ffa8b6;
     margin-bottom: 15px;
     text-align: center;
+    width: max-content;
   }
 
   .days-row {
     display: flex;
-    justify-content: center;
-    gap: 10px;
+    justify-content: space-between;
+    width: 100%;
+    position: relative;
+  }
+  .days-row::before {
+  content: '';
+  position: absolute;
+  top: 19px; 
+  left: 7.14%;           /* 👈 เส้นจะเริ่มจากกึ่งกลางวงกลมวงแรกเป๊ะๆ ทุกหน้าจอ */
+  right: 7.14%;          /* 👈 เส้นจะไปจบที่กึ่งกลางวงกลมวงสุดท้ายเป๊ะๆ ทุกหน้าจอ */
+  height: 3px;           /* ความหนาของเส้นเชื่อม */
+  background: #ffb3c1; 
+  z-index: 0;         
   }
 
-  /* 🌟 1. เพิ่มคลาสสำหรับครอบ วงกลม + วันที่ */
   .day-item {
-    display: flex;
-    flex-direction: column; /* จัดให้วงกลมอยู่บน วันที่อยู่ล่าง */
-    align-items: center;    /* จัดให้อยู่ตรงกลางตรงกันในแนวตั้ง */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;               /* 👈 เฉลี่ยให้ทุกวันกว้างเท่ากัน 7 ช่อง */
+  position: relative;
+  z-index: 1;
   }
 
   /* 🌟 2. เพิ่มคลาสสำหรับปรับแต่งตัวหนังสือวันที่ */
   .day-date {
-    font-size: 11px;
-    color: #a0a0a0;
-    margin-top: 6px;       /* เว้นระยะห่างจากขอบล่างของวงกลม */
-    font-weight: 600;
+  font-size: 11px;
+  color: #a0a0a0;
+  margin-top: 6px;
+  font-weight: 600;
+  text-align: center;
   }
-
+    
   .day-circle {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    font-weight: 600;
-    transition: transform 0.3s ease;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  transition: transform 0.3s ease;
   }
 
   .day-circle.checked {
@@ -1557,22 +1573,26 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
   }
 
   .day-circle.future {
-    background: #f1f3f5;
-    color: #adb5bd;
+  background: #ffffff;
+  color: #adb5bd;
+  border: 2px dashed #e0e0e0;
+  box-sizing: border-box; 
   }
 
   /* ดีไซน์สำหรับกล่องนับถอยหลังวันสุดท้าย */
   .countdown-timer-box {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    margin-top: 25px;
-    padding: 15px;
-    background: #fff0f3;
-    border-radius: 15px;
-    border: 2px dashed #ffb3c1;
-    animation: popIn 0.5s ease-out forwards;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin: 25px auto 0 auto;
+  padding: 15px;
+  background: #fff0f3;
+  border-radius: 15px;
+  border: 2px dashed #ffb3c1;
+  max-width: 320px;      /* ไม่ให้กล่องเวลายาวกางจนล้นในคอม */
+  width: 90%;
+  box-sizing: border-box;
   }
 
   .time-segment {
@@ -1723,6 +1743,17 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
 
   <div id="ranking-list" class="horizontal-list" style="position: relative; z-index: 2;"></div>
 </div>
+  
+<div class="section-title" onclick="toggleTopFans()" style="cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding-right: 15px; user-select: none;">
+  <span>Top Fans</span>
+  <div style="display: flex; align-items: center; gap: 10px; margin-left: auto; padding-right: 10px;">
+    <div id="top-fans-preview-zone" style="display: flex; align-items: center; direction: rtl; opacity: 1; transition: opacity 0.3s ease;"></div>
+  </div>
+  <i id="top-fans-arrow" class="fas fa-chevron-right" style="font-size: 14px; color: #888; transition: transform 0.3s ease;"></i>
+</div>
+<div id="top-fans-wrapper" class="ranking-wrapper" style="max-height: 0px; opacity: 0; padding: 0px 15px; overflow: hidden; transition: max-height 0.3s ease-in-out, opacity 0.3s ease, padding 0.3s ease;">
+  <div id="global-fan-list" class="horizontal-list"></div>
+</div>
  
   
 <div class="shop-banner-slider-wrapper" style="position: relative; margin: 20px 15px; border-radius: 16px; overflow: hidden;">
@@ -1740,17 +1771,6 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     </div>
     
     <div id="bannerDotsContainer" style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 10; background: rgba(0, 0, 0, 0.15); padding: 5px 8px; border-radius: 10px; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);"></div>
-</div>
-  
-  <div class="section-title" onclick="toggleTopFans()" style="cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding-right: 15px; user-select: none;">
-  <span>Top Fans</span>
-  <div style="display: flex; align-items: center; gap: 10px; margin-left: auto; padding-right: 10px;">
-    <div id="top-fans-preview-zone" style="display: flex; align-items: center; direction: rtl; opacity: 1; transition: opacity 0.3s ease;"></div>
-  </div>
-  <i id="top-fans-arrow" class="fas fa-chevron-right" style="font-size: 14px; color: #888; transition: transform 0.3s ease;"></i>
-</div>
-<div id="top-fans-wrapper" class="ranking-wrapper" style="max-height: 0px; opacity: 0; padding: 0px 15px; overflow: hidden; transition: max-height 0.3s ease-in-out, opacity 0.3s ease, padding 0.3s ease;">
-  <div id="global-fan-list" class="horizontal-list"></div>
 </div>
 
     <div class="public-member-widget" style="background: linear-gradient(135deg, #fffcfd 0%, #ffeef2 100%); border: 1px solid #ffe1e7; padding: 12px 15px; border-radius: 16px; display: flex; align-items: center; justify-content: space-between; margin-top: 20px; box-shadow: 0 4px 12px rgba(255,133,162,0.03);">
@@ -2265,55 +2285,6 @@ function renderTrendingMVs() {
     scroller.appendChild(card);
   });
 }
-
-// =========================================
-// ⏰ INTERNATIONAL COOKIE COUNTDOWN SYSTEM
-// =========================================
-function startCookieCountdown() {
-  const monthNamesEn = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
-
-  function updateTimer() {
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth(); // 0 = Jan, 11 = Dec
-
-    const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59);
-    
-    const monthTextElem = document.getElementById('countdown-month-text');
-
-    const diff = lastDayOfMonth - now;
-
-    if (diff <= 0) {
-      if(document.getElementById('cd-days')) document.getElementById('cd-days').innerText = "00";
-      if(document.getElementById('cd-hours')) document.getElementById('cd-hours').innerText = "00";
-      if(document.getElementById('cd-mins')) document.getElementById('cd-mins').innerText = "00";
-      if(document.getElementById('cd-secs')) document.getElementById('cd-secs').innerText = "00";
-      return;
-    }
-
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const secs = Math.floor((diff % (1000 * 60)) / 1000);
-
-    if(document.getElementById('cd-days')) document.getElementById('cd-days').innerText = String(days).padStart(2, '0');
-    if(document.getElementById('cd-hours')) document.getElementById('cd-hours').innerText = String(hours).padStart(2, '0');
-    if(document.getElementById('cd-mins')) document.getElementById('cd-mins').innerText = String(mins).padStart(2, '0');
-    if(document.getElementById('cd-secs')) document.getElementById('cd-secs').innerText = String(secs).padStart(2, '0');
-  }
-
-  updateTimer();
-  setInterval(updateTimer, 1000);
-}
-
-window.addEventListener('DOMContentLoaded', () => {
-  if (typeof startCookieCountdown === 'function') {
-    startCookieCountdown();
-  }
-});
   
 function renderRanking(data) {
   // 🌟 เพิ่มบรรทัดนี้ลงไปเลยครับ! เพื่อก๊อปปี้ข้อมูลไปให้ renderPost ใช้หาคน Graduated
@@ -2563,7 +2534,8 @@ function renderTracker() {
   const container = document.getElementById('weekly-tracker-grid');
   if (!container) return;
   
-  const now = new Date();
+  // 🇹🇭 จุดที่ 1: บังคับดึงเวลาปัจจุบันให้ตรงกับไทม์โซนประเทศไทย (Asia/Bangkok)
+  const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
   const year = now.getFullYear();
   const month = now.getMonth();
   const today = now.getDate();
@@ -2578,8 +2550,6 @@ function renderTracker() {
   document.getElementById('countdown-month-text').innerText = `${monthNames[month]} - Week ${currentWeekNumber}`;
 
   let daysHtml = '';
-
-  // สั้นๆ ย่อชื่อเดือนมาโชว์คู่กับวันที่ (เช่น Jun)
   const shortMonthName = monthNames[month].substring(0, 3);
 
   for (let day = startDay; day <= endDay; day++) {
@@ -2594,7 +2564,6 @@ function renderTracker() {
       content = '<i class="fas fa-cookie-bite"></i>';
     }
 
-    // 🌟 [ปรับปรุงจุดนี้] ห่อด้วยเดย์ไอเทม แล้วใส่ text วันที่+เดือน ยัดไว้ด้านล่างวงกลม
     daysHtml += `
       <div class="day-item">
         <div class="day-circle ${statusClass}">${content}</div>
@@ -2621,11 +2590,14 @@ function renderTracker() {
 }
 
 function startFinaleCountdown(year, month, lastDay) {
+  // เวลาเป้าหมายคือเที่ยงคืนเมื่อขึ้นวันใหม่ของเดือนถัดไป (ตามเวลาไทยจำลอง)
   const targetDate = new Date(year, month + 1, 1, 0, 0, 0).getTime();
 
   clearInterval(countdownInterval);
   countdownInterval = setInterval(() => {
-    const now = new Date().getTime();
+    
+    // 🇹🇭 จุดที่ 2: บังคับให้เวลานับถอยหลังลดลงอิงตามไทม์โซนประเทศไทยเช่นกัน
+    const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Bangkok" })).getTime();
     const distance = targetDate - now;
 
     if (distance < 0) {
