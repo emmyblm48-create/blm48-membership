@@ -17,7 +17,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="navbar.js"></script>
     <style>
         :root {
             --primary-pink: #ff85a2;
@@ -788,6 +787,76 @@
             }
         }
 
+// ==========================================
+// 🎨 ฟังก์ชันโหลดและซิงค์ธีมผู้ชนะ (เวอร์ชันหน้าย่อย)
+// ==========================================
+function loadChampThemeSubPage() {
+  const CACHE_KEY = "bnl_winner_theme_cache";
+  
+  // 1. ดึงจากแคชเก่าในเครื่องมาแสดงรอก่อนทันที (แอปเปิดเร็ว ไอคอนไม่กระพริบโล่ง)
+  const cachedDataStr = localStorage.getItem(CACHE_KEY);
+  if (cachedDataStr) {
+    try { 
+        const cachedObj = JSON.parse(cachedDataStr);
+        // 🌟 ดึงมาเฉพาะข้อมูลแชมป์ (ถ้าหลังบ้านส่งเป็น .champ มา ก็ดึงแค่ champ)
+        const champOnly = cachedObj.champ ? cachedObj.champ : cachedObj;
+        applySubPageTheme(champOnly); 
+    } catch (e) {}
+  }
+
+  const finalURL = typeof scriptURL !== 'undefined' ? scriptURL : (typeof SCRIPT_URL !== 'undefined' ? SCRIPT_URL : '');
+  if (!finalURL) return;
+
+  // 2. แอบไปเช็กกับหลังบ้านเงียบๆ ว่าข้อมูลเปลี่ยนคนชนะหรือยัง
+  fetch(`${finalURL}?action=getWinnerTheme`)
+    .then(response => response.json())
+    .then(newData => {
+      // 🌟 สกัดเอามาเฉพาะข้อมูลไอคอนของแชมป์ (ทิ้งข้อมูล Splash วันเกิดไปเลยสำหรับหน้านี้)
+      const newChampData = newData.champ ? newData.champ : newData;
+
+      if (newChampData && newChampData.name) {
+        
+        // แปลงข้อมูลแคชปัจจุบันเพื่อเอามาเทียบว่ามีอะไรอัปเดตไหม
+        let cacheChampStr = "";
+        if (cachedDataStr) {
+            try {
+                const parsed = JSON.parse(cachedDataStr);
+                cacheChampStr = JSON.stringify(parsed.champ ? parsed.champ : parsed);
+            } catch(e) {}
+        }
+
+        // ถ้าพบว่าไอคอนแชมป์มีการเปลี่ยนแปลง ค่อยเรนเดอร์ใหม่
+        if (cacheChampStr !== JSON.stringify(newChampData)) {
+          localStorage.setItem(CACHE_KEY, JSON.stringify(newData)); // เซฟแพ็กเกจเต็มลงแคชเผื่อหน้า index มาใช้
+          applySubPageTheme(newChampData); // อัปเดตไอคอนบนจอให้เป็นปัจจุบันทันที
+        }
+      }
+    }).catch(e => console.error(e));
+}
+
+function applySubPageTheme(champData) {
+  if (!champData) return;
+  // อัปเดตแค่ Navbar โลด ไม่ต้องยุ่งกับ Splash Screen ใดๆ
+  updateSubPageIcon('nav-home', 'nav-home-fallback', champData.homeIcon);
+  updateSubPageIcon('nav-kami', 'nav-kami-fallback', champData.kamiIcon);
+  updateSubPageIcon('nav-cart', 'nav-cart-fallback', champData.cartIcon);
+  updateSubPageIcon('nav-noti', 'nav-noti-fallback', champData.notiIcon);
+}
+
+function updateSubPageIcon(imgId, fallbackId, iconUrl) {
+  const imgElement = document.getElementById(imgId);
+  const fallbackElement = document.getElementById(fallbackId);
+  if (imgElement && fallbackElement) {
+    if (iconUrl && iconUrl.trim() !== "") {
+      imgElement.src = iconUrl;
+      imgElement.style.display = 'block';
+      fallbackElement.style.display = 'none';
+    } else {
+      imgElement.style.display = 'none';
+      fallbackElement.style.display = 'block';
+    }
+  }
+}
 
 /**
  * ฟังก์ชันปิดหน้าจอโหลดวงกลมคุกกี้หมุนๆ แบบปลอดภัย
@@ -1002,6 +1071,7 @@ function hideThemeLoadingScreen() {
             if (typeof checkNotificationBadge === 'function') {
                 checkNotificationBadge();
             }
+            loadChampThemeSubPage(); // 🚀 เรียกใช้งานฟังก์ชันที่แก้ใหม่
 
             const tabProfileImg = document.getElementById('tab-profile-img');
             if (tabProfileImg) {
@@ -1022,6 +1092,6 @@ function hideThemeLoadingScreen() {
                 }
             }
         });
-    </script>
+</script>
 </body>
 </html>
