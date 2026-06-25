@@ -47,7 +47,7 @@
       --gold: #ffd700;
       --silver: #C0C0C0;
       --bronze: #cd7f32;
-      --bg-color: #fff5f6;
+      --bg-color: #ffffff;
       --violet-border: #e0c3fc;
     }
 
@@ -61,6 +61,39 @@
       padding-top: 70px;    /* ระยะดันจากด้านบน (ปรับเพิ่ม/ลดตามความสูงของ Navbar เดิม) */
       padding-bottom: 80px; /* ระยะเผื่อด้านล่างเพื่อไม่ให้ Tab-bar บังโพสต์สุดท้ายงับ 🎀 */
     }
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    
+    /* ใส่รูปภาพและการตั้งค่าเดิมตรงนี้ */
+    background-image: url(''); 
+    background-size: cover; 
+    background-position: center center; 
+    background-repeat: no-repeat; 
+    background-color: #ffffff;
+  }
+    
+    .bg-video-layer {
+  position: fixed;   /* ตรึงวิดีโอให้อยู่กับที่เวลาเลื่อนหน้าจอ */
+  top: 0;
+  left: 0;
+  width: 100vw;      /* ความกว้างเต็มจอ */
+  height: 100vh;     /* ความสูงเต็มจอ */
+  
+  /* 🪄 หัวใจสำคัญ: สั่งให้วิดีโอซูมเต็มจอแบบไม่ให้สัดส่วนเบี้ยว */
+  object-fit: cover; 
+  
+  /* ☁️ ดันวิดีโอไปอยู่เลเยอร์หลังสุด จะได้ไม่บังข้อความและกล่องต่างๆ */
+  z-index: -1;       
+  
+  /* ป้องกันไม่ให้เผลอไปกดหยุดวิดีโอ */
+  pointer-events: none; 
+}
     
     /* 📱 ระบบสไลด์หน้าจอหลัก (หลังล็อกอิน) */
     #main-app {
@@ -96,9 +129,8 @@
       position: relative;
     }
 
-    /* Page 1: UI หลัก */
     #main-ui-page {
-      background-color: var(--bg-color);
+    background-color: transparent !important; /* เปลี่ยนให้โปร่งใส เพื่อให้เห็นรูปพื้นหลังในหน้าแรกงับ 🌸 */
     }
 
     .content-box {
@@ -252,39 +284,83 @@ body {
     color: inherit;         /* ป้องกันไม่ให้สีเปลี่ยนเป็นสีน้ำเงินของลิงก์ */
 }
 
-
-    /* Navbar (แก้ไขให้ชิดขอบจอ 100%) */
+      /* =========================================
+       🤍 NAVBAR STYLE (โหมดสลับสีอัตโนมัติเมื่อเลื่อนจอ)
+       ========================================= */
     .navbar {
-      background: white;
-      width: 100%; /* บังคับให้กว้างเต็มจอ */
-      box-sizing: border-box; /* ให้ padding ไม่ดันจนล้นจอ */
-      margin: 0;
-      left: 0;
-      right: 0;
-      padding: 15px 20px;
-      border-bottom: 2px solid #f0f0f0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
+      position: fixed;
       top: 0;
-      z-index: 100;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      box-sizing: border-box;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 20px; 
+
+      /* 🤍 [ตอนอยู่บนสุด] ตั้งค่าให้เป็นสีขาวล้วน 100% */
+      background: #ffffff; 
+      backdrop-filter: blur(0px);
+      -webkit-backdrop-filter: blur(0px);
+      border-bottom: 1px solid transparent; /* เตรียมพื้นที่ไว้ให้เส้นขอบตอนเลื่อน */
+      box-shadow: none;
+
+      /* 🪄 เพิ่ม Transition เพื่อให้เวลาสลับสีมันนุ่มนวล ไม่กระตุกตา */
+      transition: background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
     }
-    .brand { font-size: 24px; font-weight: bold; color: var(--primary-pink); letter-spacing: 1px; }
-    .nav-btns { display: flex; gap: 15px; }
-    .nav-icon { background: none; border: none; color: #ffb3c1; cursor: pointer; font-size: 1.2rem; transition: 0.3s; }
-    .nav-icon:hover { color: var(--primary-pink); transform: scale(1.1); }
-    
-    .navbar, header { /* เปลี่ยนเป็นชื่อคลาสหรือแท็กที่เอ็มมี่ใช้สําหรับแถบบนสุดน้า */
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 1000;
-    box-sizing: border-box;
-    background-color: #ffffff; /* ปรับสีตามดีไซน์เดิมได้เลยงับ */
-    box-shadow: 0 2px 10px rgba(255, 133, 162, 0.08);
-}
+
+    /* ✨ [ตอนเลื่อนจอลงมา] จะถูกเปลี่ยนเป็นกระจกฝ้าใสขุ่นทันที */
+    .navbar.scrolled {
+      background: rgba(255, 255, 255, 0.4); 
+      backdrop-filter: blur(12px);          
+      -webkit-backdrop-filter: blur(12px);   
+      
+      /* แถม: เพิ่มเส้นขอบล่างและเงาบางๆ ตอนเลื่อนลง เพื่อให้ตัดกับเนื้อหาในเว็บดูหรูขึ้น */
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    }
+
+    /* 🎀 แก้ชื่อแบรนด์ให้เป็นสีเทาเข้มเกือบดำตามธีม */
+    .brand { 
+      font-size: 24px; 
+      font-weight: bold; 
+      color: #252525; 
+      letter-spacing: 1px; 
+    }
+
+    .nav-btns { 
+      display: flex; 
+      gap: 15px; 
+    }
+
+    /* 💗 เปลี่ยนไอคอนทั้งหมดเป็นสีชมพูหวานละมุน */
+    .nav-icon { 
+      color: #ff85a2; /* 🌸 เปลี่ยนจาก #252525 เป็นสีชมพู (ปรับเฉดเข้ม-อ่อนตามใจชอบได้เลยครับ) */
+      font-size: 18px;
+      margin-left: 15px; /* ระยะเว้นระหว่างไอคอน */
+      text-decoration: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      display: inline-block;
+    }
+
+    /* 🪄 ตอนเอานิ้วไปโดนหรือเมาส์ชี้ ให้จางและยุบลงนิดนึง */
+    .nav-icon:hover { 
+      transform: scale(0.92);
+      opacity: 0.6;
+    }
+
+    /* ⚠️ ปรับตรงนี้: ถอนคำสั่ง background/box-shadow ของเก่าออก เพื่อไม่ให้มันไปแย่งสีกระจกฝ้า */
+    header { 
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      box-sizing: border-box;
+      pointer-events: none; /* ปล่อยให้คลิกทะลุไปที่ .navbar ได้ */
+    }
     
 .bottom-tab-bar {
   /* 👑 Layer 1: ชั้นโปร่งใสล่างสุด ขยายความสูงรวมเพิ่มขึ้นเป็น 110px ให้ Nav ดูสูงเด่น */
@@ -313,7 +389,7 @@ body {
   background: #ffffff; 
   border-top: 1px solid rgba(0, 0, 0, 0.04);
   border-radius: 28px 28px 0 0; /* เพิ่มความโค้งมนให้ดูละมุนรับกับบาร์ที่สูงขึ้น */
-  box-shadow: 0 -12px 35px rgba(0, 0, 0, 0.08); /* เพิ่มมิติเงาให้ดูลอยแยกชั้นชัดเจน */
+  box-shadow: 0 -12px 35px rgba(0, 0, 0, 0.08); /* เงาของตัวบาร์หลักยังคงไว้เพื่อให้บาร์ดูลอยแยกชั้น */
   z-index: 1;
 }
 
@@ -327,7 +403,7 @@ body {
   z-index: 2; 
   text-decoration: none;
   color: #8e8e93; 
-  
+   
   /* 🚀 ดันไอคอนให้เลื่อนสูงขึ้นไปข้างบน 30px ทะลุเลเยอร์สีขาวขึ้นไปลอยเด่นอยู่บนชั้นโปร่งใสครึ่งตัวพอดี */
   transform: translateY(-30px); 
   transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* ปรับสปริงให้เด้งนุ่มนวลขึ้น */
@@ -350,7 +426,7 @@ body {
 }
 
 /* ------------------------------------------------------------- */
-/* 🔥 จุดที่เพิ่มเข้ามา: ตั้งค่าให้ไอคอนและรูปภาพขยายใหญ่ขึ้นตอน Active เท่านั้น */
+/* 🔥 ตั้งค่าให้ไอคอนและรูปภาพขยายใหญ่ขึ้นตอน Active เท่านั้น */
 /* ------------------------------------------------------------- */
 
 .tab-item.active i {
@@ -368,21 +444,20 @@ body {
 }
 /* ------------------------------------------------------------- */
 
-
-/* ขยายขนาดไอคอน FontAwesome (34px เท่าเดิม แต่ใส่เงาให้ลอยตามบาร์) */
+/* ขยายขนาดไอคอน FontAwesome (✨ ลบเงาออกแล้ว) */
 .tab-item i {
   font-size: 34px;
-  filter: drop-shadow(0 6px 8px rgba(0,0,0,0.08)); 
-  transition: font-size 0.2s ease; /* ใส่เพื่อให้ตอนขยายใหญ่มันสมูทขึ้นครับ */
+  /* ลบ filter: drop-shadow ออกเพื่อให้ปุ่มดูคลีนเรียบเนียน */
+  transition: font-size 0.2s ease; 
 }
 
-/* ขยายขนาดรูปไอคอนแชมป์สั่งทำ (44px เท่าเดิม พร้อมเพิ่มเงาตกกระทบลงบนเลเยอร์สีขาว) */
+/* ขยายขนาดรูปไอคอนแชมป์สั่งทำ (✨ ลบเงาออกแล้ว) */
 .tab-item img {
   width: 44px;
   height: 44px;
   object-fit: contain;
-  filter: drop-shadow(0 8px 12px rgba(0,0,0,0.12)); 
-  transition: width 0.2s ease, height 0.2s ease; /* ใส่เพื่อให้ตอนขยายใหญ่มันสมูทขึ้นครับ */
+  /* ลบ filter: drop-shadow ออกเพื่อให้ปุ่มดูคลีนเรียบเนียน */
+  transition: width 0.2s ease, height 0.2s ease; 
 }
 
 /* ปรับแต่งวงกลมรูปโปรไฟล์ให้ลอยขึ้นมาอย่างสมดุล */
@@ -392,7 +467,7 @@ body {
   border-radius: 50%;
   border: 2px solid #ffb3c1;
   box-sizing: border-box;
-  transition: width 0.2s ease, height 0.2s ease; /* ใส่เพื่อให้ตอนขยายใหญ่มันสมูทขึ้นครับ */
+  transition: width 0.2s ease, height 0.2s ease; 
 }
 
     /* เพิ่มแอนิเมชันให้ตัวหนังสือค่อยๆ ปรากฏขึ้นตอนเปลี่ยนหน้า */
@@ -521,156 +596,232 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
   margin: 30px 0 15px 20px; font-size: 18px; 
   border-left: 5px solid var(--primary-pink); padding-left: 12px; 
 }
-.ranking-wrapper {
-  position: relative;
-  background-color: #fff5f6; /* สีชมพูพาสเทลจางๆ เป็นพื้นหลังหลัก */
-  
-  /* สร้าง Pattern ไอคอนจางๆ วนซ้ำ (ตัวอย่างนี้ใช้รูปไอคอนดาว/หัวใจ) */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='%23ffb3c1' fill-opacity='0.15'%3E%3Cpath d='M12 24c0-1.1.9-2 2-2h4v-4c0-1.1.9-2 2-2s2 .9 2 2v4h4c1.1 0 2 .9 2 2s-.9 2-2 2h-4v4c0 1.1-.9 2-2 2s-2-.9-2-2v-4h-4c-1.1 0-2-.9-2-2zm28 12c0-1.1.9-2 2-2h4v-4c0-1.1.9-2 2-2s2 .9 2 2v4h4c1.1 0 2 .9 2 2s-.9 2-2 2h-4v4c0 1.1-.9 2-2 2s-2-.9-2-2v-4h-4c-1.1 0-2-.9-2-2z'/%3E%3C/g%3E%3C/svg%3E");
-  
-  padding: 15px;
-  border-radius: 20px;
-  box-shadow: inset 0 2px 8px rgba(255, 179, 193, 0.1);
-  overflow: hidden;
-}
-.horizontal-list {
-  display: flex; gap: 12px; padding: 10px 20px; 
-  overflow-x: auto;               /* เปิดให้เลื่อนซ้าย-ขวาได้ */
-  scroll-behavior: smooth;         /* ให้เลื่อนแบบนุ่มนวล */
-  align-items: flex-end; margin: 0 auto;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch; /* สำหรับ iOS ให้ปัดแล้วลื่นๆ ฟึบๆ */
-  gap: 15px;                      /* ระยะห่างระหว่างการ์ดแต่ละใบ */
-  padding: 10px 15px;
-  cursor: grab;                   /* เปลี่ยนเมาส์เป็นรูปมือเตรียมจับ */
-  user-select: none;              /* กันไม่ให้คลุมดำข้อความเวลาลาก */
-}
-
-/* เวลาคลิกเมาส์ค้าง ให้เปลี่ยนเป็นรูปมือกำ */
-.horizontal-list:active {
-  cursor: grabbing;
-}
-
-/* ซ่อนแถบ Scrollbar ด้านล่างไม่ให้โผล่มาขัดตา */
-.horizontal-list::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
-}
-.horizontal-list {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
-}
-.member-card { 
-  width: 85px; /* ปรับให้พอดี */
-  text-align: center; 
-  background: white; 
-  padding: 10px 5px 12px 5px; /* ลด Padding ให้ชิดขึ้น */
-  border-radius: 40px 40px 15px 15px; /* หัวโค้งมนแบบเต็มวง */
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04); 
-  border: 1px solid #f2f2f2; /* ขอบบางๆ สไตล์มินิมอล */
-  transition: 0.3s ease; 
-  display: flex; 
-  flex-direction: column; 
-  align-items: center; 
-  position: relative;
-  flex: 0 0 85px; /* ล็อกขนาดไม่ให้ยืด */
-}
-.member-card:hover { 
-      transform: translateY(-8px); 
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-.member-card .img-wrapper img {
-  width: 80px;      /* ปรับขนาดตามต้องการ */
-  height: 80px;     /* ต้องเท่ากับ width */
-  object-fit: cover; /* สั่งให้รูปตัดส่วนเกินออกโดยไม่บีบตัวรูป */
-  border-radius: 50%; /* ทำให้เป็นวงกลม */
-  flex-shrink: 0;    /* ป้องกันไม่ให้โดน Flexbox บีบ */
-}
-.rank-1 { height: 250px !important; border-color: var(--gold); background: linear-gradient(to bottom, #fffef0, #ffffff); }
-.rank-2 { height: 240px !important; border-color: var(--silver); }
-.rank-3 { height: 230px !important; border-color: var(--bronze); }
-.rank-other {
-    height: 220px !important; 
-    border: 1px solid #e0e0e0;
-    background: #ffffff;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-top: 10px;
-}
-.img-wrapper { 
-    position: relative; 
-    width: 60px; 
-    height: 60px; 
-    margin: 0 auto 8px; 
-    border-radius: 50%; 
-    background: #fcfcfc;
-    border: 1px solid #eee; 
-    cursor: pointer;
-    overflow: visible; /* เปลี่ยนจาก hidden เป็น visible เพื่อให้ไอคอนแสดงผลเต็มที่ */
-    flex-shrink: 0;
-}
-
-/* 2. กำหนดให้รูปข้างใน เต็มกรอบเสมอ (แก้จุดที่ทำให้งง) */
-.img-wrapper img { 
-    width: 100% !important; 
-    height: 100% !important; 
-    border-radius: 50% !important; 
-    object-fit: cover !important; 
-    display: block;
-}
-.rank-1 .img-wrapper { width: 75px !important; height: 75px !important; border-color: var(--gold); }
-.rank-2 .img-wrapper { width: 75px !important; height: 75px !important; border-color: var(--silver); }
-.rank-3 .img-wrapper { width: 75px !important; height: 75px !important; border-color: var(--bronze); }
-.rank-other .img-wrapper {  width: 70px !important; height: 70px !important;
-    border: 1px solid #f0f0f0;
-    box-shadow: 0 0 0 1px #eee;
-}
-.img-wrapper img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; }
-.rank-badge { 
-    position: absolute; 
-    bottom: -2px; 
-    right: -2px; 
-    width: 18px; 
-    height: 18px; 
-    border-radius: 50%; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    font-weight: 700; 
-    font-size: 9px; 
-    border: 2px solid white; 
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2); /* เพิ่มเงาให้ดูมีมิติ */
-    z-index: 10; /* สำคัญ: ให้ไอคอนอยู่ชั้นบนสุด */
-    background: white; /* ใส่พื้นหลังให้ไอคอนทึบ */
-}
-.rank-1 .rank-badge { background: var(--gold); color: white; }
-.rank-2 .rank-badge { background: var(--silver); color: white; }
-.rank-3 .rank-badge { background: var(--bronze); color: white; }
-.rank-other .rank-badge { 
-    background: #f8f8f8; 
-    color: #999; 
-    border: 1.5px solid #fff;
-    font-size: 8px;
-    font-weight: 600;
-}
-.name-text { 
-  font-weight: 600; 
-  color: #333; 
-  font-size: 12px; 
-  margin-bottom: 2px; 
-  white-space: nowrap; 
-  overflow: hidden; 
-  text-overflow: ellipsis; 
-  width: 90%; 
-}
-.cookie-text { 
-  font-size: 12px; 
-  color: var(--primary-pink); 
-  font-weight: 700; 
-  margin-bottom: 6px; /* ดันปุ่มลงเล็กน้อย */
-}
     
+    /* =========================================
+       🌟 RANKING WRAPPER (เวอร์ชัน: พื้นหลังใสเคลียร์)
+       ========================================= */
+    .ranking-wrapper {
+      position: relative;
+
+      /* 🤍 1. ปรับพื้นหลังให้ใสเคลียร์ 100% ตามรีเควสเลยงับ */
+      background: transparent !important; 
+
+      /* 🚀 2. ดึงกล่องให้กว้างทะลุขอบจอ ชนขอบโทรศัพท์พอดีเป๊ะ */
+      margin-left: -20px;
+      margin-right: -20px;
+      border-radius: 0;
+
+      /* ❌ 3. เอาลายน้ำรูปเครื่องหมายบวก (SVG) อันเก่าออกให้แล้วครับ */
+      background-image: none !important; 
+
+      /* 🎀 4. ดันเนื้อหารายชื่อ ranking ขยับเข้ามา ไม่ให้ไปเบียดชิดขอบจอ */
+      padding: 15px 20px;
+      overflow: hidden;
+
+      /* 🙅‍♂️ เอาเงาและเส้นขอบออกทั้งหมด เพื่อให้เนียนล่องหนไปกับพื้นหลังหลัก */
+      box-shadow: none !important;
+      border: none !important;
+    }
+
+    /* =========================================
+       💛 เสกไอคอนกระจายตัว สีทองเข้มเด่นชัด ไม่จาง
+       ========================================= */
+    .bg-decorations {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none; 
+      z-index: 1;           
+    }
+
+    .decor-item {
+      position: absolute;
+      color: #ffe479 !important;       
+      opacity: 1 !important; 
+      font-size: 14px !important;      
+    }
+
+    /* 👑 มงกุฎ (3 ชิ้น) */
+    .bg-decorations .d1-1 { top: 12%; left: 5%;   transform: rotate(-15deg); }
+    .bg-decorations .d1-2 { top: 75%; left: 42%;  transform: rotate(10deg); }
+    .bg-decorations .d1-3 { top: 20%; left: 75%;  transform: rotate(15deg); }
+
+    /* ❤️ หัวใจ (3 ชิ้น) */
+    .bg-decorations .d2-1 { top: 65%; left: 12%;  transform: rotate(12deg); }
+    .bg-decorations .d2-2 { top: 15%; left: 38%;  transform: rotate(-20deg); }
+    .bg-decorations .d2-3 { top: 70%; left: 82%;  transform: rotate(5deg); }
+
+    /* ⭐ ดาว (3 ชิ้น) */
+    .bg-decorations .d3-1 { top: 25%; left: 22%;  transform: rotate(25deg); }
+    .bg-decorations .d3-2 { top: 60%; left: 62%;  transform: rotate(-15deg); }
+    .bg-decorations .d3-3 { top: 15%; left: 92%;  transform: rotate(30deg); }
+
+    /* 🎵 ดนตรี (3 ชิ้น) */
+    .bg-decorations .d4-1 { top: 75%; left: 26%;  transform: rotate(-10deg); }
+    .bg-decorations .d4-2 { top: 22%; left: 55%;  transform: rotate(18deg); }
+    .bg-decorations .d4-3 { top: 48%; left: 95%;  transform: rotate(-25deg); }
+
+    /* 🪄 คทาวิเศษ (3 ชิ้น) */
+    .bg-decorations .d5-1 { top: 45%; left: 3%;   transform: rotate(20deg); }
+    .bg-decorations .d5-2 { top: 80%; left: 68%;  transform: rotate(-5deg); }
+    .bg-decorations .d5-3 { top: 40%; left: 86%;  transform: rotate(15deg); }
+
+    .horizontal-list {
+      display: flex; gap: 12px; padding: 10px 20px; 
+      overflow-x: auto;               /* เปิดให้เลื่อนซ้าย-ขวาได้ */
+      scroll-behavior: smooth;         /* ให้เลื่อนแบบนุ่มนวล */
+      align-items: flex-end; margin: 0 auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch; /* สำหรับ iOS ให้ปัดแล้วลื่นๆ ฟึบๆ */
+      gap: 15px;                      /* ระยะห่างระหว่างการ์ดแต่ละใบ */
+      padding: 10px 15px;
+      cursor: grab;                   /* เปลี่ยนเมาส์เป็นรูปมือเตรียมจับ */
+      user-select: none;              /* กันไม่ให้คลุมดำข้อความเวลาลาก */
+    }
+
+    /* เวลาคลิกเมาส์ค้าง ให้เปลี่ยนเป็นรูปมือกำ */
+    .horizontal-list:active {
+      cursor: grabbing;
+    }
+
+    /* ซ่อนแถบ Scrollbar ด้านล่างไม่ให้โผล่มาขัดตา */
+    .horizontal-list::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera */
+    }
+    .horizontal-list {
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+    }
+    .member-card { 
+      width: 85px; /* ปรับให้พอดี */
+      text-align: center; 
+      background: rgba(254, 228, 121, 0.4);
+      padding: 10px 5px 12px 5px; /* ลด Padding ให้ชิดขึ้น */
+      border-radius: 40px 40px 15px 15px; /* หัวโค้งมนแบบเต็มวง */
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04); 
+      border: 2px solid #fee479;
+      transition: 0.3s ease; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      position: relative;
+      flex: 0 0 85px; /* ล็อกขนาดไม่ให้ยืด */
+    }
+    .member-card:hover { 
+          transform: translateY(-8px); 
+          box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+    .member-card .img-wrapper img {
+      width: 80px;      /* ปรับขนาดตามต้องการ */
+      height: 80px;     /* ต้องเท่ากับ width */
+      object-fit: cover; /* สั่งให้รูปตัดส่วนเกินออกโดยไม่บีบตัวรูป */
+      border-radius: 50%; /* ทำให้เป็นวงกลม */
+      flex-shrink: 0;    /* ป้องกันไม่ให้โดน Flexbox บีบ */
+    }
+    .rank-1 { height: 250px !important; border-color: #fee479 !important;}
+    .rank-2 { height: 240px !important; border-color: #fee479 !important; }
+    .rank-3 { height: 230px !important; border-color: #fee479 !important; }
+    .rank-other {
+        height: 220px !important; 
+        border: 2px solid #fee479 !important;
+        background: rgba(254, 228, 121, 0.4);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 10px;
+    }
+    .img-wrapper { 
+        position: relative; 
+        width: 60px; 
+        height: 60px; 
+        margin: 0 auto 8px; 
+        border-radius: 50%; 
+        background: #fcfcfc;
+        border: 1px solid #eee; 
+        cursor: pointer;
+        overflow: visible;
+        flex-shrink: 0;
+    }
+
+    .img-wrapper img { 
+        width: 100% !important; 
+        height: 100% !important; 
+        border-radius: 50% !important; 
+        object-fit: cover !important; 
+        display: block;
+    }
     
+    .rank-1 .img-wrapper { 
+        width: 75px !important; 
+        height: 75px !important; 
+        border: 2px solid #fee479 !important; 
+    }
+    
+    .rank-2 .img-wrapper { 
+        width: 75px !important; 
+        height: 75px !important; 
+        border: 2px solid #fee479 !important; 
+    }
+    
+    .rank-3 .img-wrapper { 
+        width: 75px !important; 
+        height: 75px !important; 
+        border: 2px solid #fee479 !important; 
+    }
+    
+    .rank-other .img-wrapper {  
+        width: 70px !important; 
+        height: 70px !important;
+        border: 2px solid #fee479 !important;
+        box-shadow: none;
+    }
+
+    .rank-badge { 
+        position: absolute; 
+        bottom: -2px; 
+        right: -2px; 
+        width: 18px; 
+        height: 18px; 
+        border-radius: 50%; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        font-weight: 700; 
+        font-size: 9px; 
+        border: 2px solid white; 
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2); /* เพิ่มเงาให้ดูมีมิติ */
+        z-index: 10; /* สำคัญ: ให้ไอคอนอยู่ชั้นบนสุด */
+        background: white; /* ใส่พื้นหลังให้ไอคอนทึบ */
+    }
+    .rank-1 .rank-badge { background: var(--gold); color: white; }
+    .rank-2 .rank-badge { background: var(--silver); color: white; }
+    .rank-3 .rank-badge { background: var(--bronze); color: white; }
+    .rank-other .rank-badge { 
+        background: #f8f8f8; 
+        color: #999; 
+        border: 1.5px solid #fff;
+        font-size: 8px;
+        font-weight: 600;
+    }
+    .name-text { 
+      font-weight: 600; 
+      color: #333; 
+      font-size: 12px; 
+      margin-bottom: 2px; 
+      white-space: nowrap; 
+      overflow: hidden; 
+      text-overflow: ellipsis; 
+      width: 90%; 
+    }
+    .cookie-text { 
+      font-size: 12px; 
+      color: var(--primary-pink); 
+      font-weight: 700; 
+      margin-bottom: 6px; /* ดันปุ่มลงเล็กน้อย */
+    }
+
     /* Modals & Stats */
     #modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(6px); z-index: 1000; overflow-y: auto; padding: 40px 10px; box-sizing: border-box; }
     .modal-box { background: white; width: 100%; max-width: 380px; margin: 0 auto; padding: 30px 20px; border-radius: 35px; text-align: center; position: relative; }
@@ -805,663 +956,703 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     background: #ff8fa3;
 }
     
-    /* =========================================
-       👑 CHAMP OF THE MONTH BANNER (EXTRA BIG SIZE)
-       ========================================= */
-    .champ-banner {
-      background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
-      border: 2px solid #d4af37;
-      border-radius: 26px; /* เพิ่มความมนของกล่องให้รับกับรูปที่ใหญ่ขึ้น */
-      padding: 25px 25px; /* ขยายพื้นที่บนล่างให้กว้างขึ้น */
-      margin: 15px 20px;
+/* =========================================
+   👑 CHAMP OF THE MONTH BANNER (GLAM LUXURY SIZE)
+   ========================================= */
+  .champ-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+
+    /* 🖤 เปลี่ยนเป็นกระจกดำรมควัน ผสมทองคำหรู (Luxury Dark Glass) */
+    background: 
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.06'/%3E%3C/svg%3E"),
+      linear-gradient(135deg, rgba(20, 20, 20, 0.88) 0%, rgba(43, 36, 18, 0.92) 100%); 
+
+    backdrop-filter: blur(16px);           
+    -webkit-backdrop-filter: blur(16px);    
+
+    /* ✨ เปลี่ยนขอบให้เป็นสีทองคำขาวและทองคำแท้แบบบางเฉียบเฉียบคม */
+    border: 1px solid rgba(254, 228, 121, 0.35);
+    border-bottom: 1px solid rgba(254, 228, 121, 0.15);
+    border-right: 1px solid rgba(254, 228, 121, 0.15);
+
+    /* 🎀 ตกแต่งรูปทรงและเพิ่มเงามืดด้านหลังให้กล่องดูลอยเด่น */
+    border-radius: 20px;          
+    padding: 15px 20px;            
+    margin: 15px;                  
+    cursor: pointer;
+  }
+
+  /* ✨ แสงวิ้งพาดกระจกแบบคมชัด (Diamond Sweep) */
+  .champ-banner::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    /* ปรับให้แสงวิ้งขาวสว่างวาบขึ้นสไตล์ Glam */
+    background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.75) 50%, rgba(255, 255, 255, 0) 100%);
+    transform: skewX(-25deg);
+    animation: shine 3s infinite ease-in-out;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  @keyframes shine {
+    0% { left: -100%; }
+    25% { left: 200%; }
+    100% { left: 200%; }
+  }
+
+  .champ-banner:active {
+    transform: scale(0.98);
+  }
+
+  .champ-info {
+    position: relative;
+    z-index: 2;
+    flex: 1;
+  }
+
+  .champ-badge {
+    font-size: 12px;
+    color: #fee479; /* สีทองสว่างคู่สีตัดกับพื้นหลังมืด */
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    /* เพิ่มเงาเรืองแสงให้ตัวหนังสือป้ายแชมป์ */
+    text-shadow: 0 0 8px rgba(254, 228, 121, 0.4); 
+  }
+
+  .champ-title {
+    font-size: 28px; 
+    font-weight: 800;
+    margin-bottom: 4px;
+    color: #ffffff; /* 🤍 เปลี่ยนชื่อเป็นสีขาวบริสุทธิ์เพื่อความโดดเด่นสูงสุด */
+    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  }
+
+  .champ-month {
+    font-size: 13px;
+    color: #cccccc; /* 🤍 เปลี่ยนข้อความเดือนเป็นเทาอ่อนเพื่อให้ชื่อเด่น */
+  }
+
+  .champ-btn-view {
+    margin-top: 14px;
+    /* 💛 ปรับปุ่มเป็นสีไล่เฉดทองคำเมทัลลิก (Metallic Gold Gradient) */
+    background: linear-gradient(135deg, #fee479 0%, #e6c13b 100%); 
+    color: #000000; /* ตัวหนังสือดำเข้มคมชัด */
+    border: none;
+    padding: 9px 22px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(230, 193, 59, 0.3);
+    transition: all 0.3s;
+  }
+
+  .champ-btn-view:hover {
+    background: linear-gradient(135deg, #ffffff 0%, #fee479 100%); /* สลับเป็นทองขาวตอนโฮเวอร์ */
+    box-shadow: 0 6px 20px rgba(254, 228, 121, 0.6);
+    transform: translateY(-2px);
+  }
+
+  .champ-img-container {
+    position: relative;
+    z-index: 2;
+    width: 125px; 
+    height: 125px;
+    margin-left: 15px; 
+    flex-shrink: 0; 
+  }
+
+  .champ-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #fee479; 
+    /* 💛 เพิ่มเอฟเฟกต์ออร่าเรืองแสงสีทองรอบรูปแชมป์ให้ดูทรงพลัง */
+    box-shadow: 0 0 25px rgba(254, 228, 121, 0.65), 0 4px 10px rgba(0,0,0,0.5); 
+  }
+
+  /* ===================================================
+     🌸 BLM48 CUTE LOGIN STYLE (VERSION 2 - QUICKSAND & KANIT)
+     =================================================== */
+
+  /* 1. ตัวกล่องหน้าต่างหลัก (Modal Box) - ทรงยาวมน ขอบเรียบคลีนตามรูปที่ 2 */
+  .modal-box {
+      background: #ffffff !important;
+      max-width: 360px;
+      width: 100%;
+      border-radius: 32px !important; /* โค้งมนสวยงามกอดใจ */
+      box-shadow: 0 20px 40px rgba(255, 154, 178, 0.12) !important; /* เงาฟุ้งสีชมพูอ่อนจางๆ ซอฟท์มาก */
+      padding: 35px 30px !important;
+      font-family: 'Quicksand', 'Kanit', sans-serif !important; /* 🌟 เปลี่ยนฟอนต์ตามใจชอบของเอ็มมี่ */
+      box-sizing: border-box;
+      border: none !important; /* เอาขอบเส้นออกเพื่อให้คลีนแบบรูปที่ 2 */
+  }
+
+  /* 💖 โลโก้หัวใจตรงกลาง */
+  .brand-logo {
+      text-align: center;
+      margin-bottom: 15px;
+  }
+  .brand-logo i {
+      font-size: 44px;
+      color: #ff6b8b;
+      filter: drop-shadow(0 4px 6px rgba(255, 107, 139, 0.2));
+  }
+
+  /* 🏷️ จัดการหัวข้อหลักและหัวข้อย่อย */
+  .title {
+      font-size: 26px !important;
+      font-weight: 700 !important;
+      color: #ff5376 !important;
+      text-align: center;
+      margin: 0 0 8px 0 !important;
+      font-family: 'Quicksand', 'Kanit', sans-serif !important;
+      letter-spacing: 0.5px;
+  }
+  .subtitle {
+      font-size: 13px !important;
+      color: #8e8e93 !important; /* สีเทาซอฟท์ */
+      text-align: center;
+      margin-bottom: 30px !important;
+      font-family: 'Quicksand', 'Kanit', sans-serif !important;
+  }
+
+  /* 📝 ฟอร์มจัดกลุ่มช่องกรอก */
+  .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+  }
+  .form-group label {
+      display: block;
+      font-size: 12px;
+      color: #ff6b8b;
+      font-weight: 600;
+      margin-bottom: 8px;
+      padding-left: 4px;
+      font-family: 'Quicksand', 'Kanit', sans-serif !important;
+  }
+
+  /* 🔒 กล่องคลุม Input และ ไอคอน */
+  .input-wrapper {
+      position: relative;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      transition: transform 0.2s;
-    }
-    .champ-banner:active { transform: scale(0.98); }
-    
-    /* เอฟเฟกต์แสงวิบวับพื้นหลัง */
-    .champ-banner::before {
-      content: '';
+  }
+  /* ช่องกรอกข้อมูลทรงมน ขอบชมพูระเรื่อบางๆ */
+  .cute-input {
+      width: 100% !important;
+      padding: 14px 15px 14px 45px !important; /* เว้นซ้ายให้ไอคอน */
+      border: 1.5px solid #ffe3e8 !important;
+      border-radius: 16px !important; /* มนเข้ากับตัวกล่อง */
+      font-family: 'Quicksand', 'Kanit', sans-serif !important;
+      font-size: 14px;
+      color: #444;
+      background-color: #ffffff !important;
+      transition: all 0.25s ease !important;
+      box-sizing: border-box;
+  }
+  .cute-input:focus {
+      outline: none !important;
+      border-color: #ff8fa4 !important;
+      box-shadow: 0 0 0 4px rgba(255, 143, 164, 0.15) !important; /* เอฟเฟกต์ตอนกดนุ่มๆ */
+  }
+  /* ไอคอนในช่องกรอก */
+  .input-wrapper i {
       position: absolute;
-      top: -50%; left: -50%; width: 200%; height: 200%;
-      background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, transparent 60%);
-      animation: rotateGlow 10s linear infinite;
-    }
-    @keyframes rotateGlow { 100% { transform: rotate(360deg); } }
+      left: 18px;
+      color: #ffb6c1;
+      font-size: 16px;
+  }
 
-    .champ-info {
-      position: relative;
-      z-index: 2;
-      color: #fff;
-      flex: 1;
-    }
-    .champ-badge {
-      font-size: 13px;
-      color: #d4af37;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-    .champ-title {
-      font-size: 26px; /* ขยายชื่อแชมป์ขึ้นอีกนิดให้รับกับรูป (จาก 24px เป็น 26px) */
-      font-weight: 700;
-      margin-bottom: 4px;
-      letter-spacing: 0.5px;
-    }
-    .champ-month {
-      font-size: 13px;
-      color: #cccccc;
-    }
-    .champ-btn-view {
-      margin-top: 12px;
-      background: #d4af37;
-      color: #111;
-      border: none;
-      padding: 8px 18px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 700;
+  /* 🔘 ปุ่ม Sign In ชมพูทึบโค้งมนเด่นสะดุดตา */
+  .btn-login {
+      width: 100% !important;
+      background: #ff6b8b !important; /* สีชมพูเนื้อเดียวแบบรูปที่ 2 */
+      color: white !important;
+      border: none !important;
+      padding: 14px !important;
+      border-radius: 16px !important;
       cursor: pointer;
-      transition: all 0.2s;
-    }
-    .champ-btn-view:hover {
-      background: #f4c842;
-      transform: translateY(-2px);
-    }
-    
-    /* 🌟 ส่วนที่ปรับให้รูปใหญ่กระแทกตา 🌟 */
-    .champ-img-container {
-      position: relative;
-      z-index: 2;
-      width: 120px; /* ขยายจาก 95px เป็น 120px ใหญ่เบิ้มๆ! */
-      height: 120px;
-      margin-left: 15px; 
-      flex-shrink: 0; /* สำคัญมาก: ป้องกันไม่ให้รูปโดนบีบเป็นวงรีเวลาข้อความยาว */
-    }
-    .champ-img {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 4px solid #d4af37; /* เพิ่มความหนาขอบทองให้สมกับขนาดรูป */
-      box-shadow: 0 0 20px rgba(212, 175, 55, 0.5); /* เพิ่มเงาฟุ้งออร่าให้ใหญ่ขึ้น */
-    }
-    
-/* ===================================================
-   🌸 BLM48 CUTE LOGIN STYLE (VERSION 2 - QUICKSAND & KANIT)
-   =================================================== */
+      font-family: 'Quicksand', 'Kanit', sans-serif !important;
+      font-weight: 700;
+      font-size: 16px;
+      margin-top: 10px;
+      box-shadow: 0 6px 20px rgba(255, 107, 139, 0.25) !important;
+      transition: all 0.2s ease;
+  }
+  .btn-login:hover {
+      background: #ff5276 !important;
+      transform: translateY(-1px);
+  }
 
-/* 1. ตัวกล่องหน้าต่างหลัก (Modal Box) - ทรงยาวมน ขอบเรียบคลีนตามรูปที่ 2 */
-.modal-box {
-    background: #ffffff !important;
-    max-width: 360px;
-    width: 100%;
-    border-radius: 32px !important; /* โค้งมนสวยงามกอดใจ */
-    box-shadow: 0 20px 40px rgba(255, 154, 178, 0.12) !important; /* เงาฟุ้งสีชมพูอ่อนจางๆ ซอฟท์มาก */
-    padding: 35px 30px !important;
-    font-family: 'Quicksand', 'Kanit', sans-serif !important; /* 🌟 เปลี่ยนฟอนต์ตามใจชอบของเอ็มมี่ */
-    box-sizing: border-box;
-    border: none !important; /* เอาขอบเส้นออกเพื่อให้คลีนแบบรูปที่ 2 */
-}
+  /* ✖️ ปุ่ม Cancel สไตล์ลิงก์เทาอ่อน */
+  .btn-cancel {
+      display: block;
+      text-align: center;
+      color: #a1a1a6 !important;
+      font-size: 14px;
+      text-decoration: none;
+      margin: 15px 0 25px 0;
+      font-family: 'Quicksand', 'Kanit', sans-serif !important;
+      transition: color 0.2s;
+  }
+  .btn-cancel:hover {
+      color: #666 !important;
+  }
 
-/* 💖 โลโก้หัวใจตรงกลาง */
-.brand-logo {
-    text-align: center;
-    margin-bottom: 15px;
-}
-.brand-logo i {
-    font-size: 44px;
-    color: #ff6b8b;
-    filter: drop-shadow(0 4px 6px rgba(255, 107, 139, 0.2));
-}
+  /* ➖ เส้นคั่นสไตล์ Minimal */
+  .divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      color: #8e8e93;
+      font-size: 12px;
+      margin: 25px 0;
+      font-family: 'Quicksand', 'Kanit', sans-serif !important;
+  }
+  .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px dashed #ffd3dc; /* เส้นประสีชมพูจาง */
+  }
+  .divider:not(:empty)::before { margin-right: 1em; }
+  .divider:not(:empty)::after { margin-left: 1em; }
 
-/* 🏷️ จัดการหัวข้อหลักและหัวข้อย่อย */
-.title {
-    font-size: 26px !important;
-    font-weight: 700 !important;
-    color: #ff5376 !important;
-    text-align: center;
-    margin: 0 0 8px 0 !important;
-    font-family: 'Quicksand', 'Kanit', sans-serif !important;
-    letter-spacing: 0.5px;
-}
-.subtitle {
-    font-size: 13px !important;
-    color: #8e8e93 !important; /* สีเทาซอฟท์ */
-    text-align: center;
-    margin-bottom: 30px !important;
-    font-family: 'Quicksand', 'Kanit', sans-serif !important;
-}
+  /* 🟢 ปรับแต่งปุ่มสมัคร LINE ให้อวบอิ่มน่ากด */
+  .btn-login-main {
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      font-family: 'Quicksand', 'Kanit', sans-serif !important;
+      color: #ffffff !important;
+      font-weight: 600; 
+      font-size: 14px;
+      padding: 14px !important;
+      border-radius: 16px !important;
+      box-shadow: 0 4px 12px rgba(6, 199, 85, 0.2) !important;
+      transition: all 0.2s ease;
+  }
+  .btn-login-main:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 15px rgba(6, 199, 85, 0.35) !important;
+      color: #ffffff !important;            /* เวลาเอาเมาส์ชี้ก็ยังคงเป็นสีขาว */
+  }
 
-/* 📝 ฟอร์มจัดกลุ่มช่องกรอก */
-.form-group {
-    margin-bottom: 20px;
-    text-align: left;
-}
-.form-group label {
-    display: block;
-    font-size: 12px;
-    color: #ff6b8b;
+  .btn-login-main i, 
+  .btn-login-main svg, 
+  .btn-login-main img {
+      color: #ffffff !important;            /* 🌟 เปลี่ยนไอคอน/รูปภาพด้านในให้เป็นสีขาว */
+      fill: #ffffff !important;             /* สำหรับไอคอนที่เป็น SVG */
+  }
+
+  /* 📝 หมายเหตุตัวจิ๋วด้านล่างสุด */
+  .note-text {
+      font-size: 11px !important;
+      color: #999999 !important;
+      line-height: 1.6 !important;
+      text-align: center;
+      margin-top: 20px !important;
+      font-family: 'Quicksand', 'Kanit', sans-serif !important;
+  }
+      /* ตกแต่งคอนเทนเนอร์หลัก */
+  .trending-container {
+    margin: 20px auto;
+    padding: 15px;
+    max-width: 100%;
+  }
+
+  .trending-title {
+    font-size: 1.2rem;
+    color: #ff6b81; /* สีชมพูน่ารักๆ */
+    margin-bottom: 12px;
     font-weight: 600;
-    margin-bottom: 8px;
-    padding-left: 4px;
-    font-family: 'Quicksand', 'Kanit', sans-serif !important;
-}
+  }
 
-/* 🔒 กล่องคลุม Input และ ไอคอน */
-.input-wrapper {
+  /* ตั้งค่าการเลื่อนซ้าย-ขวา */
+  .mv-scroller {
+    display: flex;
+    overflow-x: auto;
+    gap: 16px;
+    padding-bottom: 10px;
+    scroll-snap-type: x mandatory;
+    /* ซ่อน Scrollbar ให้ดูคลีน */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  .mv-scroller::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+
+  /* =========================================
+     ✨ TRENDING MV STYLES (สไตล์กะทัดรัดแบบ Peek เลื่อนขวา)
+     ========================================= */
+  .mv-card {
     position: relative;
-    display: flex;
-    align-items: center;
-}
-/* ช่องกรอกข้อมูลทรงมน ขอบชมพูระเรื่อบางๆ */
-.cute-input {
-    width: 100% !important;
-    padding: 14px 15px 14px 45px !important; /* เว้นซ้ายให้ไอคอน */
-    border: 1.5px solid #ffe3e8 !important;
-    border-radius: 16px !important; /* มนเข้ากับตัวกล่อง */
-    font-family: 'Quicksand', 'Kanit', sans-serif !important;
-    font-size: 14px;
-    color: #444;
-    background-color: #ffffff !important;
-    transition: all 0.25s ease !important;
-    box-sizing: border-box;
-}
-.cute-input:focus {
-    outline: none !important;
-    border-color: #ff8fa4 !important;
-    box-shadow: 0 0 0 4px rgba(255, 143, 164, 0.15) !important; /* เอฟเฟกต์ตอนกดนุ่มๆ */
-}
-/* ไอคอนในช่องกรอก */
-.input-wrapper i {
-    position: absolute;
-    left: 18px;
-    color: #ffb6c1;
-    font-size: 16px;
-}
+    width: 75vw;
+    max-width: 240px;
+    background: white;
+    padding: 10px;
+    border-radius: 18px;
 
-/* 🔘 ปุ่ม Sign In ชมพูทึบโค้งมนเด่นสะดุดตา */
-.btn-login {
-    width: 100% !important;
-    background: #ff6b8b !important; /* สีชมพูเนื้อเดียวแบบรูปที่ 2 */
-    color: white !important;
-    border: none !important;
-    padding: 14px !important;
-    border-radius: 16px !important;
+    /* 📍 เปลี่ยนจาก center เป็น flex-start เพื่อให้เนื้อหาภายในชิดซ้าย */
+    text-align: left; 
+
+    border: 2px solid #ffeef2;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     cursor: pointer;
-    font-family: 'Quicksand', 'Kanit', sans-serif !important;
-    font-weight: 700;
-    font-size: 16px;
-    margin-top: 10px;
-    box-shadow: 0 6px 20px rgba(255, 107, 139, 0.25) !important;
-    transition: all 0.2s ease;
-}
-.btn-login:hover {
-    background: #ff5276 !important;
-    transform: translateY(-1px);
-}
-
-/* ✖️ ปุ่ม Cancel สไตล์ลิงก์เทาอ่อน */
-.btn-cancel {
-    display: block;
-    text-align: center;
-    color: #a1a1a6 !important;
-    font-size: 14px;
-    text-decoration: none;
-    margin: 15px 0 25px 0;
-    font-family: 'Quicksand', 'Kanit', sans-serif !important;
-    transition: color 0.2s;
-}
-.btn-cancel:hover {
-    color: #666 !important;
-}
-
-/* ➖ เส้นคั่นสไตล์ Minimal */
-.divider {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
     display: flex;
-    align-items: center;
-    text-align: center;
-    color: #8e8e93;
-    font-size: 12px;
-    margin: 25px 0;
-    font-family: 'Quicksand', 'Kanit', sans-serif !important;
-}
-.divider::before, .divider::after {
-    content: '';
-    flex: 1;
-    border-bottom: 1px dashed #ffd3dc; /* เส้นประสีชมพูจาง */
-}
-.divider:not(:empty)::before { margin-right: 1em; }
-.divider:not(:empty)::after { margin-left: 1em; }
+    flex-direction: column;
 
-/* 🟢 ปรับแต่งปุ่มสมัคร LINE ให้อวบอิ่มน่ากด */
-.btn-login-main {
-    display: flex !important;
+    /* 📍 เปลี่ยนเป็น flex-start ให้ Element ลูกเรียงชิดซ้ายทั้งหมด */
+    align-items: flex-start; 
+
+    flex-shrink: 0;
+  }
+
+  .mv-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(255, 133, 162, 0.15);
+  }
+
+  /* รูปปก MV อัตราส่วน 16:9 */
+  .mv-thumbnail {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 10px;
+    object-fit: cover;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+  }
+
+  /* ชื่อเพลง (บังคับพื้นที่ 2 บรรทัด + ชิดซ้าย) */
+  .mv-title {
+    font-family: 'Quicksand','Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    color: #444;
+    margin-top: 8px;
+
+    /* 📍 เทคนิคบังคับให้สูงคงที่เท่ากับ 2 บรรทัดเสมอ (fontSize * lineHeight * 2) */
+    line-height: 1.4;
+    height: calc(12px * 1.4 * 2); /* สูงประมาณ 33.6px */
+
+    width: 100%;
+    white-space: normal;
+    word-wrap: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* ยาวเกิน 2 บรรทัดจะตัดเป็น ... */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* วันที่ลง MV */
+  .mv-date {
+    font-family: 'Quicksand', 'Kanit', sans-serif;
+    font-size: 10px;
+    color: #ff85a2;
+    font-weight: 700;
+    margin-top: 4px;
+
+    /* 📍 มั่นใจว่าชิดซ้ายแน่นอน */
+    text-align: left; 
+  }
+
+  /* --- Gallery Layout (เน้นสี่เหลี่ยมจัตุรัส) --- */
+  .post-gallery {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* แบ่ง 2 คอลัมน์ */
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .img-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1; /* บังคับให้ช่องเป็นจัตุรัส */
+  }
+
+  .gallery-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* ตัดรูปให้เต็มพอดีช่อง */
+    border-radius: 8px; /* ปรับความมนของมุมตามชอบ (เลขน้อย = มุมเหลี่ยมขึ้น) */
+    cursor: pointer;
+    display: block;
+  }
+
+  /* เงาสีดำรูปที่ 4 */
+  .more-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 8px; /* ต้องเท่ากับ .gallery-img */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+      /* จัดตำแหน่งจุดแดงให้อยู่มุมขวาบนของกระดิ่ง */
+  .icon-wrapper {
+    position: relative;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    text-decoration: none;
-    font-family: 'Quicksand', 'Kanit', sans-serif !important;
-    color: #ffffff !important;
-    font-weight: 600; 
-    font-size: 14px;
-    padding: 14px !important;
-    border-radius: 16px !important;
-    box-shadow: 0 4px 12px rgba(6, 199, 85, 0.2) !important;
-    transition: all 0.2s ease;
-}
-.btn-login-main:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 15px rgba(6, 199, 85, 0.35) !important;
-    color: #ffffff !important;            /* เวลาเอาเมาส์ชี้ก็ยังคงเป็นสีขาว */
-}
-    
-.btn-login-main i, 
-.btn-login-main svg, 
-.btn-login-main img {
-    color: #ffffff !important;            /* 🌟 เปลี่ยนไอคอน/รูปภาพด้านในให้เป็นสีขาว */
-    fill: #ffffff !important;             /* สำหรับไอคอนที่เป็น SVG */
-}
-
-/* 📝 หมายเหตุตัวจิ๋วด้านล่างสุด */
-.note-text {
-    font-size: 11px !important;
-    color: #999999 !important;
-    line-height: 1.6 !important;
+  }
+  .noti-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 8px;
+    height: 8px;
+    background-color: #ff4d6d; /* สีแดงสดตัดขอบขาว */
+    border-radius: 50%;
+    border: 1px solid white;
+    z-index: 10;
+  }
+  /* =========================================
+     🍪 CUTE MONTHLY COOKIE COUNTDOWN (COMPACT & MINIMAL)
+     ========================================= */
+  .cookie-countdown-container {
+    background: linear-gradient(135deg, #fff0f3 0%, #fffbf2 100%);
+    border: 1.5px dashed #ffb6c1; /* ลดความหนาของเส้นประให้ดูเบาบางลง */
+    border-radius: 18px; /* ปรับความมนให้รับกับกล่องที่เล็กลง */
+    padding: 12px 15px; /* ลด Padding ให้กล่องกระชับขึ้น */
+    margin: 10px 20px; /* ลดระยะห่างบนล่าง */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-align: center;
-    margin-top: 20px !important;
-    font-family: 'Quicksand', 'Kanit', sans-serif !important;
-}
-    /* ตกแต่งคอนเทนเนอร์หลัก */
-.trending-container {
-  margin: 20px auto;
-  padding: 15px;
-  max-width: 100%;
-}
+    box-shadow: 0 4px 10px rgba(255, 133, 162, 0.05); /* ลดเงาให้ซอฟต์ลง ไม่แย่งซีน */
+    position: relative;
+    overflow: hidden;
+  }
 
-.trending-title {
-  font-size: 1.2rem;
-  color: #ff6b81; /* สีชมพูน่ารักๆ */
-  margin-bottom: 12px;
-  font-weight: 600;
-}
+  /* หัวข้อหลักด้านบนสุด */
+  .countdown-label {
+    font-size: 13px; /* เล็กลงจาก 15px */
+    font-weight: 800;
+    color: #ff6b8b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
 
-/* ตั้งค่าการเลื่อนซ้าย-ขวา */
-.mv-scroller {
-  display: flex;
-  overflow-x: auto;
-  gap: 16px;
-  padding-bottom: 10px;
-  scroll-snap-type: x mandatory;
-  /* ซ่อน Scrollbar ให้ดูคลีน */
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
-}
+  .countdown-label i {
+    font-size: 12px; /* ลดขนาดไอคอนคุกกี้ */
+    animation: cookieBounce 1.2s infinite ease-in-out;
+  }
 
-.mv-scroller::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
-}
+  /* รายละเอียดข้อความด้านล่างหัวข้อหลัก */
+  .countdown-subtitle {
+    font-size: 10px; /* เล็กลงจาก 11px */
+    color: #a39095;
+    font-weight: 600;
+    margin-bottom: 8px; /* เว้นระยะห่างก่อนถึงตัวเลขเวลานิดหน่อย */
+  }
 
-/* =========================================
-   ✨ TRENDING MV STYLES (สไตล์กะทัดรัดแบบ Peek เลื่อนขวา)
-   ========================================= */
-.mv-card {
-  position: relative;
-  width: 75vw;
-  max-width: 240px;
-  background: white;
-  padding: 10px;
-  border-radius: 18px;
-  
-  /* 📍 เปลี่ยนจาก center เป็น flex-start เพื่อให้เนื้อหาภายในชิดซ้าย */
-  text-align: left; 
-  
-  border: 2px solid #ffeef2;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  display: flex;
-  flex-direction: column;
-  
-  /* 📍 เปลี่ยนเป็น flex-start ให้ Element ลูกเรียงชิดซ้ายทั้งหมด */
-  align-items: flex-start; 
-  
-  flex-shrink: 0;
-}
+  /* กล่องตัวเลขนับถอยหลังด้านล่างสุด */
+  .countdown-timer-box {
+    display: flex;
+    gap: 4px; /* ลดช่องว่างระหว่างตัวเลขแต่ละกล่อง */
+    align-items: center;
+    justify-content: center;
+  }
 
-.mv-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 16px rgba(255, 133, 162, 0.15);
-}
+  .time-segment {
+    background: #ffffff;
+    border: 1px solid #ffe1e7;
+    border-radius: 10px;
+    padding: 4px 6px; /* ลด Padding ให้กล่องตัวเลขเล็กลง */
+    min-width: 38px; /* ลดความกว้างขั้นต่ำของแต่ละช่องลง */
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(255, 133, 162, 0.03); /* ลดเงากล่อง */
+  }
 
-/* รูปปก MV อัตราส่วน 16:9 */
-.mv-thumbnail {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  border-radius: 10px;
-  object-fit: cover;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-}
+  .time-val {
+    font-family: 'Quicksand', sans-serif;
+    font-size: 14px; /* ลดขนาดตัวเลขหลักจาก 17px เป็น 14px */
+    font-weight: 700;
+    color: #ff85a2;
+    display: block;
+    line-height: 1.1;
+  }
 
-/* ชื่อเพลง (บังคับพื้นที่ 2 บรรทัด + ชิดซ้าย) */
-.mv-title {
-  font-family: 'Quicksand','Kanit', sans-serif;
-  font-weight: 600;
-  font-size: 12px;
-  color: #444;
-  margin-top: 8px;
-  
-  /* 📍 เทคนิคบังคับให้สูงคงที่เท่ากับ 2 บรรทัดเสมอ (fontSize * lineHeight * 2) */
-  line-height: 1.4;
-  height: calc(12px * 1.4 * 2); /* สูงประมาณ 33.6px */
-  
-  width: 100%;
-  white-space: normal;
-  word-wrap: break-word;
-  display: -webkit-box;
-  -webkit-line-clamp: 2; /* ยาวเกิน 2 บรรทัดจะตัดเป็น ... */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
+  .time-lbl {
+    font-size: 7px; /* ลดขนาดตัวหนังสือบอกหน่วย (Days, Hrs) */
+    color: #ccb2b7;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
 
-/* วันที่ลง MV */
-.mv-date {
-  font-family: 'Quicksand', 'Kanit', sans-serif;
-  font-size: 10px;
-  color: #ff85a2;
-  font-weight: 700;
-  margin-top: 4px;
-  
-  /* 📍 มั่นใจว่าชิดซ้ายแน่นอน */
-  text-align: left; 
-}
+  .time-separator {
+    color: #ffb6c1;
+    font-weight: bold;
+    font-size: 14px; /* ลดขนาดจุดคู่ลำดับ */
+    margin-bottom: 10px; /* ขยับจุดให้บาลานซ์กับกล่องตัวเลขที่เล็กลง */
+    animation: blink 1s infinite;
+  }
 
-/* --- Gallery Layout (เน้นสี่เหลี่ยมจัตุรัส) --- */
-.post-gallery {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr); /* แบ่ง 2 คอลัมน์ */
-  gap: 8px;
-  margin-top: 10px;
-}
+  /* แอนิเมชันดุ๊กดิ๊กน่ารักๆ (ใช้ของเดิมได้เลย) */
+  @keyframes cookieBounce {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-3px) rotate(10deg); }
+  }
 
-.img-wrapper {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1 / 1; /* บังคับให้ช่องเป็นจัตุรัส */
-}
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+      /* 🌸 Dropdown เมนูจัดการโพสต์ (ปุ่ม 3 จุด) */
+  .post-menu-container {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 100;
+  }
 
-.gallery-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* ตัดรูปให้เต็มพอดีช่อง */
-  border-radius: 8px; /* ปรับความมนของมุมตามชอบ (เลขน้อย = มุมเหลี่ยมขึ้น) */
-  cursor: pointer;
-  display: block;
-}
+  /* ขยับลงมาหลบบนริบบิ้นทองสำหรับโพสต์พิเศษของแชมป์ */
+  .champ-special-post .post-menu-container {
+    top: 35px;
+  }
 
-/* เงาสีดำรูปที่ 4 */
-.more-overlay {
-  position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.6);
-  border-radius: 8px; /* ต้องเท่ากับ .gallery-img */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: white;
-  font-size: 1.5rem;
-  font-weight: bold;
-  cursor: pointer;
-}
-    /* จัดตำแหน่งจุดแดงให้อยู่มุมขวาบนของกระดิ่ง */
-.icon-wrapper {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-.noti-badge {
-  position: absolute;
-  top: -2px;
-  right: -2px;
-  width: 8px;
-  height: 8px;
-  background-color: #ff4d6d; /* สีแดงสดตัดขอบขาว */
-  border-radius: 50%;
-  border: 1px solid white;
-  z-index: 10;
-}
-/* =========================================
-   🍪 CUTE MONTHLY COOKIE COUNTDOWN (COMPACT & MINIMAL)
-   ========================================= */
-.cookie-countdown-container {
-  background: linear-gradient(135deg, #fff0f3 0%, #fffbf2 100%);
-  border: 1.5px dashed #ffb6c1; /* ลดความหนาของเส้นประให้ดูเบาบางลง */
-  border-radius: 18px; /* ปรับความมนให้รับกับกล่องที่เล็กลง */
-  padding: 12px 15px; /* ลด Padding ให้กล่องกระชับขึ้น */
-  margin: 10px 20px; /* ลดระยะห่างบนล่าง */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  box-shadow: 0 4px 10px rgba(255, 133, 162, 0.05); /* ลดเงาให้ซอฟต์ลง ไม่แย่งซีน */
-  position: relative;
-  overflow: hidden;
-}
+  .post-menu-btn {
+    background: none;
+    border: none;
+    color: #bbb;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-/* หัวข้อหลักด้านบนสุด */
-.countdown-label {
-  font-size: 13px; /* เล็กลงจาก 15px */
-  font-weight: 800;
-  color: #ff6b8b;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  letter-spacing: 0.5px;
-  margin-bottom: 2px;
-}
+  .post-menu-btn:hover {
+    background: var(--blmem-pink-light);
+    color: var(--blmem-pink);
+  }
 
-.countdown-label i {
-  font-size: 12px; /* ลดขนาดไอคอนคุกกี้ */
-  animation: cookieBounce 1.2s infinite ease-in-out;
-}
+  .post-dropdown-menu {
+    display: none; /* ซ่อนไว้ก่อน */
+    position: absolute;
+    right: 0;
+    top: 32px;
+    background: #ffffff;
+    border: 1px solid #ffe3e8;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(255, 133, 162, 0.1);
+    min-width: 120px;
+    overflow: hidden;
+    animation: fadeInMenu 0.15s ease-out;
+  }
 
-/* รายละเอียดข้อความด้านล่างหัวข้อหลัก */
-.countdown-subtitle {
-  font-size: 10px; /* เล็กลงจาก 11px */
-  color: #a39095;
-  font-weight: 600;
-  margin-bottom: 8px; /* เว้นระยะห่างก่อนถึงตัวเลขเวลานิดหน่อย */
-}
+  @keyframes fadeInMenu {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
-/* กล่องตัวเลขนับถอยหลังด้านล่างสุด */
-.countdown-timer-box {
-  display: flex;
-  gap: 4px; /* ลดช่องว่างระหว่างตัวเลขแต่ละกล่อง */
-  align-items: center;
-  justify-content: center;
-}
+  .post-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 14px;
+    border: none;
+    background: none;
+    font-size: 13px;
+    color: #666;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.2s;
+  }
 
-.time-segment {
-  background: #ffffff;
-  border: 1px solid #ffe1e7;
-  border-radius: 10px;
-  padding: 4px 6px; /* ลด Padding ให้กล่องตัวเลขเล็กลง */
-  min-width: 38px; /* ลดความกว้างขั้นต่ำของแต่ละช่องลง */
-  text-align: center;
-  box-shadow: 0 2px 4px rgba(255, 133, 162, 0.03); /* ลดเงากล่อง */
-}
+  .post-dropdown-item:hover {
+    background: var(--blmem-pink-light);
+    color: var(--blmem-pink);
+  }
 
-.time-val {
-  font-family: 'Quicksand', sans-serif;
-  font-size: 14px; /* ลดขนาดตัวเลขหลักจาก 17px เป็น 14px */
-  font-weight: 700;
-  color: #ff85a2;
-  display: block;
-  line-height: 1.1;
-}
+  /* สไตล์พิเศษสำหรับปุ่มลบโพสต์ */
+  .post-dropdown-item.delete-item {
+    color: #ff5c7c;
+  }
 
-.time-lbl {
-  font-size: 7px; /* ลดขนาดตัวหนังสือบอกหน่วย (Days, Hrs) */
-  color: #ccb2b7;
-  text-transform: uppercase;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-}
+  .post-dropdown-item.delete-item:hover {
+    background: #fff0f2;
+    color: #ff335c;
+  }
 
-.time-separator {
-  color: #ffb6c1;
-  font-weight: bold;
-  font-size: 14px; /* ลดขนาดจุดคู่ลำดับ */
-  margin-bottom: 10px; /* ขยับจุดให้บาลานซ์กับกล่องตัวเลขที่เล็กลง */
-  animation: blink 1s infinite;
-}
+      @keyframes popupScale {
+    0% { transform: scale(0.7); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+      /* ตกแต่งกล่องรูปภาพที่เพิ่มมาใหม่ให้มีความโค้งมนมนๆ ดูนุ่มฟู */
+  .shop-banner-container {
+    border: 2px solid #ffb3c1; /* เส้นขอบสีชมพูพาสเทลเข้ากับธีมแอป */
+    transition: transform 0.3s ease;
+  }
 
-/* แอนิเมชันดุ๊กดิ๊กน่ารักๆ (ใช้ของเดิมได้เลย) */
-@keyframes cookieBounce {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-3px) rotate(10deg); }
-}
+  .shop-banner-container:active {
+    transform: scale(0.98); /* ลูกเล่นเวลากดแล้วยุบตัวเล็กน้อย */
+  }
 
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
-}
-    /* 🌸 Dropdown เมนูจัดการโพสต์ (ปุ่ม 3 จุด) */
-.post-menu-container {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  z-index: 100;
-}
+  /* ไอคอนตกแต่งใน Ranking */
+  .rank-decoration {
+    font-size: 1.2rem;
+    margin-right: 4px;
+    filter: drop-shadow(0px 2px 4px rgba(255, 192, 203, 0.5));
+  }
+      /* กำหนดให้กล่องเก็บไอคอนอยู่ชั้นล่างสุด */
+  .bg-decorations {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none; /* ทำให้กดทะลุไปโดนลิสต์การ์ดได้ปกติ */
+  }
 
-/* ขยับลงมาหลบบนริบบิ้นทองสำหรับโพสต์พิเศษของแชมป์ */
-.champ-special-post .post-menu-container {
-  top: 35px;
-}
+  /* สไตล์เริ่มต้นของไอคอนพื้นหลัง ให้สีชมพูจางๆ ดูฟุ้งๆ */
+  .decor-item {
+    position: absolute;
+    color: #ffccd5; 
+    opacity: 0.4;
+    font-size: 1.5rem;
+    filter: blur(0.5px);
+  }
 
-.post-menu-btn {
-  background: none;
-  border: none;
-  color: #bbb;
-  font-size: 18px;
-  cursor: pointer;
-  padding: 6px 10px;
-  border-radius: 50%;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.post-menu-btn:hover {
-  background: var(--blmem-pink-light);
-  color: var(--blmem-pink);
-}
-
-.post-dropdown-menu {
-  display: none; /* ซ่อนไว้ก่อน */
-  position: absolute;
-  right: 0;
-  top: 32px;
-  background: #ffffff;
-  border: 1px solid #ffe3e8;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(255, 133, 162, 0.1);
-  min-width: 120px;
-  overflow: hidden;
-  animation: fadeInMenu 0.15s ease-out;
-}
-
-@keyframes fadeInMenu {
-  from { opacity: 0; transform: translateY(-5px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.post-dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 10px 14px;
-  border: none;
-  background: none;
-  font-size: 13px;
-  color: #666;
-  cursor: pointer;
-  text-align: left;
-  transition: background 0.2s;
-}
-
-.post-dropdown-item:hover {
-  background: var(--blmem-pink-light);
-  color: var(--blmem-pink);
-}
-
-/* สไตล์พิเศษสำหรับปุ่มลบโพสต์ */
-.post-dropdown-item.delete-item {
-  color: #ff5c7c;
-}
-
-.post-dropdown-item.delete-item:hover {
-  background: #fff0f2;
-  color: #ff335c;
-}
-    
-    @keyframes popupScale {
-  0% { transform: scale(0.7); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
-}
-    /* ตกแต่งกล่องรูปภาพที่เพิ่มมาใหม่ให้มีความโค้งมนมนๆ ดูนุ่มฟู */
-.shop-banner-container {
-  border: 2px solid #ffb3c1; /* เส้นขอบสีชมพูพาสเทลเข้ากับธีมแอป */
-  transition: transform 0.3s ease;
-}
-
-.shop-banner-container:active {
-  transform: scale(0.98); /* ลูกเล่นเวลากดแล้วยุบตัวเล็กน้อย */
-}
-
-/* ไอคอนตกแต่งใน Ranking */
-.rank-decoration {
-  font-size: 1.2rem;
-  margin-right: 4px;
-  filter: drop-shadow(0px 2px 4px rgba(255, 192, 203, 0.5));
-}
-    /* กำหนดให้กล่องเก็บไอคอนอยู่ชั้นล่างสุด */
-.bg-decorations {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  pointer-events: none; /* ทำให้กดทะลุไปโดนลิสต์การ์ดได้ปกติ */
-}
-
-/* สไตล์เริ่มต้นของไอคอนพื้นหลัง ให้สีชมพูจางๆ ดูฟุ้งๆ */
-.decor-item {
-  position: absolute;
-  color: #ffccd5; 
-  opacity: 0.4;
-  font-size: 1.5rem;
-  filter: blur(0.5px);
-}
-
-/* จัดวางตำแหน่งสุ่มกระจายตามมุมต่างๆ */
-.d1 { top: 10%; left: 5%; transform: rotate(-15deg); font-size: 1.2rem; }
-.d2 { bottom: 15%; left: 25%; transform: rotate(20deg); }
-.d3 { top: 20%; right: 30%; transform: rotate(10deg); font-size: 1rem; }
-.d4 { bottom: 10%; right: 5%; transform: rotate(-25deg); }
-.d5 { top: 40%; left: 60%; transform: rotate(45deg); opacity: 0.3; }
+  /* จัดวางตำแหน่งสุ่มกระจายตามมุมต่างๆ */
+  .d1 { top: 10%; left: 5%; transform: rotate(-15deg); font-size: 1.2rem; }
+  .d2 { bottom: 15%; left: 25%; transform: rotate(20deg); }
+  .d3 { top: 20%; right: 30%; transform: rotate(10deg); font-size: 1rem; }
+  .d4 { bottom: 10%; right: 5%; transform: rotate(-25deg); }
+  .d5 { top: 40%; left: 60%; transform: rotate(45deg); opacity: 0.3; }
 
   .monthly-tracker-container {
   background: transparent; /* ลบกล่องขาวและเงาออก */
@@ -1646,6 +1837,30 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
         width: 16px;
         border-radius: 4px;
     }
+    
+.main-content-container {
+  /* 🤍 ใช้สีขาวแบบโปร่งแสง เห็นสีสันพื้นหลังลอยจางๆ ละมุนเหมือนเดิม */
+  background: rgba(255, 255, 255, 0.92); 
+  
+  /* 🪄 เอฟเฟกต์เบลอภาพข้างหลังกล่อง (ฟีลกระจกฝ้า) */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  
+  /* 🌟 [แก้ไขใหม่] ตั้งค่าให้ขยายเต็มจอพอดีเป๊ะ */
+  margin: 0;                    /* เปลี่ยนเป็น 0 เพื่อให้ขยายชนขอบจอทุกด้าน ไม่เหลือช่องว่าง */
+  border-radius: 0;             /* เปลี่ยนเป็น 0 เอาขอบมนออก เพื่อให้เนียนไปกับหน้าจองับ */
+  width: 100%;                  /* บังคับความกว้างเต็มจอ 100% */
+  min-height: 100vh;            /* สูงอย่างน้อยเต็มหน้าจอ (ถ้าเนื้อหายาวก็เลื่อนลงได้เรื่อยๆ) */
+  box-sizing: border-box;       /* ป้องกันไม่ให้ padding ดันจนหน้าจอเกินขอบขวา */
+  
+  /* 🎀 [แก้ไขใหม่] เพิ่มระยะห่างด้านใน (Padding) */
+  /* ปรับซ้าย-ขวาเป็น 20px เพื่อไม่ให้เนื้อหา, ข้อความ หรือแบนเนอร์ไปเบียดชิดขอบจอเกินไปงับ */
+  padding: 20px 20px 25px 20px; 
+  
+  /* ☁️ เอาเส้นขอบและเงาออก เพราะกล่องขยายติดขอบจอแล้ว ไม่จำเป็นต้องใช้แล้วงับ */
+  border: none;
+  box-shadow: none;
+}
   </style>
 </head>
 <body>
@@ -1701,6 +1916,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
       </div>
 </div>
   
+<div class="main-content-container">
 <div class="monthly-tracker-container">
   <div class="tracker-header">
     <div class="countdown-subtitle" id="countdown-month-text">Loading...</div>
@@ -1734,12 +1950,26 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
 <div class="ranking-wrapper" style="position: relative; overflow: hidden;">
   
   <div class="bg-decorations">
-    <i class="fa-solid fa-crown decor-item d1"></i>
-    <i class="fa-solid fa-heart decor-item d2"></i>
-    <i class="fa-solid fa-star decor-item d3"></i>
-    <i class="fa-solid fa-music decor-item d4"></i>
-    <i class="fa-solid fa-wand-magic-sparkles decor-item d5"></i>
-  </div>
+  <i class="fa-solid fa-crown decor-item d1-1"></i>
+  <i class="fa-solid fa-crown decor-item d1-2"></i>
+  <i class="fa-solid fa-crown decor-item d1-3"></i>
+  
+  <i class="fa-solid fa-heart decor-item d2-1"></i>
+  <i class="fa-solid fa-heart decor-item d2-2"></i>
+  <i class="fa-solid fa-heart decor-item d2-3"></i>
+  
+  <i class="fa-solid fa-star decor-item d3-1"></i>
+  <i class="fa-solid fa-star decor-item d3-2"></i>
+  <i class="fa-solid fa-star decor-item d3-3"></i>
+  
+  <i class="fa-solid fa-music decor-item d4-1"></i>
+  <i class="fa-solid fa-music decor-item d4-2"></i>
+  <i class="fa-solid fa-music decor-item d4-3"></i>
+  
+  <i class="fa-solid fa-wand-magic-sparkles decor-item d5-1"></i>
+  <i class="fa-solid fa-wand-magic-sparkles decor-item d5-2"></i>
+  <i class="fa-solid fa-wand-magic-sparkles decor-item d5-3"></i>
+</div>
 
   <div id="ranking-list" class="horizontal-list" style="position: relative; z-index: 2;"></div>
 </div>
@@ -1804,7 +2034,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
    <div id="posts-container">
        </div>
 </div>
-
+</div>
 <i class="fas fa-pencil-alt edit-icon" id="edit-name-btn" onclick="updateDisplayName()" style="display: none;"></i>
 <input type="file" id="profile-upload" style="display:none" accept="image/*" onchange="handleImageUpload(event, user.username)">
 
@@ -1999,43 +2229,50 @@ async function refreshAppData() {
     if (typeof hideAppLoading === 'function') hideAppLoading();
   }
 }
-  
 // ==========================================
 // 🎨 ระบบโหลดธีมผู้ชนะประจำเดือนแบบมีระบบ Cache & Sync อัปเดต
 // ==========================================
 function loadChampOfTheMonth() {
   const CACHE_KEY = "bnl_winner_theme_cache";
+  const TOGGLE_KEY = "bnl_splash_toggle"; // ใช้จำว่าครั้งที่แล้วโชว์ Splash ของอะไรไป
   
   // 1. ดึงข้อมูลธีมเก่าจากแคชในเครื่องขึ้นมาโชว์ก่อนทันที (แอปเปิดไว ไม่รอกระพริบ)
   const cachedData = localStorage.getItem(CACHE_KEY);
   if (cachedData) {
     try {
       const parsedData = JSON.parse(cachedData);
-      applyWinnerTheme(parsedData); // สั่งแสดงผลรูปภาพและไอคอนเก่าทันที
+      applyThemeAndToggleSplash(parsedData, TOGGLE_KEY); // สั่งแสดงผลรูปภาพและไอคอนเก่าทันที
     } catch (e) {
       console.error("การอ่านข้อมูลแคชธีมขัดข้อง:", e);
     }
   }
 
   // 2. แอบยิงไปถามหลังบ้านเงียบๆ ว่าข้อมูลมีการอัปเดตเปลี่ยนคนชนะหรือรูปภาพใหม่หรือยัง
+  // (อย่าลืมประกาศตัวแปร scriptURL ไว้ด้านบนโค้ดด้วยนะครับ)
   fetch(`${scriptURL}?action=getWinnerTheme`)
     .then(response => response.json())
     .then(newData => {
-      if (newData && newData.name) {
+      if (newData && newData.success) {
         
         // 🔄 เช็กว่าข้อมูลใหม่กับข้อมูลในแคชเก่าตรงกันไหม?
-        // ถ้าไม่ตรงกัน หรือยังไม่เคยเก็บแคช แปลว่า "มีการอัปเดตข้อมูลแชมป์"
         if (cachedData !== JSON.stringify(newData)) {
           console.log("✨ พบการอัปเดตธีมใหม่! กำลังล้าง Session เก่าและบันทึกข้อมูลล่าสุด...");
           
           localStorage.setItem(CACHE_KEY, JSON.stringify(newData)); // บันทึกทับอันใหม่
-          applyWinnerTheme(newData); // สั่งเปลี่ยนรูปภาพบนหน้าจอเป็นเวอร์ชันล่าสุดทันที
+          
+          // หากยังไม่มีแคชมาก่อน (เพิ่งเข้าแอปครั้งแรก) ให้เรียกใช้วาดหน้าจอทันที
+          if (!cachedData) {
+              applyThemeAndToggleSplash(newData, TOGGLE_KEY); 
+          } else {
+              // 💡 ทริค: ถ้ามีแคชและรูป Splash โหลดโชว์ไปแล้ว เราจะอัปเดตแบบเงียบๆ "แค่ไอคอน"
+              // เพื่อป้องกันไม่ให้รูป Splash เปลี่ยนกะทันหันกลางอากาศต่อหน้าผู้ใช้
+              applyIconsOnly(newData.champ);
+          }
         } else {
-          console.log(" ข้อมูลธีมเป็นปัจจุบันอยู่แล้ว ไม่ต้องโหลดใหม่");
+          console.log("✅ ข้อมูลธีมเป็นปัจจุบันอยู่แล้ว ไม่ต้องโหลดใหม่");
         }
       }
       
-      // ปิดหน้าจอโหลดวงกลมหมุนๆ หลังจากเช็กข้อมูลเสร็จ
       hideThemeLoadingScreen();
     })
     .catch(error => {
@@ -2045,19 +2282,58 @@ function loadChampOfTheMonth() {
 }
 
 /**
- * ฟังก์ชันสำหรับสั่งให้นำข้อมูลธีมไปวาดลงหน้าจอ 
- * (แยกออกมาเพื่อรองรับการเรียกใช้ซ้ำ ทั้งจากแคช และจากตอนอัปเดตข้อมูลสดครับ)
+ * ฟังก์ชันสำหรับสั่งให้นำข้อมูลไปวาดลงหน้าจอ (สลับหน้า Splash อัตโนมัติ)
  */
-function applyWinnerTheme(champData) {
-  if (!champData) return;
+function applyThemeAndToggleSplash(themeData, toggleKey) {
+  if (!themeData || !themeData.champ) return;
   
-  // เปลี่ยนรูปภาพหน้าจอ Splash Screen 
+  const champ = themeData.champ;
+  const birthdaySplash = themeData.birthdaySplash; // ถ้าไม่มีคนเกิด จะเป็นค่าว่าง ""
+  
   const mainSplash = document.getElementById('main-splash');
-  if (mainSplash && champData.splash) {
-    mainSplash.src = champData.splash;
+  const splashScreen = document.getElementById('splash-screen');
+  
+  let splashToShow = champ.splash; // เริ่มต้นให้โชว์รูปแชมป์ก่อน
+
+  // 🔄 ระบบสลับหน้าจอ (จะทำงานก็ต่อเมื่อ "วันนี้มีวันเกิด" เท่านั้น)
+  if (birthdaySplash) {
+    const lastShown = localStorage.getItem(toggleKey);
+    
+    if (lastShown === "birthday") {
+      // ครั้งที่แล้วโชว์วันเกิดไปแล้ว -> รอบนี้ขอโชว์รูปแชมป์
+      splashToShow = champ.splash;
+      localStorage.setItem(toggleKey, "champ");
+    } else {
+      // เข้าแอปครั้งแรก หรือรอบที่แล้วโชว์แชมป์ -> รอบนี้ขอโชว์วันเกิด
+      splashToShow = birthdaySplash;
+      localStorage.setItem(toggleKey, "birthday");
+    }
+  }
+
+  // เปลี่ยนรูปภาพหน้าจอ Splash Screen
+  if (mainSplash && splashToShow) {
+    mainSplash.src = splashToShow;
+    
+    // โชว์ Splash ไว้สักพักแล้วเฟดออก (ใส่ไว้ให้ตรงนี้เผื่อเรียกใช้ครับ)
+    if(splashScreen) {
+       splashScreen.style.display = "flex";
+       setTimeout(() => splashScreen.style.opacity = "1", 10);
+       setTimeout(() => {
+           splashScreen.style.opacity = "0";
+           setTimeout(() => splashScreen.style.display = "none", 500);
+       }, 3000); // ระยะเวลาโชว์ 3 วินาที
+    }
   }
   
-  // เรียกใช้งานระบบสลับสับเปลี่ยนไอคอนแถบด้านล่าง
+  // 🌟 ไม่ว่ารูป Splash จะเป็นใคร "ไอคอน" จะถูกบังคับให้เป็นของแชมป์เสมอ!
+  applyIconsOnly(champ);
+}
+
+/**
+ * ฟังก์ชันแยกสำหรับใช้อัปเดตแค่ไอคอนแถบด้านล่าง
+ */
+function applyIconsOnly(champData) {
+  if (!champData) return;
   updateTabIcon('nav-home', 'nav-home-fallback', champData.homeIcon);
   updateTabIcon('nav-kami', 'nav-kami-fallback', champData.kamiIcon);
   updateTabIcon('nav-cart', 'nav-cart-fallback', champData.cartIcon);
@@ -2077,7 +2353,6 @@ function updateTabIcon(imgId, fallbackId, iconUrl) {
       imgElement.style.display = 'block';       // เปิดโชว์รูปภาพสั่งทำของเอ็มมี่
       fallbackElement.style.display = 'none';    // ซ่อนไอคอนเริ่มต้นทิ้งไป
     } else {
-      // เคสเผื่ออนาคตในชีตไม่มีรูปภาพ ให้ถอยกลับไปใช้ไอคอนปกติ
       imgElement.style.display = 'none';
       fallbackElement.style.display = 'block';
     }
@@ -2092,16 +2367,16 @@ function hideThemeLoadingScreen() {
   if (appLoading) appLoading.style.display = 'none';
 }
 
-  window.addEventListener('pageshow', function(event) {
-    if (event.persisted) {
-        // หากผู้ใช้กดย้อนกลับมาหน้านี้ (ดึงจาก bfcache) 
-        // ให้ซ่อน Splash Screen เพื่อความสมูท และแค่ดึงยอดเงินมาอัปเดตเงียบๆ
-        const splash = document.getElementById('splash-screen');
-        if(splash) splash.style.display = 'none';
-        
-        // อัปเดตข้อมูลเงียบๆ (ถ้ามีฟังก์ชัน)
-        if(typeof loadWalletFromCache === "function") loadWalletFromCache();
-    }
+window.addEventListener('pageshow', function(event) {
+  if (event.persisted) {
+    // หากผู้ใช้กดย้อนกลับมาหน้านี้ (ดึงจาก bfcache) 
+    // ให้ซ่อน Splash Screen เพื่อความสมูท
+    const splash = document.getElementById('splash-screen');
+    if(splash) splash.style.display = 'none';
+    
+    // อัปเดตข้อมูลเงียบๆ (ถ้ามีฟังก์ชัน)
+    if(typeof loadWalletFromCache === "function") loadWalletFromCache();
+  }
 });
 
 // =========================================================================
