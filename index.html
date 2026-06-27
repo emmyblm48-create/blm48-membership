@@ -47,7 +47,7 @@
       --gold: #ffd700;
       --silver: #C0C0C0;
       --bronze: #cd7f32;
-      --bg-color: #ffffff;
+      --bg-color: #ffe372;
       --violet-border: #e0c3fc;
     }
 
@@ -75,7 +75,7 @@
     background-size: cover; 
     background-position: center center; 
     background-repeat: no-repeat; 
-    background-color: #ffffff;
+    background-color: #ffeb9c;
   }
     
     .bg-video-layer {
@@ -287,40 +287,25 @@ body {
       /* =========================================
        🤍 NAVBAR STYLE (โหมดสลับสีอัตโนมัติเมื่อเลื่อนจอ)
        ========================================= */
-    .navbar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      z-index: 1000;
-      box-sizing: border-box;
+   .navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px; 
 
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 15px 20px; 
-
-      /* 🤍 [ตอนอยู่บนสุด] ตั้งค่าให้เป็นสีขาวล้วน 100% */
-      background: #ffffff; 
-      backdrop-filter: blur(0px);
-      -webkit-backdrop-filter: blur(0px);
-      border-bottom: 1px solid transparent; /* เตรียมพื้นที่ไว้ให้เส้นขอบตอนเลื่อน */
-      box-shadow: none;
-
-      /* 🪄 เพิ่ม Transition เพื่อให้เวลาสลับสีมันนุ่มนวล ไม่กระตุกตา */
-      transition: background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    /* ✨ [ตอนเลื่อนจอลงมา] จะถูกเปลี่ยนเป็นกระจกฝ้าใสขุ่นทันที */
-    .navbar.scrolled {
-      background: rgba(255, 255, 255, 0.4); 
-      backdrop-filter: blur(12px);          
-      -webkit-backdrop-filter: blur(12px);   
-      
-      /* แถม: เพิ่มเส้นขอบล่างและเงาบางๆ ตอนเลื่อนลง เพื่อให้ตัดกับเนื้อหาในเว็บดูหรูขึ้น */
-      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
-    }
+  /* 🪄 ปรับให้โปร่งใสล่องหน 100% */
+  background: transparent !important; 
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
 
     /* 🎀 แก้ชื่อแบรนด์ให้เป็นสีเทาเข้มเกือบดำตามธีม */
     .brand { 
@@ -337,7 +322,7 @@ body {
 
     /* 💗 เปลี่ยนไอคอนทั้งหมดเป็นสีชมพูหวานละมุน */
     .nav-icon { 
-      color: #ff85a2; /* 🌸 เปลี่ยนจาก #252525 เป็นสีชมพู (ปรับเฉดเข้ม-อ่อนตามใจชอบได้เลยครับ) */
+      color: #000000; /* 🌸 เปลี่ยนจาก #252525 เป็นสีชมพู (ปรับเฉดเข้ม-อ่อนตามใจชอบได้เลยครับ) */
       font-size: 18px;
       margin-left: 15px; /* ระยะเว้นระหว่างไอคอน */
       text-decoration: none;
@@ -386,7 +371,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: #ffffff; 
+  background: #ffeb9c; 
   border-top: 1px solid rgba(0, 0, 0, 0.04);
   border-radius: 28px 28px 0 0; /* เพิ่มความโค้งมนให้ดูละมุนรับกับบาร์ที่สูงขึ้น */
   box-shadow: 0 -12px 35px rgba(0, 0, 0, 0.08); /* เงาของตัวบาร์หลักยังคงไว้เพื่อให้บาร์ดูลอยแยกชั้น */
