@@ -58,8 +58,8 @@
       padding: 0;
       min-height: 100vh;
       overflow-x: hidden;
-      padding-top: 70px;    /* ระยะดันจากด้านบน (ปรับเพิ่ม/ลดตามความสูงของ Navbar เดิม) */
-      padding-bottom: 80px; /* ระยะเผื่อด้านล่างเพื่อไม่ให้ Tab-bar บังโพสต์สุดท้ายงับ 🎀 */
+      padding-top: 50px;    /* ระยะดันจากด้านบน (ปรับเพิ่ม/ลดตามความสูงของ Navbar เดิม) */
+      padding-bottom: 100px; /* ระยะเผื่อด้านล่างเพื่อไม่ให้ Tab-bar บังโพสต์สุดท้ายงับ 🎀 */
     }
     body::before {
       content: "";
@@ -69,14 +69,17 @@
       width: 100%;
       height: 100%;
       z-index: -1;
-    
-    /* ใส่รูปภาพและการตั้งค่าเดิมตรงนี้ */
-    background-image: url(''); 
-    background-size: cover; 
-    background-position: center center; 
-    background-repeat: no-repeat; 
-    background-color: #ffeb9c;
-  }
+
+      /* 🌼 พื้นหลังสีเหลืองพาสเทล */
+      background-color: #ffeb9c;
+
+      /* 🍀 Pattern ใบโคลเวอร์ 4 แฉกสีเขียวพาสเทล (ปรับกลีบให้ห่างกันสวยงาม) 
+      background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%2381c784' fill-opacity='0.6'%3E%3Cg transform='translate(50,50) rotate(15) scale(0.8)'%3E%3Cpath d='M0,-5 C-25,-15 -25,-45 0,-30 C25,-45 25,-15 0,-5 Z'/%3E%3Cpath d='M0,-5 C-25,-15 -25,-45 0,-30 C25,-45 25,-15 0,-5 Z' transform='rotate(90)'/%3E%3Cpath d='M0,-5 C-25,-15 -25,-45 0,-30 C25,-45 25,-15 0,-5 Z' transform='rotate(180)'/%3E%3Cpath d='M0,-5 C-25,-15 -25,-45 0,-30 C25,-45 25,-15 0,-5 Z' transform='rotate(270)'/%3E%3Cpath d='M0,5 C5,25 -5,45 -5,45 C-10,45 0,25 0,5 Z'/%3E%3C/g%3E%3Cg transform='translate(150,140) rotate(-20) scale(0.6)'%3E%3Cpath d='M0,-5 C-25,-15 -25,-45 0,-30 C25,-45 25,-15 0,-5 Z'/%3E%3Cpath d='M0,-5 C-25,-15 -25,-45 0,-30 C25,-45 25,-15 0,-5 Z' transform='rotate(90)'/%3E%3Cpath d='M0,-5 C-25,-15 -25,-45 0,-30 C25,-45 25,-15 0,-5 Z' transform='rotate(180)'/%3E%3Cpath d='M0,-5 C-25,-15 -25,-45 0,-30 C25,-45 25,-15 0,-5 Z' transform='rotate(270)'/%3E%3Cpath d='M0,5 C5,25 -5,45 -5,45 C-10,45 0,25 0,5 Z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");*/
+
+      /* ⚙️ ปรับขนาดพื้นที่ของ Pattern */
+      background-size: 150px 150px;
+      background-repeat: repeat;
+    }
     
     .bg-video-layer {
   position: fixed;   /* ตรึงวิดีโอให้อยู่กับที่เวลาเลื่อนหน้าจอ */
@@ -1056,7 +1059,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     background: #ff8fa3;
 }
     
-/* =========================================
+  /* =========================================
    👑 CHAMP OF THE MONTH BANNER (GLAM LUXURY SIZE)
    ========================================= */
   .champ-banner {
@@ -1065,6 +1068,9 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     justify-content: space-between;
     position: relative;
     overflow: hidden;
+
+    /* ⬆️ 1. เพิ่มความสูงขั้นต่ำ (ปรับตัวเลข 180px ได้ตามความชอบเลยครับ) */
+    min-height: 180px; 
 
     /* 🖤 เปลี่ยนเป็นกระจกดำรมควัน ผสมทองคำหรู (Luxury Dark Glass) */
     background: 
@@ -1081,7 +1087,10 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
 
     /* 🎀 ตกแต่งรูปทรงและเพิ่มเงามืดด้านหลังให้กล่องดูลอยเด่น */
     border-radius: 20px;          
-    padding: 15px 20px;            
+    
+    /* ⬆️ 2. ปรับ Padding บนและล่างให้กว้างขึ้น (เปลี่ยนจาก 15px เป็น 25px) */
+    padding: 25px 20px;            
+    
     margin: 15px;                  
     cursor: pointer;
   }
@@ -1148,12 +1157,21 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     background: linear-gradient(135deg, #fee479 0%, #e6c13b 100%); 
     color: #000000; /* ตัวหนังสือดำเข้มคมชัด */
     border: none;
-    padding: 9px 22px;
+    
+    /* ⬇️ 1. ปรับลด Padding ให้กล่องปุ่มเล็กลง (บน-ล่าง 6px, ซ้าย-ขวา 14px) */
+    padding: 6px 14px; 
+    
     border-radius: 20px;
-    font-size: 12px;
+    
+    /* ⬇️ 2. ปรับลดขนาดตัวอักษรให้เล็กลงกะทัดรัด */
+    font-size: 10px; 
+    
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    
+    /* ⬇️ 3. ปรับระยะห่างตัวอักษรนิดหน่อยให้พอดีกับปุ่มเล็ก */
+    letter-spacing: 0px; 
+    
     cursor: pointer;
     box-shadow: 0 4px 15px rgba(230, 193, 59, 0.3);
     transition: all 0.3s;
@@ -1168,8 +1186,8 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
   .champ-img-container {
     position: relative;
     z-index: 2;
-    width: 125px; 
-    height: 125px;
+    width: 140px;  
+    height: 140px;   
     margin-left: 15px; 
     flex-shrink: 0; 
   }
@@ -1179,8 +1197,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     height: 100%;
     border-radius: 50%;
     object-fit: cover;
-    border: 3px solid #fee479; 
-    /* 💛 เพิ่มเอฟเฟกต์ออร่าเรืองแสงสีทองรอบรูปแชมป์ให้ดูทรงพลัง */
+    border: 4px solid #fee479; 
     box-shadow: 0 0 25px rgba(254, 228, 121, 0.65), 0 4px 10px rgba(0,0,0,0.5); 
   }
 
@@ -1937,30 +1954,21 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
         width: 16px;
         border-radius: 4px;
     }
+
+    .main-content-container {
+      background: rgba(255, 255, 255, 0.92); 
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      margin: 0;                    /* เปลี่ยนเป็น 0 เพื่อให้ขยายชนขอบจอทุกด้าน ไม่เหลือช่องว่าง */
+      border-radius: 0;             /* เปลี่ยนเป็น 0 เอาขอบมนออก เพื่อให้เนียนไปกับหน้าจองับ */
+      width: 100%;                  /* บังคับความกว้างเต็มจอ 100% */
+      min-height: 100vh;            /* สูงอย่างน้อยเต็มหน้าจอ (ถ้าเนื้อหายาวก็เลื่อนลงได้เรื่อยๆ) */
+      box-sizing: border-box;       /* ป้องกันไม่ให้ padding ดันจนหน้าจอเกินขอบขวา */
+      padding: 20px 20px 25px 20px; 
+      border: none;
+      box-shadow: none;
+      }
     
-.main-content-container {
-  /* 🤍 ใช้สีขาวแบบโปร่งแสง เห็นสีสันพื้นหลังลอยจางๆ ละมุนเหมือนเดิม */
-  background: rgba(255, 255, 255, 0.92); 
-  
-  /* 🪄 เอฟเฟกต์เบลอภาพข้างหลังกล่อง (ฟีลกระจกฝ้า) */
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  
-  /* 🌟 [แก้ไขใหม่] ตั้งค่าให้ขยายเต็มจอพอดีเป๊ะ */
-  margin: 0;                    /* เปลี่ยนเป็น 0 เพื่อให้ขยายชนขอบจอทุกด้าน ไม่เหลือช่องว่าง */
-  border-radius: 0;             /* เปลี่ยนเป็น 0 เอาขอบมนออก เพื่อให้เนียนไปกับหน้าจองับ */
-  width: 100%;                  /* บังคับความกว้างเต็มจอ 100% */
-  min-height: 100vh;            /* สูงอย่างน้อยเต็มหน้าจอ (ถ้าเนื้อหายาวก็เลื่อนลงได้เรื่อยๆ) */
-  box-sizing: border-box;       /* ป้องกันไม่ให้ padding ดันจนหน้าจอเกินขอบขวา */
-  
-  /* 🎀 [แก้ไขใหม่] เพิ่มระยะห่างด้านใน (Padding) */
-  /* ปรับซ้าย-ขวาเป็น 20px เพื่อไม่ให้เนื้อหา, ข้อความ หรือแบนเนอร์ไปเบียดชิดขอบจอเกินไปงับ */
-  padding: 20px 20px 25px 20px; 
-  
-  /* ☁️ เอาเส้นขอบและเงาออก เพราะกล่องขยายติดขอบจอแล้ว ไม่จำเป็นต้องใช้แล้วงับ */
-  border: none;
-  box-shadow: none;
-}
   </style>
 </head>
 <body>
@@ -1988,7 +1996,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     <a href="post.html" id="btn-create-post" style="display: none; color: #ff85a2; font-size: 1.5rem; margin-right: 10px; text-decoration: none;">
         <i class="fas fa-plus-circle"></i> 
     </a>
-    <span class="logo-text">BLM48</span>
+    <span class="logo-text">Discover</span>
 </div>
   
   <div class="nav-btns">
@@ -2105,7 +2113,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     </div>
     
     <div id="bannerCounterContainer" style="position: absolute; bottom: 12px; right: 15px; z-index: 10; background: rgba(0, 0, 0, 0.45); color: #ffffff; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; font-family: sans-serif; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); letter-spacing: 0.5px;">
-        01/03
+        01|03
     </div>
 </div>
 
@@ -2646,7 +2654,7 @@ function initBannerCounter() {
     const currentStr = String(currentIndex).padStart(2, '0');
     const totalStr = String(totalItems).padStart(2, '0');
     
-    counter.innerText = `${currentStr}/${totalStr}`;
+    counter.innerText = `${currentStr}|${totalStr}`;
   }
 
   // ให้ทำงานครั้งแรกทันทีที่โหลดหน้าเว็บ
