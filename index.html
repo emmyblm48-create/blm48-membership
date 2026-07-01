@@ -157,7 +157,7 @@
       width: 100%;
       max-width: 350px;
       aspect-ratio: 1.586 / 1; /* อัตราส่วนบัตรมาตรฐาน */
-      background-image: url('MEMBERSHIP.png');
+      background-image: url('https://lh3.googleusercontent.com/d/1rebp2F8vyP0nyvsEOFD9Nw2mPcRtVqtG=s1000');
       background-size: cover;
       background-position: center;
       border-radius: 15px;
@@ -1984,7 +1984,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
 </div>
 <div id="splash-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: #000; display: none; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.5s ease; opacity: 1;">
     <!-- ดึงรูปภาพกางเต็มจอ 100% สัดส่วนไม่เพี้ยนด้วย object-fit: cover -->
-    <img id="main-splash" src="images/default-splash.jpg" style="width: 100%; height: 100%; object-fit: cover;">
+    <img id="main-splash" src="https://lh3.googleusercontent.com/d/1nvKkrs0bjgR8YAL8VKLDIxooRUtSekcb=s1000" style="width: 100%; height: 100%; object-fit: cover;">
 </div>
 
 <!-- Overlay สำหรับปิด Sidebar -->
@@ -2057,7 +2057,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
 
 <div class="ranking-wrapper" style="position: relative; overflow: hidden;">
   
-  <div class="bg-decorations">
+  <div id="bg-decorations" class="bg-decorations">
   <i class="fa-solid fa-crown decor-item d1-1"></i>
   <i class="fa-solid fa-crown decor-item d1-2"></i>
   <i class="fa-solid fa-crown decor-item d1-3"></i>
@@ -2794,7 +2794,7 @@ async function fetchActiveCampaigns() {
       campaigns.forEach(campaign => {
         const id = campaign.CampaignID;
         const title = campaign.CampaignName;
-        const coverImg = campaign.CoverImage || "https://via.placeholder.com/260x135?text=No+Image";
+        const coverImg = campaign.CoverImage || "https://lh3.googleusercontent.com/d/1DMvowEnRuxYIUQFnb6paHJWYBHCALPCw=s1000";
         const totalAmount = campaign.TotalAmount || 0; 
         const currencyType = campaign.CurrencyType ? campaign.CurrencyType.trim() : "token";
 
@@ -3053,7 +3053,7 @@ function renderGlobalFans(rawData) {
         margin-left: -6px; background: white;
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
       `;
-      miniAvatar.onerror = function() { this.src = 'https://via.placeholder.com/150'; };
+      miniAvatar.onerror = function() { this.src = 'https://lh3.googleusercontent.com/d/1rebp2F8vyP0nyvsEOFD9Nw2mPcRtVqtG=s1000'; };
       previewZone.appendChild(miniAvatar);
     });
   }
@@ -3080,7 +3080,7 @@ function renderGlobalFans(rawData) {
         box-shadow: 0 2px 5px rgba(0,0,0,0.1); white-space: nowrap;">
         ${isTop3 ? rankIcon + ' ' : ''}อันดับ ${i + 1}
       </div>
-      <img src="${getImg(f.img)}" style="width:65px; height:65px; border-radius:50%; border:3px solid #fef5f7; margin-top:5px; object-fit:cover;" onerror="this.src='https://via.placeholder.com/150'">
+      <img src="${getImg(f.img)}" style="width:65px; height:65px; border-radius:50%; border:3px solid #fef5f7; margin-top:5px; object-fit:cover;" onerror="this.src='https://lh3.googleusercontent.com/d/1rebp2F8vyP0nyvsEOFD9Nw2mPcRtVqtG=s1000'">
       <div style="font-weight:700; font-size:14px; color:#444; margin-top:8px; white-space: nowrap; overflow:hidden; text-overflow:ellipsis;">
         ${f.name || f.username}
       </div>
@@ -3318,7 +3318,7 @@ function renderPost(post) {
   const currentUser = getUserSession();
   const canManage = hasManagementPermission(post.authorUsername);
 
-  const authorProfileImg = post.profile_img || 'https://via.placeholder.com/40';
+  const authorProfileImg = post.profile_img || 'https://lh3.googleusercontent.com/d/1rebp2F8vyP0nyvsEOFD9Nw2mPcRtVqtG=s1000';
   const authorName = escapeHtml(post.authorName || 'Anonymous Member');
 
   // แปลงวันที่ให้เป็นภาษาไทย
@@ -3852,37 +3852,31 @@ function closeImageViewer() {
   document.getElementById('image-viewer-modal').style.display = 'none';
 }
   
-  (function() {
+(function() {
     const container = document.getElementById('autoBannerContainer');
+    if (!container) return; // 🛡️ ดักไว้เผื่อหน้าไหนไม่มีสไลเดอร์จะได้ไม่พัง
+
     const items = container.querySelectorAll('.auto-banner-item');
-    const dotsContainer = document.getElementById('bannerDotsContainer');
+    const counterContainer = document.getElementById('bannerCounterContainer'); // 👈 เปลี่ยนมาดึงกล่องตัวเลขแทน
     const totalBanners = items.length;
     let currentIndex = 0;
     let autoSlideTimer;
 
     if (totalBanners === 0) return;
 
-    // 1. สร้างจุดไข่ปลาบอกตำแหน่งข้างล่างแบบไดนามิกตามจริง
-    items.forEach((_, idx) => {
-        const dot = document.createElement('div');
-        dot.className = `banner-dot ${idx === 0 ? 'active' : ''}`;
-        dotsContainer.appendChild(dot);
-    });
-
-    const dots = dotsContainer.querySelectorAll('.banner-dot');
-
-    // 2. ฟังก์ชันช่วยปรับความสว่างของจุดให้ตรงกับแผ่นปัจจุบัน
-    function updateDots(index) {
-        dots.forEach((dot, idx) => {
-            if (idx === index) {
-                dot.classList.add('active');
-            } else {
-                dot.classList.remove('active');
-            }
-        });
+    // 1. ฟังก์ชันอัปเดตตัวเลขบอกหน้า (เช่น 01|03)
+    function updateCounter(index) {
+        if (counterContainer) {
+            const currentStr = String(index + 1).padStart(2, '0'); // เติม 0 ข้างหน้าให้เป็น 01, 02
+            const totalStr = String(totalBanners).padStart(2, '0');
+            counterContainer.innerText = `${currentStr}|${totalStr}`;
+        }
     }
 
-    // 3. ฟังก์ชันสั่งเลื่อนหน้าสไลด์ถัดไป
+    // เรียกอัปเดตครั้งแรกตอนเปิดหน้าเว็บ
+    updateCounter(currentIndex);
+
+    // 2. ฟังก์ชันสั่งเลื่อนหน้าสไลด์ถัดไป
     function slideNext() {
         if (totalBanners <= 1) return;
         currentIndex = (currentIndex + 1) % totalBanners;
@@ -3892,29 +3886,29 @@ function closeImageViewer() {
             left: currentIndex * slideWidth,
             behavior: 'smooth'
         });
-        updateDots(currentIndex);
+        updateCounter(currentIndex); // 👈 อัปเดตตัวเลขเมื่อเปลี่ยนหน้า
     }
 
-    // 4. สั่งให้ระบบเริ่มนับเวลาเลื่อนอัตโนมัติ (สไลด์ทุกๆ 3.5 วินาที)
+    // 3. สั่งให้ระบบเริ่มนับเวลาเลื่อนอัตโนมัติ (สไลด์ทุกๆ 3.5 วินาที)
     function startAutoSlide() {
         autoSlideTimer = setInterval(slideNext, 3500);
     }
 
     startAutoSlide();
 
-    // 5. ระบบตรวจจับความเคลื่อนไหวเวลามีคนเอานิ้วมาปัด (Scroll)
+    // 4. ระบบตรวจจับความเคลื่อนไหวเวลามีคนเอานิ้วมาปัด (Scroll)
     container.addEventListener('scroll', () => {
         const slideWidth = container.clientWidth;
         if (slideWidth > 0) {
             const scrolledIndex = Math.round(container.scrollLeft / slideWidth);
             if (scrolledIndex !== currentIndex && scrolledIndex < totalBanners) {
                 currentIndex = scrolledIndex;
-                updateDots(currentIndex);
+                updateCounter(currentIndex); // 👈 อัปเดตตัวเลขเมื่อเอานิ้วปัด
             }
         }
     });
 
-    // 6. ฟังก์ชันเคลียร์ไทม์เมอร์เมื่อผู้ใช้สัมผัสหน้าจอ และนับต่อทันทีเมื่อปล่อยมือ
+    // 5. ฟังก์ชันเคลียร์ไทม์เมอร์เมื่อผู้ใช้สัมผัสหน้าจอ
     const clearTimer = () => clearInterval(autoSlideTimer);
     const resetTimer = () => {
         clearInterval(autoSlideTimer); 
@@ -4059,7 +4053,7 @@ function setupUserProfile(user) {
   function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
 
    function getImg(url) {
-    if (!url) return 'https://via.placeholder.com/150';
+    if (!url) return 'https://lh3.googleusercontent.com/d/1rebp2F8vyP0nyvsEOFD9Nw2mPcRtVqtG=s1000';
 
     if (url.includes('drive.google.com')) {
       const match = url.match(/[-\w]{25,}/);
@@ -4395,7 +4389,7 @@ document.addEventListener("DOMContentLoaded", () => {
         username: currentUser.username,
         name: currentUser.name || currentUser.username || 'Anonymous',
         role: currentUser.role || 'user',
-        profile_img: currentUser.profile_img || 'https://via.placeholder.com/40?text=🌸',
+        profile_img: currentUser.profile_img || 'https://lh3.googleusercontent.com/d/1rebp2F8vyP0nyvsEOFD9Nw2mPcRtVqtG=s1000',
         text: commentText,
         timestamp: Date.now()
       };
@@ -4512,7 +4506,7 @@ document.addEventListener("DOMContentLoaded", () => {
   </a>
 
   <a href="profile.html" class="tab-item">
-    <img id="tab-profile-img" src="https://via.placeholder.com/30" style="border-radius: 50%; object-fit: cover; border: 2px solid #ffb3c1;">
+    <img id="tab-profile-img" src="https://lh3.googleusercontent.com/d/1rebp2F8vyP0nyvsEOFD9Nw2mPcRtVqtG=s1000" style="border-radius: 50%; object-fit: cover; border: 2px solid #ffb3c1;">
   </a>
 
 </div>
