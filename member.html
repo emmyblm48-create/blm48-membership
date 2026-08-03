@@ -18,6 +18,8 @@
     <meta http-equiv="Expires" content="0">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase-client.js"></script>
   
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
@@ -659,8 +661,16 @@
         const res = await resp.json();
         if (res.status === "success") {
           user = res.data;
-          saveUserSession(user); 
-          updateButtonStyles(); 
+          // token/cookie/geToken now live in Supabase (updated on every transaction),
+          // so overlay the live numbers instead of trusting the Sheets snapshot above.
+          const wallet = await blm48GetWallet(user.username);
+          if (wallet && wallet.token !== undefined) {
+            user.token = wallet.token;
+            user.cookie = wallet.cookie;
+            user.geToken = wallet.geToken;
+          }
+          saveUserSession(user);
+          updateButtonStyles();
         }
       } catch (e) { console.error("Sync Error:", e); }
     }
@@ -759,7 +769,7 @@ function renderMemberStatsAndFans() {
           title: 'กรุณาเข้าสู่ระบบ',
           text: 'คุณต้องเข้าสู่ระบบก่อนจึงจะร่วมกิจกรรมกับเมมเบอร์ได้ค่ะ 🌸',
           icon: 'warning',
-          confirmButtonColor: '#ff85a2',
+          confirmButtonColor: 'var(--blmem-pink)',
           confirmButtonText: 'รับทราบ'
         });
         return false;
@@ -1024,7 +1034,7 @@ function renderMemberStatsAndFans() {
 
       const finalConfirm = await Swal.fire({
         title: subTitle, text: confirmText, icon: 'question', showCancelButton: true,
-        confirmButtonColor: '#ff85a2', cancelButtonColor: '#aaa', confirmButtonText: 'ตกลง', cancelButtonText: 'ยกเลิก'
+        confirmButtonColor: 'var(--blmem-pink)', cancelButtonColor: '#aaa', confirmButtonText: 'ตกลง', cancelButtonText: 'ยกเลิก'
       });
 
       if (!finalConfirm.isConfirmed) return;
@@ -1105,7 +1115,7 @@ function renderMemberStatsAndFans() {
       if (!checkLoginStatus()) return;
 
       if (!user || !user.role || user.role.toLowerCase() !== 'user') {
-        Swal.fire({ title: 'คำเตือน', text: 'คุณไม่สามารถปาคุกกี้ได้ เนื่องจากคุณเป็นเมมเบอร์หรือแอดมิน', icon: 'error', confirmButtonColor: '#ff85a2' });
+        Swal.fire({ title: 'คำเตือน', text: 'คุณไม่สามารถปาคุกกี้ได้ เนื่องจากคุณเป็นเมมเบอร์หรือแอดมิน', icon: 'error', confirmButtonColor: 'var(--blmem-pink)' });
         return;
       }
 
@@ -1115,7 +1125,7 @@ function renderMemberStatsAndFans() {
           title: 'GRADUATED', 
           text: 'เมมเบอร์คนนี้จบการศึกษาแล้ว ไม่สามารถส่งคุกกี้ให้ได้ แต่ยังสนับสนุนด้วยการกดเป็น Oshi หรือ Kami ได้อยู่ค่ะ!', 
           icon: 'info', 
-          confirmButtonColor: '#ff85a2' 
+          confirmButtonColor: 'var(--blmem-pink)' 
         });
         return;
       }
@@ -1126,7 +1136,7 @@ function renderMemberStatsAndFans() {
         title: `ปาคุกกี้ให้ ${escapeHtml(memberName)}`,
         html: `<p style="font-size:13px; color:#888; margin-bottom:10px;">คุณมีคุกกี้ทั้งหมด: <b>${userCookies.toLocaleString()}</b> ชิ้น</p>`,
         input: 'number', inputPlaceholder: 'กรอกจำนวนคุกกี้ที่ต้องการส่ง', showCancelButton: true,
-        confirmButtonColor: '#ff85a2', confirmButtonText: 'ส่งคุกกี้', cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: 'var(--blmem-pink)', confirmButtonText: 'ส่งคุกกี้', cancelButtonText: 'ยกเลิก',
         inputValidator: (value) => {
           if (!value || parseInt(value) <= 0) { return 'กรุณาระบุจำนวนคุกกี้ที่ถูกต้องด้วยงับ!'; }
           if (parseInt(value) > userCookies) { return `คุกกี้ไม่พอค่ะ! คุณมีคุกกี้เหลือแค่ ${userCookies.toLocaleString()} ชิ้นเท่านั้น`; }
@@ -1164,11 +1174,7 @@ function renderMemberStatsAndFans() {
           // 🚀 2. แอบส่งข้อมูลเงียบๆ เบื้องหลัง
           // ==========================================
           try {
-            const resp = await fetch(scriptURL, {
-              method: 'POST',
-              body: JSON.stringify({ action: 'giveCookie', username: user.username, memberName: memberName, amount: amountSent })
-            });
-            const res = await resp.json();
+            const res = await blm48GiveCookie(user.username, memberName, amountSent);
 
             if (res.status === "success") {
               syncUserData(); 
@@ -1222,6 +1228,49 @@ function formatThaiDate(dateStr) {
         return user.username === postAuthorUsername;
     }
 
+// 🖼️ สร้าง HTML แกลเลอรี่รูปภาพของโพสต์ (แยกออกมาให้เรียกซ้ำได้ตอนแก้ไขรูปในโพสต์แบบสด ๆ โดยไม่ต้องรีเฟรชทั้งโพสต์)
+function buildImagesHtml(displayImage) {
+  if (!displayImage) return '';
+  const imageUrls = displayImage.split(',').map(url => url.trim()).filter(url => url);
+  if (imageUrls.length === 0) return '';
+
+  const visibleImages = imageUrls.slice(0, 4);
+  let imagesHtml = '';
+
+  if (imageUrls.length === 1) {
+    imagesHtml += `
+      <div class="post-gallery-single" style="margin-top: 10px; width: 100%;">
+        <img src="${imageUrls[0]}" onclick="openImageViewer(0, ['${imageUrls[0]}'])" style="width: 100%; max-height: 450px; object-fit: cover; border-radius: 12px; cursor: pointer; display: block; margin: 0 auto;">
+      </div>
+    `;
+  } else if (imageUrls.length === 3) {
+    // 🖼️ เลย์เอาต์พิเศษสำหรับ 3 รูปพอดี: รูปแรกใหญ่ด้านบน อีก 2 รูปเรียงคู่ด้านล่าง (กริดสวยงามไม่มีช่องว่าง)
+    const allUrlsJs = imageUrls.map(u => `'${u}'`).join(',');
+    imagesHtml += `<div class="post-gallery post-gallery-3" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px;">`;
+    imagesHtml += `<div style="grid-column: 1 / span 2; position: relative; aspect-ratio: 16 / 10;">
+      <img src="${imageUrls[0]}" onclick="openImageViewer(0, [${allUrlsJs}])" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px !important; cursor: pointer;">
+    </div>`;
+    [1, 2].forEach(index => {
+      imagesHtml += `<div style="position: relative; aspect-ratio: 1 / 1;">
+        <img src="${imageUrls[index]}" onclick="openImageViewer(${index}, [${allUrlsJs}])" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px !important; cursor: pointer;">
+      </div>`;
+    });
+    imagesHtml += `</div>`;
+  } else {
+    imagesHtml += `<div class="post-gallery" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px;">`;
+    visibleImages.forEach((url, index) => {
+      imagesHtml += `<div style="position: relative; aspect-ratio: 1 / 1;">`;
+      imagesHtml += `<img src="${url}" onclick="openImageViewer(${index}, [${imageUrls.map(u => `'${u}'`).join(',')}])" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px !important; cursor: pointer;">`;
+      if (index === 3 && imageUrls.length > 4) {
+        imagesHtml += `<div onclick="openImageViewer(${index}, [${imageUrls.map(u => `'${u}'`).join(',')}])" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); border-radius: 12px !important; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold; font-size: 1.5rem; cursor: pointer;">+${imageUrls.length - 4}</div>`;
+      }
+      imagesHtml += `</div>`;
+    });
+    imagesHtml += `</div>`;
+  }
+  return imagesHtml;
+}
+
 function renderPost(post) {
   if (!post) return '';
 
@@ -1230,7 +1279,7 @@ function renderPost(post) {
 
   const authorProfileImg = post.profile_img || 'https://via.placeholder.com/40';
   const authorName = escapeHtml(post.authorName || 'Anonymous Member');
-  
+
   // [ข้อที่ 1] แปลงวันที่ให้เป็นภาษาไทยสวยงาม
   const rawDate = post.timestamp || post.date || 'เมื่อสักครู่';
   const postTimestamp = escapeHtml(rawDate !== 'เมื่อสักครู่' ? formatThaiDate(rawDate) : rawDate);
@@ -1301,7 +1350,7 @@ function renderPost(post) {
     // 🔇 ฟีเจอร์แนบเสียงพูดถูกปิดให้บริการแล้ว โพสเก่าที่เคยมีเสียงแนบเลยแสดงคำเตือนน่ารักๆ แทนเครื่องเล่นเสียง
     mediaHtml += `
       <div style="margin-top: 12px; background: #fff5f7; border: 1px dashed #ffc0cb; border-radius: 16px; padding: 12px 16px; display: flex; align-items: center; gap: 10px; max-width: 400px;">
-        <i class="fa-solid fa-microphone-slash" style="color: #ff85a2; font-size: 1.1rem;"></i>
+        <i class="fa-solid fa-microphone-slash" style="color: var(--blmem-pink); font-size: 1.1rem;"></i>
         <span style="font-size: 0.8rem; color: #a68a90;">โพสนี้เคยมีข้อความเสียงแนบอยู่ แต่ตอนนี้ฟีเจอร์นี้ปิดให้บริการแล้วนะ 🙈</span>
       </div>
     `;
@@ -1315,30 +1364,7 @@ function renderPost(post) {
     `;
   }
 
-  let imagesHtml = '';
-  if (displayImage) {
-    const imageUrls = displayImage.split(',').map(url => url.trim()).filter(url => url);
-    const visibleImages = imageUrls.slice(0, 4);
-    
-    if (imageUrls.length === 1) {
-      imagesHtml += `
-        <div class="post-gallery-single" style="margin-top: 10px; width: 100%;">
-          <img src="${imageUrls[0]}" onclick="openImageViewer(0, ['${imageUrls[0]}'])" style="width: 100%; max-height: 450px; object-fit: cover; border-radius: 12px; cursor: pointer; display: block; margin: 0 auto;">
-        </div>
-      `;
-    } else {
-      imagesHtml += `<div class="post-gallery" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px;">`;
-      visibleImages.forEach((url, index) => {
-        imagesHtml += `<div style="position: relative; aspect-ratio: 1 / 1;">`;
-        imagesHtml += `<img src="${url}" onclick="openImageViewer(${index}, [${imageUrls.map(u => `'${u}'`).join(',')}])" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px !important; cursor: pointer;">`;
-        if (index === 3 && imageUrls.length > 4) {
-          imagesHtml += `<div onclick="openImageViewer(${index}, [${imageUrls.map(u => `'${u}'`).join(',')}])" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); border-radius: 12px !important; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold; font-size: 1.5rem; cursor: pointer;">+${imageUrls.length - 4}</div>`;
-        }
-        imagesHtml += `</div>`;
-      });
-      imagesHtml += `</div>`;
-    }
-  }
+  const imagesHtml = buildImagesHtml(displayImage);
 
   const actionMenu = canManage ? `
     <div class="post-menu-container">
@@ -1357,28 +1383,28 @@ function renderPost(post) {
   ` : '';
       
   return `
-    <div class="${postContainerClass}" id="post-${postId}" style="position: relative; border-radius: 15px; padding: 15px; margin-bottom: 20px; ${champCardStyle}">
+    <div class="${postContainerClass}" id="post-${postId}" data-images="${escapeAttr(displayImage)}" style="position: relative; border-radius: 15px; padding: 15px; margin-bottom: 20px; ${champCardStyle}">
       ${specialBadge}
       ${actionMenu}
-      
+
       <div class="post-header" style="display: flex; align-items: center; margin-bottom: 10px; margin-top: ${isChampPost ? '12px' : '0px'};">
         ${profileImgHtml}
         <div>
-          <b style="color: #ff85a2;">${authorName} ${isPostVerified}</b>
+          <b style="color: var(--blmem-pink);">${authorName} ${isPostVerified}</b>
           <div style="font-size: 0.8rem; color: gray;">
             ${postTimestamp} ${graduatedSubtext}
           </div>
         </div>
       </div>
-      
+
       <div class="post-body" style="margin-bottom: 15px;">
         <p id="content-${postId}" style="margin: 0; white-space: pre-wrap; word-break: break-word; overflow-wrap: break-word;">${postContent}</p>
-        ${imagesHtml}
+        <div id="post-images-${postId}">${imagesHtml}</div>
         ${mediaHtml}
       </div>
       
       <div class="post-actions" style="border-top: 1px solid #eee; padding-top: 10px; display: flex; gap: 15px;">
-        <button onclick="likePost('${postId}')" style="background: none; border: none; color: #ff85a2; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+        <button onclick="likePost('${postId}')" style="background: none; border: none; color: var(--blmem-pink); cursor: pointer; display: flex; align-items: center; gap: 6px;">
           <i class="${heartClass} fa-heart" id="heart-${postId}"></i> <span id="like-count-${postId}">${postLikes}</span>
         </button>
         <button onclick="toggleCommentSection('${postId}')" style="background: none; border: none; color: #555; cursor: pointer; display: flex; align-items: center; gap: 6px;">
@@ -1392,7 +1418,7 @@ function renderPost(post) {
         </div>
         <div class="comment-input-box" style="display: flex; gap: 8px;">
           <input type="text" id="comment-input-${postId}" placeholder="Write a comment..." style="flex: 1; border: 1px solid #ffccd7; border-radius: 20px; padding: 6px 14px; font-size: 0.85rem; outline: none;">
-          <button onclick="submitComment('${postId}', this)" style="background: #ff85a2; color: white; border: none; border-radius: 20px; padding: 0 14px; font-size: 0.85rem; cursor: pointer; font-weight: bold;">SEND</button>
+          <button onclick="submitComment('${postId}', this)" style="background: var(--blmem-pink); color: white; border: none; border-radius: 20px; padding: 0 14px; font-size: 0.85rem; cursor: pointer; font-weight: bold;">SEND</button>
         </div>
       </div>
     </div>
@@ -1510,7 +1536,7 @@ function renderPost(post) {
   } catch (error) {
     console.error("โหลดฟีดล้มเหลว:", error);
     if (!hasExistingPosts) {
-       container.innerHTML = '<div style="text-align: center; color: #ff85a2; font-size: 13px; padding: 20px 0;">โหลดโพสต์ไม่สำเร็จ ลองใหม่อีกครั้งนะคะ</div>';
+       container.innerHTML = '<div style="text-align: center; color: var(--blmem-pink); font-size: 13px; padding: 20px 0;">โหลดโพสต์ไม่สำเร็จ ลองใหม่อีกครั้งนะคะ</div>';
     }
   } finally {
     window.isTimelineLoading = false;
@@ -1545,7 +1571,7 @@ document.addEventListener('click', function() {
     async function deletePostUi(postId) {
       const result = await Swal.fire({
         title: 'ลบโพสต์นี้?', text: "ลบแล้วไม่สามารถกู้คืนได้นะงับ!", icon: 'warning',
-        showCancelButton: true, confirmButtonColor: '#ff85a2', cancelButtonColor: '#d33', confirmButtonText: 'ลบเลย!'
+        showCancelButton: true, confirmButtonColor: 'var(--blmem-pink)', cancelButtonColor: '#d33', confirmButtonText: 'ลบเลย!'
       });
 
       if (result.isConfirmed) {
@@ -1570,32 +1596,90 @@ document.addEventListener('click', function() {
       }
     }
 
+    // 🖼️ รูปภาพที่กำลังแก้ไขอยู่ใน Modal แก้ไขโพสต์ (ลบ/สลับลำดับได้ก่อนกดบันทึก)
+    let __editPostImages = [];
+
+    function __renderEditPostImages() {
+      const container = document.getElementById('edit-post-img-list');
+      if (!container) return;
+
+      if (__editPostImages.length === 0) {
+        container.innerHTML = '<p style="color:#999; font-size:12px; margin:8px 0 0;">ไม่มีรูปภาพในโพสต์นี้</p>';
+        return;
+      }
+
+      container.innerHTML = __editPostImages.map((url, i) => `
+        <div style="position:relative; width:72px; height:72px; flex-shrink:0; margin-bottom:12px;">
+          <img src="${url}" style="width:100%; height:100%; object-fit:cover; border-radius:8px; border:1px solid #eee;">
+          <button type="button" onclick="__editPostRemoveImg(${i})" title="ลบรูปนี้" style="position:absolute; top:-6px; right:-6px; width:20px; height:20px; border-radius:50%; background:#ff4757; color:#fff; border:none; font-size:11px; line-height:1; cursor:pointer;">✕</button>
+          <div style="position:absolute; bottom:-10px; left:0; right:0; display:flex; justify-content:center; gap:3px;">
+            <button type="button" onclick="__editPostMoveImg(${i},-1)" ${i === 0 ? 'disabled' : ''} style="width:18px; height:18px; border-radius:50%; border:1px solid #ddd; background:#fff; font-size:9px; cursor:pointer; ${i === 0 ? 'opacity:0.3;' : ''}">◀</button>
+            <button type="button" onclick="__editPostMoveImg(${i},1)" ${i === __editPostImages.length - 1 ? 'disabled' : ''} style="width:18px; height:18px; border-radius:50%; border:1px solid #ddd; background:#fff; font-size:9px; cursor:pointer; ${i === __editPostImages.length - 1 ? 'opacity:0.3;' : ''}">▶</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    window.__editPostRemoveImg = function(index) {
+      __editPostImages.splice(index, 1);
+      __renderEditPostImages();
+    };
+
+    window.__editPostMoveImg = function(index, direction) {
+      const newIndex = index + direction;
+      if (newIndex < 0 || newIndex >= __editPostImages.length) return;
+      const [moved] = __editPostImages.splice(index, 1);
+      __editPostImages.splice(newIndex, 0, moved);
+      __renderEditPostImages();
+    };
+
     async function editPostUi(postId, encodedContent) {
       const oldContent = decodeURIComponent(encodedContent);
-      const { value: newText } = await Swal.fire({
-        title: 'แก้ไขโพสต์', input: 'textarea', inputValue: oldContent,
-        showCancelButton: true, confirmButtonColor: '#ff85a2', cancelButtonColor: 'gray'
+      const postEl = document.getElementById(`post-${postId}`);
+      const oldImageUrl = postEl ? (postEl.dataset.images || '') : '';
+      __editPostImages = oldImageUrl.split(',').map(s => s.trim()).filter(Boolean);
+
+      const { value: formValues } = await Swal.fire({
+        title: 'แก้ไขโพสต์',
+        html: `
+          <textarea id="swal-edit-content" class="swal2-textarea" style="margin-top:0;">${escapeHtml(oldContent)}</textarea>
+          <div id="edit-post-img-list" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; text-align:left;"></div>
+        `,
+        didOpen: () => { __renderEditPostImages(); },
+        showCancelButton: true,
+        confirmButtonColor: 'var(--blmem-pink)',
+        cancelButtonColor: 'gray',
+        focusConfirm: false,
+        preConfirm: () => document.getElementById('swal-edit-content').value
       });
 
-      if (newText && newText !== oldContent) {
-        const currentUser = getUserSession();
-        if (!currentUser) {
-          Swal.fire('กรุณาเข้าสู่ระบบ', 'เซสชันหมดอายุแล้ว กรุณาเข้าสู่ระบบใหม่ค่ะ', 'warning');
-          return;
-        }
-        const userRole = currentUser.role || "";
-        try {
-          const response = await fetch(`${scriptURL}?action=editPost&postId=${postId}&username=${encodeURIComponent(currentUser.username)}&role=${encodeURIComponent(userRole)}&newContent=${encodeURIComponent(newText)}`);
-          const data = await response.json();
-          if (data.status === 'success') {
-            const contentEl = document.getElementById(`content-${postId}`);
-            if (contentEl) contentEl.innerText = newText;
-            Swal.fire('สำเร็จ!', 'อัปเดตข้อความเรียบร้อย', 'success');
-          } else { Swal.fire('เอ๊ะ!', 'เกิดข้อผิดพลาด หรือคุณไม่มีสิทธิ์ในการแก้ไขโพสต์นี้', 'error'); }
-        } catch (e) {
-          console.error("Edit Post Error:", e);
-          Swal.fire('Error', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ค่ะ', 'error');
-        }
+      if (typeof formValues === 'undefined') return; // กดยกเลิก
+
+      const newText = formValues;
+      const newImageUrl = __editPostImages.join(',');
+
+      if (newText === oldContent && newImageUrl === oldImageUrl) return; // ไม่มีอะไรเปลี่ยน ไม่ต้องยิง request
+
+      const currentUser = getUserSession();
+      if (!currentUser) {
+        Swal.fire('กรุณาเข้าสู่ระบบ', 'เซสชันหมดอายุแล้ว กรุณาเข้าสู่ระบบใหม่ค่ะ', 'warning');
+        return;
+      }
+      const userRole = currentUser.role || "";
+      try {
+        const response = await fetch(`${scriptURL}?action=editPost&postId=${postId}&username=${encodeURIComponent(currentUser.username)}&role=${encodeURIComponent(userRole)}&newContent=${encodeURIComponent(newText)}&newImageUrl=${encodeURIComponent(newImageUrl)}`);
+        const data = await response.json();
+        if (data.status === 'success') {
+          const contentEl = document.getElementById(`content-${postId}`);
+          if (contentEl) contentEl.innerText = newText;
+          if (postEl) postEl.dataset.images = newImageUrl;
+          const imagesContainer = document.getElementById(`post-images-${postId}`);
+          if (imagesContainer) imagesContainer.innerHTML = buildImagesHtml(newImageUrl);
+          Swal.fire('สำเร็จ!', 'อัปเดตโพสต์เรียบร้อย', 'success');
+        } else { Swal.fire('เอ๊ะ!', 'เกิดข้อผิดพลาด หรือคุณไม่มีสิทธิ์ในการแก้ไขโพสต์นี้', 'error'); }
+      } catch (e) {
+        console.error("Edit Post Error:", e);
+        Swal.fire('Error', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ค่ะ', 'error');
       }
     }
 
@@ -1665,7 +1749,7 @@ document.addEventListener('click', function() {
   window.likePost = async function(postId) {
     const currentUser = getUserSession();
     if (!currentUser || !currentUser.username) {
-      Swal.fire({ icon: 'warning', title: 'ไม่พบผู้ใช้งาน', text: 'กรุณาล็อกอินก่อนงับ', confirmButtonColor: '#ff85a2' });
+      Swal.fire({ icon: 'warning', title: 'ไม่พบผู้ใช้งาน', text: 'กรุณาล็อกอินก่อนงับ', confirmButtonColor: 'var(--blmem-pink)' });
       return;
     }
     const likeSpan = document.getElementById(`like-count-${postId}`);
@@ -1722,8 +1806,8 @@ document.addEventListener('click', function() {
             <img src="${escapeHtml(cmt.profile_img)}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 1px solid #ffe3e8;">
             <div style="font-size: 0.88rem; width: 100%;">
               <div style="display: flex; align-items: center; gap: 4px;">
-                <b style="color: #ff85a2;">${escapeHtml(cmt.name)}</b> ${isCmtVerified}
-                <span class="role-badge" style="font-size: 8px; padding: 1px 4px; background: #ffe4e8; color: #ff85a2; border-radius: 4px; margin-left: auto;">${escapeHtml(cmt.role || 'user')}</span>
+                <b style="color: var(--blmem-pink);">${escapeHtml(cmt.name)}</b> ${isCmtVerified}
+                <span class="role-badge" style="font-size: 8px; padding: 1px 4px; background: #ffe4e8; color: var(--blmem-pink); border-radius: 4px; margin-left: auto;">${escapeHtml(cmt.role || 'user')}</span>
               </div>
               <div style="color: #333; word-break: break-word; overflow-wrap: break-word; margin-top: 2px;">${escapeHtml(cmt.text)}</div>
             </div>

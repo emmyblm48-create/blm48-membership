@@ -985,14 +985,21 @@ function doGet(e) {
     }
 
     if (action === "getTickets") {
-        return getTicketsData();
+        return withCache('getTickets', 15, getTicketsData);
       }
-      
+
       // ✨ ปรับปรุงบล็อก buyTicket: ส่งค่าตรงๆ ป้องกันการชนกับตัวแปร const
+      // 🔒 ใส่ Lock กันคนกดซื้อบัตรพร้อมกันหลายคนแล้วสต็อกเพี้ยน (Overselling)
       if (action === "buyTicket") {
         var ticketId = e.parameter.ticketId;
         var benefitTier = e.parameter.benefitTier;
-        return buyTicketProcess(e.parameter.username, ticketId, benefitTier);
+        const ticketLock = LockService.getScriptLock();
+        ticketLock.waitLock(10000);
+        try {
+          return buyTicketProcess(e.parameter.username, ticketId, benefitTier);
+        } finally {
+          ticketLock.releaseLock();
+        }
       }
 
       // ✨ ปรับปรุงบล็อก getInventory: ส่งค่าตรงๆ เช่นกัน
@@ -1004,15 +1011,16 @@ function doGet(e) {
     // 🎨 [เวอร์ชันแพ็กเกจคู่] ACTION: ดึงข้อมูลธีมผู้ชนะ และรูป Splash วันเกิด 
     // =========================================================================
     if (action === "getWinnerTheme") {
+      return withCache('getWinnerTheme', 60, function() {
       const memberSheet = SS.getSheetByName("members");
       if (!memberSheet) return jsonResponse({ success: false, message: "หาชีทชื่อ 'members' ไม่เจอ" });
       const memberRows = memberSheet.getDataRange().getValues();
-      
+
       // 🏆 1. ดึงข้อมูลธีมแชมป์ (เพื่อเอาไอคอนมาใช้เสมอ)
       const champSheet = SS.getSheetByName("champofthemonth");
       const champRows = champSheet ? champSheet.getDataRange().getValues() : [];
       const winnerName = champRows.length > 1 && champRows[champRows.length - 1][1] ? champRows[champRows.length - 1][1].toString().trim() : "";
-      
+
       let champTheme = { name: "", splash: "", homeIcon: "", kamiIcon: "", cartIcon: "", notiIcon: "" };
       if (winnerName) {
         for (let i = 1; i < memberRows.length; i++) {
@@ -1035,13 +1043,13 @@ function doGet(e) {
       // 🇹🇭 บังคับให้เช็ก "วันนี้" อิงตามไทม์โซนประเทศไทย (Asia/Bangkok) ไม่ใช่โซนเวลาของเซิร์ฟเวอร์สคริปต์
       const birthdayColIndex = 17; // คอลัมน์ R (วันเกิด)
       const today = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
-      let birthdaySplash = ""; 
+      let birthdaySplash = "";
       let birthdayBanner = ""; // 📌 เพิ่มตัวแปรสำหรับรับ Banner HBD
-      
+
       for (let i = 1; i < memberRows.length; i++) {
         const bData = memberRows[i][birthdayColIndex];
         if (!bData) continue;
-        
+
         let isBirthday = false;
         if (bData instanceof Date) {
           if (bData.getDate() === today.getDate() && (bData.getMonth() + 1) === (today.getMonth() + 1)) isBirthday = true;
@@ -1051,11 +1059,11 @@ function doGet(e) {
           const currentShortDate2 = (today.getDate() < 10 ? "0" + today.getDate() : today.getDate()) + "/" + ((today.getMonth() + 1) < 10 ? "0" + (today.getMonth() + 1) : (today.getMonth() + 1));
           if (bStr.includes(currentShortDate1) || bStr.includes(currentShortDate2)) isBirthday = true;
         }
-        
+
         if (isBirthday) {
           birthdaySplash = memberRows[i][18] ? memberRows[i][18].toString().trim() : ""; // คอลัมน์ S (Splash)
           birthdayBanner = memberRows[i][19] ? memberRows[i][19].toString().trim() : ""; // 📌 คอลัมน์ T (Banner) ดึง Index ที่ 19
-          break; 
+          break;
         }
       }
 
@@ -1065,6 +1073,7 @@ function doGet(e) {
         champ: champTheme,
         birthdaySplash: birthdaySplash, // ถ้าไม่มีใครเกิด จะเป็นค่าว่าง ""
         birthdayBanner: birthdayBanner  // 📌 ส่ง Banner กลับไปด้วย
+      });
       });
     }
 
@@ -1160,6 +1169,10 @@ function doGet(e) {
  // ❤️ 2. ACTION: กดไลก์
    else if (action === 'likePost') {
       const postId = e.parameter.postId;
+      // 🔒 ใส่ Lock กันคนกดไลก์พร้อมกันหลายคนแล้วยอดไลก์/คุกกี้ในการจัดอันดับเพี้ยน (Race Condition)
+      const likeLock = LockService.getScriptLock();
+      likeLock.waitLock(10000);
+      try {
       const likeSheet = SS.getSheetByName('Likes');
       const postSheet = SS.getSheetByName('Posts');
       const likeData = likeSheet.getDataRange().getValues();
@@ -1194,11 +1207,11 @@ function doGet(e) {
           }
       }
 
-      // 🌟 [ส่วนเพิ่มใหม่] ตรวจสอบและบันทึกคะแนนคุกกี้ลงชีต ranking ตามเดือน
+      // 🌟 ตรวจสอบและบันทึกคะแนนคุกกี้ลง ranking_monthly บน Supabase ตามเดือนของโพสต์
+      // (ย้ายจากการเขียนลงชีต ranking ตรงๆ มาเป็นแหล่งเดียวกับ give_cookie เพื่อไม่ให้ยอดแยกกันสองที่)
       if (authorUsername && postTimestampStr) {
         const userSheet = SS.getSheetByName('users');
-        const rankingSheet = SS.getSheetByName('ranking');
-        
+
         // A. ค้นหาชื่อเมมเบอร์จากชีต users (เช็คคอลัมน์ A ตรงกับคอลัมน์ C)
         const userData = userSheet.getDataRange().getValues();
         let memberName = "";
@@ -1209,68 +1222,59 @@ function doGet(e) {
           }
         }
 
-        // B. ถ้าพบชื่อเมมเบอร์ ให้ดำเนินการเช็คเดือนและอัปเดตชีต ranking
         if (memberName) {
-          // ดึงชื่อเดือนภาษาอังกฤษจาก Timestamp ของโพสต์ เพื่อเอาไปหาคอลัมน์ในบรรทัดแรก
-          // 🇹🇭 บังคับให้อิงเดือนตามไทม์โซนประเทศไทย (Asia/Bangkok) กันโพสต์ใกล้เที่ยงคืนตกไปคนละเดือน
+          // 🇹🇭 บังคับให้อิงเดือน/ปีตามไทม์โซนประเทศไทย (Asia/Bangkok) กันโพสต์ใกล้เที่ยงคืนตกไปคนละเดือน
           const postDate = new Date(new Date(postTimestampStr).toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
-          const months = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
-          const targetMonth = months[postDate.getMonth()];
+          const postYearMonth = Utilities.formatDate(postDate, "Asia/Bangkok", "yyyy-MM");
 
-          const rankingData = rankingSheet.getDataRange().getValues();
-          const headerRow = rankingData[0]; // แถวแรกของชีต ranking
-          
-          // ค้นหาตำแหน่งคอลัมน์ของเดือน (รองรับกรณีตัวอักษรพิมพ์เล็ก-ใหญ่ หรือมีเว้นวรรค เช่น "January ")
-          let targetColIdx = -1;
-          for (let c = 0; c < headerRow.length; c++) {
-            if (String(headerRow[c]).toLowerCase().trim() === targetMonth) {
-              targetColIdx = c + 1; // แปลงเป็น Base-1 สำหรับ getRange
-              break;
-            }
-          }
-
-          // ค้นหาแถวของเมมเบอร์คนนั้นในคอลัมน์ B (name)
-          let targetRowIdx = -1;
-          for (let r = 1; r < rankingData.length; r++) {
-            if (String(rankingData[r][1]).trim() === String(memberName).trim()) { // คอลัมน์ B: name
-              targetRowIdx = r + 1; // แปลงเป็น Base-1 สำหรับ getRange
-              break;
-            }
-          }
-
-          // C. เมื่อเจอตำแหน่งทั้ง แถว และ คอลัมน์ แล้ว ให้คำนวณแต้มคุกกี้
-          if (targetRowIdx > -1 && targetColIdx > -1) {
-            const cell = rankingSheet.getRange(targetRowIdx, targetColIdx);
-            const currentCookies = Number(cell.getValue()) || 0;
-            
-            // เงื่อนไข: 1 ไลก์ = 9 คุกกี้ (ถ้ากดไลก์บวก 9, ถอนไลก์ลบออก 9)
-            const cookieChange = isNowLiked ? 9 : -9;
-            
-            // ทำการบันทึกค่าใหม่ทับช่องเดิม โดยไม่กระทบกับคะแนนคุกกี้อื่นๆ ในระบบ
-            cell.setValue(currentCookies + cookieChange);
-          }
+          // เงื่อนไข: 1 ไลก์ = 9 คุกกี้ (ถ้ากดไลก์บวก 9, ถอนไลก์ลบออก 9)
+          const cookieChange = isNowLiked ? 9 : -9;
+          bumpRankingInSupabase_(memberName, postYearMonth, cookieChange);
         }
       }
 
       return jsonResponse({ status: "success", likes: totalLikes, isLiked: isNowLiked });
+      } finally {
+        likeLock.releaseLock();
+      }
     }
 
     else if (action === 'editPost') {
         const postId = e.parameter.postId;
         const reqUsername = e.parameter.username;
-        const reqUserRole = e.parameter.role; // รับ Role มาด้วย
         const newContent = e.parameter.newContent;
-        
+        // newImageUrl ถ้าไม่ส่งมาเลย (undefined) แปลว่าไม่แตะรูปภาพ ถ้าส่งมาเป็นค่าว่าง "" แปลว่าตั้งใจลบรูปทั้งหมด
+        const newImageUrl = e.parameter.newImageUrl;
+
+        // 🔒 ใส่ Lock กันแก้ไข/ลบโพสต์ชนกันตอนมีคนใช้งานพร้อมกันเยอะๆ (deleteRow เลื่อนตำแหน่งแถว ถ้าชนกันจะลบผิดแถวได้)
+        const editLock = LockService.getScriptLock();
+        editLock.waitLock(10000);
+        try {
+
+        // 🌟 ไม่ใช้ e.parameter.role จากหน้าบ้าน (แก้ไขให้เหมือน deletePost) แต่ไปหา Role จริงในชีต users กันมั่ว/ปลอมสิทธิ์
+        const userSheet = SS.getSheetByName('users');
+        const userData = userSheet.getDataRange().getValues();
+        let realRole = 'member';
+        for (let u = 1; u < userData.length; u++) {
+          if (userData[u][0] && userData[u][0].toString().trim() === reqUsername.toString().trim()) {
+            realRole = userData[u][3];
+            break;
+          }
+        }
+
         const postSheet = SS.getSheetByName('Posts');
         const postData = postSheet.getDataRange().getValues();
-        
+
         for (let i = 1; i < postData.length; i++) {
           const postAuthor = postData[i][1];
-          
+
           if (postData[i][0] == postId) {
             // เรียกใช้ฟังก์ชันเช็กสิทธิ์
-            if (canEditOrDelete({username: reqUsername, role: reqUserRole}, postAuthor)) {
+            if (canEditOrDelete({username: reqUsername, role: realRole}, postAuthor)) {
               postSheet.getRange(i + 1, 3).setValue(newContent);
+              if (typeof newImageUrl !== 'undefined') {
+                postSheet.getRange(i + 1, 4).setValue(newImageUrl);
+              }
               return jsonResponse({ status: "success", message: "Updated successfully" });
             } else {
               return jsonResponse({ status: "error", message: "Permission denied" });
@@ -1278,12 +1282,20 @@ function doGet(e) {
           }
         }
         return jsonResponse({ status: "error", message: "Post not found" });
+        } finally {
+          editLock.releaseLock();
+        }
       }
-    
+
     else if (action === 'deletePost') {
       const postId = e.parameter.postId;
       const reqUsername = e.parameter.username;
-      
+
+      // 🔒 ใส่ Lock กันลบโพสต์ชนกัน (deleteRow เลื่อนตำแหน่งแถว ถ้าชนกันจะลบผิดแถวได้)
+      const deleteLock = LockService.getScriptLock();
+      deleteLock.waitLock(10000);
+      try {
+
       // 🌟 [ปรับใหม่] ไม่ใช้ e.parameter.role จากหน้าบ้าน แต่ไปหา Role จริงในชีต users
       const userSheet = SS.getSheetByName('users');
       const userData = userSheet.getDataRange().getValues();
@@ -1313,24 +1325,28 @@ function doGet(e) {
         }
       }
       return jsonResponse({ status: "error", message: "Post not found" });
+      } finally {
+        deleteLock.releaseLock();
+      }
     }
 
 
     // --- 🛍️ ดึงข้อมูลตู้คอลเลกชันทั้งหมด ---
     if (action === "getCollections") {
+      return withCache('getCollections', 20, function() {
       const colSheet = SS.getSheetByName("Collections");
       if (!colSheet) return jsonResponse({ status: "error", message: "หาชีทชื่อ 'Collections' ไม่เจอ" });
       const rows = colSheet.getDataRange().getValues();
       if (rows.length <= 1) return jsonResponse([]);
-      
+
       const headers = rows[0];
       // หาตำแหน่งคอลัมน์ Status
-      const statusIndex = headers.findIndex(h => h.toString().trim() === "Status"); 
+      const statusIndex = headers.findIndex(h => h.toString().trim() === "Status");
 
       const jsonArray = [];
       for (let i = 1; i < rows.length; i++) {
         if (!rows[i][0]) continue;
-        
+
         // ✨ [เพิ่มจุดนี้] ถ้ามีคอลัมน์ Status และค่าในช่องนั้นคือ "Sold Out" ให้ข้ามไปเลย ไม่ส่งไปโชว์ที่หน้า Shop
         if (statusIndex !== -1 && rows[i][statusIndex].toString().trim() === "Sold Out") {
             continue;
@@ -1341,6 +1357,7 @@ function doGet(e) {
         jsonArray.push(obj);
       }
       return jsonResponse(jsonArray);
+      });
     }
 
     // --- 🎒 ระบบดึงข้อมูลของในกระเป๋าแยกตาม Collections ---
@@ -1418,29 +1435,31 @@ if (action === "getMyInventory") {
 
   // รองรับการดึงค่าผ่าน action = getMemberCount
     if (e.parameter.action === 'getMemberCount') {
+      return withCache('getMemberCount', 60, function() {
       try {
-        var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("users"); 
+        var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("users");
         var data = sheet.getDataRange().getValues();
-        
+
         var count = 0;
-        
+
         // วิ่งลูปตั้งแต่แถวที่ 2 เป็นต้นไป (ข้ามหัวตารางแถวแรก)
         for (var i = 1; i < data.length; i++) {
           var role = String(data[i][3]).toLowerCase().trim(); // 📊 Column D คือคอลัมน์ role
-          
+
           // 🌸 กรองนับเฉพาะแถวที่เป็น user หรือ member
           if (role === 'user' || role === 'member') {
             count++;
           }
         }
-        
+
         // ✨ เปลี่ยนมาใช้ jsonResponse เพื่อความสอดคล้องและปลอดภัยของระบบ CORS ครับ
         return jsonResponse({ success: true, total: count });
-                             
+
       } catch (error) {
         // ✨ ตรงส่วน Error ก็ใช้ jsonResponse ครอบเช่นกันงับ
         return jsonResponse({ success: false, error: error.toString() });
       }
+      });
     }
 
     // --- 📜 ดึงประวัติส่วนตัว (Logs) แบบครบชุด ---
@@ -1607,12 +1626,13 @@ if (action === "getMyInventory") {
     // 🌸 ดึงรายชื่อเมมเบอร์ทั้งหมด (สำหรับหน้าค้นหา)
     // ==========================================
     if (action === "getAllMembers") {
+      return withCache('getAllMembers', 60, function() {
       const memberSheet = SS.getSheetByName("members");
       if (!memberSheet) return jsonResponse({ status: "error", message: "หาชีทชื่อ 'members' ไม่เจอ" });
-      
+
       const rows = memberSheet.getDataRange().getValues();
       const dataRows = rows.slice(1); // ตัดแถวหัวตารางออก
-      
+
       const membersData = dataRows.map(row => {
         return {
           member_id: row[0] ? row[0].toString().trim() : "",
@@ -1625,8 +1645,9 @@ if (action === "getMyInventory") {
           profile: row[7] ? row[7].toString().trim() : ""          // คอลัมน์ H
         };
       });
-      
+
       return jsonResponse({ status: "success", data: membersData });
+      });
     }
 
   // ==========================================
@@ -1643,25 +1664,37 @@ if (action === "getMyInventory") {
 
     const membersData = memberSheet.getDataRange().getValues();
     const profileMap = {};
+    const groupMap = {};
+    const statusMap = {};
     for (let i = 1; i < membersData.length; i++) {
       const mName = membersData[i][2] ? membersData[i][2].toString().trim() : "";
       const mProfile = membersData[i][7] ? membersData[i][7].toString().trim() : "";
-      if (mName) profileMap[mName] = mProfile;
+      const mGroup = membersData[i][3] ? membersData[i][3].toString().trim() : "";
+      const mStatus = membersData[i][6] ? membersData[i][6].toString().trim() : "";
+      if (mName) {
+        profileMap[mName] = mProfile;
+        groupMap[mName] = mGroup || "BLM48";
+        statusMap[mName] = mStatus || "Active";
+      }
     }
 
     const champData = champSheet.getDataRange().getValues();
     const champList = [];
-    
+
     for (let j = 1; j < champData.length; j++) {
       const name = champData[j][1] ? champData[j][1].toString().trim() : "";
       if (name) {
+        // ถ้าไม่เจอชื่อนี้ในชีต members เลย แปลว่าไม่มีรายชื่ออยู่ในระบบแล้ว
+        const status = Object.prototype.hasOwnProperty.call(statusMap, name) ? statusMap[name] : "Not in System";
         champList.push({
           monthYear: champData[j][0] ? champData[j][0].toString().trim() : "",
           name: name,
           totalCookie: champData[j][2] || 0,
           message: champData[j][3] ? champData[j][3].toString().trim() : "",
           postImage: champData[j][4] ? champData[j][4].toString().trim() : (champData[j][5] ? champData[j][5].toString().trim() : ""),
-          profileImage: profileMap[name] || "" 
+          profileImage: profileMap[name] || "",
+          groupName: groupMap[name] || "BLM48",
+          status: status
         });
       }
     }
@@ -1679,35 +1712,36 @@ if (action === "getMyInventory") {
     // 🏆 [NEW ACTION]: ดึงข้อมูลจากชีต champaign (เฉพาะคอลัมน์ที่กำหนด & แถวที่มีข้อมูล)
     // =========================================================================
     if (action === "getCampaignCollections") {
+      return withCache('getCampaignCollections', 60, function() {
       const champSheet = SS.getSheetByName("campaign");
       if (!champSheet) {
         return sendJsonResponse({ status: "error", message: "หาชีท 'campaign' ไม่เจอ" });
       }
-      
+
       const lastRow = champSheet.getLastRow();
       if (lastRow <= 1) {
         return sendJsonResponse({ status: "success", data: [] });
       }
-      
+
       // ดึงข้อมูลทั้งหมดในชีต champaign
       const rows = champSheet.getDataRange().getValues();
       const headers = rows[0].map(h => h.toString().trim());
       const campaigns = [];
-      
+
       // ค้นหาตำแหน่ง Index ของแต่ละคอลัมน์ตามที่คุณเอ็มมี่กำหนดไว้
       const idxId = headers.indexOf("CampaignID");
       const idxName = headers.indexOf("CampaignName");
       const idxCover = headers.indexOf("CoverImage");
       const idxAmount = headers.indexOf("TotalAmount");
       const idxCurrency = headers.indexOf("CurrencyType");
-      
+
       for (let i = 1; i < rows.length; i++) {
         // 1. ตรวจสอบเงื่อนไข: ดึงเฉพาะ row ที่มีข้อมูล (ถ้าไม่มี CampaignID หรือแถวว่างให้ข้ามทันที)
         const campaignId = idxId !== -1 ? rows[i][idxId] : rows[i][0];
         if (!campaignId || campaignId.toString().trim() === "") {
-          continue; 
+          continue;
         }
-        
+
         // 2. จัดโครงสร้าง Object ดึงเฉพาะคอลัมน์ที่คุณเอ็มมี่กำหนด
         let obj = {};
         obj["CampaignID"] = campaignId;
@@ -1715,22 +1749,24 @@ if (action === "getMyInventory") {
         obj["CoverImage"] = idxCover !== -1 ? rows[i][idxCover] : "";
         obj["TotalAmount"] = idxAmount !== -1 ? Number(rows[i][idxAmount]) || 0 : 0;
         obj["CurrencyType"] = idxCurrency !== -1 ? rows[i][idxCurrency] : "";
-        
+
         // 💡 (เผื่อไว้สำหรับหน้าบ้าน HTML เดิม) แมปค่าให้เข้ากับตัวแปรที่หน้าบ้านเคยเรียกใช้
         obj["VoteCollectionID"] = obj["CampaignID"];
         obj["Title"] = obj["CampaignName"];
         obj["totalAmount"] = obj["TotalAmount"];
-        
+
         campaigns.push(obj);
       }
-      
+
       return sendJsonResponse({ status: "success", data: campaigns });
+      });
     }
 
     // =========================================================================
     // 🗳️ ACTION 1: ดึงเฉพาะแคมเปญที่อยู่ในช่วงเวลาจัดกิจกรรม (คอลัมน์ A-H + I: EnableGift)
     // =========================================================================
     if (action === "getMajorVoteCollections") {
+      return withCache('getMajorVoteCollections', 15, function() {
       const voteColSheet = SS.getSheetByName("majorVoteCollections");
       if (!voteColSheet) return sendJsonResponse({ status: "error", message: "หาชีท 'majorVoteCollections' ไม่เจอ" });
 
@@ -1776,6 +1812,7 @@ if (action === "getMyInventory") {
       }
 
       return sendJsonResponse({ status: "success", data: campaigns });
+      });
     }
 
     // =========================================================================
@@ -2049,6 +2086,7 @@ if (action === "getMyInventory") {
       // ชีต "GiftCatalog" คอลัมน์: GiftID, GiftName, Tier, CostCookies, Points, ImageURL, Active
       // =========================================================================
       if (action === "getGiftCatalog") {
+        return withCache('getGiftCatalog', 60, function() {
         const giftSheet = SS.getSheetByName("GiftCatalog");
         if (!giftSheet) return sendJsonResponse({ status: "error", message: "หาชีท 'GiftCatalog' ไม่เจอ" });
 
@@ -2069,6 +2107,7 @@ if (action === "getMyInventory") {
         }
 
         return sendJsonResponse({ status: "success", data: gifts });
+        });
       }
 
     // ==========================================
@@ -2229,7 +2268,8 @@ function getRankingData() {
           total_cookies: Number(row[8]) || 0,                    // คอลัมน์ I (Index 8) - Total Cookie
           total_kami: Number(row[9]) || 0,                      // คอลัมน์ J (Index 9) - Total Kami
           total_oshi: Number(row[10]) || 0,                      // คอลัมน์ K (Index 10) - Total Oshi
-          totalLikes: Number(row[16]) || 0
+          totalLikes: Number(row[16]) || 0,
+          group_name: row[3] ? row[3].toString().trim() : "BLM48" // คอลัมน์ D (Index 3)
         };
       }
     });
@@ -2268,9 +2308,10 @@ function getRankingData() {
       total_kami: mData.total_kami || 0,            
       total_oshi: mData.total_oshi || 0,            
       all_time_total: mData.total_cookies || (Number(row[17]) || 0), // ใช้คุกกี้จาก members ก่อน ถ้าไม่มีค่อยไปเอาจาก R ใน ranking
-      profile_img: mData.profile_img || row[18],    
-      status: mData.status || "Active",             
-      totalLikes: mData.totalLikes || 0              
+      profile_img: mData.profile_img || row[18],
+      status: mData.status || "Active",
+      totalLikes: mData.totalLikes || 0,
+      group_name: mData.group_name || "BLM48"
     };
   });
   
@@ -2635,6 +2676,34 @@ function jsonResponse(obj) {
 }
 
 // =========================================================================
+// ⚡ withCache: แคชผลลัพธ์ของ action ที่อ่านอย่างเดียวและข้อมูลไม่ได้เปลี่ยนวินาทีต่อวินาที
+// (เช่น รายชื่อเมมเบอร์, ตู้คอลเลกชัน, gift catalog) ไว้ใน CacheService ของสคริปต์
+// เพื่อลดจำนวนครั้งที่ต้องอ่าน Google Sheets ทั้งชีตซ้ำๆ เวลามีคนเข้าเว็บพร้อมกันเยอะๆ
+// ถ้าแคชมีปัญหา (เช่น ข้อมูลใหญ่เกิน 100KB ต่อคีย์) จะข้ามการแคชไปเฉยๆ ไม่ทำให้ระบบพัง
+// =========================================================================
+function withCache(cacheKey, ttlSeconds, computeFn) {
+  const cache = CacheService.getScriptCache();
+  try {
+    const cached = cache.get(cacheKey);
+    if (cached) {
+      return ContentService.createTextOutput(cached).setMimeType(ContentService.MimeType.JSON);
+    }
+  } catch (readErr) {
+    // อ่านแคชไม่ได้ ไม่เป็นไร ข้ามไปดึงข้อมูลสดแทน
+  }
+
+  const output = computeFn();
+
+  try {
+    cache.put(cacheKey, output.getContent(), ttlSeconds);
+  } catch (writeErr) {
+    // เขียนแคชไม่ได้ (เช่นข้อมูลใหญ่เกิน) ไม่เป็นไร ยังส่งผลลัพธ์สดกลับไปได้ตามปกติ
+  }
+
+  return output;
+}
+
+// =========================================================================
 // 🔥 Firebase Realtime Database mirror — best-effort push so the frontend
 // can subscribe live instead of polling. Never throws: a Firebase hiccup
 // must not break the Sheet write that already succeeded.
@@ -2711,4 +2780,370 @@ function getDashboardDataProcess(username) {
   } catch (error) {
     return sendJsonResponse({ status: "error", message: "เกิดข้อผิดพลาดคลาวด์: " + error.toString() });
   }
+}
+
+// =========================================================================
+// 🔗 SUPABASE SYNC — ให้คุกกี้ / ซื้อของ / กาชา / redeem code / inventory
+// ย้ายไปทำงานบน Supabase โดยตรงแล้ว (ดู supabase-client.js ในหน้าเว็บ)
+// ชุดฟังก์ชันนี้ทำหน้าที่ 2 ทาง:
+//   1) ขาไป (Sheets -> Supabase): พอแอดมินแก้ Collections/Items/codes/users
+//      (เฉพาะ username/password/role) ในชีต ก็ยิงไปอัปเดต Supabase ทันที
+//      ผ่าน onEdit trigger ใช้ service_role key เท่านั้น (ไม่ใช่ anon key)
+//      เพราะต้องข้าม RLS ได้ — ต้องตั้งค่าใน Script Properties เอง ห้ามแปะ
+//      ค่านี้ลงในไฟล์โค้ดหรือส่งให้ใครเด็ดขาด
+//   2) ขากลับ (Supabase -> Sheets): ทุกๆ 10 นาที ดึงยอด token/cookie/geToken,
+//      ranking เดือนปัจจุบัน, และ log ใหม่ๆ กลับมาโชว์ในชีตให้แอดมินดู
+//      (ชีตไม่ใช่เจ้าของค่าจริงอีกต่อไปแล้วสำหรับ 3 คอลัมน์นี้)
+//
+// วิธีติดตั้ง (ทำครั้งเดียว):
+//   1. เปิด Project Settings (รูปเฟือง) ในตัวแก้ไข Apps Script
+//   2. เพิ่ม Script Properties สองตัว:
+//        SUPABASE_URL = https://rqhwzbrcgnpxtuaeoxml.supabase.co
+//        SUPABASE_SERVICE_ROLE_KEY = (คัดลอกจาก Supabase Dashboard
+//          -> Project Settings -> API -> service_role secret)
+//   3. เลือกฟังก์ชัน setupBlm48SupabaseSync แล้วกด Run ครั้งเดียว
+//      (จะขอสิทธิ์ authorize — กดอนุญาตได้เลย)
+// =========================================================================
+
+var BLM48_SYNCED_SHEETS = ["Collections", "Items", "codes", "users", "members"];
+
+function getSupabaseConfig_() {
+  var props = PropertiesService.getScriptProperties();
+  var url = props.getProperty('SUPABASE_URL');
+  var key = props.getProperty('SUPABASE_SERVICE_ROLE_KEY');
+  if (!url || !key) {
+    throw new Error('ยังไม่ได้ตั้งค่า SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY ใน Script Properties');
+  }
+  return { url: url, key: key };
+}
+
+// upsert แถวทั้งหมดเข้า Supabase table เดียว (ใช้ service_role คือข้าม RLS ได้ทั้งหมด)
+function supabaseUpsert_(table, rows) {
+  if (!rows || rows.length === 0) return;
+  var cfg = getSupabaseConfig_();
+  var res = UrlFetchApp.fetch(cfg.url + '/rest/v1/' + table, {
+    method: 'post',
+    contentType: 'application/json',
+    headers: {
+      apikey: cfg.key,
+      Authorization: 'Bearer ' + cfg.key,
+      Prefer: 'resolution=merge-duplicates,return=minimal'
+    },
+    payload: JSON.stringify(rows),
+    muteHttpExceptions: true
+  });
+  var code = res.getResponseCode();
+  if (code >= 300) {
+    Logger.log('supabaseUpsert_ ' + table + ' failed (' + code + '): ' + res.getContentText());
+  }
+}
+
+function supabaseSelect_(table, queryString) {
+  var cfg = getSupabaseConfig_();
+  var res = UrlFetchApp.fetch(cfg.url + '/rest/v1/' + table + '?' + queryString, {
+    method: 'get',
+    headers: { apikey: cfg.key, Authorization: 'Bearer ' + cfg.key },
+    muteHttpExceptions: true
+  });
+  if (res.getResponseCode() >= 300) {
+    Logger.log('supabaseSelect_ ' + table + ' failed: ' + res.getContentText());
+    return [];
+  }
+  return JSON.parse(res.getContentText());
+}
+
+// เพิ่ม/ลบคุกกี้ในการจัดอันดับของเมมเบอร์คนหนึ่งสำหรับเดือน/ปีที่ระบุ (ใช้กับผลจากการกดไลก์โพสต์)
+// ฟังก์ชัน bump_ranking_monthly ฝั่ง Supabase ไม่ได้ grant ให้ anon เรียก — เรียกได้เฉพาะผ่าน service_role นี้เท่านั้น
+function bumpRankingInSupabase_(memberName, yearMonth, delta) {
+  try {
+    var cfg = getSupabaseConfig_();
+    var res = UrlFetchApp.fetch(cfg.url + '/rest/v1/rpc/bump_ranking_monthly', {
+      method: 'post',
+      contentType: 'application/json',
+      headers: { apikey: cfg.key, Authorization: 'Bearer ' + cfg.key },
+      payload: JSON.stringify({ p_member_name: memberName, p_year_month: yearMonth, p_delta: delta }),
+      muteHttpExceptions: true
+    });
+    if (res.getResponseCode() >= 300) {
+      Logger.log('bumpRankingInSupabase_ failed: ' + res.getContentText());
+    }
+  } catch (err) {
+    Logger.log('bumpRankingInSupabase_ exception: ' + err.message);
+  }
+}
+
+// ลบแถวออกจากตาราง Supabase ตามเงื่อนไข filter ของ PostgREST เช่น "username=eq.00-1"
+function supabaseDelete_(table, filterQuery) {
+  var cfg = getSupabaseConfig_();
+  var res = UrlFetchApp.fetch(cfg.url + '/rest/v1/' + table + '?' + filterQuery, {
+    method: 'delete',
+    headers: { apikey: cfg.key, Authorization: 'Bearer ' + cfg.key, Prefer: 'return=minimal' },
+    muteHttpExceptions: true
+  });
+  if (res.getResponseCode() >= 300) {
+    Logger.log('supabaseDelete_ ' + table + ' failed: ' + res.getContentText());
+  }
+}
+
+// แปลงค่าวันเกิดในชีต (อาจเป็น Date object หรือ string) ให้เป็น 'yyyy-MM-dd' — เอาแค่วัน/เดือนไปใช้จริง ปีไม่มีผล
+function sheetDateToISODate_(val) {
+  if (!val) return null;
+  if (val instanceof Date) return Utilities.formatDate(val, "Asia/Bangkok", "yyyy-MM-dd");
+  return null;
+}
+
+// อ่านชีตเป็น array ของ object โดยใช้แถวหัวตารางเป็นคีย์ (ตัดช่องว่างหัว/ท้ายออกให้)
+function readSheetAsObjects_(sheetName) {
+  var sheet = SS.getSheetByName(sheetName);
+  if (!sheet) return [];
+  var rows = sheet.getDataRange().getValues();
+  var headers = rows[0].map(function (h) { return h.toString().trim(); });
+  var out = [];
+  for (var i = 1; i < rows.length; i++) {
+    if (rows[i].every(function (c) { return c === ""; })) continue;
+    var obj = {};
+    headers.forEach(function (h, idx) { if (h) obj[h] = rows[i][idx]; });
+    out.push(obj);
+  }
+  return out;
+}
+
+function syncCollectionsToSupabase_() {
+  var data = readSheetAsObjects_("Collections");
+  var rows = data.filter(function (r) { return r.CollectionID && r.CollectionID.toString().trim() !== ""; })
+    .map(function (r) {
+      return {
+        collection_id: r.CollectionID.toString().trim(),
+        collection_name: r.CollectionName || null,
+        cost_tokens: Number(r.CostTokens) || 0,
+        cover_image: r.CoverImage || null,
+        description: r.Description || null,
+        status: r.Status || null,
+        updated_at: new Date().toISOString()
+      };
+    });
+  supabaseUpsert_('collections?on_conflict=collection_id', rows);
+}
+
+function syncItemsToSupabase_() {
+  var data = readSheetAsObjects_("Items");
+  var rows = data.filter(function (r) { return r.CollectionID && r.ItemID !== "" && r.ItemID !== undefined; })
+    .map(function (r) {
+      return {
+        collection_id: r.CollectionID.toString().trim(),
+        item_id: r.ItemID.toString().trim(),
+        name: r.Name || null,
+        image_url: r.ImageURL || null,
+        rate: Number(r.Rate) || 0,
+        stock: r.Stock === "" || r.Stock === undefined ? null : Number(r.Stock),
+        updated_at: new Date().toISOString()
+      };
+    });
+  supabaseUpsert_('items?on_conflict=collection_id,item_id', rows);
+}
+
+function syncCodesToSupabase_() {
+  var data = readSheetAsObjects_("codes");
+  var rows = data.filter(function (r) { return r.Code && r.Code.toString().trim() !== ""; })
+    .map(function (r) {
+      var expiry = null;
+      if (r.ExpiryTime instanceof Date) expiry = r.ExpiryTime.toISOString();
+      return {
+        code: r.Code.toString().trim(),
+        reward_type: (r.RewardType || "").toString().trim().toLowerCase(),
+        reward_amount: Number(r.RewardAmount) || 0,
+        expiry_time: expiry,
+        max_limit: Number(r.MaxLimit) || 999999,
+        updated_at: new Date().toISOString()
+      };
+    });
+  supabaseUpsert_('codes?on_conflict=code', rows);
+}
+
+// เฉพาะ username/password/role เท่านั้น — ไม่แตะ token/cookie/ge_token ของ Supabase เด็ดขาด
+// (คอลัมน์พวกนั้น Supabase เป็นเจ้าของค่าจริงแล้ว การไม่ส่งคีย์นี้ไปเลยจะทำให้ merge-duplicates ไม่ไปทับมัน)
+function syncUsersProfileToSupabase_() {
+  var data = readSheetAsObjects_("users");
+  var rows = data.filter(function (r) { return r.username && r.username.toString().trim() !== ""; })
+    .map(function (r) {
+      return {
+        username: r.username.toString().trim(),
+        password: r.password === "" ? null : r.password,
+        role: (r.role || "user").toString().trim(),
+        updated_at: new Date().toISOString()
+      };
+    });
+  supabaseUpsert_('users?on_conflict=username', rows);
+}
+
+// เมมเบอร์: catalog เต็มรูปแบบ (โปรไฟล์, ธีมแชมป์, วันเกิด ฯลฯ) แอดมินยังแก้ในชีตนี้เหมือนเดิม
+function syncMembersToSupabase_() {
+  var data = readSheetAsObjects_("members");
+  var clean = function (v) { return (v === "#N/A" || v === "-" || v === "") ? null : v; };
+  var rows = data.filter(function (r) { return r.name && r.name.toString().trim() !== ""; })
+    .map(function (r) {
+      return {
+        member_id: r.member_id ? r.member_id.toString().trim() : null,
+        full_name_en: clean(r["Full Name(EN)"]),
+        name: r.name.toString().trim(),
+        group_name: clean(r.group_name),
+        generation: r.generation === "" ? null : r.generation.toString(),
+        team: clean(r.team),
+        status: clean(r.status),
+        profile_img: clean(r.profile),
+        total_cookie_legacy: r["total cookie"] === "" ? null : Number(r["total cookie"]),
+        total_kamioshi_legacy: r["total kamioshi"] === "" ? null : Number(r["total kamioshi"]),
+        total_oshi_legacy: r["total oshi"] === "" ? null : Number(r["total oshi"]),
+        splash_url: clean(r.Splash_URL),
+        nav_home_url: clean(r.Nav_Home_URL),
+        nav_kami_url: clean(r.Nav_Kami_URL),
+        nav_cart_url: clean(r.Nav_Cart_URL),
+        nav_noti_url: clean(r.Nav_Noti_URL),
+        total_like: r["total Like"] === "" ? null : Number(r["total Like"]),
+        birthday: sheetDateToISODate_(r.Birthday),
+        splash_bd_url: clean(r.SplashBD_URL),
+        banner_bd_url: clean(r.BannerBD_URL),
+        updated_at: new Date().toISOString()
+      };
+    })
+    .filter(function (r) { return r.member_id; });
+  supabaseUpsert_('members?on_conflict=member_id', rows);
+}
+
+// user_oshi: ตารางแยกที่ normalize มาจากคอลัมน์ kamioshi/oshi1..oshi10 ในชีต users
+// ผู้ใช้ยังกดตั้งค่าผ่าน setKamioshi/setOshi/removeOshi (เขียนลงชีตเหมือนเดิม) ฟังก์ชันนี้แค่ mirror
+// ทำแบบล้างของเก่าทั้งตารางแล้วใส่ใหม่ทั้งหมด เพราะข้อมูลไม่เยอะ (หลักร้อยแถว) ปลอดภัยกว่าไล่ diff เอง
+function syncUserOshiToSupabase_() {
+  var data = readSheetAsObjects_("users");
+  var rows = [];
+  data.forEach(function (r) {
+    var username = r.username ? r.username.toString().trim() : "";
+    if (!username) return;
+    var kamioshi = r.kamioshi ? r.kamioshi.toString().trim() : "";
+    if (kamioshi) rows.push({ username: username, member_name: kamioshi, relation: 'kamioshi' });
+    for (var i = 1; i <= 10; i++) {
+      var name = r['oshi' + i] ? r['oshi' + i].toString().trim() : "";
+      if (name) rows.push({ username: username, member_name: name, relation: 'oshi' });
+    }
+  });
+
+  // ต้องมี filter เสมอสำหรับ DELETE ผ่าน PostgREST — ใช้เงื่อนไขที่จริงเสมอเพื่อลบทั้งตาราง
+  supabaseDelete_('user_oshi', 'username=not.is.null');
+  supabaseUpsert_('user_oshi?on_conflict=username,member_name,relation', rows);
+}
+
+function syncSheetToSupabase_(sheetName) {
+  if (sheetName === "Collections") syncCollectionsToSupabase_();
+  else if (sheetName === "Items") syncItemsToSupabase_();
+  else if (sheetName === "codes") syncCodesToSupabase_();
+  else if (sheetName === "users") { syncUsersProfileToSupabase_(); syncUserOshiToSupabase_(); }
+  else if (sheetName === "members") syncMembersToSupabase_();
+}
+
+// ---------- ขาไป: ติดตั้งเป็น "installable trigger" เท่านั้น (onEdit ธรรมดายิง UrlFetchApp ไม่ได้) ----------
+function onEditInstallable(e) {
+  try {
+    if (!e || !e.range) return;
+    var sheetName = e.range.getSheet().getName();
+    if (BLM48_SYNCED_SHEETS.indexOf(sheetName) === -1) return;
+    syncSheetToSupabase_(sheetName);
+  } catch (err) {
+    Logger.log('onEditInstallable sync failed: ' + err.message);
+  }
+}
+
+// ---------- ขากลับ: ยอด wallet / ranking เดือนนี้ / log ใหม่ ๆ กลับมาโชว์ในชีต ----------
+function reverseSyncFromSupabase_() {
+  mirrorWalletsToSheet_();
+  mirrorRankingToSheet_();
+  mirrorNewRowsToSheet_('fan_logs', 'fanLogs', 'lastMirroredFanLogId', function (row) {
+    return [new Date(row.created_at), row.username, row.member_name, row.amount];
+  });
+  mirrorNewRowsToSheet_('wallet_logs', 'logs', 'lastMirroredWalletLogId', function (row) {
+    return [new Date(row.created_at), row.username, row.action, row.target, row.amount];
+  });
+}
+
+function mirrorWalletsToSheet_() {
+  var sheet = SS.getSheetByName('users');
+  if (!sheet) return;
+  var wallets = supabaseSelect_('users', 'select=username,token,cookie,ge_token');
+  var walletMap = {};
+  wallets.forEach(function (w) { walletMap[w.username] = w; });
+
+  var rows = sheet.getDataRange().getValues();
+  var updates = [];
+  for (var i = 1; i < rows.length; i++) {
+    var uname = rows[i][0] ? rows[i][0].toString().trim() : "";
+    var w = walletMap[uname];
+    updates.push(w ? [Number(w.token), Number(w.cookie), Number(w.ge_token)] : [rows[i][5], rows[i][6], rows[i][7]]);
+  }
+  if (updates.length > 0) {
+    sheet.getRange(2, 6, updates.length, 3).setValues(updates);
+  }
+}
+
+function mirrorRankingToSheet_() {
+  var sheet = SS.getSheetByName('ranking');
+  if (!sheet) return;
+  var ym = Utilities.formatDate(new Date(), "Asia/Bangkok", "yyyy-MM");
+  var totals = supabaseSelect_('ranking_monthly', 'year_month=eq.' + ym + '&select=member_name,cookies');
+  if (totals.length === 0) return;
+
+  var monthNames = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
+  var currentMonthName = monthNames[new Date().getMonth()];
+
+  var rows = sheet.getDataRange().getValues();
+  var headers = rows[0];
+  var monthColIdx = -1;
+  for (var c = 0; c < headers.length; c++) {
+    if (headers[c].toString().trim().toLowerCase() === currentMonthName) { monthColIdx = c; break; }
+  }
+  if (monthColIdx === -1) return;
+
+  var totalsMap = {};
+  totals.forEach(function (t) { totalsMap[t.member_name.toString().trim().toLowerCase()] = t.cookies; });
+
+  for (var r = 1; r < rows.length; r++) {
+    var memberName = rows[r][1] ? rows[r][1].toString().trim().toLowerCase() : "";
+    if (memberName && Object.prototype.hasOwnProperty.call(totalsMap, memberName)) {
+      sheet.getRange(r + 1, monthColIdx + 1).setValue(Number(totalsMap[memberName]));
+    }
+  }
+}
+
+// ดึงเฉพาะแถวใหม่ (id > watermark ที่เก็บไว้ใน Script Properties) แล้ว append ต่อท้ายชีตปลายทาง
+function mirrorNewRowsToSheet_(supabaseTable, sheetName, watermarkKey, toRowFn) {
+  var sheet = SS.getSheetByName(sheetName);
+  if (!sheet) return;
+  var props = PropertiesService.getScriptProperties();
+  var watermark = Number(props.getProperty(watermarkKey) || 0);
+
+  var newRows = supabaseSelect_(supabaseTable, 'id=gt.' + watermark + '&order=id.asc&limit=500');
+  if (newRows.length === 0) return;
+
+  newRows.forEach(function (row) { sheet.appendRow(toRowFn(row)); });
+
+  var maxId = newRows.reduce(function (max, row) { return Math.max(max, row.id); }, watermark);
+  props.setProperty(watermarkKey, String(maxId));
+}
+
+// ---------- ตั้งค่าครั้งเดียว: รัน trigger + sync ทุกอย่างรอบแรก ----------
+function setupBlm48SupabaseSync() {
+  // ล้าง trigger เก่าของฟังก์ชันพวกนี้ก่อน กันสร้างซ้ำถ้ารันปุ่มนี้หลายครั้ง
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    var fn = t.getHandlerFunction();
+    if (fn === 'onEditInstallable' || fn === 'reverseSyncFromSupabase_') {
+      ScriptApp.deleteTrigger(t);
+    }
+  });
+
+  ScriptApp.newTrigger('onEditInstallable').forSpreadsheet(SS).onEdit().create();
+  ScriptApp.newTrigger('reverseSyncFromSupabase_').timeBased().everyMinutes(10).create();
+
+  // sync รอบแรกทันที ไม่ต้องรอแก้ชีตก่อน
+  BLM48_SYNCED_SHEETS.forEach(syncSheetToSupabase_);
+  reverseSyncFromSupabase_();
+
+  Logger.log('ตั้งค่า Supabase sync เรียบร้อยแล้วค่ะ');
 }
