@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>BLM48 Membership | Search Members</title>
+  <script src="assets/js/common.js"></script>
   <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s32">
   <meta name="theme-color" content="#ffc0cb">
   <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s180">
@@ -17,10 +18,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="assets/js/supabase-client.js"></script>
-  <script src="assets/js/common.js"></script>
-
+  
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
     :root {
@@ -65,7 +63,7 @@
     .app-sidebar-promo {
       display: none;
       flex: 1;
-      background: linear-gradient(45deg, var(--blmem-pink), #ffb3c6, #ffe066);
+      background: linear-gradient(45deg, #ff85a2, #ffb3c6, #ffe066);
       position: relative;
       overflow: hidden;
       flex-direction: column;
@@ -189,46 +187,12 @@
     }
     .search-input::placeholder { color: #cccccc; font-weight: 300; }
 
-    /* --- แท็บสลับวง (BLM48 / NPT48) --- */
-    .group-tabs {
-      display: flex;
-      background: #fff;
-      border-bottom: 1px solid var(--border-color);
-    }
-    .group-tab {
-      flex: 1;
-      text-align: center;
-      padding: 14px 0 12px 0;
-      font-size: 14px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      color: #bbbbbb;
-      background: none;
-      border: none;
-      border-bottom: 3px solid transparent;
-      margin-bottom: -1px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    .group-tab.active[data-group="BLM48"] {
-      color: #e0a800;
-      border-bottom-color: #ffc107;
-    }
-    .group-tab.active[data-group="NPT48"] {
-      color: #2f9fe0;
-      border-bottom-color: #6acbfc;
-    }
-    .graduated-badge {
-      display: inline-block;
-      background: #e2e8f0;
-      color: #64748b;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      padding: 2px 8px;
-      border-radius: 10px;
-      margin-left: 8px;
-      text-transform: uppercase;
+    .header-divider {
+      height: 3px;
+      background: linear-gradient(90deg, var(--blmem-pink) 0%, var(--blmem-yellow-dark) 100%);
+      margin: 0 24px;
+      border-radius: 2px;
+      opacity: 0.7;
     }
 
     /* --- ส่วนรายการแถวเมมเบอร์ (List Items) --- */
@@ -288,7 +252,7 @@
       border-radius: 50%;
       object-fit: cover;
       background: #fdfdfd;
-      border: 2px solid var(--search-group-color, var(--blmem-pink));
+      border: 2px solid var(--blmem-pink);
       box-shadow: 0 0 0 2px #fffdf0;
     }
 
@@ -384,10 +348,7 @@
           <input type="text" id="searchInput" class="search-input" placeholder="ค้นหาเมมเบอร์..." onkeyup="filterMembers()">
         </div>
       </div>
-      <div class="group-tabs" id="groupTabs">
-        <button type="button" class="group-tab active" data-group="BLM48" onclick="selectGroupFilter('BLM48')">BLM48</button>
-        <button type="button" class="group-tab" data-group="NPT48" onclick="selectGroupFilter('NPT48')">NPT48</button>
-      </div>
+      <div class="header-divider"></div>
 
       <div class="member-list" id="memberList">
         <div class="loading-state" id="loadingState">
@@ -401,8 +362,9 @@
   </div>
 
 <script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxF5G3E1HWhVTQOVGzWtsqSCZfXkq8ZrX6DqGKt_pcicYbi2_59B-ecEeeTU6-aqBEf/exec';
+    
     let allMembers = [];
-    let currentGroupFilter = 'BLM48';
 
     // 🔗 ตั้งค่าลิงก์รูปภาพสำรองตามที่เอ็มมี่ระบุ
     const fallbackAvatarURL = 'https://lh3.googleusercontent.com/d/1rebp2F8vyP0nyvsEOFD9Nw2mPcRtVqtG=s1000';
@@ -419,19 +381,20 @@
 
     async function fetchAllMembers() {
       try {
-        const res = await blm48GetAllMembers();
-
+        const resp = await fetch(`${scriptURL}?action=getAllMembers&_=${Date.now()}`);
+        const res = await resp.json();
+        
         if (res.status === "success" && res.data) {
           // 🌟 [จุดสำคัญแก้ปัญหาแกรดหน่วง] ทำการกรองเอาเฉพาะแถวที่มีชื่อเมมเบอร์จริง ๆ (ไม่เป็นค่าว่าง)
           // แถวว่างเปล่าท้ายชีตจะถูกตัดทิ้งทั้งหมดตรงนี้ ทำให้วนลูปเร็วขึ้นมาก ไม่หน่วงเครื่องแน่นอนครับ
           allMembers = res.data.filter(m => m.name && m.name.toString().trim() !== "");
-          filterMembers();
+          renderMembers(allMembers);
         } else {
           document.getElementById('memberList').innerHTML = '<div class="empty-state">ไม่พบฐานข้อมูลเมมเบอร์</div>';
         }
       } catch (e) {
         console.error("Error fetching members:", e);
-        document.getElementById('memberList').innerHTML = `<div class="empty-state">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>`;
+        document.getElementById('memberList').innerHTML = '<div class="empty-state">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>';
       }
     }
 
@@ -450,16 +413,18 @@
 
       // 1. หมวดหมู่แสดงผลเมมเบอร์ปัจจุบัน (Active Members)
       if (activeMembers.length > 0) {
-        const activeTitle = document.createElement('div');
-        activeTitle.className = 'list-section-title';
-        activeTitle.innerHTML = `<i class="fas fa-users"></i> Members`;
-        listContainer.appendChild(activeTitle);
+        if (graduatedMembers.length > 0) {
+          const activeTitle = document.createElement('div');
+          activeTitle.className = 'list-section-title';
+          activeTitle.innerHTML = `<i class="fas fa-users"></i> Members`;
+          listContainer.appendChild(activeTitle);
+        }
 
         activeMembers.forEach(m => {
           const item = document.createElement('a');
           item.className = 'member-item';
           item.href = `member.html?name=${encodeURIComponent(m.name)}`;
-
+          
           // 🔒 ป้องกันความต่างของชื่อคีย์เก่าและใหม่จากหลังบ้าน
           const imgUrl = m.profile || m.profile_img || '';
           const fullNameText = m['Full Name(EN)'] || m.full_name || "BLM48 Member";
@@ -489,7 +454,7 @@
           const item = document.createElement('a');
           item.className = 'member-item graduated-item';
           item.href = `member.html?name=${encodeURIComponent(m.name)}`;
-
+          
           // 🔒 ป้องกันความต่างของชื่อคีย์เก่าและใหม่จากหลังบ้าน
           const imgUrl = m.profile || m.profile_img || '';
           const fullNameText = m['Full Name(EN)'] || m.full_name || "BLM48 Member";
@@ -500,7 +465,8 @@
             </div>
             <div class="member-info">
               <div class="member-nickname">
-                ${escapeHtml(m.name)}<span class="graduated-badge">Graduated</span>
+                ${escapeHtml(m.name)}
+                <i class="fas fa-graduation-cap" style="color: #94a3b8; font-size: 14px; margin-left: 6px;" title="Graduated"></i>
               </div>
               <div class="member-fullname">${escapeHtml(fullNameText)}</div>
             </div>
@@ -511,34 +477,13 @@
       }
     }
 
-    function selectGroupFilter(groupName) {
-      currentGroupFilter = groupName;
-      document.querySelectorAll('#groupTabs .group-tab').forEach(tab => {
-        tab.classList.toggle('active', tab.dataset.group === groupName);
-      });
-      applyAvatarBorderColor();
-      filterMembers();
-    }
-
-    // 🎨 กรอบรูปเมมเบอร์ในหน้านี้เปลี่ยนสีตามแท็บวงที่กำลังดูอยู่ (BLM48 = เหลือง, NPT48 = ฟ้า)
-    function applyAvatarBorderColor() {
-      const color = currentGroupFilter === 'NPT48' ? '#6acbfc' : '#ffc107';
-      document.documentElement.style.setProperty('--search-group-color', color);
-    }
-    applyAvatarBorderColor();
-
     function filterMembers() {
       const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-      const filtered = allMembers.filter(m => {
-        const matchesSearch = (m.name || "").toLowerCase().includes(searchTerm) ||
-          (m.full_name || "").toLowerCase().includes(searchTerm) ||
-          (m['Full Name(EN)'] || "").toLowerCase().includes(searchTerm);
-
-        if (!matchesSearch) return false;
-
-        const groupName = (m.group_name || 'BLM48').toString().trim().toUpperCase();
-        return groupName === currentGroupFilter;
-      });
+      const filtered = allMembers.filter(m => 
+        (m.name || "").toLowerCase().includes(searchTerm) || 
+        (m.full_name || "").toLowerCase().includes(searchTerm) ||
+        (m['Full Name(EN)'] || "").toLowerCase().includes(searchTerm)
+      );
       renderMembers(filtered);
     }
 
