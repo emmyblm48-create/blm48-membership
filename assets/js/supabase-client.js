@@ -58,6 +58,36 @@ function blm48GetRankingFull(yearMonth) {
   return blm48Rpc('get_ranking_full', { p_year_month: yearMonth || null });
 }
 
+// Reference/catalog data synced in from Google Sheets (GiftCatalog/campaign/
+// majorVoteCollections/majorVoteCandidates) - read-only, no ownership check needed.
+function blm48GetGiftCatalog() {
+  return blm48Rpc('get_gift_catalog', {});
+}
+function blm48GetCampaigns() {
+  return blm48Rpc('get_campaigns', {});
+}
+function blm48GetVoteCollections() {
+  return blm48Rpc('get_vote_collections', {});
+}
+// unified transaction history for history.html: giveLogs, purchaseHistory, voteLogs, giftLogs
+function blm48GetMyHistory(username) {
+  return blm48Rpc('get_my_history', { p_username: username });
+}
+
+// member.html profile stats: total_kami/total_oshi (live count from user_oshi),
+// total_likes (live counter bumped on every post like), all_time_total (sum of ranking_monthly)
+function blm48GetMemberStats(memberName) {
+  return blm48Rpc('get_member_stats', { p_member_name: memberName });
+}
+// top fans (by all-time cookies given) for one member - used on member.html
+function blm48GetMemberTopFans(memberName) {
+  return blm48Rpc('get_member_top_fans', { p_member_name: memberName });
+}
+// top fans for every member at once, keyed by member name - used on index.html's global Top Fans section
+function blm48GetTopFans() {
+  return blm48Rpc('get_top_fans', {});
+}
+
 // Live-updates whenever anyone's monthly cookie total changes (give_cookie, likePost).
 // onChange is called with no arguments — caller decides what to re-fetch/re-render.
 // Debounced so a burst of cookies within the same window only triggers one refresh.
@@ -70,5 +100,62 @@ function blm48SubscribeRanking(onChange, debounceMs) {
   return blm48Supabase
     .channel('ranking-monthly-changes')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'ranking_monthly' }, trigger)
+    .subscribe();
+}
+
+// ---------------------------------------------------------------------------
+// Post system (feed, likes, comments) - moved off Google Apps Script/Sheets
+// and Firebase onto Supabase so posting/liking/commenting doesn't queue up
+// behind Sheets' single global lock or need a third backend for comments.
+// Same "anon key can only call RPCs" lockdown as everything else above.
+// ---------------------------------------------------------------------------
+
+// username is optional - pass it to get accurate isLiked flags per viewer.
+function blm48GetPosts(username) {
+  return blm48Rpc('get_posts', { p_username: username || null });
+}
+function blm48CreatePost(username, content, imageUrl, audioUrl, videoUrl) {
+  return blm48Rpc('create_post', {
+    p_username: username,
+    p_content: content || '',
+    p_image_url: imageUrl || '',
+    p_audio_url: audioUrl || '',
+    p_video_url: videoUrl || ''
+  });
+}
+function blm48LikePost(username, postId) {
+  return blm48Rpc('like_post', { p_username: username, p_post_id: postId });
+}
+// newImageUrl is the FINAL joined image list (empty string clears all images), not a delta.
+function blm48EditPost(username, postId, newContent, newImageUrl) {
+  return blm48Rpc('edit_post', { p_username: username, p_post_id: postId, p_new_content: newContent, p_new_image_url: newImageUrl || '' });
+}
+function blm48DeletePost(username, postId) {
+  return blm48Rpc('delete_post', { p_username: username, p_post_id: postId });
+}
+function blm48AddComment(username, postId, text) {
+  return blm48Rpc('add_comment', { p_username: username, p_post_id: postId, p_text: text });
+}
+
+// Profile updates - name (role='user' only, same as before) and photo, written straight to Supabase.
+function blm48UpdateProfileName(username, newName) {
+  return blm48Rpc('update_profile_name', { p_username: username, p_new_name: newName });
+}
+function blm48UpdateProfileImage(username, imageUrl) {
+  return blm48Rpc('update_profile_image', { p_username: username, p_image_url: imageUrl });
+}
+
+// Live-updates whenever likes/comments change on any post. onChange gets no arguments -
+// caller decides what to re-fetch/re-render (mirrors blm48SubscribeRanking's pattern).
+function blm48SubscribePosts(onChange, debounceMs) {
+  let timer = null;
+  const trigger = () => {
+    clearTimeout(timer);
+    timer = setTimeout(onChange, debounceMs || 400);
+  };
+  return blm48Supabase
+    .channel('posts-feed-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, trigger)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'comments' }, trigger)
     .subscribe();
 }

@@ -1230,6 +1230,9 @@ function doGet(e) {
           // เงื่อนไข: 1 ไลก์ = 9 คุกกี้ (ถ้ากดไลก์บวก 9, ถอนไลก์ลบออก 9)
           const cookieChange = isNowLiked ? 9 : -9;
           bumpRankingInSupabase_(memberName, postYearMonth, cookieChange);
+
+          // 🌟 ยอดไลก์รวมของเมมเบอร์ (โชว์ในหน้าโปรไฟล์เมมเบอร์) อัปเดตสดที่ Supabase ด้วยเช่นกัน
+          bumpMemberLikesInSupabase_(memberName, isNowLiked ? 1 : -1);
         }
       }
 
@@ -2805,7 +2808,7 @@ function getDashboardDataProcess(username) {
 //      (จะขอสิทธิ์ authorize — กดอนุญาตได้เลย)
 // =========================================================================
 
-var BLM48_SYNCED_SHEETS = ["Collections", "Items", "codes", "users", "members"];
+var BLM48_SYNCED_SHEETS = ["Collections", "Items", "codes", "users", "members", "GiftCatalog", "campaign", "majorVoteCollections", "majorVoteCandidates", "giftLogs", "majorVoteLogs"];
 
 function getSupabaseConfig_() {
   var props = PropertiesService.getScriptProperties();
@@ -2869,6 +2872,26 @@ function bumpRankingInSupabase_(memberName, yearMonth, delta) {
     }
   } catch (err) {
     Logger.log('bumpRankingInSupabase_ exception: ' + err.message);
+  }
+}
+
+// เพิ่ม/ลบยอดไลก์รวมของเมมเบอร์ (ใช้ตอนกดไลก์/ถอนไลก์โพสต์ของเมมเบอร์คนนั้น)
+// ฟังก์ชัน bump_member_likes ฝั่ง Supabase ไม่ได้ grant ให้ anon เรียก — เรียกได้เฉพาะผ่าน service_role นี้เท่านั้น
+function bumpMemberLikesInSupabase_(memberName, delta) {
+  try {
+    var cfg = getSupabaseConfig_();
+    var res = UrlFetchApp.fetch(cfg.url + '/rest/v1/rpc/bump_member_likes', {
+      method: 'post',
+      contentType: 'application/json',
+      headers: { apikey: cfg.key, Authorization: 'Bearer ' + cfg.key },
+      payload: JSON.stringify({ p_member_name: memberName, p_delta: delta }),
+      muteHttpExceptions: true
+    });
+    if (res.getResponseCode() >= 300) {
+      Logger.log('bumpMemberLikesInSupabase_ failed: ' + res.getContentText());
+    }
+  } catch (err) {
+    Logger.log('bumpMemberLikesInSupabase_ exception: ' + err.message);
   }
 }
 
@@ -2960,20 +2983,28 @@ function syncCodesToSupabase_() {
   supabaseUpsert_('codes?on_conflict=code', rows);
 }
 
-// เฉพาะ username/password/role เท่านั้น — ไม่แตะ token/cookie/ge_token ของ Supabase เด็ดขาด
+// เฉพาะ username/password/role เท่านั้น — ไม่แตะ token/cookie/ge_token/name/profile_img ของ Supabase เด็ดขาด
 // (คอลัมน์พวกนั้น Supabase เป็นเจ้าของค่าจริงแล้ว การไม่ส่งคีย์นี้ไปเลยจะทำให้ merge-duplicates ไม่ไปทับมัน)
+// name/profile_img ย้ายไปแก้ตรงที่ Supabase โดยตรงแล้ว (update_profile_name / update_profile_image RPC)
+// ไหลกลับมาโชว์ในชีตทาง mirrorWalletsToSheet_ แทน (เหมือน token/cookie/ge_token)
+// อ่านตำแหน่งคอลัมน์ตรงๆ (เหมือนกับ getUserInfo) แทนการอ้างชื่อหัวตาราง เพราะชีต users
+// ไม่มีหัวตารางที่ตรงกับชื่อ name/profile_img แน่ชัด — A=username, B=password, C=name, D=role, E=profile_img
 function syncUsersProfileToSupabase_() {
-  var data = readSheetAsObjects_("users");
-  var rows = data.filter(function (r) { return r.username && r.username.toString().trim() !== ""; })
-    .map(function (r) {
-      return {
-        username: r.username.toString().trim(),
-        password: r.password === "" ? null : r.password,
-        role: (r.role || "user").toString().trim(),
-        updated_at: new Date().toISOString()
-      };
+  var sheet = SS.getSheetByName("users");
+  if (!sheet) return;
+  var rows = sheet.getDataRange().getValues();
+  var out = [];
+  for (var i = 1; i < rows.length; i++) {
+    var username = rows[i][0] ? rows[i][0].toString().trim() : "";
+    if (!username) continue;
+    out.push({
+      username: username,
+      password: rows[i][1] === "" ? null : rows[i][1],
+      role: (rows[i][3] || "user").toString().trim(),
+      updated_at: new Date().toISOString()
     });
-  supabaseUpsert_('users?on_conflict=username', rows);
+  }
+  supabaseUpsert_('users?on_conflict=username', out);
 }
 
 // เมมเบอร์: catalog เต็มรูปแบบ (โปรไฟล์, ธีมแชมป์, วันเกิด ฯลฯ) แอดมินยังแก้ในชีตนี้เหมือนเดิม
@@ -2999,7 +3030,7 @@ function syncMembersToSupabase_() {
         nav_kami_url: clean(r.Nav_Kami_URL),
         nav_cart_url: clean(r.Nav_Cart_URL),
         nav_noti_url: clean(r.Nav_Noti_URL),
-        total_like: r["total Like"] === "" ? null : Number(r["total Like"]),
+        // total_like ไม่ sync จากชีตนี้แล้ว — ตอนนี้ Supabase เป็นเจ้าของค่าจริง อัปเดตสดผ่าน bump_member_likes ตอนกดไลก์โพสต์แทน
         birthday: sheetDateToISODate_(r.Birthday),
         splash_bd_url: clean(r.SplashBD_URL),
         banner_bd_url: clean(r.BannerBD_URL),
@@ -3038,6 +3069,151 @@ function syncSheetToSupabase_(sheetName) {
   else if (sheetName === "codes") syncCodesToSupabase_();
   else if (sheetName === "users") { syncUsersProfileToSupabase_(); syncUserOshiToSupabase_(); }
   else if (sheetName === "members") syncMembersToSupabase_();
+  else if (sheetName === "GiftCatalog") syncGiftCatalogToSupabase_();
+  else if (sheetName === "campaign") syncCampaignToSupabase_();
+  else if (sheetName === "majorVoteCollections") syncMajorVoteCollectionsToSupabase_();
+  else if (sheetName === "majorVoteCandidates") syncMajorVoteCandidatesToSupabase_();
+  else if (sheetName === "giftLogs") syncGiftLogsToSupabase_();
+  else if (sheetName === "majorVoteLogs") syncMajorVoteLogsToSupabase_();
+}
+
+// ซิงค์เฉพาะแถวใหม่ที่เพิ่มเข้าชีต log (append-only) เข้า Supabase — ใช้ watermark (แถวล่าสุดที่ซิงค์แล้ว)
+// เก็บใน Script Properties กันซิงค์ซ้ำ, และ map คอลัมน์จากชื่อหัวตารางจริงในชีต ไม่ hardcode ตำแหน่ง
+// เผื่อกรณีชีตมีลำดับ/ชื่อคอลัมน์ต่างจากที่คาดไว้ ปลอดภัยเพราะฝั่ง Supabase มี unique constraint
+// ตาม natural key ของแต่ละแถวอยู่แล้ว (on conflict do nothing) ซิงค์ซ้ำไม่ทำให้เกิดข้อมูลซ้ำ
+function syncNewLogRows_(sheetName, supabaseTableWithConflict, columnMapFn) {
+  var sheet = SS.getSheetByName(sheetName);
+  if (!sheet) return;
+  var props = PropertiesService.getScriptProperties();
+  var watermarkKey = 'logSyncRow_' + sheetName;
+  var lastSyncedRow = Number(props.getProperty(watermarkKey) || 1); // แถว 1 คือหัวตาราง
+  var lastRow = sheet.getLastRow();
+  if (lastRow <= lastSyncedRow) return;
+
+  var numCols = sheet.getLastColumn();
+  var headers = sheet.getRange(1, 1, 1, numCols).getValues()[0].map(function (h) { return h.toString().trim(); });
+  var numRows = lastRow - lastSyncedRow;
+  var data = sheet.getRange(lastSyncedRow + 1, 1, numRows, numCols).getValues();
+
+  var rows = data
+    .filter(function (r) { return r[0]; })
+    .map(function (r) {
+      var obj = {};
+      headers.forEach(function (h, idx) { if (h) obj[h] = r[idx]; });
+      return columnMapFn(obj);
+    });
+
+  if (rows.length > 0) supabaseUpsert_(supabaseTableWithConflict, rows);
+  props.setProperty(watermarkKey, String(lastRow));
+}
+
+function syncGiftLogsToSupabase_() {
+  syncNewLogRows_("giftLogs", "gift_logs?on_conflict=created_at,username,candidate_name,gift_id", function (obj) {
+    return {
+      created_at: sheetDateTimeToISO_(obj.Timestamp),
+      username: obj.Username || null,
+      candidate_name: obj.CandidateName || null,
+      campaign_id: obj.CollectionID || obj.CampaignID || null,
+      gift_id: obj.GiftID || null,
+      gift_name: obj.GiftName || null,
+      tier: obj.Tier || null,
+      cost_cookies: Number(obj.CostCookies) || 0,
+      points_awarded: Number(obj.Points || obj.PointsAwarded) || 0,
+      quantity: Number(obj.Quantity || obj["จำนวน"]) || 1
+    };
+  });
+}
+
+function syncMajorVoteLogsToSupabase_() {
+  syncNewLogRows_("majorVoteLogs", "major_vote_logs?on_conflict=created_at,username,vote_collection_id,member_name", function (obj) {
+    return {
+      created_at: sheetDateTimeToISO_(obj.Timestamp),
+      username: obj.Username || null,
+      vote_collection_id: obj.VoteCollectionID || obj.CollectionID || null,
+      member_name: obj.MemberName || obj.CandidateName || null,
+      amount: Number(obj.Amount || obj.VoteAmount) || 0,
+      token_type: obj.TokenType || null
+    };
+  });
+}
+
+// แปลงค่าวันที่-เวลาในชีต (Date object) ให้เป็น ISO string เต็มรูปแบบ ใช้กับ StartTime/EndTime
+function sheetDateTimeToISO_(val) {
+  if (!val) return null;
+  if (val instanceof Date) return val.toISOString();
+  return null;
+}
+
+function syncGiftCatalogToSupabase_() {
+  var data = readSheetAsObjects_("GiftCatalog");
+  var rows = data.filter(function (r) { return r.GiftID && r.GiftID.toString().trim() !== ""; })
+    .map(function (r) {
+      return {
+        gift_id: r.GiftID.toString().trim(),
+        gift_name: r.GiftName || null,
+        tier: r.Tier || null,
+        cost_cookies: Number(r.CostCookies) || 0,
+        points: Number(r.Points) || 0,
+        image_url: r.ImageURL || null,
+        active: r.Active === true || r.Active === "TRUE",
+        updated_at: new Date().toISOString()
+      };
+    });
+  supabaseUpsert_('gift_catalog?on_conflict=gift_id', rows);
+}
+
+function syncCampaignToSupabase_() {
+  var data = readSheetAsObjects_("campaign");
+  var rows = data.filter(function (r) { return r.CampaignID && r.CampaignID.toString().trim() !== ""; })
+    .map(function (r) {
+      return {
+        campaign_id: r.CampaignID.toString().trim(),
+        campaign_name: r.CampaignName || null,
+        cover_image: r.CoverImage || null,
+        total_amount: Number(r.TotalAmount) || 0,
+        currency_type: r.CurrencyType || null,
+        updated_at: new Date().toISOString()
+      };
+    });
+  supabaseUpsert_('campaign?on_conflict=campaign_id', rows);
+}
+
+function syncMajorVoteCollectionsToSupabase_() {
+  var data = readSheetAsObjects_("majorVoteCollections");
+  var rows = data.filter(function (r) { return r.VoteCollectionID && r.VoteCollectionID.toString().trim() !== ""; })
+    .map(function (r) {
+      return {
+        vote_collection_id: r.VoteCollectionID.toString().trim(),
+        title: r.Title || null,
+        description: r.Description || null,
+        cover_image: r.CoverImage || null,
+        start_time: sheetDateTimeToISO_(r.StartTime),
+        end_time: sheetDateTimeToISO_(r.EndTime),
+        status: r.Status || null,
+        token_type: r.TokenType || null,
+        enable_gift: r.EnableGift === true || r.EnableGift === "TRUE",
+        updated_at: new Date().toISOString()
+      };
+    });
+  supabaseUpsert_('major_vote_collections?on_conflict=vote_collection_id', rows);
+}
+
+function syncMajorVoteCandidatesToSupabase_() {
+  var data = readSheetAsObjects_("majorVoteCandidates");
+  var rows = data.filter(function (r) { return r.CandidateID && r.CandidateID.toString().trim() !== ""; })
+    .map(function (r) {
+      return {
+        candidate_id: r.CandidateID.toString().trim(),
+        vote_collection_id: r.VoteCollectionID || null,
+        member_name: r.MemberName || null,
+        profile_member: r.ProfileMember || null,
+        token_type: r.TokenType || null,
+        current_votes: Number(r.CurrentVotes) || 0,
+        thank_you_card_url: r.ThankYouCardURL || null,
+        updated_at: new Date().toISOString()
+      };
+    });
+  supabaseUpsert_('major_vote_candidates?on_conflict=candidate_id', rows);
 }
 
 // ---------- ขาไป: ติดตั้งเป็น "installable trigger" เท่านั้น (onEdit ธรรมดายิง UrlFetchApp ไม่ได้) ----------
@@ -3067,19 +3243,26 @@ function reverseSyncFromSupabase_() {
 function mirrorWalletsToSheet_() {
   var sheet = SS.getSheetByName('users');
   if (!sheet) return;
-  var wallets = supabaseSelect_('users', 'select=username,token,cookie,ge_token');
+  var wallets = supabaseSelect_('users', 'select=username,token,cookie,ge_token,name,profile_img');
   var walletMap = {};
   wallets.forEach(function (w) { walletMap[w.username] = w; });
 
   var rows = sheet.getDataRange().getValues();
-  var updates = [];
+  var walletUpdates = [];
+  var nameUpdates = [];
+  var profileImgUpdates = [];
   for (var i = 1; i < rows.length; i++) {
     var uname = rows[i][0] ? rows[i][0].toString().trim() : "";
     var w = walletMap[uname];
-    updates.push(w ? [Number(w.token), Number(w.cookie), Number(w.ge_token)] : [rows[i][5], rows[i][6], rows[i][7]]);
+    walletUpdates.push(w ? [Number(w.token), Number(w.cookie), Number(w.ge_token)] : [rows[i][5], rows[i][6], rows[i][7]]);
+    // name (col C) / profile_img (col E) — Supabase เป็นเจ้าของค่าจริงแล้ว (update_profile_name / update_profile_image RPC)
+    nameUpdates.push([w && w.name ? w.name : rows[i][2]]);
+    profileImgUpdates.push([w && w.profile_img ? w.profile_img : rows[i][4]]);
   }
-  if (updates.length > 0) {
-    sheet.getRange(2, 6, updates.length, 3).setValues(updates);
+  if (walletUpdates.length > 0) {
+    sheet.getRange(2, 6, walletUpdates.length, 3).setValues(walletUpdates);
+    sheet.getRange(2, 3, nameUpdates.length, 1).setValues(nameUpdates);
+    sheet.getRange(2, 5, profileImgUpdates.length, 1).setValues(profileImgUpdates);
   }
 }
 
