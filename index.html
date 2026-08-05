@@ -1550,6 +1550,140 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     z-index: 10;
   }
   /* =========================================
+     🎯 DAILY MISSION MODAL
+     ========================================= */
+  /* SweetAlert2's default z-index (1060) sits BELOW our custom modals (9999),
+     so any Swal.fire() triggered while this modal is open would render hidden
+     behind it - force it above every in-app modal. */
+  .swal2-container {
+    z-index: 100000 !important;
+  }
+  #daily-mission-modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.55);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  .mission-card {
+    background: #fff;
+    border-radius: 22px;
+    width: 100%;
+    max-width: 360px;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 22px 20px 20px 20px;
+    box-sizing: border-box;
+    position: relative;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+  }
+  .mission-card-close {
+    position: absolute;
+    top: 14px; right: 16px;
+    font-size: 22px;
+    color: #999;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .mission-card-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--primary-pink, #ff85a2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .mission-card-subtitle {
+    font-size: 0.78rem;
+    color: #999;
+    margin-bottom: 16px;
+  }
+  .mission-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f5e6ea;
+  }
+  .mission-item:last-of-type { border-bottom: none; }
+  .mission-item-icon {
+    flex: 0 0 auto;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: #fff0f3;
+    color: var(--primary-pink, #ff85a2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+  }
+  .mission-item.done .mission-item-icon {
+    background: #e8fbe8;
+    color: #3cb371;
+  }
+  .mission-item-body { flex: 1 1 auto; min-width: 0; }
+  .mission-item-text {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 6px;
+  }
+  .mission-progress-bar {
+    height: 6px;
+    background: #f5e6ea;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .mission-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff9db1, var(--primary-pink, #ff85a2));
+    border-radius: 4px;
+    transition: width 0.3s ease;
+  }
+  .mission-item-count {
+    font-size: 0.72rem;
+    color: #aaa;
+    margin-top: 4px;
+  }
+  .mission-item-check {
+    flex: 0 0 auto;
+    color: #3cb371;
+    font-size: 1.2rem;
+    display: none;
+  }
+  .mission-item.done .mission-item-check { display: block; }
+  #mission-claim-btn {
+    width: 100%;
+    margin-top: 18px;
+    padding: 13px;
+    border: none;
+    border-radius: 14px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #ffb6c1, var(--primary-pink, #ff85a2));
+    color: #fff;
+    box-shadow: 0 6px 14px rgba(255,133,162,0.35);
+  }
+  #mission-claim-btn i { font-size: 1.05rem; }
+  #mission-claim-btn.claimable {
+    background: linear-gradient(135deg, #7ee08c, #3cb371);
+    box-shadow: 0 6px 14px rgba(60,179,113,0.35);
+  }
+  #mission-claim-btn:disabled {
+    background: #eee;
+    color: #aaa;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+  /* =========================================
      🍪 CUTE MONTHLY COOKIE COUNTDOWN (COMPACT & MINIMAL)
      ========================================= */
   .cookie-countdown-container {
@@ -2001,6 +2135,10 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
 </div>
   
   <div class="nav-btns">
+    <a href="javascript:void(0)" class="nav-icon icon-wrapper" title="ภารกิจประจำวัน" onclick="openDailyMissionModal()">
+        <i class="fas fa-list-check"></i>
+        <span class="noti-badge" id="mission-badge" style="display: none;"></span>
+    </a>
     <a href="majorvote.html" class="nav-icon" title="Major Vote">
         <i class="fas fa-crown"></i>
     </a>
@@ -4066,22 +4204,165 @@ async function refreshAppData() {
   } 
 }
 
+// ==========================================
+// 🎯 DAILY MISSION - แยกชุดภารกิจตาม role ฝั่งเซิร์ฟเวอร์ (get_daily_missions คืน role
+// มาด้วย และเลือกชุด missions ให้เองอยู่แล้ว ฝั่งนี้แค่ render ตาม key ที่ได้รับ):
+//   role=user:   ให้คุกกี้รวม 10 / กดใจ 2 โพส / คอมเมนต์ 2 โพส (ของเดือนนี้ ต่างโพสกัน)
+//   role=member: โพส 1 โพสต่อวัน / กดใจ 3 โพส (ของเดือนนี้ ต่างโพสกัน)
+// รีเซ็ตทุกเที่ยงคืนฝั่งเซิร์ฟเวอร์ (Asia/Bangkok) ความคืบหน้าถูกนับจาก
+// give_cookie/like_post/add_comment/create_post โดยตรง ที่นี่แค่อ่าน+กดรับรางวัล
+// ==========================================
+let dailyMissionData = null;
+const MISSION_META = {
+  cookie:  { icon: 'fa-cookie-bite',   label: (p, t) => `ให้คุกกี้เมมเบอร์รวม ${t} Cookies` },
+  like:    { icon: 'fa-heart',         label: (p, t) => `กดใจโพสของเดือนนี้ ${t} โพส (ต่างโพสกัน)` },
+  comment: { icon: 'fa-comment-dots',  label: (p, t) => `คอมเมนต์โพสของเดือนนี้ ${t} โพส (ต่างโพสกัน)` },
+  post:    { icon: 'fa-pen-to-square', label: (p, t) => `โพสอัปเดตประจำวัน ${t} โพส` }
+};
+
+async function loadDailyMissions() {
+  if (!user || !user.username) return null;
+  try {
+    const res = await blm48GetDailyMissions(user.username);
+    if (res && res.status === 'success') {
+      dailyMissionData = res;
+      const badge = document.getElementById('mission-badge');
+      if (badge) badge.style.display = (res.allDone && !res.claimed) ? 'block' : 'none';
+    }
+    return dailyMissionData;
+  } catch (e) {
+    console.error('loadDailyMissions error:', e);
+    return null;
+  }
+}
+
+function renderDailyMissionsModal() {
+  const list = document.getElementById('mission-item-list');
+  const btn = document.getElementById('mission-claim-btn');
+  if (!list || !btn || !dailyMissionData) return;
+
+  if (!dailyMissionData.missions || dailyMissionData.missions.length === 0) {
+    list.innerHTML = '<div style="text-align:center;color:#aaa;padding:20px 0;">บัญชีนี้ยังไม่มีภารกิจประจำวันค่ะ</div>';
+    btn.disabled = true;
+    btn.classList.remove('claimable');
+    btn.textContent = 'ไม่มีภารกิจ';
+    return;
+  }
+
+  list.innerHTML = dailyMissionData.missions.map(m => {
+    const meta = MISSION_META[m.key];
+    const pct = Math.min(100, Math.round((m.progress / m.target) * 100));
+    return `
+      <div class="mission-item ${m.done ? 'done' : ''}">
+        <div class="mission-item-icon"><i class="fas ${meta.icon}"></i></div>
+        <div class="mission-item-body">
+          <div class="mission-item-text">${escapeHtml(meta.label(m.progress, m.target))}</div>
+          <div class="mission-progress-bar"><div class="mission-progress-fill" style="width:${pct}%;"></div></div>
+          <div class="mission-item-count">${m.progress}/${m.target}</div>
+        </div>
+        <div class="mission-item-check"><i class="fas fa-circle-check"></i></div>
+      </div>`;
+  }).join('');
+
+  if (dailyMissionData.claimed) {
+    btn.disabled = true;
+    btn.classList.remove('claimable');
+    btn.innerHTML = '<i class="fas fa-circle-check"></i> รับของรางวัลวันนี้แล้ว';
+  } else if (dailyMissionData.allDone) {
+    btn.disabled = false;
+    btn.classList.add('claimable');
+    btn.innerHTML = `<i class="fas fa-gift"></i> ${dailyMissionData.reward} Tokens`;
+  } else {
+    btn.disabled = true;
+    btn.classList.remove('claimable');
+    btn.textContent = 'ทำภารกิจให้ครบก่อนนะ';
+  }
+}
+
+// นับถอยหลังไปยังเที่ยงคืนถัดไปตามเวลาประเทศไทย (Asia/Bangkok) ไม่ใช่เวลาเครื่องผู้ใช้
+let missionCountdownTimer = null;
+function msUntilNextBangkokMidnight() {
+  const bkkNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Bangkok' }));
+  const nextMidnight = new Date(bkkNow);
+  nextMidnight.setHours(24, 0, 0, 0);
+  return nextMidnight - bkkNow;
+}
+function tickMissionCountdown() {
+  const el = document.getElementById('mission-countdown');
+  if (!el) return;
+  const totalSec = Math.max(0, Math.floor(msUntilNextBangkokMidnight() / 1000));
+  const h = String(Math.floor(totalSec / 3600)).padStart(2, '0');
+  const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
+  const s = String(totalSec % 60).padStart(2, '0');
+  el.textContent = `${h}:${m}:${s}`;
+}
+
+async function openDailyMissionModal() {
+  if (!user) {
+    Swal.fire('กรุณาเข้าสู่ระบบ', 'เข้าสู่ระบบก่อนเพื่อทำภารกิจประจำวันค่ะ', 'info');
+    return;
+  }
+  const modal = document.getElementById('daily-mission-modal');
+  if (modal) modal.style.display = 'flex';
+  const list = document.getElementById('mission-item-list');
+  if (list) list.innerHTML = '<div style="text-align:center;color:#aaa;padding:20px 0;">กำลังโหลด...</div>';
+
+  tickMissionCountdown();
+  if (!missionCountdownTimer) missionCountdownTimer = setInterval(tickMissionCountdown, 1000);
+
+  await loadDailyMissions();
+  renderDailyMissionsModal();
+}
+
+function closeDailyMissionModal() {
+  const modal = document.getElementById('daily-mission-modal');
+  if (modal) modal.style.display = 'none';
+  if (missionCountdownTimer) {
+    clearInterval(missionCountdownTimer);
+    missionCountdownTimer = null;
+  }
+}
+
+async function claimDailyMissionReward() {
+  if (!user || !user.username) return;
+  const btn = document.getElementById('mission-claim-btn');
+  if (btn) btn.disabled = true;
+  Swal.fire({ title: 'กำลังรับของรางวัล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+  try {
+    const res = await blm48ClaimDailyMissionReward(user.username);
+    if (res && res.status === 'success') {
+      await syncUserData();
+      await loadDailyMissions();
+      renderDailyMissionsModal();
+      Swal.fire('สำเร็จ!', res.message, 'success');
+    } else {
+      Swal.fire('ไม่สำเร็จ', (res && res.message) || 'เกิดข้อผิดพลาด กรุณาลองใหม่', 'error');
+      renderDailyMissionsModal();
+    }
+  } catch (e) {
+    console.error('claimDailyMissionReward error:', e);
+    Swal.fire('ผิดพลาด', 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาลองใหม่อีกครั้งค่ะ', 'error');
+  }
+}
+
 // ⚡ ดักจับตอนหน้าเว็บโหลดโครงสร้างเสร็จสมบูรณ์
 document.addEventListener("DOMContentLoaded", () => {
-  
+
   // ===================================================
   // [ส่วนที่ 1] ระบบล็อกอิน UI และระบบ Background Auto-Kick (คงเดิมไว้)
   // ===================================================
-  user = getUserSession(); 
+  user = getUserSession();
   updateUI();
   hideAppLoading();
   loadData();
 
   if (user) {
     syncUserData();
+    loadDailyMissions();
     setInterval(async () => {
       if (localStorage.getItem('bnl_session')) {
         await syncUserData();
+        await loadDailyMissions();
       }
     }, 45000);
 
@@ -4366,6 +4647,16 @@ document.addEventListener("DOMContentLoaded", () => {
     <img id="tab-profile-img" src="https://lh3.googleusercontent.com/d/1rebp2F8vyP0nyvsEOFD9Nw2mPcRtVqtG=s1000" style="border-radius: 50%; object-fit: cover; border: 2px solid #ffb3c1;">
   </a>
 
+</div>
+
+<div id="daily-mission-modal">
+  <div class="mission-card">
+    <span class="mission-card-close" onclick="closeDailyMissionModal()">&times;</span>
+    <div class="mission-card-title"><i class="fas fa-list-check"></i> ภารกิจประจำวัน</div>
+    <div class="mission-card-subtitle">ทำครบ 3 ภารกิจ รับ 5 Tokens ฟรี! รีเซ็ตในอีก <span id="mission-countdown">--:--:--</span></div>
+    <div id="mission-item-list"></div>
+    <button id="mission-claim-btn" disabled onclick="claimDailyMissionReward()">ทำภารกิจให้ครบก่อนนะ</button>
+  </div>
 </div>
 
 <div id="image-viewer-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); z-index: 9999; justify-content: center; align-items: center;">
