@@ -1205,7 +1205,7 @@ function renderInventoryData() {
                     </div>
                 `;
             }
-        }, 15000);
+        }, 60000); // ไฟล์โฟโต้บุ๊คมีขนาดใหญ่ (~16MB) 15 วิเดิมสั้นเกินไปจนแจ้ง error ทั้งที่ยังโหลดอยู่
 
         currentEpubRendition.display().catch((err) => {
             console.error('epub display error:', err);
