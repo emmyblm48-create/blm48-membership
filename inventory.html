@@ -1233,22 +1233,35 @@ function renderInventoryData() {
             probe.src = imageUrls[0];
         });
 
-        viewerEl.innerHTML = '';
-        const flipRoot = document.createElement('div');
-        flipRoot.id = 'flipbookRoot';
-        viewerEl.appendChild(flipRoot);
-
         const availW = Math.max(viewerEl.clientWidth - 24, 200);
         const availH = Math.max(viewerEl.clientHeight - 24, 200);
         const scale = Math.min(availW / naturalSize.w, availH / naturalSize.h, 1) || 1;
-        const pageW = Math.round(naturalSize.w * scale);
-        const pageH = Math.round(naturalSize.h * scale);
+        const displayW = Math.round(naturalSize.w * scale);
+        const displayH = Math.round(naturalSize.h * scale);
+
+        // StPageFlip เซ็ตขนาด canvas ภายในเท่ากับขนาด CSS พอดี (ไม่คูณ devicePixelRatio)
+        // บนจอ Retina/มือถือความละเอียดสูงเลยเบลอเพราะจอ upscale canvas ให้ใหญ่ขึ้นอีกที
+        // แก้โดยสั่งให้ PageFlip เรนเดอร์ที่ความละเอียดสูงกว่าจริง (คูณ dpr) แล้วห่อด้วย
+        // container ขนาดจริงบนจอ + transform:scale ย่อกลับ ให้ตำแหน่งคลิก/ทัชยังตรงเหมือนเดิม
+        const dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 3));
+        const renderW = Math.round(displayW * dpr);
+        const renderH = Math.round(displayH * dpr);
+
+        viewerEl.innerHTML = '';
+        const sizer = document.createElement('div');
+        sizer.style.cssText = `width:${displayW}px; height:${displayH}px; position:relative; overflow:hidden;`;
+        viewerEl.appendChild(sizer);
+
+        const flipRoot = document.createElement('div');
+        flipRoot.id = 'flipbookRoot';
+        flipRoot.style.cssText = `position:absolute; top:0; left:0; transform: scale(${1 / dpr}); transform-origin: top left;`;
+        sizer.appendChild(flipRoot);
 
         if (currentFlipBook) { currentFlipBook.destroy(); currentFlipBook = null; }
 
         currentFlipBook = new St.PageFlip(flipRoot, {
-            width: pageW,
-            height: pageH,
+            width: renderW,
+            height: renderH,
             size: 'fixed',
             showCover: false,
             maxShadowOpacity: 0.5,
