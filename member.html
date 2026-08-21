@@ -411,7 +411,7 @@
     .fan-name { font-size: 13px; color: var(--dark-text); font-weight: 500; }
     .fan-amount {
       font-size: 11px;
-      color: #d2691e;
+      color: #ff6b9d;
       display: flex;
       align-items: center;
       gap: 3px;
@@ -730,6 +730,7 @@
             user.token = wallet.token;
             user.cookie = wallet.cookie;
             user.geToken = wallet.geToken;
+            user.fanCookies = wallet.fanCookies;
           }
           saveUserSession(user);
           updateButtonStyles();
@@ -804,9 +805,10 @@ function renderMemberStatsAndFans() {
   
   if (savedFans && fanContainer) {
     fanContainer.innerHTML = '';
+
     const fans = JSON.parse(savedFans);
     if (fans.length === 0) {
-      fanContainer.innerHTML = '<div style="padding:20px 0; color:#bbb; font-size:12px; text-align:center;">ยังไม่มีแฟนคลับปาคุกกี้ให้ในเดือนนี้</div>';
+      fanContainer.innerHTML += '<div style="padding:20px 0; color:#bbb; font-size:12px; text-align:center;">ยังไม่มีแฟนคลับปาคุกกี้ให้ในเดือนนี้</div>';
     } else {
       fans.forEach((f, idx) => {
         const row = document.createElement('div');
@@ -816,7 +818,7 @@ function renderMemberStatsAndFans() {
           <img src="${getImg(f.img)}" class="fan-avatar" onerror="this.src='https://raw.githubusercontent.com/Chatchapong-Sing/stockManagement/main/default-profile.png'"> 
           <div class="fan-meta">
             <div class="fan-name">${f.name || f.username}</div>
-            <div class="fan-amount"><i class="fas fa-cookie-bite"></i> ${Number(f.total || 0).toLocaleString()} Cookies</div>
+            <div class="fan-amount"><i class="fas fa-heart-circle-check"></i> ${Number(f.total || 0).toLocaleString()} Fan Score</div>
           </div>
         `;
         fanContainer.appendChild(row);

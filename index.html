@@ -2460,6 +2460,7 @@ async function syncUserData() {
         result.data.token = wallet.token;
         result.data.cookie = wallet.cookie;
         result.data.geToken = wallet.geToken;
+        result.data.fanCookies = wallet.fanCookies;
       }
     } catch (e) { console.error("Wallet sync error:", e); }
 
@@ -3404,7 +3405,7 @@ function renderGlobalFans(rawData) {
         ${f.name || f.username}
       </div>
       <div style="font-size:12px; color:var(--primary-pink); font-weight:700; margin-top:4px;">
-        <i class="fas fa-cookie-bite" style="color: #d2691e;"></i> ${Number(f.total).toLocaleString()}
+        <i class="fas fa-heart-circle-check" style="color: #ff6b9d;"></i> ${Number(f.total).toLocaleString()} Fan Score
       </div>
     `;
     list.appendChild(card);
