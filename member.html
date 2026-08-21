@@ -1861,7 +1861,7 @@ document.addEventListener('click', function() {
         const data = await blm48EditPost(currentUser.username, postId, newText, newImageUrl);
         if (data.status === 'success') {
           const contentEl = document.getElementById(`content-${postId}`);
-          if (contentEl) contentEl.innerText = newText;
+          if (contentEl) contentEl.innerHTML = formatPostContent(newText); // ผ่าน formatPostContent เพื่อให้ #hashtag/ลิงก์/@แท็ก ยังขึ้นหลังแก้ไขโพสต์
           if (postEl) postEl.dataset.images = newImageUrl;
           const imagesContainer = document.getElementById(`post-images-${postId}`);
           if (imagesContainer) imagesContainer.innerHTML = buildImagesHtml(newImageUrl);

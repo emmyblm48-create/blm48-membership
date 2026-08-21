@@ -4191,7 +4191,7 @@ async function editPostUi(postId, encodedContent) {
   const data = await blm48EditPost(currentUser.username, postId, newText, newImageUrl);
 
   if (data.status === 'success') {
-    document.getElementById(`content-${postId}`).innerText = newText; // เปลี่ยนข้อความบนจอทันที
+    document.getElementById(`content-${postId}`).innerHTML = formatPostContent(newText); // เปลี่ยนข้อความบนจอทันที (ผ่าน formatPostContent เพื่อให้ #hashtag/ลิงก์/@แท็ก ยังขึ้นหลังแก้ไขโพสต์)
     if (postEl) postEl.dataset.images = newImageUrl;
     const imagesContainer = document.getElementById(`post-images-${postId}`);
     if (imagesContainer) imagesContainer.innerHTML = buildImagesHtml(newImageUrl);

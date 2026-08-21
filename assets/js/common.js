@@ -23,6 +23,37 @@
   document.addEventListener('dblclick', function(e) { e.preventDefault(); }, { passive: false });
 })();
 
+// 🛡️ กันกดรูปค้าง (long-press) แล้วเซฟรูป / คลิกขวา Save Image As ทุกหน้า ยกเว้นหน้า inventory
+// (หน้า inventory ต้องการให้ผู้ใช้เซฟรูปไอเทมที่ซื้อไว้ได้ตามปกติ)
+// ใช้ delegated event ที่ document แทนการเซ็ต attribute ทีละรูป เพื่อให้ครอบคลุมรูปที่ยังไม่ถูกสร้าง
+// ตอนนี้ด้วย (โพสต์/แกลเลอรีที่โหลดทีหลังผ่าน JS) โดยไม่ต้องใช้ MutationObserver
+(function preventImageSaving() {
+  const currentPage = window.location.pathname.replace(/\/+$/, '').split('/').pop() || '';
+  if (currentPage === 'inventory' || currentPage === 'inventory.html') return;
+
+  // คลิกขวา (เดสก์ท็อป) / long-press ที่ยิง contextmenu (บางเบราว์เซอร์บนมือถือ) บนรูปภาพ
+  document.addEventListener('contextmenu', function(e) {
+    if (e.target && e.target.tagName === 'IMG') e.preventDefault();
+  });
+
+  // ลากรูปออกไปวางที่อื่นเพื่อเซฟ (เดสก์ท็อป)
+  document.addEventListener('dragstart', function(e) {
+    if (e.target && e.target.tagName === 'IMG') e.preventDefault();
+  });
+
+  // -webkit-touch-callout ปิดเมนู "บันทึกรูปภาพ" ตอนกดค้างบน iOS Safari โดยเฉพาะ (เบราว์เซอร์อื่นไม่รองรับ
+  // property นี้ก็ไม่เป็นไร ยังมี contextmenu preventDefault ด้านบนช่วยกันซ้ำอีกชั้น)
+  const style = document.createElement('style');
+  style.textContent = `
+    img {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+  `;
+  document.head.appendChild(style);
+})();
+
 // อัปเดตตัวเลขคุกกี้สะสมของโพสต์บนจอทันที (real-time หลังกดใจ/คอมเมนต์/ตอบกลับ/กดใจคอมเมนต์)
 function updatePostCookiesUI(postId, postCookies) {
   if (!postId || postCookies === undefined || postCookies === null) return;
