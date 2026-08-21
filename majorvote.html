@@ -439,7 +439,7 @@
     }
 
     // 🌟 ตัวแปรหลักที่ใช้เก็บชื่อผู้ใช้ของหน้านี้คือ username
-    const username = getUsernameFromSession(); 
+    const username = getUsernameFromSession();
 
     async function initPage() {
         if (!username) {
@@ -448,10 +448,82 @@
             return;
         }
         checkAppVersion();
-        
+
         loadWalletFromCache();
-        
+        loadChampThemeSubPage(); // 🎨 ไอคอน nav-bar ธีมแชมป์ประจำเดือน (เพิ่มมาพร้อม bottom-tab-bar ของหน้านี้)
+        loadTabProfileImg(); // 🖼️ รูปโปรไฟล์ผู้ใช้ในแท็บ Profile
+
         await Promise.all([loadUserBalancesRealTime(), loadVoteCampaigns()]);
+    }
+
+    // ==========================================
+    // 🎨 ฟังก์ชันโหลดและซิงค์ธีมผู้ชนะ (ก็อปมาจาก kami.html - หน้านี้เพิ่งมี bottom-tab-bar เป็นครั้งแรก
+    // ตอนสลับบทบาทกับ shop.html เลยยังไม่เคยมีการดึงไอคอนธีมแชมป์มาโชว์ตรงนี้มาก่อน)
+    // ==========================================
+    function loadChampThemeSubPage() {
+        const CACHE_KEY = "bnl_winner_theme_cache";
+
+        // 1. ดึงจากแคชเก่าในเครื่องมาแสดงรอก่อนทันที (แอปเปิดเร็ว ไอคอนไม่กระพริบโล่ง)
+        const cachedDataStr = localStorage.getItem(CACHE_KEY);
+        if (cachedDataStr) {
+            try {
+                const cachedObj = JSON.parse(cachedDataStr);
+                const champOnly = cachedObj.champ ? cachedObj.champ : cachedObj;
+                applySubPageTheme(champOnly);
+            } catch (e) {}
+        }
+
+        // 2. แอบไปเช็กกับหลังบ้านเงียบๆ ว่าข้อมูลเปลี่ยนคนชนะหรือยัง
+        blm48GetWinnerTheme()
+            .then(newData => {
+                const newChampData = newData.champ ? newData.champ : newData;
+                if (newChampData && newChampData.name) {
+                    let cacheChampStr = "";
+                    if (cachedDataStr) {
+                        try {
+                            const parsed = JSON.parse(cachedDataStr);
+                            cacheChampStr = JSON.stringify(parsed.champ ? parsed.champ : parsed);
+                        } catch (e) {}
+                    }
+                    if (cacheChampStr !== JSON.stringify(newChampData)) {
+                        localStorage.setItem(CACHE_KEY, JSON.stringify(newData));
+                        applySubPageTheme(newChampData);
+                    }
+                }
+            }).catch(e => console.error("โหลดธีมแชมป์ประจำเดือนไม่สำเร็จ:", e));
+    }
+
+    function applySubPageTheme(champData) {
+        if (!champData) return;
+        updateSubPageIcon('nav-home', 'nav-home-fallback', champData.homeIcon);
+        updateSubPageIcon('nav-kami', 'nav-kami-fallback', champData.kamiIcon);
+        updateSubPageIcon('nav-cart', 'nav-cart-fallback', champData.cartIcon);
+        updateSubPageIcon('nav-noti', 'nav-noti-fallback', champData.notiIcon);
+    }
+
+    function updateSubPageIcon(imgId, fallbackId, iconUrl) {
+        const imgElement = document.getElementById(imgId);
+        const fallbackElement = document.getElementById(fallbackId);
+        if (imgElement && fallbackElement) {
+            if (iconUrl && iconUrl.trim() !== "") {
+                imgElement.src = iconUrl;
+                imgElement.style.display = 'block';
+                fallbackElement.style.display = 'none';
+            } else {
+                imgElement.style.display = 'none';
+                fallbackElement.style.display = 'block';
+            }
+        }
+    }
+
+    // 🖼️ รูปโปรไฟล์ในแท็บ Profile ของ bottom-tab-bar (ก็อปแบบเดียวกับ kami.html)
+    function loadTabProfileImg() {
+        const tabProfileImg = document.getElementById('tab-profile-img');
+        if (!tabProfileImg) return;
+        const currentUser = getUserSession();
+        if (currentUser && currentUser.profile_img) {
+            tabProfileImg.src = typeof getImg === 'function' ? getImg(currentUser.profile_img) : currentUser.profile_img;
+        }
     }
 
     function loadWalletFromCache() {
