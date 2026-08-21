@@ -892,6 +892,10 @@ function renderMemberStatsAndFans() {
       if (!memberName) { window.location.href = 'index'; return; }
       user = getUserSession();
 
+      // 🛡️ ยิงโหลดรายชื่อเมมเบอร์จริงไว้ล่วงหน้าแบบไม่รอ (หน้านี้ไม่มี window.memberData จากที่อื่นเหมือน index.html)
+      // ใช้เช็คก่อนแปลง @แท็กในโพสเป็นลิงก์ กันแท็กชื่อไม่มีตัวตนจริง (ดู getMemberNameLookup ใน common.js)
+      primeMemberNameCache();
+
       // 🔴 Realtime: ยอด Token/Cookie เปลี่ยนจากที่ไหนก็ตาม -> อัปเดตปุ่มให้คุกกี้ทันที
       if (user && window.BLM48Realtime) {
         window.BLM48Realtime.subscribeWallet(user.username, (wallet) => {

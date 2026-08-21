@@ -112,6 +112,45 @@ function escapeAttr(text) {
     .replace(/>/g, "&gt;");
 }
 
+// 🛡️ [กันแท็กผี] แคชรายชื่อเมมเบอร์จริง (lowercase -> ชื่อจริงตามระบบ) ไว้เช็คก่อนแปลง @ชื่อ เป็นลิงก์
+// index.html มักมี window.memberData อยู่แล้ว (จาก renderRanking) ใช้อันนั้นก่อนถ้ามี ไม่งั้นค่อยไปดึงเอง (member.html)
+// แคชคำนวณ Map ใหม่เฉพาะตอน window.memberData เปลี่ยน reference เท่านั้น ไม่ต้องวนลูปทุกครั้งที่ render โพสต์
+let _memberNameLookupSource = null;
+let _memberNameLookupCache = null;
+let _memberNameCacheLoading = false;
+
+function getMemberNameLookup() {
+  const source = window.memberData;
+  if (!Array.isArray(source) || source.length === 0) return null;
+  if (_memberNameLookupSource === source) return _memberNameLookupCache;
+
+  const map = new Map();
+  source.forEach(m => {
+    const name = m && m.name ? m.name.toString().trim() : '';
+    if (name) map.set(name.toLowerCase(), name);
+  });
+  _memberNameLookupSource = source;
+  _memberNameLookupCache = map;
+  return map;
+}
+
+// เรียกตอนโหลดหน้า (fire-and-forget) เพื่อให้ตรวจแท็กได้ทันเวลาที่โพสต์เริ่ม render
+// ถ้า window.memberData มีข้อมูลอยู่แล้ว (เช่น index.html โหลดจากแคช) จะข้ามการดึงซ้ำทันที
+async function primeMemberNameCache() {
+  if ((Array.isArray(window.memberData) && window.memberData.length > 0) || _memberNameCacheLoading) return;
+  _memberNameCacheLoading = true;
+  try {
+    const res = await blm48GetAllMembers();
+    if (res && res.status === 'success' && Array.isArray(res.data)) {
+      window.memberData = res.data;
+    }
+  } catch (e) {
+    console.error('โหลดรายชื่อเมมเบอร์สำหรับตรวจแท็กไม่สำเร็จ:', e);
+  } finally {
+    _memberNameCacheLoading = false;
+  }
+}
+
 // แปลงเนื้อหาโพสต์เป็น HTML ที่แสดงผล: escape ทุกอย่างก่อนเสมอ (กัน XSS) แล้วค่อยแปลง
 // URL / #hashtag / @แท็กเมมเบอร์ ที่เจอเป็นลิงก์คลิกได้ทีหลังจากข้อความที่ escape แล้วเท่านั้น
 // ใช้แทน escapeHtml(post.content) ตรงๆ ในทุกที่ที่ render เนื้อหาโพสต์ (index.html, member.html)
@@ -144,8 +183,16 @@ function formatPostContent(content) {
       const tag = match[2];
       result += `<a href="javascript:void(0)" onclick="filterFeedByHashtag('${escapeAttr(tag)}')" style="color:#d4af37;font-weight:700;text-decoration:none;">#${escapeHtml(tag)}</a>`;
     } else if (match[3]) {
+      // 🛡️ [กันแท็กผี] แปลงเป็นลิงก์เฉพาะชื่อที่มีตัวตนจริงในระบบเท่านั้น (เทียบแบบ case-insensitive)
+      // ชื่อที่พิมพ์มั่ว/สะกดผิด/ไม่มีเมมเบอร์คนนี้จริง จะโชว์เป็นข้อความเฉยๆ ไม่ใช่ลิงก์ไปหน้าเปล่า
       const name = match[3];
-      result += `<a href="member?name=${encodeURIComponent(name)}" style="color:var(--primary-pink,#ff85a2);font-weight:700;text-decoration:none;">@${escapeHtml(name)}</a>`;
+      const lookup = getMemberNameLookup();
+      const canonicalName = lookup ? lookup.get(name.toLowerCase()) : null;
+      if (canonicalName) {
+        result += `<a href="member?name=${encodeURIComponent(canonicalName)}" style="color:var(--primary-pink,#ff85a2);font-weight:700;text-decoration:none;">@${escapeHtml(canonicalName)}</a>`;
+      } else {
+        result += `@${escapeHtml(name)}`;
+      }
     }
 
     lastIndex = pattern.lastIndex;
