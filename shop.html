@@ -308,7 +308,7 @@
             color: var(--primary-pink);
             font-size: 18px;
         }
-        .wallet { display: grid; grid-template-columns: repeat(4, 1fr); }
+        .wallet { display: grid; grid-template-columns: repeat(3, 1fr); }
         .wallet-item {
             text-align: center;
             display: flex;
@@ -1009,10 +1009,6 @@
     <div class="wallet-card-header"><i class="fas fa-wallet"></i> My Wallet</div>
     <div class="wallet" id="shop-wallet-bar">
         <div class="wallet-item">
-            <div class="wallet-value">-</div>
-            <div class="wallet-label">Oshi Members</div>
-        </div>
-        <div class="wallet-item">
             <div class="wallet-value" style="color:var(--cookie-brown);"><i class="fas fa-cookie-bite"></i> -</div>
             <div class="wallet-label">Cookies</div>
         </div>
@@ -1278,24 +1274,12 @@ function celebratePurchase() {
     }
 }
 
-// 2. อัปเดตการแสดงผลยอดเงินในกระเป๋า (หน้าตาเดียวกับสถิติ Oshi Members/Cookies/Tokens/GE Tokens ในหน้า profile.html)
+// 2. อัปเดตการแสดงผลยอดเงินในกระเป๋า (หน้าตาเดียวกับสถิติ Cookies/Tokens/GE Tokens ในหน้า profile.html)
 function updateWalletUI() {
     const walletBar = document.getElementById('shop-wallet-bar');
     if (!userData || !walletBar) return;
 
-    // นับจำนวน Oshi ทั้งหมด (คามิโอชิหลัก + โอชิสมทบ) เหมือนที่ profile.html คำนวณ pf-oshi-count
-    let totalOshi = 0;
-    if (userData.kamioshi && userData.kamioshi.trim() !== "") totalOshi += 1;
-    if (userData.oshi && Array.isArray(userData.oshi)) {
-        const validOshis = userData.oshi.filter(o => o && o.trim() !== "" && o.toLowerCase() !== (userData.kamioshi || "").toLowerCase());
-        totalOshi += validOshis.length;
-    }
-
     walletBar.innerHTML = `
-        <div class="wallet-item">
-            <div class="wallet-value">${totalOshi.toLocaleString()}</div>
-            <div class="wallet-label">Oshi Members</div>
-        </div>
         <div class="wallet-item">
             <div class="wallet-value" style="color:var(--cookie-brown);"><i class="fas fa-cookie-bite"></i> ${Number(userData.cookie).toLocaleString()}</div>
             <div class="wallet-label">Cookies</div>
