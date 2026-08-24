@@ -23,6 +23,46 @@
   document.addEventListener('dblclick', function(e) { e.preventDefault(); }, { passive: false });
 })();
 
+// 👈 [ปัดย้อนกลับ] หน้าที่ไม่มี bottom-tab-bar (เมนูหลักด้านล่าง) ปัดจากขอบซ้ายสุดของจอไปทางขวาเพื่อ
+// ย้อนกลับไปหน้าก่อนหน้าได้ เหมือน edge-swipe มาตรฐานของ iOS — เช็คจาก DOM ว่ามี .bottom-tab-bar
+// อยู่จริงไหม (ไม่ใช่เช็คจากชื่อไฟล์) กันหลุดถ้าโครงสร้างหน้าเปลี่ยนในอนาคต ต้องรอ DOMContentLoaded
+// ก่อนเช็ค เพราะ common.js โหลดใน <head> ตั้งแต่ก่อน body (รวมถึง .bottom-tab-bar) จะถูกสร้างขึ้น
+document.addEventListener('DOMContentLoaded', function initSwipeBackGesture() {
+  if (document.querySelector('.bottom-tab-bar')) return; // หน้านี้มีเมนูหลักด้านล่างอยู่แล้ว ไม่ต้องมีปัดย้อนกลับซ้อน
+
+  const EDGE_ZONE_PX = 28;          // ต้องเริ่มปัดจากขอบซ้ายสุดของจอ (แบบเดียวกับ iOS edge-swipe)
+  const MIN_DISTANCE_PX = 70;       // ระยะปัดขั้นต่ำถึงจะถือว่าตั้งใจปัดย้อนกลับจริงๆ ไม่ใช่กดพลาด
+  const MAX_VERTICAL_DRIFT_PX = 60; // ปัดเฉียงขึ้น/ลงเกินนี้ถือว่าแค่กำลังเลื่อนจอ ไม่ใช่ปัดย้อนกลับ
+
+  let startX = 0;
+  let startY = 0;
+  let tracking = false;
+
+  document.addEventListener('touchstart', function(e) {
+    if (!e.touches || e.touches.length !== 1) { tracking = false; return; }
+    const touch = e.touches[0];
+    tracking = touch.clientX <= EDGE_ZONE_PX;
+    startX = touch.clientX;
+    startY = touch.clientY;
+  }, { passive: true });
+
+  document.addEventListener('touchend', function(e) {
+    if (!tracking) return;
+    tracking = false;
+    const touch = e.changedTouches && e.changedTouches[0];
+    if (!touch) return;
+    const deltaX = touch.clientX - startX;
+    const deltaY = Math.abs(touch.clientY - startY);
+    if (deltaX >= MIN_DISTANCE_PX && deltaY <= MAX_VERTICAL_DRIFT_PX) {
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = 'index';
+      }
+    }
+  }, { passive: true });
+});
+
 // 🛡️ กันกดรูปค้าง (long-press) แล้วเซฟรูป / คลิกขวา Save Image As ทุกหน้า ยกเว้นหน้า inventory
 // (หน้า inventory ต้องการให้ผู้ใช้เซฟรูปไอเทมที่ซื้อไว้ได้ตามปกติ)
 // ใช้ delegated event ที่ document แทนการเซ็ต attribute ทีละรูป เพื่อให้ครอบคลุมรูปที่ยังไม่ถูกสร้าง
@@ -52,6 +92,29 @@
     }
   `;
   document.head.appendChild(style);
+})();
+
+// 📱 [เปิดโพสต์เต็มจอ] กดที่พื้นที่ว่างของการ์ดโพสต์ (index.html/member.html) เพื่อไปหน้า postdetail
+// แบบเต็มจอโพสต์เดียว กดย้อนกลับได้ - ไม่ทำงานถ้าคลิกโดนปุ่ม/ลิงก์/รูป/ช่องคอมเมนต์ที่มี action ของตัวเองอยู่แล้ว
+// (เช็คจาก tagName ของปุ่ม/ลิงก์/อินพุตมาตรฐาน บวกกับ attribute onclick ที่ผูกไว้ตรงๆ เช่นรูปโปรไฟล์/ชื่อผู้โพส)
+// ข้ามหน้า postdetail เองไปเลย กันกดซ้ำแล้ว reload หน้าเดิมทิ้งเปล่าๆ
+(function initPostCardFullViewNavigation() {
+  const currentPage = window.location.pathname.replace(/\/+$/, '').split('/').pop() || '';
+  if (currentPage === 'postdetail' || currentPage === 'postdetail.html') return;
+
+  document.addEventListener('click', function(e) {
+    const card = e.target.closest('.post-card');
+    if (!card) return;
+
+    const interactiveEl = e.target.closest(
+      'a, button, input, textarea, img, audio, svg, [onclick], .voice-msg-bubble, [id^="comment-section-"]'
+    );
+    if (interactiveEl && card.contains(interactiveEl)) return;
+
+    const postId = card.id ? card.id.replace(/^post-/, '') : '';
+    if (!postId) return;
+    window.location.href = `postdetail?id=${encodeURIComponent(postId)}`;
+  });
 })();
 
 // อัปเดตตัวเลขคุกกี้สะสมของโพสต์บนจอทันที (real-time หลังกดใจ/คอมเมนต์/ตอบกลับ/กดใจคอมเมนต์)
@@ -548,7 +611,7 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('blm48_has_new_noti', 'true');
     if (typeof checkNotificationBadge === 'function') checkNotificationBadge();
 
-    const targetUrl = row.post_id ? `index?post=${encodeURIComponent(row.post_id)}` : 'notification.html';
+    const targetUrl = row.post_id ? `postdetail?id=${encodeURIComponent(row.post_id)}` : 'notification.html';
     showIosNotification({
       avatar: row.avatar,
       title: row.writer,
