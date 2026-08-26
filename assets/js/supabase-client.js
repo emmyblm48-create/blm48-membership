@@ -158,51 +158,30 @@ function blm48EditComment(username, commentId, text) {
   return blm48Rpc('edit_comment', { p_username: username, p_comment_id: commentId, p_text: text });
 }
 
-// Lazily spins up a small Firebase Storage client on first use, in its own named app
-// ("blm48-storage") separate from firebase-realtime.js's "blm48-realtime" app - not every page
-// that uploads media (post.html, profile.html) loads that script, so this stays self-contained
-// here instead of depending on load order across files. Moved uploads here from Supabase Storage
-// on 2026-08-26 because Supabase's free-tier egress quota (5.5GB/mo) was already blown past
-// (19.28GB) with a hard cutoff date from Supabase, and Firebase's free (Spark) tier gives far
-// more egress headroom (~1GB/day). Same "no real auth session, anon can upload" trust model as
-// before - enforced via Storage security rules (size/content-type caps) instead of Supabase RLS.
-let _blm48FirebaseStoragePromise = null;
-function blm48GetFirebaseStorage() {
-  if (!_blm48FirebaseStoragePromise) {
-    _blm48FirebaseStoragePromise = (async () => {
-      const { initializeApp, getApps, getApp } = await import('https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js');
-      const { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } = await import('https://www.gstatic.com/firebasejs/10.10.0/firebase-storage.js');
-      const firebaseConfig = {
-        apiKey: "AIzaSyAx5JlVGm_IpuOhksQMTA6qli9vR-5rNas",
-        authDomain: "blm48-official-site.firebaseapp.com",
-        projectId: "blm48-official-site",
-        storageBucket: "blm48-official-site.firebasestorage.app",
-        messagingSenderId: "924510827472",
-      };
-      const app = getApps().some(a => a.name === 'blm48-storage') ? getApp('blm48-storage') : initializeApp(firebaseConfig, 'blm48-storage');
-      return { storage: getStorage(app), ref, uploadBytes, getDownloadURL, deleteObject };
-    })();
-  }
-  return _blm48FirebaseStoragePromise;
-}
-
-// Shared upload helper - `folder` mirrors what used to be separate Supabase buckets, now just
-// path prefixes in Firebase's single default bucket. `file` can be a File or Blob; extension is
-// guessed from its MIME type (falls back to jpg since callers compress/crop to JPEG client-side
-// before calling this, except audio which passes its own already-known extension in via `ext`).
-// Retries on transient failures (network blip, rate limit); fresh random filePath per attempt so
-// a lost success response never collides with the retry.
-async function blm48UploadToFirebase(folder, username, file, ext, retries = 2) {
-  const type = file.type || 'application/octet-stream';
+// Uploads a recorded voice-clip Blob straight to the public "post-audio" Storage bucket
+// (created 2026-08-05, replaces the old audio pipeline that pointed at a since-abandoned
+// Supabase project) and returns its public URL for create_post/edit_post's audio param.
+// Same "anon key, no real auth session" trust model as every RPC above - anyone can upload,
+// but only into this bucket, capped by its own file_size_limit/allowed_mime_types.
+// Retries on transient failures (network blip, rate limit) same as the image upload path in
+// post.html. Generates a fresh random filePath per attempt so a lost success response never
+// collides with the retry (upsert:false would otherwise error out on an already-existing file).
+async function blm48UploadPostAudio(username, blob, retries = 2) {
+  const ext = blob.type.includes('mp4') ? 'm4a' : (blob.type.includes('ogg') ? 'ogg' : (blob.type.includes('wav') ? 'wav' : 'webm'));
 
   let lastError;
   for (let attempt = 0; attempt <= retries; attempt++) {
-    const filePath = `${folder}/${username}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const filePath = `${username}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
     try {
-      const { storage, ref, uploadBytes, getDownloadURL } = await blm48GetFirebaseStorage();
-      const fileRef = ref(storage, filePath);
-      await uploadBytes(fileRef, file, { contentType: type, cacheControl: 'public, max-age=31536000, immutable' });
-      return await getDownloadURL(fileRef);
+      const { error } = await blm48Supabase.storage.from('post-audio').upload(filePath, blob, {
+        contentType: blob.type || 'audio/webm',
+        upsert: false,
+        cacheControl: '31536000'
+      });
+      if (error) throw error;
+
+      const { data } = blm48Supabase.storage.from('post-audio').getPublicUrl(filePath);
+      return data.publicUrl;
     } catch (err) {
       lastError = err;
       if (attempt === retries) throw lastError;
@@ -211,39 +190,55 @@ async function blm48UploadToFirebase(folder, username, file, ext, retries = 2) {
   }
 }
 
-async function blm48UploadPostAudio(username, blob, retries = 2) {
-  const ext = blob.type.includes('mp4') ? 'm4a' : (blob.type.includes('ogg') ? 'ogg' : (blob.type.includes('wav') ? 'wav' : 'webm'));
-  return blm48UploadToFirebase('postAudio', username, blob, ext, retries);
+// Shared upload helper for the image buckets below - same retry-with-fresh-filename pattern as
+// blm48UploadPostAudio. `file` can be a File or Blob; extension is guessed from its MIME type
+// (falls back to jpg since both callers compress/crop to JPEG client-side before calling this).
+async function blm48UploadImageToBucket(bucket, username, file, retries = 2) {
+  const type = file.type || 'image/jpeg';
+  const ext = type.includes('png') ? 'png' : (type.includes('webp') ? 'webp' : (type.includes('gif') ? 'gif' : 'jpg'));
+
+  let lastError;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const filePath = `${username}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    try {
+      const { error } = await blm48Supabase.storage.from(bucket).upload(filePath, file, {
+        contentType: type,
+        upsert: false,
+        cacheControl: '31536000'
+      });
+      if (error) throw error;
+
+      const { data } = blm48Supabase.storage.from(bucket).getPublicUrl(filePath);
+      return data.publicUrl;
+    } catch (err) {
+      lastError = err;
+      if (attempt === retries) throw lastError;
+      await new Promise(resolve => setTimeout(resolve, 800 * (attempt + 1)));
+    }
+  }
 }
 
+// Replaces ImgBB (went down entirely on 2026-08-05, taking every image upload in the app down
+// with it) - post.html's gallery images and profile.html's profile picture go straight to
+// Supabase Storage instead of a third-party host with no reliability guarantee.
 function blm48UploadPostImage(username, file, retries = 2) {
-  const type = file.type || 'image/jpeg';
-  const ext = type.includes('png') ? 'png' : (type.includes('webp') ? 'webp' : (type.includes('gif') ? 'gif' : 'jpg'));
-  return blm48UploadToFirebase('postImages', username, file, ext, retries);
+  return blm48UploadImageToBucket('post-images', username, file, retries);
 }
 function blm48UploadProfileImage(username, file, retries = 2) {
-  const type = file.type || 'image/jpeg';
-  const ext = type.includes('png') ? 'png' : (type.includes('webp') ? 'webp' : (type.includes('gif') ? 'gif' : 'jpg'));
-  return blm48UploadToFirebase('profileImages', username, file, ext, retries);
+  return blm48UploadImageToBucket('profile-images', username, file, retries);
 }
 
 // Best-effort cleanup for orphaned files - old profile photo after a replace, a post's
 // images/audio after it's deleted, or images dropped from a post during edit. Only matches
-// URLs that actually point at one of our own storage locations (Supabase's old buckets, still
-// referenced by posts/profiles from before the Firebase move, or Firebase's current bucket) -
-// so it silently no-ops on default avatars, old dead-project audio links, etc. Never throws:
-// this tidies up storage quota, it should never block or fail the user-facing action that
-// triggered it.
+// URLs that actually point at one of our own buckets on this project (so it silently no-ops
+// on default avatars, old dead-project audio links, etc. - anything else just isn't ours to
+// delete). Never throws: this tidies up storage quota, it should never block or fail the
+// user-facing action that triggered it.
 const BLM48_STORAGE_BUCKETS = ['post-images', 'profile-images', 'post-audio'];
 async function blm48DeleteStorageFiles(urls) {
   const pathsByBucket = {};
-  const firebaseUrls = [];
   (urls || []).forEach((url) => {
     if (!url) return;
-    if (url.includes('firebasestorage.googleapis.com')) {
-      firebaseUrls.push(url);
-      return;
-    }
     for (const bucket of BLM48_STORAGE_BUCKETS) {
       const marker = `${BLM48_SUPABASE_URL}/storage/v1/object/public/${bucket}/`;
       if (url.indexOf(marker) === 0) {
@@ -259,17 +254,6 @@ async function blm48DeleteStorageFiles(urls) {
       console.error('blm48DeleteStorageFiles ' + bucket + ' error:', err);
     })
   );
-
-  if (firebaseUrls.length) {
-    tasks.push((async () => {
-      const { storage, ref, deleteObject } = await blm48GetFirebaseStorage();
-      await Promise.all(firebaseUrls.map((url) =>
-        deleteObject(ref(storage, url)).catch((err) => {
-          console.error('blm48DeleteStorageFiles firebase error:', err);
-        })
-      ));
-    })());
-  }
 
   await Promise.all(tasks);
 }
