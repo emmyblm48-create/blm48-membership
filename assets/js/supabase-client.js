@@ -396,8 +396,8 @@ function blm48ClaimMonthlyCookie(username) {
 
 // Membership Tier for the profile Membership Card: role='member' always
 // gets {tier: null} (plain Member Card); role='user' gets 'copper' /
-// 'silver' / 'gold' based on last month's average Token holding, computed
-// server-side from daily snapshots.
+// 'silver' / 'gold' based on lifetime Fan Score (users.fan_cookies):
+// copper <5000, silver 5000-10000, gold 10000+. Computed server-side.
 function blm48GetMembershipTier(username) {
   return blm48Rpc('get_membership_tier', { p_username: username });
 }
