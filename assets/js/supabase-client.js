@@ -102,6 +102,10 @@ function blm48GetMemberTopFans(memberName) {
 function blm48GetTopFans() {
   return blm48Rpc('get_top_fans', {});
 }
+// Fan Score breakdown per member for one user (reverse of get_member_top_fans) - used on profile.html
+function blm48GetUserFanScores(username) {
+  return blm48Rpc('get_user_fan_scores', { p_username: username });
+}
 
 // Live-updates whenever anyone's monthly cookie total changes (give_cookie, likePost).
 // onChange is called with no arguments — caller decides what to re-fetch/re-render.
