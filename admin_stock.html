@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8">
+    <title>BLM48 Membership | คลังสินค้า</title>
+    <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s32">
+    <meta name="theme-color" content="#ffc0cb">
+    <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s180">
+    <link rel="icon" sizes="192x192" href="https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s192">
+    <meta name="apple-mobile-web-app-title" content="BLM48">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/glassmorphism.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/supabase-client.js"></script>
+    <script src="assets/js/common.js"></script>
+
+    <style>
+        :root {
+            --primary-pink: #ff85a2;
+            --soft-pink: #ffe4e1;
+            --card-border: #ffeef2;
+            --text-dark: #444;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Quicksand', 'Kanit', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            color: var(--text-dark);
+            background: #ffffff;
+        }
+
+        .top-navigation-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--glass-bg-strong);
+            -webkit-backdrop-filter: blur(var(--glass-blur-lg));
+            backdrop-filter: blur(var(--glass-blur-lg));
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--glass-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--glass-shadow-sm);
+        }
+        .back-circle-btn {
+            flex: 0 0 auto;
+            background: var(--glass-bg-strong);
+            -webkit-backdrop-filter: blur(var(--glass-blur-sm));
+            backdrop-filter: blur(var(--glass-blur-sm));
+            border: 1px solid var(--glass-border);
+            width: 38px; height: 38px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--primary-pink); cursor: pointer; transition: 0.2s;
+        }
+        .back-circle-btn:hover { background: var(--primary-pink); color: white; transform: scale(1.05); }
+        .top-bar-title { font-family: 'Kanit', sans-serif; font-weight: 600; font-size: 16px; color: #333; }
+
+        .page-wrapper { max-width: 640px; margin: 0 auto; padding: 18px 16px 50px; }
+        @media (min-width: 768px) { .page-wrapper { max-width: 760px; padding: 24px 24px 60px; } }
+        @media (min-width: 1024px) { .page-wrapper { max-width: 1080px; padding: 32px 32px 70px; } }
+
+        .header-title-zone { text-align: center; margin-bottom: 20px; }
+        .header-title-zone h1 {
+            color: var(--primary-pink);
+            font-family: 'Kanit', sans-serif;
+            font-size: 24px;
+            margin: 0 0 6px 0;
+            font-weight: 700;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .header-title-zone p { color: #999; font-size: 13px; margin: 0; }
+        @media (min-width: 1024px) {
+            .header-title-zone h1 { font-size: 30px; }
+            .header-title-zone p { font-size: 14px; }
+        }
+
+        .section-title {
+            font-family: 'Kanit', sans-serif;
+            font-weight: 600;
+            font-size: 15px;
+            color: #333;
+            margin: 26px 0 12px;
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        /* --- Grand total cards --- */
+        .grand-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .grand-card {
+            background: linear-gradient(135deg, var(--primary-pink) 0%, #ff6b8b 100%);
+            border-radius: 16px; padding: 16px; box-shadow: var(--glass-shadow-sm);
+        }
+        .grand-card.warn { background: linear-gradient(135deg, #ffb347 0%, #ff8c42 100%); }
+        .grand-card .g-label { font-size: 12px; color: rgba(255,255,255,0.85); font-weight: 600; }
+        .grand-card .g-value { font-family: 'Kanit', sans-serif; font-size: 26px; font-weight: 700; color: #fff; margin-top: 2px; }
+
+        /* --- Collection cards, stacked single column --- */
+        .sales-grid { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: start; }
+
+        .sales-card {
+            background: var(--glass-bg-strong);
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border); border-radius: 16px;
+            padding: 14px 16px; box-shadow: var(--glass-shadow-sm);
+        }
+        .sales-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; gap: 8px; }
+        .sales-card-head .s-title { font-family: 'Kanit', sans-serif; font-weight: 700; font-size: 14px; color: var(--primary-pink); display: flex; align-items: center; gap: 8px; }
+        .sales-card-head .s-title img { width: 26px; height: 26px; border-radius: 8px; object-fit: cover; flex: 0 0 auto; }
+
+        .status-pill { font-family: 'Kanit', sans-serif; font-weight: 600; font-size: 10.5px; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+        .status-pill.st-open { background: #e5f9ee; color: #1fa864; }
+        .status-pill.st-closed { background: #f2f2f2; color: #999; }
+        .status-pill.st-soon { background: #fff4e0; color: #d98c00; }
+        .status-pill.st-soldout { background: #ffe6ea; color: #e8395f; }
+
+        .sales-item-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px dashed #f0e6e9; }
+        .sales-item-row:first-of-type { border-top: none; }
+        .sales-item-thumb { width: 34px; height: 34px; border-radius: 10px; object-fit: cover; background: #f3f3f3; flex: 0 0 auto; }
+        .sales-item-info { flex: 1; min-width: 0; }
+        .sales-item-name { font-weight: 700; font-size: 12.5px; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 6px; }
+        .sales-item-sub { font-size: 10.5px; color: #999; }
+        .sales-item-numbers { flex: 0 0 auto; text-align: right; }
+        .sales-item-count { font-size: 10.5px; color: #999; }
+        .sales-item-revenue { font-family: 'Kanit', sans-serif; font-weight: 700; font-size: 13.5px; color: #333; }
+        .sales-item-revenue.low { color: #e8395f; }
+
+        .low-tag { font-size: 9px; font-weight: 700; color: #fff; background: #e8395f; padding: 1px 6px; border-radius: 8px; flex: 0 0 auto; }
+        .out-tag { font-size: 9px; font-weight: 700; color: #999; background: #eee; padding: 1px 6px; border-radius: 8px; flex: 0 0 auto; }
+
+        .stock-bar-track { height: 4px; border-radius: 4px; background: #f0e6e9; margin-top: 4px; overflow: hidden; }
+        .stock-bar-fill { height: 100%; background: var(--primary-pink); border-radius: 4px; }
+        .stock-bar-fill.low { background: #e8395f; }
+
+        .sales-card-totals {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-top: 8px; padding-top: 10px; border-top: 2px solid var(--card-border);
+            font-family: 'Kanit', sans-serif; font-weight: 700; font-size: 13px; color: #333;
+        }
+        .sales-card-totals span.t-value { color: var(--primary-pink); }
+
+        .empty-state { text-align: center; color: #bbb; font-family: 'Kanit', sans-serif; font-size: 13px; padding: 30px 20px; }
+        .empty-state i { font-size: 26px; color: #ffd7e1; display: block; margin-bottom: 8px; }
+        .loading-state { text-align: center; color: #bbb; font-size: 13px; padding: 30px 20px; }
+
+        #access-denied { display: none; text-align: center; padding: 80px 20px; color: #999; }
+        #access-denied i { font-size: 40px; color: #ffd7e1; display: block; margin-bottom: 14px; }
+        #stock-content { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="top-navigation-bar">
+    <button type="button" class="back-circle-btn" onclick="goBack()" aria-label="ย้อนกลับ">
+        <i class="fa-solid fa-chevron-left"></i>
+    </button>
+    <div class="top-bar-title">คลังสินค้า</div>
+</div>
+
+<div class="page-wrapper">
+    <div id="access-denied">
+        <i class="fa-solid fa-lock"></i>
+        หน้านี้สำหรับ Role Admin เท่านั้นค่ะ
+    </div>
+
+    <div id="stock-content">
+        <div class="header-title-zone">
+            <h1><i class="fa-solid fa-boxes-stacked"></i> คลังสินค้า</h1>
+            <p>สต็อกคงเหลือของ Official Merchandise (กาชา) ในระบบ BLM48 Membership</p>
+        </div>
+
+        <div class="grand-grid" id="grand-grid">
+            <div class="loading-state"><i class="fa-solid fa-spinner fa-spin"></i> กำลังโหลดข้อมูล...</div>
+        </div>
+
+        <div class="section-title"><i class="fa-solid fa-gift"></i>Official Merchandise</div>
+        <div class="sales-grid" id="stock-grid">
+            <div class="loading-state"><i class="fa-solid fa-spinner fa-spin"></i> กำลังโหลดข้อมูล...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+  let user = null;
+  const LOW_STOCK_THRESHOLD = 5;
+
+  function goBack() {
+    if (document.referrer && window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.location.href = 'admin';
+    }
+  }
+
+  function resolveDriveImage(url) {
+    const fallback = 'https://lh3.googleusercontent.com/d/1rebp2F8vyP0nyvsEOFD9Nw2mPcRtVqtG=s1000';
+    if (!url) return fallback;
+    if (url.includes('drive.google.com')) {
+      const driveMatch = url.match(/[-\w]{25,}/);
+      return driveMatch ? `https://lh3.googleusercontent.com/u/0/d/${driveMatch[0]}` : url;
+    }
+    return url;
+  }
+
+  function statusPillHtml(status) {
+    const map = {
+      'Open': ['st-open', 'เปิดขาย'],
+      'Closed': ['st-closed', 'ปิดขาย'],
+      'Coming Soon': ['st-soon', 'เร็วๆ นี้'],
+      'Sold Out': ['st-soldout', 'หมดแล้ว'],
+    };
+    const [cls, label] = map[status] || ['st-closed', status || '-'];
+    return `<span class="status-pill ${cls}">${escapeHtml(label)}</span>`;
+  }
+
+  function renderStockItemRow(it) {
+    const remaining = Number(it.remaining || 0);
+    const initial = Number(it.initial || 0);
+    const pct = initial > 0 ? Math.max(0, Math.min(100, (remaining / initial) * 100)) : 0;
+    const isLow = remaining > 0 && remaining <= LOW_STOCK_THRESHOLD;
+    const isOut = remaining <= 0;
+    let tag = '';
+    if (isOut) tag = '<span class="out-tag">หมด</span>';
+    else if (isLow) tag = '<span class="low-tag">ใกล้หมด</span>';
+
+    return `
+      <div class="sales-item-row">
+        <img class="sales-item-thumb" src="${escapeAttr(resolveDriveImage(it.imageUrl))}" onerror="this.onerror=null;this.src='https://lh3.googleusercontent.com/d/1rebp2F8vyP0nyvsEOFD9Nw2mPcRtVqtG=s1000';">
+        <div class="sales-item-info">
+          <div class="sales-item-name">${escapeHtml(it.name || '-')} ${tag}</div>
+          <div class="sales-item-sub">ขายแล้ว ${Number(it.sold || 0).toLocaleString()} / ${initial.toLocaleString()}</div>
+          <div class="stock-bar-track"><div class="stock-bar-fill ${isOut || isLow ? 'low' : ''}" style="width:${pct}%;"></div></div>
+        </div>
+        <div class="sales-item-numbers">
+          <div class="sales-item-count">คงเหลือ</div>
+          <div class="sales-item-revenue ${isOut || isLow ? 'low' : ''}">${remaining.toLocaleString()}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderStockCard(col) {
+    const itemsHtml = (col.items || []).map(renderStockItemRow).join('');
+    const totals = col.totals || {};
+    return `
+      <div class="sales-card">
+        <div class="sales-card-head">
+          <div class="s-title"><img src="${escapeAttr(resolveDriveImage(col.coverImage))}" onerror="this.onerror=null;this.src='https://lh3.googleusercontent.com/d/1rebp2F8vyP0nyvsEOFD9Nw2mPcRtVqtG=s1000';"> ${escapeHtml(col.collectionName || '-')}</div>
+          ${statusPillHtml(col.status)}
+        </div>
+        ${itemsHtml || `<div class="empty-state" style="padding:16px 0;"><i class="fa-solid fa-box-open"></i>ยังไม่มีรายการสินค้า</div>`}
+        <div class="sales-card-totals">
+          <span>คงเหลือทั้งหมด</span>
+          <span class="t-value">${Number(totals.remaining || 0).toLocaleString()} / ${Number(totals.initial || 0).toLocaleString()}</span>
+        </div>
+      </div>
+    `;
+  }
+
+  async function loadStockSummary() {
+    const grandGrid = document.getElementById('grand-grid');
+    const stockGrid = document.getElementById('stock-grid');
+    try {
+      const res = await blm48AdminGetStockSummary(user.username);
+      if (res.status !== 'success') {
+        grandGrid.innerHTML = `<div class="empty-state">โหลดข้อมูลไม่สำเร็จ</div>`;
+        stockGrid.innerHTML = '';
+        return;
+      }
+      const collections = res.data || [];
+
+      let totalRemaining = 0;
+      let lowStockCount = 0;
+      collections.forEach(col => {
+        totalRemaining += Number(col.totals?.remaining || 0);
+        (col.items || []).forEach(it => {
+          const remaining = Number(it.remaining || 0);
+          if (remaining <= LOW_STOCK_THRESHOLD) lowStockCount++;
+        });
+      });
+
+      grandGrid.innerHTML = `
+        <div class="grand-card">
+          <div class="g-label"><i class="fas fa-boxes-stacked"></i> สต็อกคงเหลือทั้งหมด</div>
+          <div class="g-value">${totalRemaining.toLocaleString()}</div>
+        </div>
+        <div class="grand-card warn">
+          <div class="g-label"><i class="fas fa-triangle-exclamation"></i> รายการใกล้หมด/หมดแล้ว</div>
+          <div class="g-value">${lowStockCount.toLocaleString()}</div>
+        </div>
+      `;
+
+      stockGrid.innerHTML = collections.length
+        ? collections.map(renderStockCard).join('')
+        : `<div class="empty-state"><i class="fa-solid fa-box-open"></i>ยังไม่มีคอลเลกชันสินค้า</div>`;
+    } catch (e) {
+      grandGrid.innerHTML = `<div class="empty-state">เชื่อมต่อเซิร์ฟเวอร์ไม่ได้</div>`;
+      stockGrid.innerHTML = '';
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    user = getUserSession();
+    if (!user) {
+      window.location.href = 'login';
+      return;
+    }
+    if (!user.role || user.role.toLowerCase() !== 'admin') {
+      document.getElementById('access-denied').style.display = 'block';
+      return;
+    }
+    document.getElementById('stock-content').style.display = 'block';
+    loadStockSummary();
+  });
+</script>
+</body>
+</html>
