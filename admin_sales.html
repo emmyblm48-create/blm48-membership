@@ -107,7 +107,6 @@
 
         /* --- Section cards (Cafe/Gacha/Tickets/Gifts) laid out in a responsive grid --- */
         .sales-grid { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: start; }
-        @media (min-width: 768px) { .sales-grid { grid-template-columns: repeat(2, 1fr); } }
 
         .sales-card {
             background: var(--glass-bg-strong);
@@ -275,7 +274,13 @@
       const gachaCard = renderSalesCard('fa-gift', 'Official Merchandise', '', gachaItems,
         'ยังไม่มีการสุ่ม', 'รวมทั้งหมด', `${Number(d.gacha?.totals?.tokenRevenue || 0).toLocaleString()} Token`);
 
-      tokenGrid.innerHTML = cafeCard + gachaCard;
+      const preorderItems = (d.preorder?.items || []).map(it =>
+        renderSalesItemRow(it.name, null, it.coverImage, it.salesCount, 'สั่งแล้ว', it.tokenRevenue, 'Token')
+      ).join('');
+      const preorderCard = renderSalesCard('fa-box', 'Pre-order', '', preorderItems,
+        'ยังไม่มีคำสั่งซื้อ', 'รวมทั้งหมด', `${Number(d.preorder?.totals?.tokenRevenue || 0).toLocaleString()} Token`);
+
+      tokenGrid.innerHTML = cafeCard + gachaCard + preorderCard;
 
       const giftWalletItems = (d.giftsWallet?.items || []).map(it =>
         renderSalesItemRow(it.name, it.tier, it.imageUrl, it.qtySold, 'ชิ้น', it.cookieRevenue, 'Cookie')
