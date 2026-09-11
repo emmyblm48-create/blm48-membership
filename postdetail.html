@@ -225,6 +225,8 @@
 <script>
   let user = null;
   let currentPostId = null;
+  let currentPostType = 'member';
+  let isMemberRole = false; // role='member' - can like fan posts but not comment/reply on them
 
   // ⬅️ ปุ่มย้อนกลับ: ใช้ history เดิมถ้ามี (กันแตกกรณีเปิดลิงก์ตรงๆ ไม่มีประวัติหน้าให้ย้อน)
   function goBackFromPostDetail() {
@@ -342,7 +344,7 @@
               <button onclick="toggleCommentLike('${commentId}')" style="background: none; border: none; color: var(--primary-pink); cursor: pointer; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; padding: 0;">
                 <i class="${heartClass} fa-heart" id="cmt-heart-${commentId}"></i> <span id="cmt-like-count-${commentId}">${likes}</span>
               </button>
-              ${!isReply ? `<button onclick="toggleReplyBox('${commentId}')" style="background: none; border: none; color: #888; cursor: pointer; font-size: 0.75rem; padding: 0;">Reply</button>` : ''}
+              ${(!isReply && !(currentPostType === 'fan' && isMemberRole)) ? `<button onclick="toggleReplyBox('${commentId}')" style="background: none; border: none; color: #888; cursor: pointer; font-size: 0.75rem; padding: 0;">Reply</button>` : ''}
               ${isOwnComment ? `<button onclick="startEditComment('${commentId}')" style="background: none; border: none; color: #888; cursor: pointer; font-size: 0.75rem; padding: 0;">Edit</button>` : ''}
             </div>
             ${!isReply ? `
@@ -350,10 +352,12 @@
                 <i class="fa-solid fa-chevron-down" id="replies-chevron-${commentId}"></i> <span id="replies-count-${commentId}">${replyCount}</span> การตอบกลับ
               </button>
               <div id="replies-${commentId}" style="display: none; margin-top: 4px;">${repliesHtml}</div>
+              ${!(currentPostType === 'fan' && isMemberRole) ? `
               <div class="reply-input-box" id="reply-box-${commentId}" style="display: none; gap: 8px; margin-top: 8px;">
                 <input type="text" id="reply-input-${commentId}" placeholder="Write a reply..." style="flex: 1; border: 1px solid #ffccd7; border-radius: 20px; padding: 5px 12px; font-size: 0.8rem; outline: none;">
                 <button onclick="submitReply('${postId}', '${commentId}', this)" style="background: var(--primary-pink); color: white; border: none; border-radius: 20px; padding: 0 12px; font-size: 0.8rem; cursor: pointer; font-weight: bold;">SEND</button>
               </div>
+              ` : ''}
             ` : ''}
           </div>
         </div>
@@ -452,15 +456,16 @@
       </span>
     ` : '';
 
+    const authorClickHandler = post.postType === 'fan' ? '' : `onclick="openMemberProfile('${authorName}')"`;
     const profileImgHtml = isGraduated ? `
-      <div onclick="openMemberProfile('${authorName}')" style="position: relative; display: inline-block; margin-right: 10px; flex-shrink: 0; cursor: pointer;">
+      <div ${authorClickHandler} style="position: relative; display: inline-block; margin-right: 10px; flex-shrink: 0; ${post.postType === 'fan' ? '' : 'cursor: pointer;'}">
         <img src="${authorProfileImg}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #cbd5e1;">
         <div style="position: absolute; bottom: -2px; right: -2px; background: #718096; border-radius: 50%; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; border: 1.5px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
           <i class="fas fa-graduation-cap" style="color: white; font-size: 8px;"></i>
         </div>
       </div>
     ` : `
-      <div onclick="openMemberProfile('${authorName}')" style="margin-right: 10px; flex-shrink: 0; cursor: pointer;">
+      <div ${authorClickHandler} style="margin-right: 10px; flex-shrink: 0; ${post.postType === 'fan' ? '' : 'cursor: pointer;'}">
         <img src="${authorProfileImg}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
       </div>
     `;
@@ -506,7 +511,7 @@
         <div class="post-header" style="display: flex; align-items: center; margin-bottom: 10px; margin-top: ${isChampPost ? '12px' : '0px'};">
           ${profileImgHtml}
           <div>
-            <span onclick="openMemberProfile('${authorName}')" style="cursor: pointer;">
+            <span ${authorClickHandler} style="${post.postType === 'fan' ? '' : 'cursor: pointer;'}">
               <b style="color: var(--primary-pink);">${authorName} ${isPostVerified} ${gradBadgeHtml}</b>
             </span>
             <div style="font-size: 0.8rem; color: gray;">
@@ -528,7 +533,7 @@
           <button onclick="toggleCommentSection('${postId}')" style="background: none; border: none; color: #555; cursor: pointer; display: flex; align-items: center; gap: 6px;">
             <i class="fa-regular fa-comment"></i> <span id="comment-count-${postId}">${postComments.length}</span>
           </button>
-          <button onclick="actionSharePost('${postId}')" style="background: none; border: none; color: #555; cursor: pointer; display: flex; align-items: center; gap: 6px;" title="แชร์โพสต์เป็นลิงก์">
+          <button onclick="actionSharePost('${postId}', '${post.postType === 'fan' ? 'fanpost' : 'index'}')" style="background: none; border: none; color: #555; cursor: pointer; display: flex; align-items: center; gap: 6px;" title="แชร์โพสต์เป็นลิงก์">
             <i class="fa-solid fa-paper-plane"></i>
           </button>
           <div id="post-cookies-${postId}" style="margin-left: auto; display: flex; align-items: center; gap: 4px; font-size: 0.78rem; color: #d2691e; font-weight: 600;" title="โพสต์นี้ทำคุกกี้สะสมได้">
@@ -550,12 +555,20 @@
   function renderCommentBar(postId) {
     const bar = document.getElementById('pd-comment-bar');
     if (!bar) return;
-    bar.innerHTML = `
-      <div class="pd-comment-bar-inner">
-        <input type="text" id="comment-input-${postId}" class="pd-comment-input" placeholder="Write a comment...">
-        <button type="button" class="pd-comment-send" onclick="submitComment('${postId}', this)"><i class="fa-solid fa-paper-plane"></i></button>
-      </div>
-    `;
+    if (currentPostType === 'fan' && isMemberRole) {
+      bar.innerHTML = `
+        <div class="pd-comment-bar-inner" style="justify-content: center; color: #999; font-size: 0.82rem;">
+          <i class="fa-solid fa-lock"></i>&nbsp;สมาชิกไม่สามารถคอมเมนต์โพสต์แฟนคลับได้ค่ะ
+        </div>
+      `;
+    } else {
+      bar.innerHTML = `
+        <div class="pd-comment-bar-inner">
+          <input type="text" id="comment-input-${postId}" class="pd-comment-input" placeholder="Write a comment...">
+          <button type="button" class="pd-comment-send" onclick="submitComment('${postId}', this)"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+      `;
+    }
     bar.classList.add('active');
   }
 
@@ -582,6 +595,8 @@
         hideCommentBar();
         return;
       }
+
+      currentPostType = post.postType || 'member';
 
       const existingCard = document.getElementById(`post-${post.id}`);
       if (existingCard) {
@@ -1090,6 +1105,7 @@
       window.location.replace('login');
       return;
     }
+    isMemberRole = (user.role || '').toLowerCase() === 'member';
 
     currentPostId = new URLSearchParams(window.location.search).get('id');
     if (!currentPostId) {
