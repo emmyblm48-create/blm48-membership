@@ -133,7 +133,7 @@ function renderMemberCampaignCard(c, opts) {
       <div class="mc-cover">
         <img src="${escapeAttr(c.coverImage || 'assets/images/default-profile.png')}" alt="" loading="lazy" draggable="false" oncontextmenu="return false">
         <span class="mc-cover-tag"><i class="fa-solid fa-trophy"></i> Champ Campaign</span>
-        ${c.isBirthMonth ? '<span class="mc-cover-bday">🎂 Birthday Month</span>' : ''}
+        ${c.isBirthMonth ? '<span class="mc-cover-bday"><i class="fa-solid fa-cake-candles"></i> Birthday Month</span>' : ''}
         ${renderCampaignStamp(c)}
       </div>
       <div class="mc-body">

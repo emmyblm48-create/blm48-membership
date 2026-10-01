@@ -98,7 +98,7 @@
       <div class="section-h"><i class="fa-solid fa-trophy"></i> รายละเอียด Tier</div>
       ${renderCampaignTierList(0)}
 
-      <div class="rule">🏆 <b>พิเศษเดือนเกิด</b> : ถ้าเป็นเดือนเกิดของเมมเบอร์ และเมมเบอร์ได้รับ Champ of the Month เดือนนั้น Top Supporter อันดับ 1 ของ Campaign จะได้รับ<b style="color:#e8590c;">คุกกี้คืน 100%</b></div>
+      <div class="rule"><i class="fa-solid fa-trophy" style="color:#fcc419;"></i> <b>พิเศษเดือนเกิด</b> : ถ้าเป็นเดือนเกิดของเมมเบอร์ และเมมเบอร์ได้รับ Champ of the Month เดือนนั้น Top Supporter อันดับ 1 ของ Campaign จะได้รับ<b style="color:#e8590c;">คุกกี้คืน 100%</b></div>
 
       <div class="section-h"><i class="fa-solid fa-circle-info"></i> เงื่อนไข</div>
       <ul class="notes">
@@ -123,7 +123,7 @@
       Swal.fire({ title: 'ไม่สำเร็จ', text: (res && res.message) || 'เกิดข้อผิดพลาด', icon: 'error', confirmButtonColor: '#fcc419' });
       return;
     }
-    await Swal.fire({ title: 'เปิด Campaign แล้ว! 🎉', text: 'Campaign ของคุณขึ้นที่หน้า Home เรียบร้อย', icon: 'success', confirmButtonColor: '#fcc419' });
+    await Swal.fire({ title: 'เปิด Campaign แล้ว!', text: 'Campaign ของคุณขึ้นที่หน้า Home เรียบร้อย', icon: 'success', confirmButtonColor: '#fcc419' });
     window.location.replace(`campaign_detail?id=${encodeURIComponent(res.campaign.id)}`);
   }
 

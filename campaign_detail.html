@@ -112,7 +112,7 @@
         </div>
       </div>
       <div class="ribbon">
-        <h3>${c.isBirthMonth ? '🎂 Happy Birthday Month ' : ''}${escapeHtml(c.memberName)} · Champ Campaign</h3>
+        <h3>${c.isBirthMonth ? '<i class="fa-solid fa-cake-candles" style="color:#d6336c;"></i> Happy Birthday Month ' : ''}${escapeHtml(c.memberName)} · Champ Campaign</h3>
         <p>ซัพพอร์ตด้วยคุกกี้เพื่อส่ง ${escapeHtml(c.memberName)} ขึ้น Champ of the Month</p>
       </div>
       <div class="progress-zone">${renderCampaignProgress(c)}</div>
@@ -124,8 +124,8 @@
       <div class="desc">
         <p>Campaign ที่ ${escapeHtml(c.memberName)} เปิดเพื่อบอกแฟนๆ ว่าอยากได้ Champ of the Month ประจำเดือนนี้ โดยการซัพพอร์ตคุกกี้ครบตามจำนวนที่กำหนดไว้ คุกกี้ที่ซัพพอร์ตจะนับเป็นยอดปาคุกกี้ให้ ${escapeHtml(c.memberName)} ตามปกติ (Ranking / Top Fans / Fan Score) และจะได้รับคุกกี้คืนตาม Tier ที่ทำได้เมื่อ Campaign จบ (สิ้นเดือน 00:00 น.)</p>
         ${tiersHtml}
-        <div class="champ-rule">🏆 <b>พิเศษเดือนเกิด</b> : ถ้าเป็นเดือนเกิดของเมมเบอร์ และเมมเบอร์ได้รับ Champ of the Month เดือนนั้น Top Supporter อันดับ 1 ของ Campaign จะได้รับ<b style="color:#e8590c;">คุกกี้คืน 100%</b>
-          ${c.isBirthMonth ? '<br><span style="color:#d6336c;">✨ Campaign นี้อยู่ในเดือนเกิดของ ' + escapeHtml(c.memberName) + '</span>' : ''}</div>
+        <div class="champ-rule"><i class="fa-solid fa-trophy" style="color:#fcc419;"></i> <b>พิเศษเดือนเกิด</b> : ถ้าเป็นเดือนเกิดของเมมเบอร์ และเมมเบอร์ได้รับ Champ of the Month เดือนนั้น Top Supporter อันดับ 1 ของ Campaign จะได้รับ<b style="color:#e8590c;">คุกกี้คืน 100%</b>
+          ${c.isBirthMonth ? '<br><span style="color:#d6336c;"><i class="fa-solid fa-wand-magic-sparkles"></i> Campaign นี้อยู่ในเดือนเกิดของ ' + escapeHtml(c.memberName) + '</span>' : ''}</div>
       </div>`;
 
     renderMySupport(ended);
@@ -147,19 +147,19 @@
     // คืนคุกกี้คิดจาก "การปาคุกกี้จริง" เท่านั้น - คุกกี้จากกดใจ/คอมเมนต์โพสนับเข้ายอด Campaign แต่ไม่คืน
     const cookieBase = Number(detail.myCookieSupport || 0);
     const engagement = mine - cookieBase;
-    let html = `🍪 คุณซัพพอร์ตแล้ว <b>${mine.toLocaleString()}</b> คุกกี้`;
+    let html = `<i class="fa-solid fa-cookie-bite" style="color:#d2691e;"></i> คุณซัพพอร์ตแล้ว <b>${mine.toLocaleString()}</b> คุกกี้`;
     if (engagement > 0) {
       html += `<br><span style="font-size:12px;">(ปาคุกกี้ ${cookieBase.toLocaleString()} + กดใจ/คอมเมนต์โพส ${engagement.toLocaleString()} · คืนคุกกี้คิดจากยอดปาคุกกี้)</span>`;
     }
     if (detail.myRefund) {
-      html += `<br>✅ ได้รับคุกกี้คืนแล้ว <b>${Number(detail.myRefund.refund).toLocaleString()}</b> คุกกี้ (${detail.myRefund.refund_pct}%)${detail.myRefund.is_champ_bonus ? ' 🏆 Top Supporter เดือนเกิด' : ''}`;
+      html += `<br><i class="fa-solid fa-circle-check" style="color:#2f9e44;"></i> ได้รับคุกกี้คืนแล้ว <b>${Number(detail.myRefund.refund).toLocaleString()}</b> คุกกี้ (${detail.myRefund.refund_pct}%)${detail.myRefund.is_champ_bonus ? ' <i class="fa-solid fa-trophy" style="color:#fcc419;"></i> Top Supporter เดือนเกิด' : ''}`;
     } else if (!ended) {
       const pct = Number(c.refundPct || 0);
       html += pct > 0
         ? `<br>ตอนนี้ถึง Tier ${c.tier} แล้ว จะได้รับคุกกี้คืนอย่างน้อย <b>${Math.floor(cookieBase * pct / 100).toLocaleString()}</b> คุกกี้ (${pct}%) เมื่อจบ Campaign`
         : `<br>ยังไม่ถึง Tier 1 (10,000 คุกกี้) ชวนเพื่อนๆ มาซัพพอร์ตเพิ่มกันนะ`;
     } else {
-      html += `<br>⏳ กำลังสรุปผลและคืนคุกกี้...`;
+      html += `<br><i class="fa-solid fa-hourglass-half"></i> กำลังสรุปผลและคืนคุกกี้...`;
     }
     box.innerHTML = html;
     box.style.display = 'block';
@@ -182,10 +182,10 @@
       ? '<div style="color:#999; padding:20px;">ยังไม่มีผู้ซัพพอร์ต เป็นคนแรกเลย!</div>'
       : list.map((s, i) => `
           <div class="sup-row">
-            <span class="sup-rank">${i < 3 ? ['🥇','🥈','🥉'][i] : i + 1}</span>
+            <span class="sup-rank">${i < 3 ? '<i class="fa-solid fa-medal" style="color:' + ['#fcc419','#adb5bd','#d9480f'][i] + ';"></i>' : i + 1}</span>
             <img src="${escapeAttr(s.profileImage || 'assets/images/default-profile.png')}" alt="">
             <span class="sup-name">${escapeHtml(s.name || s.username)}</span>
-            <span class="sup-amt">${Number(s.amount).toLocaleString()} 🍪</span>
+            <span class="sup-amt">${Number(s.amount).toLocaleString()} <i class="fa-solid fa-cookie-bite" style="color:#d2691e;"></i></span>
           </div>`).join('');
     Swal.fire({ title: 'Top Supporters', html: `<div style="max-height:60vh; overflow-y:auto;">${html}</div>`, confirmButtonText: 'ปิด', confirmButtonColor: '#ff85a2' });
   }
@@ -232,7 +232,7 @@
     const newTier = res.campaign ? res.campaign.tier : 0;
     if (res.tierUp && newTier > 0) {
       const t = CAMPAIGN_TIERS.find(x => x.tier === newTier);
-      Swal.fire({ title: `🎉 ปลดล็อก Tier ${newTier}!`, html: `${escapeHtml(c.memberName)} ได้ <b>${t ? t.name : ''}</b> แล้ว<br>ผู้ซัพพอร์ตทุกคนจะได้รับคุกกี้คืน ${t ? t.refund : 0}% เมื่อจบ Campaign`, icon: 'success', confirmButtonColor: '#fcc419' });
+      Swal.fire({ title: `ปลดล็อก Tier ${newTier}!`, iconHtml: '<i class="fa-solid fa-trophy"></i>', iconColor: '#fcc419', html: `${escapeHtml(c.memberName)} ได้ <b>${t ? t.name : ''}</b> แล้ว<br>ผู้ซัพพอร์ตทุกคนจะได้รับคุกกี้คืน ${t ? t.refund : 0}% เมื่อจบ Campaign`, icon: 'success', confirmButtonColor: '#fcc419' });
     } else {
       Swal.fire({ title: 'ซัพพอร์ตสำเร็จ', text: res.message || 'ส่งคุกกี้เรียบร้อย', icon: 'success', timer: 1800, showConfirmButton: false });
     }
