@@ -3031,6 +3031,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (e) {
           console.error('Realtime ranking refresh error:', e);
         }
+        // 🏆 ยอด Campaign = ยอด Ranking เดือนนี้ -> รีเฟรชการ์ด Campaign พร้อมกันให้ตัวเลขตรงกันเสมอ
+        if (typeof fetchActiveCampaigns === 'function') fetchActiveCampaigns();
       });
     }
 
@@ -3087,7 +3089,7 @@ async function fetchActiveCampaigns() {
         </div>`;
       return;
     }
-    scrollerContainer.innerHTML = memberCampaigns.map(c => renderMemberCampaignCard(c, { compact: true })).join('');
+    scrollerContainer.innerHTML = memberCampaigns.map(c => renderMemberCampaignCard(c)).join('');
   } catch (error) {
     console.error("Fetch Campaigns Network Error:", error);
     scrollerContainer.innerHTML = `<div style="color:#999; padding:10px; font-size:13px;">ไม่สามารถเชื่อมต่อระบบแคมเปญได้</div>`;

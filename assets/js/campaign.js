@@ -50,22 +50,6 @@ function renderCampaignTierList(total) {
   .mc-progress-labels { display: flex; justify-content: space-between; font-size: 13px; color: #222; margin-top: 4px; }
   .mc-marker.reached i { font-size: 11px; color: #222; }
   .mc-heart.full { color: #fcc419; -webkit-text-stroke: 1.5px #222; }
-  /* การ์ดหน้า Home: ครึ่งหนึ่งของขนาดปกติ (280 -> 140px) ย่อตัวหนังสือ/แถบ Tier ตามสัดส่วน */
-  .mc-card.mc-compact { flex: 0 0 140px; width: 140px; border-radius: 12px; }
-  .mc-compact .mc-cover-tag, .mc-compact .mc-cover-bday { font-size: 8px; padding: 2px 6px; top: 6px; }
-  .mc-compact .mc-cover-tag { left: 6px; }
-  .mc-compact .mc-cover-bday { top: auto; bottom: 6px; left: 6px; right: auto; }
-  .mc-compact .mc-body { padding: 8px 8px 9px; }
-  .mc-compact .mc-title { font-size: 11px; line-height: 1.35; min-height: 30px; }
-  .mc-compact .mc-stats { margin: 6px 0 7px; padding: 5px 0; }
-  .mc-compact .mc-stat b { font-size: 11px; }
-  .mc-compact .mc-stat span { font-size: 7.5px; white-space: nowrap; letter-spacing: -0.2px; }
-  .mc-compact .mc-progress { height: 18px; margin: 0 2px; }
-  .mc-compact .mc-track { right: 10px; height: 5px; }
-  .mc-compact .mc-marker { width: 14px; height: 14px; font-size: 8px; }
-  .mc-compact .mc-marker.reached i { font-size: 7px; }
-  .mc-compact .mc-heart { font-size: 15px; right: -2px; }
-  .mc-compact .mc-progress-labels { font-size: 9px; margin-top: 2px; }
   .mc-stamp { position: absolute; left: 6%; bottom: 6%; width: 30%; max-width: 120px; transform: rotate(-14deg); pointer-events: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,.18)); }
   .mc-stamp svg { width: 100%; height: auto; display: block; }
   `;
@@ -145,7 +129,7 @@ function renderMemberCampaignCard(c, opts) {
   const left = campaignTimeLeft(c.endAt);
   const href = `campaign_detail?id=${encodeURIComponent(c.id)}`;
   return `
-    <a class="mc-card ${opts.full ? 'mc-full' : ''} ${opts.compact ? 'mc-compact' : ''}" href="${href}">
+    <a class="mc-card ${opts.full ? 'mc-full' : ''}" href="${href}">
       <div class="mc-cover">
         <img src="${escapeAttr(c.coverImage || 'assets/images/default-profile.png')}" alt="" loading="lazy" draggable="false" oncontextmenu="return false">
         <span class="mc-cover-tag"><i class="fa-solid fa-trophy"></i> Champ Campaign</span>

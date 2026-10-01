@@ -264,6 +264,8 @@
     user = getUserSession();
     if (!campaignId) { window.location.href = 'campaign'; return; }
     loadDetail();
+    // 🔴 Realtime: ยอด Campaign = ยอด Ranking เดือนนี้ -> Ranking ขยับเมื่อไหร่ อัปเดตยอด/Tier/Top Supporters ทันที
+    if (typeof blm48SubscribeRanking === 'function') blm48SubscribeRanking(loadDetail);
   });
 </script>
 </body>
