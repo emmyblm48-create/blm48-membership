@@ -16,7 +16,7 @@
     <!-- ทำให้แถบด้านบน (Status Bar) ดูเป็นแอปมากขึ้น -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="assets/css/glassmorphism.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -595,7 +595,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     /* Ranking & Lists */
    /* 1. สไตล์หลัก (ใช้สำหรับ Desktop/Tablet) */
 .section-title { 
-  font-family: 'Kanit', sans-serif; font-weight: 600; color: #444; 
+  font-family: 'Quicksand', 'Kanit', sans-serif; font-weight: 600; color: #444; 
   margin: 30px 0 15px 20px; font-size: 18px; 
   border-left: 5px solid var(--primary-pink); padding-left: 12px; 
 }
@@ -960,7 +960,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     .fan-cookies { font-size: 12px; color: var(--primary-pink); font-weight: 600; }
 
     /* Login Form */
-    .login-input { width: 100%; padding: 14px; margin: 10px 0; border: 1.5px solid #eee; border-radius: 12px; font-family: 'Kanit'; box-sizing: border-box; outline: none; transition: 0.3s; }
+    .login-input { width: 100%; padding: 14px; margin: 10px 0; border: 1.5px solid #eee; border-radius: 12px; font-family: 'Quicksand', 'Kanit', sans-serif; box-sizing: border-box; outline: none; transition: 0.3s; }
     .login-input:focus { border-color: var(--primary-pink); box-shadow: 0 0 0 3px rgba(255,133,162,0.1); }
 
     /* Float Button */
@@ -993,7 +993,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
 }
 
 .loader-brand {
-  font-family: 'Quicksand', sans-serif;
+  font-family: 'Quicksand', 'Kanit', sans-serif;
   font-size: 42px;
   font-weight: 700;
   color: var(--primary-pink);
@@ -1019,7 +1019,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
 }
 
 .loader-text {
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Quicksand', 'Kanit', sans-serif;
   font-size: 14px;
   color: #ffb6c1;
   letter-spacing: 1px;
@@ -1471,7 +1471,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
 
   /* ชื่อเพลง (บังคับพื้นที่ 2 บรรทัด + ชิดซ้าย) */
   .mv-title {
-    font-family: 'Quicksand','Kanit', sans-serif;
+    font-family: 'Quicksand', 'Kanit', sans-serif;
     font-weight: 600;
     font-size: 12px;
     color: #444;
@@ -1821,7 +1821,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
   }
 
   .time-val {
-    font-family: 'Quicksand', sans-serif;
+    font-family: 'Quicksand', 'Kanit', sans-serif;
     font-size: 14px; /* ลดขนาดตัวเลขหลักจาก 17px เป็น 14px */
     font-weight: 700;
     color: var(--primary-pink);
@@ -2407,7 +2407,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
 <i class="fas fa-pencil-alt edit-icon" id="edit-name-btn" onclick="updateDisplayName()" style="display: none;"></i>
 
 <footer style="padding: 60px 20px 40px 20px; text-align: center; color: #c5c5c5; font-size: 11px; letter-spacing: 0.5px; line-height: 1.6;">
-    <div style="font-family: 'Kanit', sans-serif; font-weight: 700; color: #999; margin-bottom: 6px; letter-spacing: 1px;">BLM48 MEMBERSHIP</div>
+    <div style="font-family: 'Quicksand', 'Kanit', sans-serif; font-weight: 700; color: #999; margin-bottom: 6px; letter-spacing: 1px;">BLM48 MEMBERSHIP</div>
     <div>© 2026 Virtual Idol Cover Group. All Rights Reserved.</div>
 </footer>
 
@@ -3087,7 +3087,7 @@ async function fetchActiveCampaigns() {
         </div>`;
       return;
     }
-    scrollerContainer.innerHTML = memberCampaigns.map(c => renderMemberCampaignCard(c)).join('');
+    scrollerContainer.innerHTML = memberCampaigns.map(c => renderMemberCampaignCard(c, { compact: true })).join('');
   } catch (error) {
     console.error("Fetch Campaigns Network Error:", error);
     scrollerContainer.innerHTML = `<div style="color:#999; padding:10px; font-size:13px;">ไม่สามารถเชื่อมต่อระบบแคมเปญได้</div>`;
