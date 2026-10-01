@@ -222,6 +222,29 @@
             font-weight: 600;
         }
 
+        .preorder-link-card {
+            display: flex; align-items: center; gap: 12px;
+            background: var(--glass-bg-strong);
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 14px 16px;
+            box-shadow: var(--glass-shadow);
+            margin-bottom: 25px;
+            text-decoration: none;
+            color: inherit;
+        }
+        .preorder-link-icon {
+            width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+            background: #fff6e0; color: #c9932c;
+            display: flex; align-items: center; justify-content: center; font-size: 17px;
+        }
+        .preorder-link-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+        .preorder-link-title { font-weight: 700; color: #333; font-size: 14.5px; }
+        .preorder-link-sub { font-size: 11.5px; color: #999; }
+        .preorder-link-chevron { color: #ccc; flex-shrink: 0; }
+
         .filter-section-container {
             display: flex;
             flex-direction: column;
@@ -234,6 +257,59 @@
             border-radius: 20px;
             padding: 16px;
             box-shadow: var(--glass-shadow);
+        }
+
+        .inv-search-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .inv-search-icon {
+            position: absolute;
+            left: 14px;
+            color: #ccc;
+            font-size: 13px;
+            pointer-events: none;
+        }
+
+        .inv-search-input {
+            width: 100%;
+            background: var(--glass-bg-strong);
+            -webkit-backdrop-filter: blur(var(--glass-blur-sm));
+            backdrop-filter: blur(var(--glass-blur-sm));
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 10px 36px;
+            font-family: 'Kanit', sans-serif;
+            font-size: 13px;
+            color: #444;
+            box-shadow: var(--glass-shadow-sm);
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .inv-search-input::placeholder {
+            color: #bbb;
+        }
+
+        .inv-search-input:focus {
+            border-color: var(--primary-pink);
+        }
+
+        .inv-search-clear {
+            position: absolute;
+            right: 8px;
+            background: none;
+            border: none;
+            color: #ccc;
+            font-size: 13px;
+            cursor: pointer;
+            padding: 6px;
+        }
+
+        .inv-search-clear:hover {
+            color: var(--primary-pink);
         }
 
         .filter-label {
@@ -412,6 +488,16 @@
             box-shadow: 0 10px 20px rgba(255, 133, 162, 0.12);
         }
 
+        /* ⭐ ไอเทมที่ชื่อมีคำว่า SSR ให้มีกรอบทองเด่นตลอดเวลา ไม่ต้องรอ hover */
+        .item-card-ssr {
+            border-color: #e0b953;
+            box-shadow: 0 0 0 1px rgba(224, 185, 83, 0.45), 0 6px 16px rgba(224, 185, 83, 0.25);
+        }
+
+        .item-card-ssr:hover {
+            box-shadow: 0 10px 20px rgba(224, 185, 83, 0.35);
+        }
+
         .item-qty {
             position: absolute;
             top: 13px;
@@ -564,6 +650,73 @@
         .modal-meta-tag.is-qty {
             background: #fff0f3;
             color: var(--primary-pink);
+        }
+
+        .inv-delete-zone {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .inv-qty-stepper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f7f7f7;
+            border-radius: 999px;
+            padding: 5px 6px;
+        }
+
+        .inv-qty-btn {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: none;
+            background: #ffffff;
+            color: var(--primary-pink);
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 1px 4px rgba(0,0,0,.08);
+        }
+
+        .inv-qty-btn:active {
+            transform: scale(0.92);
+        }
+
+        .inv-qty-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .inv-qty-value {
+            min-width: 20px;
+            text-align: center;
+            font-weight: 700;
+            color: #333;
+            font-size: 13px;
+        }
+
+        .btn-delete-item {
+            background: #fff0f0;
+            color: #e0435c;
+            border: 1px solid #ffd6dc;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-family: 'Kanit';
+            font-size: 12.5px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-delete-item:hover {
+            background: #ffe1e5;
         }
 
         .modal-action-buttons {
@@ -779,7 +932,21 @@
             </div>
         </div>
 
+        <a href="my_preorders" class="preorder-link-card">
+            <div class="preorder-link-icon"><i class="fa-solid fa-box"></i></div>
+            <div class="preorder-link-text">
+                <span class="preorder-link-title">พรีออเดอร์ของฉัน</span>
+                <span class="preorder-link-sub">ดูสถานะคำสั่งซื้อและการจัดส่ง</span>
+            </div>
+            <i class="fa-solid fa-chevron-right preorder-link-chevron"></i>
+        </a>
+
         <div class="filter-section-container">
+    <div class="inv-search-wrap">
+        <i class="fa-solid fa-magnifying-glass inv-search-icon"></i>
+        <input type="text" id="inventory-search-input" class="inv-search-input" placeholder="ค้นหาไอเทมด้วยชื่อ..." oninput="onInventorySearchInput(this.value)">
+        <button type="button" id="inventory-search-clear" class="inv-search-clear hidden" onclick="clearInventorySearch()" aria-label="ล้างคำค้นหา"><i class="fa-solid fa-xmark"></i></button>
+    </div>
     <div>
         <span class="filter-label"><i class="fa-solid fa-filter text-pink-400"></i> Fliter</span>
         <div id="primary-tabs" class="tabs-row">
@@ -802,6 +969,16 @@
             <img id="previewImg" src="" alt="Item Preview">
             <div class="modal-item-name" id="previewName"></div>
             <div class="modal-item-meta" id="previewMeta"></div>
+            <div class="inv-delete-zone hidden" id="deleteZone">
+                <div class="inv-qty-stepper">
+                    <button type="button" class="inv-qty-btn" id="deleteQtyMinus">−</button>
+                    <span class="inv-qty-value" id="deleteQtyValue">1</span>
+                    <button type="button" class="inv-qty-btn" id="deleteQtyPlus">+</button>
+                </div>
+                <button type="button" class="btn-delete-item" onclick="confirmDeleteInventoryItem()">
+                    <i class="fa-solid fa-trash-can"></i> ลบไอเทม
+                </button>
+            </div>
             <div class="modal-action-buttons">
                 <button type="button" class="btn-close-modal" onclick="closePreview()">Close</button>
                 <button type="button" id="viewPhotoBookBtn" class="btn-save-image" style="display:none;" onclick="openEpubReaderFromPreview()">
@@ -840,6 +1017,20 @@
     let globalInventoryData = null; 
     let currentPrimaryTab = 'all';  // 'all', 'cafe', 'coaster', 'thankyou', 'photoset', 'photobook', 'others'
     let currentSubTab = 'all';      // 'all' หรือชื่องานย่อยเฉพาะ เช่น 'BLM48 Tanabata 2026'
+    let currentSearchQuery = '';    // คำค้นหาชื่อไอเทม (lowercase แล้ว)
+
+    function onInventorySearchInput(value) {
+        currentSearchQuery = (value || '').trim().toLowerCase();
+        document.getElementById('inventory-search-clear').classList.toggle('hidden', currentSearchQuery === '');
+        renderInventoryData();
+    }
+
+    function clearInventorySearch() {
+        currentSearchQuery = '';
+        document.getElementById('inventory-search-input').value = '';
+        document.getElementById('inventory-search-clear').classList.add('hidden');
+        renderInventoryData();
+    }
 
     window.onload = async () => {
         if (!user || !currentUsername) {
@@ -911,12 +1102,20 @@
         if (totalCollectionsEl) totalCollectionsEl.textContent = totalCollections.toLocaleString();
     }
 
+    // ⭐ เช็กจากชื่อไอเทมตรงๆ ว่ามีคำว่า "SSR" อยู่ไหม (ไม่ใช่แค่เช็กจาก category)
+    // เพื่อให้ของหายากที่ได้จากกาชาคอลเลกชันอื่นๆ (ไม่ใช่แค่หมวด SSR Photo โดยตรง) ก็ได้กรอบทองด้วย
+    function isSsrByName(name) {
+        return /ssr/i.test(name || '');
+    }
+
     // 🎨 กำหนดสีประจำหมวดหมู่ ให้แต่ละไอเทมมีโทนสีต่างกันตามระดับ/ประเภท เหมือนการ์ดสะสม
     function getTierColor(category) {
         switch (category) {
             case 'BLM48 SSR Photo':
             case 'SSR_card':
                 return '#e0b953'; // ทอง
+            case 'Pre-order':
+                return '#c9932c'; // ทองเข้ม เหมือนป้าย [Pre-order] ในหน้า shop
             case 'BLM48 Cafe':
                 return '#4caf82'; // เขียวมิ้นต์
             case 'Coaster':
@@ -975,6 +1174,16 @@
         primaryTabsContainer.appendChild(btnSSR);
     }
 
+    // 🎤 ปุ่มหลัก: Pre-order - รวมของทุกอย่างที่ได้จากการสั่งพรีออเดอร์ (PVC Card/Poster/การ์ดสุ่ม SSR)
+    // ไว้ในที่เดียว แยกส่วนย่อยตามชื่อคอนเสิร์ต/อีเวนต์ (มาจาก subCollection)
+    if (hasCategory('Pre-order')) {
+        const btnPreorder = document.createElement('button');
+        btnPreorder.className = `btn-tab ${currentPrimaryTab === 'preorder' ? 'active' : ''}`;
+        btnPreorder.innerHTML = `<i class="fa-solid fa-box"></i> Pre-order`;
+        btnPreorder.onclick = () => selectPrimaryTab('preorder');
+        primaryTabsContainer.appendChild(btnPreorder);
+    }
+
     // 3. ปุ่มหลัก: BLM48 Photobook (มีตัวกรองย่อยตามชื่อคอลเลกชัน เช่น BLM48 Kami 7 in Bloom)
     if (hasCategory('BLM48 Photobook')) {
         const btnPhotobook = document.createElement('button');
@@ -987,7 +1196,7 @@
     // 3.5 ปุ่มหลัก: BLM48 PhotoCard (มีตัวกรองย่อยตามชื่อคอลเลกชัน)
     if (hasCategory('BLM48 PhotoCard')) {
         const btnPhotoCard = document.createElement('button');
-        btnPhotoCard.className = `btn-tab ${currentPrimaryTab === 'photocard' ? 'active' : ''}`;
+        btnPhotoCard.className = `btn-tab ${currentPrimaryTab === 'photo_card' ? 'active' : ''}`;
         btnPhotoCard.innerHTML = `<i class="fa-solid fa-id-card"></i> BLM48 PhotoCard`;
         btnPhotoCard.onclick = () => selectPrimaryTab('photocard');
         primaryTabsContainer.appendChild(btnPhotoCard);
@@ -1120,7 +1329,9 @@ function renderInventoryData() {
         
         // ⭐ เพิ่มเงื่อนไขเช็กสำหรับแท็บ SSR (เช็กเผื่อไว้ให้ทั้ง Name และ ID)
         if (currentPrimaryTab === 'ssr' && item.category !== 'BLM48 SSR Photo' && item.category !== 'SSR_card') return false;
-        
+
+        if (currentPrimaryTab === 'preorder' && item.category !== 'Pre-order') return false;
+
         if (currentPrimaryTab === 'photoset' && item.category !== 'BLM48 PhotoSet') return false;
         if (currentPrimaryTab === 'photobook' && item.category !== 'BLM48 Photobook') return false;
         if (currentPrimaryTab === 'photocard' && item.category !== 'BLM48 PhotoCard') return false;
@@ -1130,11 +1341,23 @@ function renderInventoryData() {
         // ตัวกรองย่อย
         if (currentSubTab !== 'all' && item.subCollection !== currentSubTab) return false;
 
+        // ค้นหาด้วยชื่อไอเทม
+        if (currentSearchQuery && !item.name.toLowerCase().includes(currentSearchQuery)) return false;
+
         return true;
     });
 
     if (filteredItems.length === 0) {
-        container.innerHTML = `<div class="inv-state-box"><i class="fa-solid fa-magnifying-glass"></i>ไม่พบไอเทมในหมวดหมู่นี้งับ</div>`;
+        const stateBox = document.createElement('div');
+        stateBox.className = 'inv-state-box';
+        if (currentSearchQuery) {
+            stateBox.innerHTML = `<i class="fa-solid fa-magnifying-glass"></i>ไม่พบไอเทมที่ตรงกับ "`;
+            stateBox.appendChild(document.createTextNode(currentSearchQuery));
+            stateBox.appendChild(document.createTextNode('"'));
+        } else {
+            stateBox.innerHTML = `<i class="fa-solid fa-magnifying-glass"></i>ไม่พบไอเทมในหมวดหมู่นี้งับ`;
+        }
+        container.appendChild(stateBox);
         return;
     }
 
@@ -1149,7 +1372,13 @@ function renderInventoryData() {
     const sortedGroupKeys = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'th'));
 
     sortedGroupKeys.forEach(subName => {
-        const items = grouped[subName].sort((a, b) => a.name.localeCompare(b.name, 'th'));
+        // ของที่ชื่อมีคำว่า SSR ให้ขึ้นก่อนเสมอในคอลเลกชันนั้นๆ ที่เหลือเรียง ก-ฮ ตามเดิม
+        const items = grouped[subName].sort((a, b) => {
+            const aSsr = isSsrByName(a.name);
+            const bSsr = isSsrByName(b.name);
+            if (aSsr !== bSsr) return aSsr ? -1 : 1;
+            return a.name.localeCompare(b.name, 'th');
+        });
 
         const section = document.createElement('div');
         section.className = 'collection-section';
@@ -1166,9 +1395,10 @@ function renderInventoryData() {
         grid.className = 'item-grid';
         
         items.forEach(item => {
+            const isSSR = isSsrByName(item.name);
             const card = document.createElement('div');
-            card.className = 'item-card';
-            card.style.setProperty('--tier-color', getTierColor(item.category));
+            card.className = 'item-card' + (isSSR ? ' item-card-ssr' : '');
+            card.style.setProperty('--tier-color', isSSR ? '#e0b953' : getTierColor(item.category));
             card.onclick = () => openPreview(item);
 
             card.innerHTML = `
@@ -1189,6 +1419,10 @@ function renderInventoryData() {
 
     let currentPreviewItem = null;
 
+    // หมวดหมู่ที่ห้ามลบ เพราะหายาก/มีค่า ป้องกันผู้ใช้กดลบพลาดของสำคัญ
+    const PROTECTED_DELETE_CATEGORIES = ['BLM48 SSR Photo', 'SSR_card', 'BLM48 Photobook', 'Pre-order'];
+    let deleteQty = 1;
+
     function openPreview(item) {
         currentPreviewItem = item;
         document.getElementById('previewImg').src = item.img;
@@ -1199,12 +1433,22 @@ function renderInventoryData() {
         viewPhotoBookBtn.style.display = item.fileUrl ? 'inline-flex' : 'none';
 
         const meta = document.getElementById('previewMeta');
-        meta.style.setProperty('--tier-color', getTierColor(item.category));
+        meta.style.setProperty('--tier-color', isSsrByName(item.name) ? '#e0b953' : getTierColor(item.category));
         meta.innerHTML = `
             <span class="modal-meta-tag">${item.category}</span>
             ${item.subCollection && item.subCollection !== item.category ? `<span class="modal-meta-tag is-sub">${item.subCollection}</span>` : ''}
             <span class="modal-meta-tag is-qty">มีอยู่ x${item.qty}</span>
         `;
+
+        deleteQty = 1;
+        document.getElementById('deleteQtyValue').textContent = deleteQty;
+        const deleteZone = document.getElementById('deleteZone');
+        const canDelete = !PROTECTED_DELETE_CATEGORIES.includes(item.category);
+        deleteZone.classList.toggle('hidden', !canDelete);
+        if (canDelete) {
+            document.getElementById('deleteQtyMinus').disabled = deleteQty <= 1;
+            document.getElementById('deleteQtyPlus').disabled = deleteQty >= (Number(item.qty) || 1);
+        }
 
         document.getElementById('previewModal').style.display = 'flex';
         blm48LockBodyScroll();
@@ -1213,6 +1457,78 @@ function renderInventoryData() {
     function closePreview() {
         document.getElementById('previewModal').style.display = 'none';
         blm48UnlockBodyScroll();
+    }
+
+    function changeDeleteQty(delta) {
+        if (!currentPreviewItem) return;
+        const maxQty = Number(currentPreviewItem.qty) || 1;
+        deleteQty = Math.min(maxQty, Math.max(1, deleteQty + delta));
+        document.getElementById('deleteQtyValue').textContent = deleteQty;
+        document.getElementById('deleteQtyMinus').disabled = deleteQty <= 1;
+        document.getElementById('deleteQtyPlus').disabled = deleteQty >= maxQty;
+    }
+
+    // กดค้างปุ่ม +/- ให้เพิ่ม/ลดจำนวนรัวๆ โดยไม่ต้องกดซ้ำหลายรอบ (กดครั้งเดียวขยับ 1 ก่อน
+    // แล้วค่อยเริ่มรัวหลังจากค้างไว้สักครู่ กันการเผลอกดครั้งเดียวแล้วขยับเกิน)
+    function bindHoldToRepeat(button, onStep) {
+        const HOLD_DELAY_MS = 400;
+        const REPEAT_INTERVAL_MS = 90;
+        let holdTimeout = null;
+        let repeatInterval = null;
+
+        function stepIfEnabled() {
+            if (button.disabled) { stopHolding(); return; }
+            onStep();
+        }
+
+        function stopHolding() {
+            clearTimeout(holdTimeout);
+            clearInterval(repeatInterval);
+            holdTimeout = null;
+            repeatInterval = null;
+        }
+
+        button.addEventListener('pointerdown', (e) => {
+            if (button.disabled) return;
+            e.preventDefault();
+            stepIfEnabled();
+            holdTimeout = setTimeout(() => {
+                repeatInterval = setInterval(stepIfEnabled, REPEAT_INTERVAL_MS);
+            }, HOLD_DELAY_MS);
+        });
+
+        ['pointerup', 'pointerleave', 'pointercancel'].forEach(evt => {
+            button.addEventListener(evt, stopHolding);
+        });
+    }
+
+    bindHoldToRepeat(document.getElementById('deleteQtyMinus'), () => changeDeleteQty(-1));
+    bindHoldToRepeat(document.getElementById('deleteQtyPlus'), () => changeDeleteQty(1));
+
+    async function confirmDeleteInventoryItem() {
+        if (!currentPreviewItem) return;
+        const item = currentPreviewItem;
+        const qtyToDelete = deleteQty;
+
+        const result = await Swal.fire({
+            title: 'ลบไอเทมนี้?',
+            html: `ต้องการลบ <b>${escapeHtml(item.name)}</b> จำนวน <b>${qtyToDelete}</b> ชิ้น ออกจากกระเป๋าใช่ไหม?<br><span style="color:#999;font-size:12px;">การลบไม่สามารถย้อนกลับได้นะงับ</span>`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'ลบเลย',
+            cancelButtonText: 'ยกเลิก',
+            confirmButtonColor: '#e0435c'
+        });
+        if (!result.isConfirmed) return;
+
+        const res = await blm48DeleteInventoryItems(currentUsername, item.category, item.subCollection, item.name, qtyToDelete);
+        if (res && res.status === 'success') {
+            closePreview();
+            await Swal.fire({ icon: 'success', title: 'ลบไอเทมเรียบร้อยแล้ว', timer: 1500, showConfirmButton: false });
+            await loadMyInventory();
+        } else {
+            Swal.fire('ลบไม่สำเร็จ', (res && res.message) || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้งนะงับ', 'error');
+        }
     }
 
     // =========================================================================

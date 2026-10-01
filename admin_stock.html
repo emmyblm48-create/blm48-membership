@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8">
+    <title>BLM48 Membership | คลังสินค้า</title>
+    <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s32">
+    <meta name="theme-color" content="#ffc0cb">
+    <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s180">
+    <link rel="icon" sizes="192x192" href="https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s192">
+    <meta name="apple-mobile-web-app-title" content="BLM48">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/glassmorphism.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/supabase-client.js"></script>
+    <script src="assets/js/common.js"></script>
+
+    <style>
+        :root {
+            --primary-pink: #ff85a2;
+            --soft-pink: #ffe4e1;
+            --card-border: #ffeef2;
+            --text-dark: #444;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Quicksand', 'Kanit', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            color: var(--text-dark);
+            background: #ffffff;
+        }
+
+        .top-navigation-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--glass-bg-strong);
+            -webkit-backdrop-filter: blur(var(--glass-blur-lg));
+            backdrop-filter: blur(var(--glass-blur-lg));
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--glass-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--glass-shadow-sm);
+        }
+        .back-circle-btn {
+            flex: 0 0 auto;
+            background: var(--glass-bg-strong);
+            -webkit-backdrop-filter: blur(var(--glass-blur-sm));
+            backdrop-filter: blur(var(--glass-blur-sm));
+            border: 1px solid var(--glass-border);
+            width: 38px; height: 38px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--primary-pink); cursor: pointer; transition: 0.2s;
+        }
+        .back-circle-btn:hover { background: var(--primary-pink); color: white; transform: scale(1.05); }
+        .top-bar-title { font-family: 'Kanit', sans-serif; font-weight: 600; font-size: 16px; color: #333; }
+
+        .page-wrapper { max-width: 1100px; margin: 0 auto; padding: 18px 16px 50px; }
+        @media (min-width: 768px) { .page-wrapper { padding: 24px 24px 60px; } }
+
+        .header-title-zone { text-align: center; margin-bottom: 18px; }
+        .header-title-zone h1 {
+            color: var(--primary-pink);
+            font-family: 'Kanit', sans-serif;
+            font-size: 24px;
+            margin: 0 0 6px 0;
+            font-weight: 700;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .header-title-zone p { color: #999; font-size: 13px; margin: 0; }
+
+        /* --- Compact KPI strip --- */
+        .kpi-strip { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+        @media (min-width: 600px) { .kpi-strip { grid-template-columns: repeat(4, 1fr); } }
+        .kpi-chip {
+            background: var(--glass-bg-strong);
+            -webkit-backdrop-filter: blur(var(--glass-blur-sm));
+            backdrop-filter: blur(var(--glass-blur-sm));
+            border: 1px solid var(--glass-border); border-radius: 14px;
+            padding: 12px 14px; box-shadow: var(--glass-shadow-sm);
+        }
+        .kpi-chip .k-label { font-size: 11px; color: #999; font-weight: 600; display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .kpi-chip .k-value { font-family: 'Kanit', sans-serif; font-size: 22px; font-weight: 700; color: #333; margin-top: 2px; }
+        .kpi-chip.warn .k-value { color: #d98c00; }
+        .kpi-chip.danger .k-value { color: #e8395f; }
+        .kpi-chip.pink .k-value { color: var(--primary-pink); }
+
+        /* --- Toolbar --- */
+        .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+        .search-input {
+            flex: 1 1 200px; min-width: 160px; border: 1px solid var(--glass-border); border-radius: 12px;
+            padding: 11px 14px; font-size: 14px; font-family: 'Quicksand', 'Kanit', sans-serif;
+            color: var(--text-dark); background: rgba(255, 255, 255, 0.7);
+        }
+        .search-input:focus { outline: none; border-color: var(--primary-pink); }
+        .collection-select {
+            flex: 0 0 auto; border: 1px solid var(--glass-border); border-radius: 12px;
+            padding: 11px 12px; font-size: 13px; font-family: 'Quicksand', 'Kanit', sans-serif;
+            color: var(--text-dark); background: rgba(255, 255, 255, 0.7); max-width: 220px;
+        }
+        .collection-select:focus { outline: none; border-color: var(--primary-pink); }
+        .result-count { font-size: 12px; color: #999; white-space: nowrap; }
+
+        .filter-tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 14px; scrollbar-width: none; }
+        .filter-tabs::-webkit-scrollbar { display: none; }
+        .filter-tab {
+            flex: 0 0 auto; background: var(--glass-bg-strong);
+            -webkit-backdrop-filter: blur(var(--glass-blur-sm));
+            backdrop-filter: blur(var(--glass-blur-sm));
+            color: #888; border: 1px solid var(--glass-border);
+            padding: 8px 16px; border-radius: 14px;
+            font-family: 'Kanit', sans-serif; font-size: 12.5px; font-weight: 500;
+            cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+            transition: all 0.2s ease; box-shadow: var(--glass-shadow-sm);
+        }
+        .filter-tab:hover { border-color: var(--primary-pink); color: var(--primary-pink); }
+        .filter-tab.active {
+            background: linear-gradient(135deg, var(--primary-pink) 0%, #ff6b8b 100%);
+            color: white; border-color: transparent; font-weight: 600;
+            box-shadow: 0 4px 10px rgba(255,133,162,0.3);
+        }
+
+        /* --- Excel-style table --- */
+        .sheet-wrap {
+            border: 1px solid #d7dbe0; border-radius: 8px; overflow: auto;
+            max-height: 68vh; background: #fff;
+            box-shadow: var(--glass-shadow-sm);
+        }
+        table.sheet { border-collapse: collapse; width: 100%; min-width: 720px; font-size: 12.5px; }
+        table.sheet thead th {
+            position: sticky; top: 0; z-index: 2;
+            background: #f1f3f5; color: #333; text-align: left;
+            font-family: 'Kanit', sans-serif; font-weight: 600; font-size: 12px;
+            padding: 9px 10px; border: 1px solid #d7dbe0; white-space: nowrap;
+            cursor: pointer; user-select: none;
+        }
+        table.sheet thead th:hover { background: #e7ebee; }
+        table.sheet thead th .sort-icon { margin-left: 4px; color: #bbb; font-size: 10px; }
+        table.sheet thead th.sorted .sort-icon { color: var(--primary-pink); }
+        table.sheet tbody td {
+            padding: 7px 10px; border: 1px solid #eceff1; white-space: nowrap;
+            color: #333;
+        }
+        table.sheet tbody tr:nth-child(even) { background: #fafbfc; }
+        table.sheet tbody tr:hover { background: #fff2f5; }
+        table.sheet tbody tr.row-out { background: #fff0f2; }
+        table.sheet tbody tr.row-out:nth-child(even) { background: #ffe9ec; }
+        table.sheet tbody tr.row-low { background: #fff8ec; }
+        table.sheet tbody tr.row-low:nth-child(even) { background: #fff3e0; }
+        td.num { text-align: right; font-family: 'Kanit', sans-serif; font-variant-numeric: tabular-nums; }
+
+        .name-cell { display: flex; align-items: center; gap: 8px; }
+        .name-cell img { width: 28px; height: 28px; border-radius: 8px; object-fit: cover; background: #f3f3f3; flex: 0 0 auto; }
+        .name-cell .n-text { white-space: normal; }
+
+        .collection-cell { display: flex; align-items: center; gap: 8px; }
+        .collection-cell img { width: 20px; height: 20px; border-radius: 6px; object-fit: cover; background: #f3f3f3; flex: 0 0 auto; }
+        .collection-cell .c-name { white-space: normal; max-width: 220px; }
+
+        .status-pill { font-family: 'Kanit', sans-serif; font-weight: 600; font-size: 10px; padding: 2px 9px; border-radius: 20px; white-space: nowrap; display: inline-block; margin-top: 2px; }
+        .status-pill.st-open { background: #e5f9ee; color: #1fa864; }
+        .status-pill.st-closed { background: #f2f2f2; color: #999; }
+        .status-pill.st-soon { background: #fff4e0; color: #d98c00; }
+        .status-pill.st-soldout { background: #ffe6ea; color: #e8395f; }
+        .status-pill.st-preorder { background: #eee5ff; color: #7c4dff; }
+
+        .remaining-cell { text-align: right; }
+        .remaining-value { font-family: 'Kanit', sans-serif; font-weight: 700; font-size: 14px; }
+        .remaining-value.low { color: #d98c00; }
+        .remaining-value.out { color: #e8395f; }
+        .mini-bar-track { height: 4px; border-radius: 4px; background: #f0e6e9; margin-top: 4px; overflow: hidden; width: 60px; margin-left: auto; }
+        .mini-bar-fill { height: 100%; background: var(--primary-pink); border-radius: 4px; }
+        .mini-bar-fill.low { background: #d98c00; }
+        .mini-bar-fill.out { background: #e8395f; }
+
+        .empty-state { text-align: center; color: #bbb; font-family: 'Kanit', sans-serif; font-size: 13px; padding: 40px 20px; }
+        .empty-state i { font-size: 28px; color: #ffd7e1; display: block; margin-bottom: 10px; }
+        .loading-state { text-align: center; color: #bbb; font-size: 13px; padding: 30px 20px; }
+
+        #access-denied { display: none; text-align: center; padding: 80px 20px; color: #999; }
+        #access-denied i { font-size: 40px; color: #ffd7e1; display: block; margin-bottom: 14px; }
+        #stock-content { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="top-navigation-bar">
+    <button type="button" class="back-circle-btn" onclick="goBack()" aria-label="ย้อนกลับ">
+        <i class="fa-solid fa-chevron-left"></i>
+    </button>
+    <div class="top-bar-title">คลังสินค้า</div>
+</div>
+
+<div class="page-wrapper">
+    <div id="access-denied">
+        <i class="fa-solid fa-lock"></i>
+        หน้านี้สำหรับ Role Admin เท่านั้นค่ะ
+    </div>
+
+    <div id="stock-content">
+        <div class="header-title-zone">
+            <h1><i class="fa-solid fa-boxes-stacked"></i> คลังสินค้า</h1>
+            <p>สต็อกคงเหลือของ Official Merchandise (กาชา) และการ์ดสุ่ม Pre-Order ในระบบ BLM48 Membership</p>
+        </div>
+
+        <div class="kpi-strip" id="kpi-strip">
+            <div class="loading-state"><i class="fa-solid fa-spinner fa-spin"></i> กำลังโหลดข้อมูล...</div>
+        </div>
+
+        <div class="toolbar">
+            <input id="stock-search" class="search-input" type="text" placeholder="ค้นหาชื่อสินค้าหรือคอลเลกชัน...">
+            <select id="collection-filter" class="collection-select">
+                <option value="">ทุกคอลเลกชัน</option>
+            </select>
+            <div class="result-count" id="result-count"></div>
+        </div>
+
+        <div class="filter-tabs" id="filter-tabs">
+            <button type="button" class="filter-tab active" data-status=""><i class="fa-solid fa-layer-group"></i> All</button>
+            <button type="button" class="filter-tab" data-status="low"><i class="fa-solid fa-triangle-exclamation"></i> ใกล้หมด</button>
+            <button type="button" class="filter-tab" data-status="out"><i class="fa-solid fa-ban"></i> หมดแล้ว</button>
+        </div>
+
+        <div class="sheet-wrap">
+            <table class="sheet">
+                <thead>
+                    <tr>
+                        <th data-key="name">สินค้า <i class="fa-solid fa-sort sort-icon"></i></th>
+                        <th data-key="collectionName">คอลเลกชัน <i class="fa-solid fa-sort sort-icon"></i></th>
+                        <th data-key="sold">ขายแล้ว <i class="fa-solid fa-sort sort-icon"></i></th>
+                        <th data-key="remaining" class="sorted">คงเหลือ <i class="fa-solid fa-sort-up sort-icon"></i></th>
+                    </tr>
+                </thead>
+                <tbody id="stock-tbody">
+                    <tr><td colspan="4"><div class="loading-state"><i class="fa-solid fa-spinner fa-spin"></i> กำลังโหลดข้อมูล...</div></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+  let user = null;
+  const LOW_STOCK_THRESHOLD = 5;
+  let itemsCache = []; // flattened: one row per item across all collections
+  let collectionsMeta = []; // [{id, name, status}]
+  let sortKey = 'remaining';
+  let sortDir = 1; // 1 = asc, -1 = desc
+  let currentStatusFilter = '';
+
+  function goBack() {
+    if (document.referrer && window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.location.href = 'admin';
+    }
+  }
+
+  function resolveDriveImage(url) {
+    const fallback = 'https://lh3.googleusercontent.com/d/1rebp2F8vyP0nyvsEOFD9Nw2mPcRtVqtG=s1000';
+    if (!url) return fallback;
+    if (url.includes('drive.google.com')) {
+      const driveMatch = url.match(/[-\w]{25,}/);
+      return driveMatch ? `https://lh3.googleusercontent.com/u/0/d/${driveMatch[0]}` : url;
+    }
+    return url;
+  }
+
+  function statusPillHtml(status) {
+    const map = {
+      'Open': ['st-open', 'เปิดขาย'],
+      'Closed': ['st-closed', 'ปิดขาย'],
+      'Coming Soon': ['st-soon', 'เร็วๆ นี้'],
+      'Sold Out': ['st-soldout', 'หมดแล้ว'],
+      'Pre-Order': ['st-preorder', 'Pre-Order'],
+    };
+    const [cls, label] = map[status] || ['st-closed', status || '-'];
+    return `<span class="status-pill ${cls}">${escapeHtml(label)}</span>`;
+  }
+
+  async function loadStockSummary() {
+    const kpiStrip = document.getElementById('kpi-strip');
+    const tbody = document.getElementById('stock-tbody');
+    try {
+      const res = await blm48AdminGetStockSummary(user.username);
+      if (res.status !== 'success') {
+        kpiStrip.innerHTML = `<div class="empty-state">โหลดข้อมูลไม่สำเร็จ</div>`;
+        tbody.innerHTML = '';
+        return;
+      }
+      const collections = res.data || [];
+
+      // แปลงข้อมูลแบบ collection > items ซ้อนกัน ให้เป็น array แบนราบ 1 แถวต่อ 1 สินค้า
+      // เพื่อให้ค้นหา/จัดเรียง/กรองได้ง่ายในตารางเดียว แทนการ์ดซ้อนการ์ดแบบเดิมที่ดูรกตา
+      itemsCache = [];
+      collectionsMeta = [];
+      let totalRemaining = 0;
+      let lowCount = 0;
+      let outCount = 0;
+
+      collections.forEach(col => {
+        collectionsMeta.push({ id: col.collectionId, name: col.collectionName, status: col.status, poolType: col.poolType });
+        totalRemaining += Number(col.totals?.remaining || 0);
+        (col.items || []).forEach(it => {
+          const remaining = Number(it.remaining || 0);
+          const sold = Number(it.sold || 0);
+          if (remaining <= 0) outCount++;
+          else if (remaining <= LOW_STOCK_THRESHOLD) lowCount++;
+          itemsCache.push({
+            name: it.name || '-',
+            imageUrl: it.imageUrl,
+            collectionId: col.collectionId,
+            collectionName: col.collectionName || '-',
+            collectionStatus: col.status,
+            poolType: col.poolType,
+            remaining,
+            sold,
+            initial: Number(it.initial || 0),
+          });
+        });
+      });
+
+      kpiStrip.innerHTML = `
+        <div class="kpi-chip pink">
+          <div class="k-label"><i class="fas fa-boxes-stacked"></i> คงเหลือทั้งหมด</div>
+          <div class="k-value">${totalRemaining.toLocaleString()}</div>
+        </div>
+        <div class="kpi-chip">
+          <div class="k-label"><i class="fas fa-layer-group"></i> คอลเลกชันทั้งหมด</div>
+          <div class="k-value">${collections.length.toLocaleString()}</div>
+        </div>
+        <div class="kpi-chip warn">
+          <div class="k-label"><i class="fas fa-triangle-exclamation"></i> ใกล้หมด</div>
+          <div class="k-value">${lowCount.toLocaleString()}</div>
+        </div>
+        <div class="kpi-chip danger">
+          <div class="k-label"><i class="fas fa-ban"></i> หมดแล้ว</div>
+          <div class="k-value">${outCount.toLocaleString()}</div>
+        </div>
+      `;
+
+      // เติม dropdown เลือกคอลเลกชัน (คงค่าที่แอดมินเลือกไว้ ถ้ายังมีอยู่หลังโหลดใหม่)
+      const select = document.getElementById('collection-filter');
+      const prevValue = select.value;
+      select.innerHTML = `<option value="">ทุกคอลเลกชัน</option>` + collectionsMeta.map(c =>
+        `<option value="${escapeAttr(c.id)}">${escapeHtml(c.name)}${c.poolType === 'preorder' ? ' (Pre-Order)' : ''}</option>`
+      ).join('');
+      if (prevValue && collectionsMeta.some(c => c.id === prevValue)) select.value = prevValue;
+
+      renderTable();
+    } catch (e) {
+      kpiStrip.innerHTML = `<div class="empty-state">เชื่อมต่อเซิร์ฟเวอร์ไม่ได้</div>`;
+      tbody.innerHTML = '';
+    }
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('stock-tbody');
+    const resultCount = document.getElementById('result-count');
+    const q = (document.getElementById('stock-search').value || '').trim().toLowerCase();
+    const collectionId = document.getElementById('collection-filter').value;
+
+    let rows = itemsCache;
+    if (q) {
+      rows = rows.filter(it =>
+        (it.name || '').toLowerCase().includes(q) ||
+        (it.collectionName || '').toLowerCase().includes(q)
+      );
+    }
+    if (collectionId) {
+      rows = rows.filter(it => it.collectionId === collectionId);
+    }
+    if (currentStatusFilter === 'low') {
+      rows = rows.filter(it => it.remaining > 0 && it.remaining <= LOW_STOCK_THRESHOLD);
+    } else if (currentStatusFilter === 'out') {
+      rows = rows.filter(it => it.remaining <= 0);
+    }
+
+    rows = [...rows].sort((a, b) => {
+      let av = a[sortKey], bv = b[sortKey];
+      if (sortKey === 'name' || sortKey === 'collectionName') {
+        av = (av || '').toLowerCase();
+        bv = (bv || '').toLowerCase();
+        return av.localeCompare(bv, 'th') * sortDir;
+      }
+      return ((av || 0) - (bv || 0)) * sortDir;
+    });
+
+    resultCount.textContent = `${rows.length.toLocaleString()} / ${itemsCache.length.toLocaleString()} สินค้า`;
+
+    if (rows.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><i class="fa-solid fa-magnifying-glass"></i>ไม่พบสินค้าที่ตรงเงื่อนไข</div></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = rows.map(it => {
+      const isOut = it.remaining <= 0;
+      const isLow = !isOut && it.remaining <= LOW_STOCK_THRESHOLD;
+      const rowClass = isOut ? 'row-out' : isLow ? 'row-low' : '';
+      const valueClass = isOut ? 'out' : isLow ? 'low' : '';
+      const pct = it.initial > 0 ? Math.max(0, Math.min(100, (it.remaining / it.initial) * 100)) : 0;
+
+      return `
+        <tr class="${rowClass}">
+          <td>
+            <div class="name-cell">
+              <img src="${escapeAttr(resolveDriveImage(it.imageUrl))}" onerror="this.onerror=null;this.src='https://lh3.googleusercontent.com/d/1rebp2F8vyP0nyvsEOFD9Nw2mPcRtVqtG=s1000';">
+              <span class="n-text">${escapeHtml(it.name)}</span>
+            </div>
+          </td>
+          <td>
+            <div class="collection-cell">
+              <div class="c-name">
+                ${escapeHtml(it.collectionName)}<br>${statusPillHtml(it.collectionStatus)}
+              </div>
+            </div>
+          </td>
+          <td class="num">${it.sold.toLocaleString()}</td>
+          <td class="remaining-cell">
+            <div class="remaining-value ${valueClass}">${it.remaining.toLocaleString()}</div>
+            <div class="mini-bar-track"><div class="mini-bar-fill ${valueClass}" style="width:${pct}%;"></div></div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function setupSortHeaders() {
+    document.querySelectorAll('table.sheet thead th').forEach(th => {
+      th.addEventListener('click', () => {
+        const key = th.dataset.key;
+        if (sortKey === key) {
+          sortDir *= -1;
+        } else {
+          sortKey = key;
+          sortDir = 1;
+        }
+        document.querySelectorAll('table.sheet thead th').forEach(h => {
+          h.classList.remove('sorted');
+          const icon = h.querySelector('.sort-icon');
+          if (icon) icon.className = 'fa-solid fa-sort sort-icon';
+        });
+        th.classList.add('sorted');
+        const icon = th.querySelector('.sort-icon');
+        if (icon) icon.className = `fa-solid ${sortDir === 1 ? 'fa-sort-up' : 'fa-sort-down'} sort-icon`;
+        renderTable();
+      });
+    });
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    user = getUserSession();
+    if (!user) {
+      window.location.href = 'login';
+      return;
+    }
+    if (!(user.is_admin === true || (user.role && user.role.toLowerCase() === 'admin'))) {
+      document.getElementById('access-denied').style.display = 'block';
+      return;
+    }
+    document.getElementById('stock-content').style.display = 'block';
+
+    setupSortHeaders();
+
+    const searchInput = document.getElementById('stock-search');
+    let debounceTimer;
+    searchInput.addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(renderTable, 200);
+    });
+
+    document.getElementById('collection-filter').addEventListener('change', renderTable);
+
+    document.getElementById('filter-tabs').addEventListener('click', (e) => {
+      const btn = e.target.closest('.filter-tab');
+      if (!btn) return;
+      document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      currentStatusFilter = btn.dataset.status;
+      renderTable();
+    });
+
+    loadStockSummary();
+  });
+</script>
+</body>
+</html>

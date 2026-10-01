@@ -28,6 +28,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/supabase-client.js"></script>
   <script src="assets/js/common.js"></script>
+  <script src="assets/js/campaign.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
@@ -53,14 +54,12 @@
 
     .app-layout {
       width: 100%;
-      max-width: 480px;
       /* ✏️ ตามคำขอผู้ใช้: คงพื้นหลังสีขาวทึบไว้เหมือนเดิม ตั้งแต่ชื่อจนถึงล่างสุด ไม่ใส่กระจกฝ้า */
       background: #ffffff;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       position: relative;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
     }
 
     .hero-image-container {
@@ -70,7 +69,7 @@
       overflow: hidden;
       background: #f3f3f3;
     }
-    
+
     .hero-image {
       width: 100%;
       height: 100%;
@@ -86,40 +85,41 @@
       z-index: 1;
     }
 
+    /* 📷 ปุ่มเปลี่ยนภาพพื้นหลังโปรไฟล์เมมเบอร์ (โชว์เฉพาะบัญชี role=member) */
+    .cover-edit-btn {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(0,0,0,0.45);
+      color: #fff;
+      font-size: 15px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 5;
+      backdrop-filter: blur(4px);
+    }
+    .cover-edit-btn.visible { display: flex; }
+    .cover-edit-btn:active { transform: scale(0.92); }
+
+    /* 🖥️ เต็มจอเสมอทั้งมือถือและไอแพด/คอม (แบบเดียวกับ member.html) - ไม่มีกรอบการ์ดลอยกลางจอ */
     @media (min-width: 768px) {
-      body {
-        padding: 40px 20px;
-        align-items: center;
-      }
-      .app-layout {
-        max-width: 900px;
-        min-height: 600px;
-        border-radius: 30px;
-        flex-direction: row;
-        overflow: hidden;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.06);
-      }
       .hero-image-container {
-        width: 45% !important;
-        height: auto !important;
-        min-height: 100%;
+        height: 320px;
       }
       .hero-gradient {
-        background: linear-gradient(to top, rgba(255,255,255,0.95) 0%, transparent 40%) !important;
-        height: 100% !important;
+        background: linear-gradient(to top, #ffffff 15%, transparent) !important;
       }
       .profile-body {
-        width: 55% !important;
-        margin-top: 0 !important;
-        padding: 40px 40px !important;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        overflow-y: auto;
-      }
-      .profile-avatar-container {
-        margin-top: 0 !important;
-        justify-content: flex-start !important;
+        width: 100%;
+        max-width: 720px;
+        margin-left: auto;
+        margin-right: auto;
       }
     }
 
@@ -168,8 +168,7 @@
     }
 
     .member-header-block { text-align: center; margin-bottom: 24px; }
-    @media (min-width: 768px) { .member-header-block { text-align: left; } }
-    
+
     .member-name {
       font-size: 26px;
       font-weight: 600;
@@ -248,6 +247,7 @@
     .icon-gray { color: #868e96; background: #f1f3f5 !important; }
     .icon-purple { color: #9775fa; background: #f3f0ff !important; }
     .icon-dark { color: #495057; background: #e9ecef !important; }
+    .icon-green { color: #40c057; background: #ebfbee !important; }
 
     #app-loading-screen {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -311,11 +311,17 @@ body {
   z-index: 10;
 }
     
-    .bonus-container { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
-    .btn-bonus { height: 48px; border: none; border-radius: 14px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; color: white; }
-    .btn-monthly { background: var(--blmem-pink); box-shadow: 0 4px 12px rgba(255,133,162,0.3); }
-    .btn-redeem { background: #4dabf7; box-shadow: 0 4px 12px rgba(77,171,247,0.3); }
-    .btn-locked { background: #ccc !important; cursor: not-allowed; opacity: 0.7; }
+    /* 🔘 ปุ่มวงกลม Monthly Cookie / Redeem / Membership Card / Campaign - สไตล์เดียวกับปุ่ม Kami/Oshi/Cookie/More ในหน้า member */
+    .pf-circle-row { display: flex; justify-content: space-evenly; align-items: flex-start; gap: 8px; margin: 4px 0 22px; }
+    .pf-circle-btn { flex: 1 1 0; max-width: 90px; background: none; border: none; padding: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 600; color: #444; text-align: center; line-height: 1.25; transition: transform 0.2s ease; }
+    .pf-circle-btn:hover { transform: translateY(-3px); }
+    .pf-circle-btn:disabled { opacity: 0.5; cursor: wait; }
+    .pf-circle-btn .icon-circle { width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 19px; box-shadow: 0 4px 10px rgba(0,0,0,0.06); }
+    .btn-pf-monthly .icon-circle { background: var(--blmem-pink-light, #ffeef2); color: var(--blmem-pink, #ff85a2); }
+    .btn-pf-redeem .icon-circle { background: #e7f5ff; color: #4dabf7; }
+    .btn-pf-card .icon-circle { background: linear-gradient(135deg, #e0b953 0%, #fff5c3 50%, #cba034 100%); color: #5e470c; }
+    .btn-pf-campaign .icon-circle { background: #fff9db; color: #f59f00; }
+    .btn-pf-campaign.is-open .icon-circle { background: #fcc419; color: #fff; }
   </style>
 </head>
 <body class="glass-mesh-bg force-white-bg">
@@ -327,6 +333,8 @@ body {
   <div class="app-layout">
     <div class="hero-image-container">
       <img id="pf-cover" src="https://via.placeholder.com/800x400/ffe4e1/ff85a2?text=BLM48+Cover" class="hero-image">
+      <button id="cover-edit-btn" class="cover-edit-btn" onclick="triggerCoverUpload()"><i class="fas fa-camera"></i></button>
+      <input type="file" id="cover-upload" accept="image/*" style="display:none" onchange="handleCoverImageSelect(event)">
       <div class="hero-gradient"></div>
     </div>
 
@@ -371,19 +379,41 @@ body {
         </div>
       </div>
 
-      <div class="bonus-container">
-        <button id="btn-claim-monthly" class="btn-bonus btn-monthly"><i class="fas fa-gift"></i> รับคุกกี้รายเดือน</button>
-        <button onclick="redeemCode()" class="btn-bonus btn-redeem"><i class="fas fa-ticket-alt"></i> Redeem</button>
-
-        <button onclick="showMembershipCardModal()" class="btn-bonus btn-membership" style="grid-column: span 2; background: linear-gradient(135deg, #e0b953 0%, #fff5c3 45%, #fff5c3 55%, #cba034 100%); box-shadow: 0 4px 12px rgba(224, 185, 83, 0.4); color: #5e470c; border: 1px solid #fce899; font-weight: bold;">
-          <i class="fas fa-id-card"></i> Membership Card
+      <!-- 🔘 ปุ่มวงกลม (สไตล์เดียวกับปุ่ม Kami/Oshi/Cookie/More ในหน้า member)
+           รับคุกกี้รายเดือน: ซ่อนสำหรับ role member/admin | Campaign: เฉพาะ role member -->
+      <div id="pf-circle-row" class="pf-circle-row">
+        <button type="button" id="btn-claim-monthly" class="pf-circle-btn btn-pf-monthly" style="display: none;">
+          <span class="icon-circle"><i class="fas fa-gift"></i></span>
+          <span class="btn-label">Monthly Cookie</span>
+        </button>
+        <button type="button" class="pf-circle-btn btn-pf-redeem" onclick="redeemCode()">
+          <span class="icon-circle"><i class="fas fa-ticket-alt"></i></span>
+          <span class="btn-label">Redeem</span>
+        </button>
+        <button type="button" class="pf-circle-btn btn-pf-card" onclick="showMembershipCardModal()">
+          <span class="icon-circle"><i class="fas fa-id-card"></i></span>
+          <span class="btn-label">Membership Card</span>
+        </button>
+        <button type="button" id="btn-pf-campaign" class="pf-circle-btn btn-pf-campaign" onclick="onProfileCampaignClick()" style="display: none;">
+          <span class="icon-circle"><i class="fas fa-trophy"></i></span>
+          <span class="btn-label">Campaign</span>
         </button>
       </div>
 
-      <div id="pf-fanscore-box" style="display: none; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(135deg, #ff6b9d 0%, #ff8fb3 45%, #ff8fb3 55%, #e0447a 100%); border-radius: 18px; padding: 14px 16px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(255, 107, 157, 0.4); border: 1px solid #ff6b9d;">
+      <div id="pf-fanscore-box" style="display: none; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(135deg, #ff6b9d 0%, #ff8fb3 45%, #ff8fb3 55%, #e0447a 100%); border-radius: 18px; padding: 14px 16px; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(255, 107, 157, 0.4); border: 1px solid #ff6b9d;">
         <i class="fas fa-heart-circle-check" style="color: #ffffff; font-size: 22px;"></i>
         <span id="pf-fanscore" style="color: #ffffff; font-size: 20px; font-weight: 700;">0</span>
         <span style="color: #ffffff; font-size: 12px; opacity: 0.85; font-weight: bold;">Fan Score</span>
+      </div>
+
+      <div id="pf-fanscore-detail-box" style="display: none; background: #fff; border-radius: 18px; padding: 4px 16px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #f4d4de;">
+        <div onclick="toggleFanScoreDetail()" style="cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding: 12px 0; user-select: none;">
+          <span style="font-weight: 700; color: #555; font-size: 13.5px;"><i class="fas fa-heart-circle-check" style="color: #e0447a; margin-right: 7px;"></i>Fan Score แยกตามเมมเบอร์</span>
+          <i id="pf-fanscore-detail-arrow" class="fas fa-chevron-right" style="font-size: 13px; color: #888; transition: transform 0.3s ease;"></i>
+        </div>
+        <div id="pf-fanscore-detail-wrapper" style="max-height: 0px; opacity: 0; overflow: hidden; transition: max-height 0.3s ease-in-out, opacity 0.3s ease;">
+          <div id="pf-fanscore-detail-list" style="padding-bottom: 10px;"></div>
+        </div>
       </div>
 
       <div class="menu-section">
@@ -393,12 +423,24 @@ body {
     <i class="fas fa-chevron-right menu-arrow"></i>
   </a>
   
+  <a href="shop" class="menu-item">
+    <div class="menu-icon icon-green"><i class="fas fa-store"></i></div>
+    <div class="menu-text">Shop</div>
+    <i class="fas fa-chevron-right menu-arrow"></i>
+  </a>
+
   <a href="inventory" class="menu-item">
     <div class="menu-icon icon-blue"><i class="fas fa-briefcase"></i></div>
     <div class="menu-text">Inventory</div>
     <i class="fas fa-chevron-right menu-arrow"></i>
   </a>
-  
+
+  <a href="my_preorders" class="menu-item">
+    <div class="menu-icon icon-gray"><i class="fas fa-box-open"></i></div>
+    <div class="menu-text">My Pre-orders</div>
+    <i class="fas fa-chevron-right menu-arrow"></i>
+  </a>
+
   <a href="kami" class="menu-item">
     <div class="menu-icon icon-gold"><i class="fas fa-star"></i></div>
     <div class="menu-text">My Kami-Oshi Members</div>
@@ -468,7 +510,19 @@ body {
       } else {
          avatarEl.src = user.profile_img;
       }
-      document.getElementById('pf-cover').src = avatarEl.src;
+    }
+
+    // 📷 บัญชี role=member มีรูปพื้นหลัง (cover_image) เป็นของตัวเองแยกจากรูปโปรไฟล์ ดึงจากตาราง members และเปิดปุ่มแก้ไขให้
+    const coverEditBtn = document.getElementById('cover-edit-btn');
+    if (isUserMember()) {
+      if (coverEditBtn) coverEditBtn.classList.add('visible');
+      loadMemberCoverForSelf();
+      loadProfileCampaignButton();
+    } else {
+      if (coverEditBtn) coverEditBtn.classList.remove('visible');
+      const campaignBtn = document.getElementById('btn-pf-campaign');
+      if (campaignBtn) campaignBtn.style.display = 'none';
+      if (avatarEl.src) document.getElementById('pf-cover').src = avatarEl.src;
     }
 
     let totalOshi = 0;
@@ -489,35 +543,86 @@ body {
     if (user.role && user.role.toLowerCase() === 'user') {
       if (fanScoreBox) fanScoreBox.style.display = 'flex';
       document.getElementById('pf-fanscore').innerText = Number(user.fanCookies || 0).toLocaleString();
+      loadFanScoreDetail();
     } else {
       if (fanScoreBox) fanScoreBox.style.display = 'none';
+      const fanScoreDetailBox = document.getElementById('pf-fanscore-detail-box');
+      if (fanScoreDetailBox) fanScoreDetailBox.style.display = 'none';
     }
 
     if (user.role && user.role.toLowerCase() === 'user') {
       document.getElementById('edit-name-btn').style.display = 'inline-flex';
     }
 
-    // เมนูเฉพาะ Role Admin เท่านั้น (ลิงก์ไปหน้า Admin Dashboard แยกต่างหาก)
-    const isAdmin = user.role && user.role.toLowerCase() === 'admin';
+    // เมนูเฉพาะ Role Admin หรือบัญชีที่ได้รับสิทธิ์ Admin ควบ (is_admin) เท่านั้น (ลิงก์ไปหน้า Admin Dashboard แยกต่างหาก)
+    const isAdmin = (user.role && user.role.toLowerCase() === 'admin') || user.is_admin === true;
     const menuAdminDashboard = document.getElementById('menu-admin-dashboard');
     if (menuAdminDashboard) menuAdminDashboard.style.display = isAdmin ? 'flex' : 'none';
     if (isAdmin) loadAdminPendingBadge();
     // เพิ่มการจัดการปุ่มรับคุกกี้ตามสถานะ Member
+    // ปุ่มรับคุกกี้รายเดือน: role member และ role admin มองไม่เห็น
     const btnClaim = document.getElementById('btn-claim-monthly');
     if (btnClaim) {
-      if (isUserMember()) {
-        btnClaim.onclick = () => Swal.fire('ขออภัย','สิทธิ์รับคุกกี้ฟรีไม่ครอบคลุมสถานะเมมเบอร์','info');
-        btnClaim.classList.add('btn-locked');
-      } else {
-        btnClaim.onclick = claimMonthly;
-        btnClaim.classList.remove('btn-locked');
-      }
+      const roleLower = (user.role || '').toLowerCase().trim();
+      const hideMonthly = isUserMember() || roleLower === 'admin';
+      btnClaim.style.display = hideMonthly ? 'none' : '';
+      btnClaim.onclick = hideMonthly ? null : claimMonthly;
     }
 
     // อัปเดตรูปโปรไฟล์ตรง Tab Bar ด้านล่าง
     const tabProfileImg = document.getElementById('tab-profile-img');
     if (tabProfileImg) {
       tabProfileImg.src = document.getElementById('pf-avatar').src; // ใช้รูปที่แปลงแล้วจาก pf-avatar ได้เลย
+    }
+  }
+
+  function toggleFanScoreDetail() {
+    const wrapper = document.getElementById('pf-fanscore-detail-wrapper');
+    const arrow = document.getElementById('pf-fanscore-detail-arrow');
+    if (!wrapper) return;
+    if (wrapper.style.maxHeight === '0px' || !wrapper.style.maxHeight) {
+      wrapper.style.maxHeight = wrapper.scrollHeight + 'px';
+      wrapper.style.opacity = '1';
+      arrow.style.transform = 'rotate(90deg)';
+    } else {
+      wrapper.style.maxHeight = '0px';
+      wrapper.style.opacity = '0';
+      arrow.style.transform = 'rotate(0deg)';
+    }
+  }
+
+  // ยอด Fan Score แยกตามเมมเบอร์ (ให้เมมเบอร์ไหนไปเท่าไหร่บ้าง) ดึงจาก fan_logs ผ่าน RPC get_user_fan_scores
+  async function loadFanScoreDetail() {
+    if (!user || !user.username) return;
+    const box = document.getElementById('pf-fanscore-detail-box');
+    const list = document.getElementById('pf-fanscore-detail-list');
+    if (!box || !list) return;
+    try {
+      const scores = await blm48GetUserFanScores(user.username);
+      if (!Array.isArray(scores) || scores.length === 0) {
+        box.style.display = 'none';
+        return;
+      }
+      box.style.display = 'block';
+      list.innerHTML = scores.map(s => {
+        let img = s.img || 'https://raw.githubusercontent.com/Chatchapong-Sing/stockManagement/main/default-profile.png';
+        if (img.includes('drive.google.com')) {
+          const driveMatch = img.match(/[-\w]{25,}/);
+          if (driveMatch) img = `https://lh3.googleusercontent.com/u/0/d/${driveMatch[0]}`;
+        }
+        return `
+          <div style="display:flex; align-items:center; gap:12px; padding:9px 0; border-top:1px solid #f9f9f9;">
+            <img src="${img}" onerror="this.src='https://raw.githubusercontent.com/Chatchapong-Sing/stockManagement/main/default-profile.png'" style="width:38px; height:38px; border-radius:50%; object-fit:cover; flex-shrink:0;">
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:13px; font-weight:600; color:#444; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${s.name || s.member_name}</div>
+              <div style="font-size:11.5px; color:#e0447a; font-weight:700;"><i class="fas fa-heart-circle-check"></i> ${Number(s.total || 0).toLocaleString()} Fan Score</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    } catch (e) {
+      console.error('loadFanScoreDetail error:', e);
+      box.style.display = 'none';
     }
   }
 
@@ -639,6 +744,117 @@ body {
     return user && user.role && user.role.toUpperCase().trim() === 'MEMBER';
   }
 
+  // 📷 --- ภาพพื้นหลังโปรไฟล์เมมเบอร์ (cover_image ในตาราง members แยกจากรูปโปรไฟล์วงกลม) ---
+  const DEFAULT_MEMBER_IMG = 'https://raw.githubusercontent.com/Chatchapong-Sing/stockManagement/main/default-profile.png';
+  function getMemberImg(url) {
+    if (!url || url.trim() === "") return DEFAULT_MEMBER_IMG;
+    if (url.includes('googleusercontent.com')) return url + '=s600';
+    return url;
+  }
+
+  let currentMemberCoverUrl = null;
+  let activeCoverCropper = null;
+
+  // 🏆 ปุ่มวงกลม Campaign: ยังไม่เปิดเดือนนี้ = กดเพื่อเปิด / เปิดแล้ว = กดไปหน้า Campaign ของตัวเอง
+  let profileCampaign = null;
+  async function loadProfileCampaignButton() {
+    const btn = document.getElementById('btn-pf-campaign');
+    if (!btn || !user || !user.name) return;
+    try {
+      const res = await blm48GetMemberCampaign(user.name);
+      profileCampaign = (res && res.status === 'success') ? res.campaign : null;
+    } catch (e) { profileCampaign = null; }
+    btn.classList.toggle('is-open', !!profileCampaign);
+    btn.querySelector('.btn-label').textContent = profileCampaign ? 'My Campaign' : 'Campaign';
+    btn.style.display = '';
+  }
+
+  async function onProfileCampaignClick() {
+    if (profileCampaign) {
+      window.location.href = `campaign_detail?id=${encodeURIComponent(profileCampaign.id)}`;
+      return;
+    }
+    window.location.href = 'campaign_open';
+  }
+
+  async function loadMemberCoverForSelf() {
+    if (!user || !user.name) return;
+    try {
+      const stats = await blm48GetMemberStats(user.name);
+      if (stats) {
+        currentMemberCoverUrl = stats.cover_image || null;
+        document.getElementById('pf-cover').src = getMemberImg(stats.cover_image || stats.profile_img);
+      }
+    } catch (e) { console.error('loadMemberCoverForSelf error:', e); }
+  }
+
+  function triggerCoverUpload() {
+    document.getElementById('cover-upload').click();
+  }
+
+  function handleCoverImageSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      // ครอบตัดภาพพื้นหลังด้วยสัดส่วน 16:9
+      Swal.fire({
+        title: 'ปรับตำแหน่งภาพพื้นหลัง',
+        html: `<div class="cropper-container-box"><img id="cover-cropper-target-img" src="${e.target.result}"></div>`,
+        showCancelButton: true,
+        confirmButtonColor: 'var(--blmem-pink)',
+        confirmButtonText: 'ยืนยันรูปภาพนี้',
+        cancelButtonText: 'ยกเลิก',
+        allowOutsideClick: false,
+        didOpen: () => {
+          const imageElement = document.getElementById('cover-cropper-target-img');
+          activeCoverCropper = new Cropper(imageElement, {
+            aspectRatio: 16 / 9,
+            viewMode: 1,
+            autoCropArea: 1,
+            movable: true,
+            zoomable: true,
+            rotatable: false,
+            scalable: false
+          });
+        },
+        willClose: () => {
+          if (activeCoverCropper) { activeCoverCropper.destroy(); activeCoverCropper = null; }
+        },
+        preConfirm: () => {
+          return new Promise((resolve) => {
+            activeCoverCropper.getCroppedCanvas({ width: 960, height: 540 }).toBlob((blob) => resolve(blob), 'image/jpeg', 0.85);
+          });
+        }
+      }).then(async (result) => {
+        if (result.isConfirmed && result.value) {
+          await proceedToUploadCover(result.value);
+        }
+        document.getElementById('cover-upload').value = '';
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function proceedToUploadCover(blobFile) {
+    Swal.fire({ title: 'กำลังอัปโหลด...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+    try {
+      const oldCoverUrl = currentMemberCoverUrl;
+      const finalUrl = await blm48UploadMemberCoverImage(user.username, blobFile);
+      const res = await blm48UpdateMemberCoverImage(user.username, user.name, finalUrl);
+      if (res.status !== 'success') throw new Error(res.message || 'อัปเดตรูปพื้นหลังไม่สำเร็จ');
+
+      if (oldCoverUrl) blm48DeleteStorageFiles([oldCoverUrl]);
+      currentMemberCoverUrl = finalUrl;
+      document.getElementById('pf-cover').src = finalUrl;
+
+      Swal.fire('สำเร็จ!', 'เปลี่ยนภาพพื้นหลังโปรไฟล์เรียบร้อยแล้วค่ะ', 'success');
+    } catch (e) {
+      Swal.fire('ผิดพลาด', e.message || 'ไม่สามารถอัปโหลดรูปได้ในขณะนี้', 'error');
+    }
+  }
+
   // --- ฟังก์ชันรับคุกกี้ ---
   async function claimMonthly() {
     const btnClaim = document.getElementById('btn-claim-monthly');
@@ -686,7 +902,7 @@ body {
 
   // --- ฟังก์ชันสร้างการ์ด Membership ---
   // การ์ดพื้นหลังแยกตาม Role/Tier: Member ได้ Member Card เสมอ
-  // ส่วน role=user จะได้ Copper/Silver/Gold ตาม Membership Tier (ค่าเฉลี่ยการถือ Token ย้อนหลัง 1 เดือน)
+  // ส่วน role=user จะได้ Copper/Silver/Gold ตาม Membership Tier (Fan Score สะสม: Copper <5000, Silver 5000-10000, Gold 10000+)
   const MEMBERSHIP_CARD_IMAGES = {
     member: 'https://lh3.googleusercontent.com/d/1z1rqVAMbE6a0-i-A_9W-PfErg0V8RSqy=s1000',
     copper: 'https://lh3.googleusercontent.com/d/1ZlMrb8p1Du8-KITKpVlYt7E1H1aBGlC8=s1000',
@@ -974,9 +1190,9 @@ function updateSubPageIcon(imgId, fallbackId, iconUrl) {
     <i id="nav-home-fallback" class="fa-solid fa-house"></i>
     <img id="nav-home" src="" alt="Home" style="display: none;">
   </a>
-  <a href="kami" class="tab-item">
+  <a href="fanpost" class="tab-item">
     <i id="nav-kami-fallback" class="fa-solid fa-star"></i>
-    <img id="nav-kami" src="" alt="My Oshi" style="display: none;">
+    <img id="nav-kami" src="" alt="Fan Post" style="display: none;">
   </a>
   <a href="majorvote" class="tab-item">
     <i id="nav-cart-fallback" class="fa-solid fa-crown"></i>

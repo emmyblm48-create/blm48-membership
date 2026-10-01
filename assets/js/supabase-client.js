@@ -34,8 +34,8 @@ async function blm48Rpc(fnName, params) {
 function blm48GiveCookie(username, memberName, amount) {
   return blm48Rpc('give_cookie', { p_username: username, p_member_name: memberName, p_amount: amount });
 }
-function blm48BuyGachaItem(username, collectionId) {
-  return blm48Rpc('buy_gacha_item', { p_username: username, p_collection_id: collectionId });
+function blm48BuyGachaItem(username, collectionId, pullCount) {
+  return blm48Rpc('buy_gacha_item', { p_username: username, p_collection_id: collectionId, p_pull_count: pullCount || 1 });
 }
 function blm48BuyDirectItem(username, itemId) {
   return blm48Rpc('buy_direct_item', { p_username: username, p_item_id: itemId });
@@ -43,8 +43,36 @@ function blm48BuyDirectItem(username, itemId) {
 function blm48RedeemCode(username, code) {
   return blm48Rpc('redeem_code', { p_username: username, p_code: code });
 }
+function blm48GetPreorderProducts() {
+  return blm48Rpc('get_preorder_products', {});
+}
+function blm48BuyPreorder(username, productId, quantity) {
+  return blm48Rpc('buy_preorder', { p_username: username, p_product_id: productId, p_quantity: quantity });
+}
+function blm48GetMyPreorderOrders(username) {
+  return blm48Rpc('get_my_preorder_orders', { p_username: username });
+}
+function blm48AdminListPreorderOrders(adminUsername, statusFilter) {
+  return blm48Rpc('admin_list_preorder_orders', { p_admin_username: adminUsername, p_status_filter: statusFilter || null });
+}
+function blm48AdminSetPreorderOrderStatus(adminUsername, orderId, status) {
+  return blm48Rpc('admin_set_preorder_order_status', { p_admin_username: adminUsername, p_order_id: orderId, p_status: status });
+}
+// สุ่มลายการ์ด preorder ล่วงหน้าให้แอดมินดูผลก่อนกดจัดส่งจริง (ไม่เปลี่ยนสถานะออเดอร์)
+function blm48AdminRevealPreorderRandom(adminUsername, orderId) {
+  return blm48Rpc('admin_reveal_preorder_random', { p_admin_username: adminUsername, p_order_id: orderId });
+}
 function blm48GetInventory(username) {
   return blm48Rpc('get_inventory', { p_username: username });
+}
+function blm48DeleteInventoryItems(username, category, subCollection, itemName, qty) {
+  return blm48Rpc('delete_inventory_items', {
+    p_username: username,
+    p_category: category,
+    p_sub_collection: subCollection,
+    p_item_name: itemName,
+    p_qty: qty
+  });
 }
 function blm48GetWallet(username) {
   return blm48Rpc('get_wallet', { p_username: username });
@@ -102,6 +130,14 @@ function blm48GetMemberTopFans(memberName) {
 function blm48GetTopFans() {
   return blm48Rpc('get_top_fans', {});
 }
+// top fans across every member combined, pre-sorted server-side - used on topfans.html's global mode (no ?name=)
+function blm48GetGlobalTopFans() {
+  return blm48Rpc('get_global_top_fans', {});
+}
+// Fan Score breakdown per member for one user (reverse of get_member_top_fans) - used on profile.html
+function blm48GetUserFanScores(username) {
+  return blm48Rpc('get_user_fan_scores', { p_username: username });
+}
 
 // Live-updates whenever anyone's monthly cookie total changes (give_cookie, likePost).
 // onChange is called with no arguments — caller decides what to re-fetch/re-render.
@@ -118,6 +154,25 @@ function blm48SubscribeRanking(onChange, debounceMs) {
     .subscribe();
 }
 
+// Live-updates admin_users.html the instant any wallet (token/cookie/geToken) or Oshi/Kami-Oshi
+// row changes anywhere in the app. Listens on public.realtime_ping instead of public.users
+// directly - users holds password/wallet data, so it can never get a public RLS SELECT policy
+// (required for Realtime to deliver events to anon), while realtime_ping is just a topic+
+// timestamp a trigger touches on every users/user_oshi write (see migration
+// add_realtime_ping_for_admin_users_overview). onChange is called with no arguments - caller
+// re-fetches via admin_get_users_overview() same as the initial load.
+function blm48SubscribeAdminUsersOverview(onChange, debounceMs) {
+  let timer = null;
+  const trigger = () => {
+    clearTimeout(timer);
+    timer = setTimeout(onChange, debounceMs || 400);
+  };
+  return blm48Supabase
+    .channel('admin-users-overview-ping')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'realtime_ping', filter: 'topic=eq.admin_users_overview' }, trigger)
+    .subscribe();
+}
+
 // ---------------------------------------------------------------------------
 // Post system (feed, likes, comments) - moved off Google Apps Script/Sheets
 // and Firebase onto Supabase so posting/liking/commenting doesn't queue up
@@ -129,13 +184,33 @@ function blm48SubscribeRanking(onChange, debounceMs) {
 function blm48GetPosts(username) {
   return blm48Rpc('get_posts', { p_username: username || null });
 }
-function blm48CreatePost(username, content, imageUrl, audioUrl, videoUrl) {
+// Paginated feed fetch - use this instead of blm48GetPosts() for the main scrolling feed (index.html)
+// so it doesn't pull every post + every comment in one multi-MB response. Cursor-based (beforeEpochMs
+// = createdAtEpochMs of the oldest post already loaded, or null/omitted for the first page) rather
+// than offset-based, so posts never get skipped or duplicated if new ones are inserted above while
+// scrolling (same reasoning Facebook/Instagram-style feeds use cursors instead of page numbers).
+// includePostId optionally pins one specific post into the result even if it falls outside the
+// current page (for shared post links that need to be found/scrolled-to without loading everything).
+// authorFilter optionally limits to one author's posts server-side (matches authorName or
+// authorUsername case-insensitively) - used by member.html's per-member feed section instead of
+// fetching every post and filtering client-side.
+function blm48GetPostsPage(username, limit, beforeEpochMs, includePostId, authorFilter) {
+  return blm48Rpc('get_posts_page', {
+    p_username: username || null,
+    p_limit: limit || 20,
+    p_before_epoch_ms: beforeEpochMs || null,
+    p_include_post_id: includePostId || null,
+    p_author_filter: authorFilter || null
+  });
+}
+function blm48CreatePost(username, content, imageUrl, audioUrl, videoUrl, postType) {
   return blm48Rpc('create_post', {
     p_username: username,
     p_content: content || '',
     p_image_url: imageUrl || '',
     p_audio_url: audioUrl || '',
-    p_video_url: videoUrl || ''
+    p_video_url: videoUrl || '',
+    p_post_type: postType || 'member'
   });
 }
 function blm48LikePost(username, postId) {
@@ -158,41 +233,10 @@ function blm48EditComment(username, commentId, text) {
   return blm48Rpc('edit_comment', { p_username: username, p_comment_id: commentId, p_text: text });
 }
 
-// Uploads a recorded voice-clip Blob straight to the public "post-audio" Storage bucket
-// (created 2026-08-05, replaces the old audio pipeline that pointed at a since-abandoned
-// Supabase project) and returns its public URL for create_post/edit_post's audio param.
-// Same "anon key, no real auth session" trust model as every RPC above - anyone can upload,
-// but only into this bucket, capped by its own file_size_limit/allowed_mime_types.
-// Retries on transient failures (network blip, rate limit) same as the image upload path in
-// post.html. Generates a fresh random filePath per attempt so a lost success response never
-// collides with the retry (upsert:false would otherwise error out on an already-existing file).
-async function blm48UploadPostAudio(username, blob, retries = 2) {
-  const ext = blob.type.includes('mp4') ? 'm4a' : (blob.type.includes('ogg') ? 'ogg' : (blob.type.includes('wav') ? 'wav' : 'webm'));
-
-  let lastError;
-  for (let attempt = 0; attempt <= retries; attempt++) {
-    const filePath = `${username}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
-    try {
-      const { error } = await blm48Supabase.storage.from('post-audio').upload(filePath, blob, {
-        contentType: blob.type || 'audio/webm',
-        upsert: false,
-        cacheControl: '31536000'
-      });
-      if (error) throw error;
-
-      const { data } = blm48Supabase.storage.from('post-audio').getPublicUrl(filePath);
-      return data.publicUrl;
-    } catch (err) {
-      lastError = err;
-      if (attempt === retries) throw lastError;
-      await new Promise(resolve => setTimeout(resolve, 800 * (attempt + 1)));
-    }
-  }
-}
-
-// Shared upload helper for the image buckets below - same retry-with-fresh-filename pattern as
-// blm48UploadPostAudio. `file` can be a File or Blob; extension is guessed from its MIME type
-// (falls back to jpg since both callers compress/crop to JPEG client-side before calling this).
+// Shared upload helper for the image buckets below - retries with a fresh filename per attempt
+// so a lost success response never collides with the retry (upsert:false would otherwise error
+// out on an already-existing file). `file` can be a File or Blob; extension is guessed from its
+// MIME type (falls back to jpg since both callers compress/crop to JPEG client-side before calling this).
 async function blm48UploadImageToBucket(bucket, username, file, retries = 2) {
   const type = file.type || 'image/jpeg';
   const ext = type.includes('png') ? 'png' : (type.includes('webp') ? 'webp' : (type.includes('gif') ? 'gif' : 'jpg'));
@@ -228,13 +272,12 @@ function blm48UploadProfileImage(username, file, retries = 2) {
   return blm48UploadImageToBucket('profile-images', username, file, retries);
 }
 
-// Best-effort cleanup for orphaned files - old profile photo after a replace, a post's
-// images/audio after it's deleted, or images dropped from a post during edit. Only matches
-// URLs that actually point at one of our own buckets on this project (so it silently no-ops
-// on default avatars, old dead-project audio links, etc. - anything else just isn't ours to
-// delete). Never throws: this tidies up storage quota, it should never block or fail the
-// user-facing action that triggered it.
-const BLM48_STORAGE_BUCKETS = ['post-images', 'profile-images', 'post-audio'];
+// Best-effort cleanup for orphaned files - old profile photo after a replace, or images
+// dropped from a post after it's deleted or edited. Only matches URLs that actually point at
+// one of our own buckets on this project (so it silently no-ops on default avatars, etc. -
+// anything else just isn't ours to delete). Never throws: this tidies up storage quota, it
+// should never block or fail the user-facing action that triggered it.
+const BLM48_STORAGE_BUCKETS = ['post-images', 'profile-images'];
 async function blm48DeleteStorageFiles(urls) {
   const pathsByBucket = {};
   (urls || []).forEach((url) => {
@@ -266,6 +309,15 @@ function blm48UpdateProfileImage(username, imageUrl) {
   return blm48Rpc('update_profile_image', { p_username: username, p_image_url: imageUrl });
 }
 
+// Member cover photo (member.html hero background) - self-serve upload by the role='member'
+// account whose users.name matches the member row (server checks that match, see update_member_cover RPC).
+function blm48UploadMemberCoverImage(username, file, retries = 2) {
+  return blm48UploadImageToBucket('profile-images', username, file, retries);
+}
+function blm48UpdateMemberCoverImage(username, memberName, imageUrl) {
+  return blm48Rpc('update_member_cover', { p_username: username, p_member_name: memberName, p_image_url: imageUrl });
+}
+
 // Live-updates whenever likes/comments change on any post. onChange gets no arguments -
 // caller decides what to re-fetch/re-render (mirrors blm48SubscribeRanking's pattern).
 function blm48SubscribePosts(onChange, debounceMs) {
@@ -286,6 +338,23 @@ function blm48SubscribePosts(onChange, debounceMs) {
 // month, members, oshi, wallet exchange, gacha catalog) - moved off Google
 // Apps Script/Sheets onto Supabase. Same "anon key can only call RPCs" lockdown.
 // ---------------------------------------------------------------------------
+
+// Monthly login streak (index.html modal): 2 rescue tickets/month to backfill a missed day
+// (1 rescue use per real day), 100 Token once the whole calendar month is checked in - either
+// clicked to claim on the last day, or auto-credited next time record_daily_login runs if they
+// never clicked.
+function blm48RecordDailyLogin(username) {
+  return blm48Rpc('record_daily_login', { p_username: username });
+}
+function blm48GetLoginStreakStatus(username) {
+  return blm48Rpc('get_login_streak_status', { p_username: username });
+}
+function blm48UseLoginRescue(username, dateStr) {
+  return blm48Rpc('use_login_rescue', { p_username: username, p_date: dateStr });
+}
+function blm48ClaimLoginMonthlyReward(username) {
+  return blm48Rpc('claim_login_monthly_reward', { p_username: username });
+}
 
 // Auth. login() checks the password; getUserInfo() is the silent session-refresh/
 // kill-switch call (no password check) used on every page load.
@@ -366,6 +435,24 @@ function blm48GetWinnerTheme() {
   return blm48Rpc('get_winner_theme', {});
 }
 
+// 🏆 Member Cookie Campaign - เมมเบอร์กดเปิดเพื่อบอกว่า "อยากได้ Champ of the Month เดือนนี้"
+// แฟนๆ ซัพพอร์ตคุกกี้ (นับเหมือนปาคุกกี้ปกติ) จบสิ้นเดือน แล้วระบบคืนคุกกี้ 5/10/15/20% ตาม Tier อัตโนมัติ (pg_cron)
+function blm48OpenMemberCampaign(username) {
+  return blm48Rpc('open_member_campaign', { p_username: username });
+}
+function blm48GetMemberCampaign(memberName) {
+  return blm48Rpc('get_member_campaign', { p_member_name: memberName });
+}
+function blm48GetActiveMemberCampaigns() {
+  return blm48Rpc('get_active_member_campaigns', {});
+}
+function blm48GetMemberCampaignDetail(campaignId, username) {
+  return blm48Rpc('get_member_campaign_detail', { p_campaign_id: campaignId, p_username: username || null });
+}
+function blm48SupportMemberCampaign(username, campaignId, amount) {
+  return blm48Rpc('support_member_campaign', { p_username: username, p_campaign_id: campaignId, p_amount: amount });
+}
+
 // Members directory / headline count
 function blm48GetAllMembers() {
   return blm48Rpc('get_all_members', {});
@@ -396,8 +483,8 @@ function blm48ClaimMonthlyCookie(username) {
 
 // Membership Tier for the profile Membership Card: role='member' always
 // gets {tier: null} (plain Member Card); role='user' gets 'copper' /
-// 'silver' / 'gold' based on last month's average Token holding, computed
-// server-side from daily snapshots.
+// 'silver' / 'gold' based on lifetime Fan Score (users.fan_cookies):
+// copper <5000, silver 5000-10000, gold 10000+. Computed server-side.
 function blm48GetMembershipTier(username) {
   return blm48Rpc('get_membership_tier', { p_username: username });
 }
@@ -416,8 +503,8 @@ function blm48ExchangeCookies(username, tokenPrice) {
 }
 
 // Gacha machine catalog (shop.html) - reads the already-synced collections/items tables.
-function blm48GetGachaCollections() {
-  return blm48Rpc('get_gacha_collections', {});
+function blm48GetGachaCollections(username) {
+  return blm48Rpc('get_gacha_collections', { p_username: username || null });
 }
 
 // Best-selling item per shop category (Cookie/Cafe/Gacha), by purchase count in wallet_logs.
@@ -462,6 +549,18 @@ function blm48AdminTransferWallet(adminUsername, targetUsername, token, cookie, 
 function blm48AdminGetTransferHistory(adminUsername, limit) {
   return blm48Rpc('admin_get_transfer_history', { p_admin_username: adminUsername, p_limit: limit || 100 });
 }
+// Every account's Token/Cookie/GEToken movement (purchases, admin transfers, redeem codes,
+// daily missions, Major Vote spends, gift sends), newest first, searchable + paginated -
+// powers admin_wallet_history.html. p_type: null/'wallet'/'vote'/'gift'.
+function blm48AdminGetWalletHistory(adminUsername, search, type, limit, offset) {
+  return blm48Rpc('admin_get_wallet_history', {
+    p_admin_username: adminUsername,
+    p_search: search || null,
+    p_type: type || null,
+    p_limit: limit || 50,
+    p_offset: offset || 0
+  });
+}
 
 // Pending-account approval queue (admin.html Dashboard) - accounts admin_create_user makes
 // start life as status='pending' and are blocked from logging in until an admin approves them
@@ -496,6 +595,12 @@ function blm48AdminSearchUsers(adminUsername, query) {
   return blm48Rpc('admin_search_users', { p_admin_username: adminUsername, p_query: query || '' });
 }
 
+// Every account's wallet (Token/Cookie/GEToken), Oshi/Kami-Oshi counts, and lifetime Fan Score
+// in one shot - powers the Excel-style table in admin_users.html.
+function blm48AdminGetUsersOverview(adminUsername) {
+  return blm48Rpc('admin_get_users_overview', { p_admin_username: adminUsername });
+}
+
 // Suspend (p_suspend=true) or reinstate (p_suspend=false) a user/member account. A suspended
 // account is blocked from logging in and gets signed out on its next session refresh, same as
 // the existing "account deleted / password cleared" kick-out flow already wired app-wide.
@@ -507,6 +612,23 @@ function blm48AdminSuspendUser(adminUsername, targetUsername, suspend) {
 // send channels = Cookie) - powers admin_sales.html.
 function blm48AdminGetSalesSummary(adminUsername) {
   return blm48Rpc('admin_get_sales_summary', { p_admin_username: adminUsername });
+}
+
+// Official Merchandise (gacha) stock levels, per collection/item - powers admin_stock.html.
+function blm48AdminGetStockSummary(adminUsername) {
+  return blm48Rpc('admin_get_stock_summary', { p_admin_username: adminUsername });
+}
+
+// Redeem Code management (admin.html "จัดการโค้ด Redeem") - one code can now carry several
+// reward rows at once (e.g. Token + Cookie together), stored in the code_rewards table.
+function blm48AdminListCodes(adminUsername) {
+  return blm48Rpc('admin_list_codes', { p_admin_username: adminUsername });
+}
+function blm48AdminCreateCode(adminUsername, code, expiryTime, maxLimit, rewards) {
+  return blm48Rpc('admin_create_code', { p_admin_username: adminUsername, p_code: code, p_expiry_time: expiryTime, p_max_limit: maxLimit, p_rewards: rewards });
+}
+function blm48AdminDeleteCode(adminUsername, code) {
+  return blm48Rpc('admin_delete_code', { p_admin_username: adminUsername, p_code: code });
 }
 
 // Live-updates a Major Vote campaign's candidate rows. Replaces the old Firebase

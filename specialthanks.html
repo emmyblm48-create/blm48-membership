@@ -205,6 +205,11 @@
             word-break: break-word;
         }
 
+        .message-content.placeholder-text {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
         /* 🖼️ โพสต์รูปภาพเฉลิมฉลองประจำตำแหน่ง */
         .artwork-section {
             width: 100%;
@@ -361,7 +366,8 @@
             const container = document.getElementById('thanks-content-box');
             const avatarImg = data.profileImage ? data.profileImage : 'https://lh3.googleusercontent.com/d/1rebp2F8vyP0nyvsEOFD9Nw2mPcRtVqtG=s400';
             const formatCookie = Number(data.totalCookie).toLocaleString();
-            const thankYouMessage = data.message ? data.message : "";
+            const hasMessage = !!(data.message && data.message.toString().trim() !== "");
+            const thankYouMessage = hasMessage ? data.message : "Stay Tuned !";
 
             container.innerHTML = `
                 <div class="avatar-wrapper">
@@ -386,7 +392,7 @@
                     <div class="message-title">
                         <i class="fa-solid fa-heart"></i> Message from Member
                     </div>
-                    <div class="message-content">${escapeHtml(thankYouMessage)}</div>
+                    <div class="message-content${hasMessage ? '' : ' placeholder-text'}">${escapeHtml(thankYouMessage)}</div>
                 </div>
 
                 <div class="artwork-section" id="artwork-wrapper">
@@ -394,7 +400,7 @@
                 </div>
 
                 ${data.postId ? `
-                <a href="index?post=${encodeURIComponent(data.postId)}" class="engage-post-btn">
+                <a href="postdetail?id=${encodeURIComponent(data.postId)}" class="engage-post-btn">
                     <i class="fa-solid fa-heart"></i> กดใจ &nbsp;<i class="fa-solid fa-comment"></i> คอมเมนต์ &nbsp;<i class="fa-solid fa-paper-plane"></i> แชร์โพสนี้
                 </a>` : ''}
             `;

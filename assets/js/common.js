@@ -63,13 +63,14 @@ document.addEventListener('DOMContentLoaded', function initSwipeBackGesture() {
   }, { passive: true });
 });
 
-// 🛡️ กันกดรูปค้าง (long-press) แล้วเซฟรูป / คลิกขวา Save Image As ทุกหน้า ยกเว้นหน้า inventory
-// (หน้า inventory ต้องการให้ผู้ใช้เซฟรูปไอเทมที่ซื้อไว้ได้ตามปกติ)
+// 🛡️ กันกดรูปค้าง (long-press) แล้วเซฟรูป / คลิกขวา Save Image As ทุกหน้า ยกเว้นหน้า inventory และ admin
+// (หน้า inventory ต้องการให้ผู้ใช้เซฟรูปไอเทมที่ซื้อไว้ได้ตามปกติ, หน้า admin ต้องการให้แอดมินเซฟรูปสลิปโอนเงินได้)
 // ใช้ delegated event ที่ document แทนการเซ็ต attribute ทีละรูป เพื่อให้ครอบคลุมรูปที่ยังไม่ถูกสร้าง
 // ตอนนี้ด้วย (โพสต์/แกลเลอรีที่โหลดทีหลังผ่าน JS) โดยไม่ต้องใช้ MutationObserver
 (function preventImageSaving() {
   const currentPage = window.location.pathname.replace(/\/+$/, '').split('/').pop() || '';
-  if (currentPage === 'inventory' || currentPage === 'inventory.html') return;
+  const excludedPages = ['inventory', 'inventory.html', 'admin', 'admin.html'];
+  if (excludedPages.includes(currentPage)) return;
 
   // คลิกขวา (เดสก์ท็อป) / long-press ที่ยิง contextmenu (บางเบราว์เซอร์บนมือถือ) บนรูปภาพ
   document.addEventListener('contextmenu', function(e) {
@@ -83,12 +84,18 @@ document.addEventListener('DOMContentLoaded', function initSwipeBackGesture() {
 
   // -webkit-touch-callout ปิดเมนู "บันทึกรูปภาพ" ตอนกดค้างบน iOS Safari โดยเฉพาะ (เบราว์เซอร์อื่นไม่รองรับ
   // property นี้ก็ไม่เป็นไร ยังมี contextmenu preventDefault ด้านบนช่วยกันซ้ำอีกชั้น)
+  // pointer-events: none คือตัวที่กันเมนู "ดาวน์โหลดรูปภาพ" ของ Android Chrome ตอนกดค้างได้จริง (Android ไม่สนใจ
+  // -webkit-touch-callout และบางรุ่นก็ไม่ยิง contextmenu event ให้ preventDefault ทัน) - ทำให้รูปไม่รับอีเวนต์การกด
+  // เลยแทน ยกเว้นรูปที่มี onclick ของตัวเอง (เช่น รูปโพสต์ที่กดเพื่อเปิดดูเต็มจอ) ที่ยังต้องคลิกได้ปกติ
   const style = document.createElement('style');
   style.textContent = `
     img {
       -webkit-touch-callout: none;
       -webkit-user-select: none;
       user-select: none;
+    }
+    img:not([onclick]) {
+      pointer-events: none;
     }
   `;
   document.head.appendChild(style);
@@ -107,7 +114,7 @@ document.addEventListener('DOMContentLoaded', function initSwipeBackGesture() {
     if (!card) return;
 
     const interactiveEl = e.target.closest(
-      'a, button, input, textarea, img, audio, svg, [onclick], .voice-msg-bubble, [id^="comment-section-"]'
+      'a, button, input, textarea, img, svg, [onclick], [id^="comment-section-"]'
     );
     if (interactiveEl && card.contains(interactiveEl)) return;
 
@@ -130,10 +137,129 @@ function findPostIdFromElement(el) {
   return postCard && postCard.id ? postCard.id.replace(/^post-/, '') : null;
 }
 
+// 🌸 อัปเดตโพสต์ที่อยู่บนจออยู่แล้วแบบ "เงียบ" (ใช้ตอน Realtime/refresh ดึงข้อมูลใหม่มา) - แก้เฉพาะจุดที่เปลี่ยนจริง
+// เดิมเขียน commentList.innerHTML ทับทั้งลิสต์ทุกครั้งที่มีใครไลก์/คอมเมนต์ที่ไหนก็ตามในแอป ทำให้คอมเมนต์ที่กำลังดูอยู่
+// กระพริบรีเซ็ต: ลูกศร reply ที่เปิดไว้ปิดเอง, กล่อง reply/ข้อความที่พิมพ์ค้างหาย, ช่องแก้ไขคอมเมนต์หาย, เลื่อนลิสต์กลับ,
+// และหัวใจที่เพิ่งกด (optimistic) โดนทับกลับก่อน server ตอบ ตอนนี้แทรก/ลบ/อัปเดตเฉพาะคอมเมนต์ที่ต่างจากเดิมเท่านั้น
+function patchPostLive(post) {
+  if (!post || !post.id) return;
+  const id = post.id;
+
+  const likeCountEl = document.getElementById(`like-count-${id}`);
+  const heartIcon = document.getElementById(`heart-${id}`);
+  const heartBusy = !!(heartIcon && heartIcon.dataset.loading === 'true'); // กำลังรอ server ตอบหลังกดใจ - อย่าทับค่า optimistic
+  if (!heartBusy) {
+    if (likeCountEl) likeCountEl.innerText = post.likes || 0;
+    if (heartIcon) heartIcon.className = post.isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
+  }
+
+  const cookieCountEl = document.getElementById(`post-cookies-count-${id}`);
+  if (cookieCountEl) cookieCountEl.innerText = post.cookies || 0;
+
+  const comments = Array.isArray(post.comments) ? post.comments : [];
+  const commentCountEl = document.getElementById(`comment-count-${id}`);
+  if (commentCountEl) commentCountEl.innerText = comments.length;
+
+  reconcileComments(id, comments);
+}
+
+function reconcileComments(postId, comments) {
+  const listEl = document.getElementById(`comment-list-${postId}`);
+  if (!listEl) return;
+
+  // จัดกลุ่มเหมือน buildCommentsHtml: reply ทุกอันผูกกับคอมเมนต์แม่บนสุดเสมอ
+  const byId = {};
+  comments.forEach(c => { if (c.commentId) byId[c.commentId] = c; });
+  const topLevel = [];
+  const repliesByParent = {};
+  comments.forEach(c => {
+    if (!c.parentCommentId || !byId[c.parentCommentId]) {
+      topLevel.push(c);
+    } else {
+      let topId = c.parentCommentId;
+      let hops = 0;
+      while (byId[topId] && byId[topId].parentCommentId && byId[byId[topId].parentCommentId] && hops < 5) {
+        topId = byId[topId].parentCommentId;
+        hops++;
+      }
+      (repliesByParent[topId] = repliesByParent[topId] || []).push(c);
+    }
+  });
+
+  const findItem = (root, cid) => root.querySelector(`.comment-item[data-comment-id="${CSS.escape(cid)}"]`);
+
+  // อัปเดตคอมเมนต์/reply ที่มีอยู่แล้วบนจอ: ยอดไลก์ + หัวใจ + ข้อความ (ถ้าไม่ได้กำลังแก้ไขอยู่)
+  const patchItem = (cmt) => {
+    const cid = cmt.commentId;
+    const heart = document.getElementById(`cmt-heart-${cid}`);
+    const likeSpan = document.getElementById(`cmt-like-count-${cid}`);
+    if (heart && likeSpan && heart.dataset.loading !== 'true') {
+      likeSpan.innerText = cmt.likes || 0;
+      heart.classList.toggle('fa-solid', !!cmt.isLiked);
+      heart.classList.toggle('fa-regular', !cmt.isLiked);
+    }
+    const textEl = document.getElementById(`cmt-text-${cid}`);
+    if (textEl && textEl.dataset.editing !== 'true' && textEl.textContent !== (cmt.text || '')) {
+      textEl.textContent = cmt.text || '';
+    }
+    window.__commentTextCache = window.__commentTextCache || {};
+    if (!(textEl && textEl.dataset.editing === 'true')) window.__commentTextCache[cid] = cmt.text || '';
+  };
+
+  if (topLevel.length === 0) {
+    if (!listEl.querySelector('.no-comment-placeholder')) listEl.innerHTML = buildCommentsHtml([], postId);
+    return;
+  }
+  const placeholder = listEl.querySelector('.no-comment-placeholder');
+  if (placeholder) placeholder.remove();
+
+  // คอมเมนต์ที่หายไปจาก server แล้ว (โดนลบ) ค่อยเอาออกจากจอ
+  const liveIds = new Set(comments.map(c => c.commentId).filter(Boolean));
+  listEl.querySelectorAll('.comment-item[data-comment-id]').forEach(el => {
+    if (!liveIds.has(el.dataset.commentId)) el.remove();
+  });
+
+  let prevEl = null;
+  topLevel.forEach(cmt => {
+    const replies = repliesByParent[cmt.commentId] || [];
+    let el = cmt.commentId ? findItem(listEl, cmt.commentId) : null;
+
+    if (el) {
+      patchItem(cmt);
+      const repliesEl = document.getElementById(`replies-${cmt.commentId}`);
+      if (repliesEl) {
+        let prevReply = null;
+        replies.forEach(r => {
+          let rEl = r.commentId ? findItem(repliesEl, r.commentId) : null;
+          if (rEl) {
+            patchItem(r);
+          } else {
+            const html = buildSingleCommentHtml(r, postId, true);
+            if (prevReply) prevReply.insertAdjacentHTML('afterend', html);
+            else repliesEl.insertAdjacentHTML('afterbegin', html);
+            rEl = r.commentId ? findItem(repliesEl, r.commentId) : null;
+          }
+          if (rEl) prevReply = rEl;
+        });
+        const repliesCountEl = document.getElementById(`replies-count-${cmt.commentId}`);
+        if (repliesCountEl) repliesCountEl.innerText = replies.length;
+        const toggleBtn = document.getElementById(`replies-toggle-btn-${cmt.commentId}`);
+        if (toggleBtn) toggleBtn.style.display = replies.length > 0 ? 'flex' : 'none';
+      }
+    } else {
+      const html = buildSingleCommentHtml(cmt, postId, false, replies);
+      if (prevEl) prevEl.insertAdjacentHTML('afterend', html);
+      else listEl.insertAdjacentHTML('afterbegin', html);
+      el = cmt.commentId ? findItem(listEl, cmt.commentId) : null;
+    }
+    if (el) prevEl = el;
+  });
+}
+
 // แชร์โพสต์เป็นลิงก์ (เปิด native share sheet ถ้ามี ไม่งั้น copy ลิงก์ไปคลิปบอร์ด)
-async function actionSharePost(postId) {
+async function actionSharePost(postId, targetPage) {
   if (!postId) return;
-  const shareUrl = `${window.location.origin}/index?post=${encodeURIComponent(postId)}`;
+  const shareUrl = `${window.location.origin}/${targetPage || 'index'}?post=${encodeURIComponent(postId)}`;
   const shareData = { title: 'BLM48', text: 'มาดูโพสต์นี้ในแอป BLM48 กันเถอะ! 🌸', url: shareUrl };
 
   if (navigator.share) {
@@ -204,6 +330,138 @@ function escapeAttr(text) {
     .replace(/"/g, "&quot;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
+}
+
+// =========================================================================
+// 👑 สลิปโอน Token/Cookie/GEToken (ใช้ร่วมกันโดย admin_transfer.html ตอนโอนใหม่
+// และ admin_transfer_history.html ตอนเปิดดูสลิปย้อนหลัง) - เดิมอยู่ใน admin.html
+// เพียงไฟล์เดียวตอนที่ทั้งสองฟีเจอร์ยังเป็น modal ในหน้าเดียวกัน
+// ต้องมีฟังก์ชัน resolveDriveImage() ประกาศไว้ในหน้าที่เรียกใช้ด้วย
+// =========================================================================
+
+// โหลดรูปแบบปลอดภัย - คืนค่า null แทนที่จะ throw ถ้าโหลดไม่สำเร็จ (เผื่อโดเมนรูปไม่รองรับ CORS)
+function loadImageSafe(src, useCors) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    if (useCors) img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+}
+
+// วาดรูปโปรไฟล์แบบ cover-fit ครอบตัดเป็นวงกลม ทับลงบนวงกลมขาวในพื้นหลังสลิป
+function drawCircleAvatar(ctx, img, cx, cy, r) {
+  if (!img) return;
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.closePath();
+  ctx.clip();
+  const scale = Math.max((r * 2) / img.width, (r * 2) / img.height);
+  const w = img.width * scale, h = img.height * scale;
+  ctx.drawImage(img, cx - w / 2, cy - h / 2, w, h);
+  ctx.restore();
+}
+
+// สร้างสลิปยืนยันการโอนโดยเอาข้อมูลไปวางทับบนรูปพื้นหลังสลิปจริง (assets/images/transfer-slip-bg.png)
+// ตำแหน่งพิกัดถูก calibrate ให้ตรงกับจุดวงเล็บในรูปตัวอย่างของแอดมิน
+// ใช้ได้ทั้งตอนโอนเสร็จใหม่ๆ (มี refNo/createdAt จาก server) และตอนเปิดดูย้อนหลังจากประวัติ
+async function generateTransferSlip({ admin, adminName, adminAvatar, target, token, cookie, getoken, refNo, createdAt }) {
+  const now = createdAt ? new Date(createdAt) : new Date();
+  const dateStr = now.toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' });
+  const ref = refNo || ('TXN' + now.getTime());
+
+  const bg = new Image();
+  const loaded = new Promise((resolve, reject) => {
+    bg.onload = resolve;
+    bg.onerror = reject;
+  });
+  bg.src = 'assets/images/transfer-slip-bg.png?v=20260810';
+
+  const drawSlip = async (includeAvatars) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = bg.naturalWidth;
+    canvas.height = bg.naturalHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(bg, 0, 0);
+
+    if (includeAvatars) {
+      const [adminImg, targetImg] = await Promise.all([
+        loadImageSafe(resolveDriveImage(adminAvatar), true),
+        loadImageSafe(resolveDriveImage(target.profile_img), true)
+      ]);
+      // พิกัดวงกลมนี้วัดจากพิกเซลจริงของรูปพื้นหลัง (สแกนหาขอบวงกลมขาว) ไม่ใช่กะด้วยตา
+      drawCircleAvatar(ctx, adminImg, 156, 306, 82);
+      drawCircleAvatar(ctx, targetImg, 156, 640, 82);
+    }
+
+    ctx.fillStyle = '#ffffff';
+
+    ctx.textAlign = 'left';
+    ctx.font = '600 38px "Kanit", sans-serif';
+    ctx.fillText(dateStr, 64, 1250);
+
+    ctx.font = '600 42px "Kanit", sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('@' + admin, 280, 352);
+    ctx.fillText(adminName || admin, 280, 414);
+
+    ctx.fillText('@' + target.username, 280, 680);
+    ctx.fillText(target.name || target.username, 280, 742);
+
+    ctx.textAlign = 'right';
+    ctx.font = '600 46px "Kanit", sans-serif';
+    ctx.fillText(ref, 1170, 944);
+
+    const items = [];
+    if (token > 0) items.push({ label: 'Token', amount: token });
+    if (cookie > 0) items.push({ label: 'Cookie', amount: cookie });
+    if (getoken > 0) items.push({ label: 'GEToken', amount: getoken });
+    let y = 1074;
+    ctx.font = '700 52px "Kanit", sans-serif';
+    items.forEach(item => {
+      ctx.fillText(Number(item.amount).toLocaleString() + ' ' + item.label, 1170, y);
+      y += 62;
+    });
+
+    return canvas;
+  };
+
+  let canvas, dataUrl;
+  try {
+    await loaded;
+  } catch (e) {
+    Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดรูปพื้นหลังสลิปได้ (assets/images/transfer-slip-bg.png)', 'error');
+    return;
+  }
+
+  try {
+    canvas = await drawSlip(true);
+    dataUrl = canvas.toDataURL('image/png');
+  } catch (e) {
+    // canvas ถูก taint เพราะโดเมนรูปโปรไฟล์ไม่รองรับ CORS - สร้างใหม่แบบไม่มีรูปโปรไฟล์แทน
+    canvas = await drawSlip(false);
+    dataUrl = canvas.toDataURL('image/png');
+  }
+
+  Swal.fire({
+    title: refNo ? 'สลิปการโอน' : 'ทำรายการโอนสำเร็จ',
+    html: `
+      <div style="display:flex; flex-direction:column; align-items:center; gap:15px;">
+        <img src="${dataUrl}" style="width:100%; max-width:340px; border-radius:14px; box-shadow:0 8px 26px rgba(255,133,162,0.25);">
+        <a href="${dataUrl}" download="BLM48_Transfer_${target.username}_${ref}.png" style="
+          display:inline-flex; align-items:center; gap:8px; padding:12px 32px;
+          background: var(--primary-pink); color:#fff; text-decoration:none; border-radius:25px;
+          font-weight:bold; font-size:15px; box-shadow:0 4px 12px rgba(255,133,162,0.3);
+        ">
+          <i class="fas fa-download"></i> บันทึกสลิป
+        </a>
+      </div>
+    `,
+    showConfirmButton: false,
+    showCloseButton: true
+  });
 }
 
 // 🛡️ [กันแท็กผี] แคชรายชื่อเมมเบอร์จริง (lowercase -> ชื่อจริงตามระบบ) ไว้เช็คก่อนแปลง @ชื่อ เป็นลิงก์
@@ -598,20 +856,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const subscribedAt = Date.now();
   blm48SubscribeNotifications((row) => {
-    if (!row || !row.writer || !row.recipient_username) return; // broadcast/admin rows ไม่โชว์ toast (เหมือนเดิม)
+    if (!row || !row.writer) return;
+    const isBroadcast = !row.recipient_username;
+    const broadcastTypeVal = row.notifType || row.notif_type;
+    // broadcast rows ปกติไม่โชว์ toast เหมือนเดิม ยกเว้น notif_type='shop' (แจ้งเตือนสินค้าเปิดขาย
+    // ต้องเห็นทุกคน ดู check_shop_open_notifications() ฝั่ง Supabase ที่ยิง broadcast แบบนี้) หรือ
+    // 'admin' (ประกาศที่แอดมินพิมพ์เองในหน้า notification.html - add_notification RPC)
+    if (isBroadcast && broadcastTypeVal !== 'shop' && broadcastTypeVal !== 'admin') return;
+
     const rowTs = row.created_at ? new Date(row.created_at).getTime() : Date.now();
     if (rowTs < subscribedAt) return; // ข้ามของเก่าที่อาจถูกส่งมาตอนเพิ่ง subscribe
 
-    // เช็ค username สดทุกครั้ง (ไม่ cache ไว้ตอน subscribe) เพราะตอนโหลดหน้าเสร็จใหม่ๆ session
-    // ในเครื่องอาจยังเป็นข้อมูลเก่า กว่า syncUserData() จะดึงข้อมูลล่าสุดจากเซิร์ฟเวอร์มาทับ
-    const currentUsername = getUsername();
-    if (!currentUsername || row.recipient_username !== currentUsername) return;
+    if (!isBroadcast) {
+      // เช็ค username สดทุกครั้ง (ไม่ cache ไว้ตอน subscribe) เพราะตอนโหลดหน้าเสร็จใหม่ๆ session
+      // ในเครื่องอาจยังเป็นข้อมูลเก่า กว่า syncUserData() จะดึงข้อมูลล่าสุดจากเซิร์ฟเวอร์มาทับ
+      const currentUsername = getUsername();
+      if (!currentUsername || row.recipient_username !== currentUsername) return;
+    }
     if (!blm48MarkNotiShown(row.id)) return;
 
     localStorage.setItem('blm48_has_new_noti', 'true');
     if (typeof checkNotificationBadge === 'function') checkNotificationBadge();
 
-    const targetUrl = row.post_id ? `postdetail?id=${encodeURIComponent(row.post_id)}` : 'notification.html';
+    const notifTypeVal = row.notifType || row.notif_type;
+    const targetUrl = row.post_id
+      ? `postdetail?id=${encodeURIComponent(row.post_id)}`
+      : (notifTypeVal === 'shop' ? 'shop.html' : (notifTypeVal === 'wallet' ? 'history.html' : (notifTypeVal === 'preorder' ? 'my_preorders_history.html' : 'notification.html')));
     showIosNotification({
       avatar: row.avatar,
       title: row.writer,
@@ -694,73 +964,6 @@ async function applyGroupTheme() {
   } catch (e) {
     // เน็ตหลุด/เรียกไม่สำเร็จ — ปล่อยให้ใช้สีจากแคชเดิมต่อไป ไม่ต้องล้มทั้งหน้า
     console.error("applyGroupTheme error:", e);
-  }
-}
-
-// =========================================================================
-// 🎙️ Voice message bubble player - ใช้ร่วมกันในทุกหน้าที่แสดงฟีดโพส (index.html, member.html)
-// แต่ละโพสมี <audio class="voice-msg-audio" id="voice-audio-{postId}"> ซ่อนอยู่ พร้อมปุ่มเล่น/แถบ
-// ความคืบหน้า/เวลา ที่ผูก id ตาม postId เดียวกัน เรียกใช้ผ่าน inline event attribute ในโพสนั้นๆ
-// =========================================================================
-
-function formatVoiceMsgTime(seconds) {
-  if (!isFinite(seconds) || seconds < 0) return '0:00';
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60).toString().padStart(2, '0');
-  return `${m}:${s}`;
-}
-
-// เรียกตอน <audio> ยิง onloadedmetadata - ใช้โชว์ความยาวคลิปทั้งหมดก่อนกดเล่น
-function initVoiceDuration(postId) {
-  const audio = document.getElementById(`voice-audio-${postId}`);
-  const timeEl = document.getElementById(`voice-time-${postId}`);
-  if (audio && timeEl && isFinite(audio.duration)) {
-    timeEl.textContent = formatVoiceMsgTime(audio.duration);
-  }
-}
-
-// เรียกตอน <audio> ยิง ontimeupdate ระหว่างเล่น - อัปเดตแถบความคืบหน้า + เวลาปัจจุบัน
-function updateVoiceProgress(postId) {
-  const audio = document.getElementById(`voice-audio-${postId}`);
-  const progress = document.getElementById(`voice-progress-${postId}`);
-  const timeEl = document.getElementById(`voice-time-${postId}`);
-  if (!audio || !audio.duration) return;
-  if (progress) progress.style.width = `${(audio.currentTime / audio.duration) * 100}%`;
-  if (timeEl) timeEl.textContent = formatVoiceMsgTime(audio.currentTime);
-}
-
-// เรียกตอน <audio> ยิง onended - รีเซ็ตปุ่ม/แถบกลับเป็นสถานะพร้อมเล่นใหม่
-function onVoiceEnded(postId) {
-  const audio = document.getElementById(`voice-audio-${postId}`);
-  const progress = document.getElementById(`voice-progress-${postId}`);
-  const timeEl = document.getElementById(`voice-time-${postId}`);
-  const btn = document.getElementById(`voice-play-btn-${postId}`);
-  if (progress) progress.style.width = '0%';
-  if (btn) btn.innerHTML = '<i class="fa-solid fa-play"></i>';
-  if (audio && timeEl && isFinite(audio.duration)) timeEl.textContent = formatVoiceMsgTime(audio.duration);
-}
-
-// ปุ่มเล่น/หยุดหลัก - หยุดคลิปเสียงอื่นที่กำลังเล่นอยู่ก่อนเสมอ กันเสียงซ้อนกันหลายคลิปพร้อมกันในฟีด
-function toggleVoiceMessage(postId) {
-  const audio = document.getElementById(`voice-audio-${postId}`);
-  const btn = document.getElementById(`voice-play-btn-${postId}`);
-  if (!audio || !btn) return;
-
-  document.querySelectorAll('audio.voice-msg-audio').forEach(el => {
-    if (el !== audio && !el.paused) {
-      el.pause();
-      const otherId = el.id.replace('voice-audio-', '');
-      const otherBtn = document.getElementById(`voice-play-btn-${otherId}`);
-      if (otherBtn) otherBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
-    }
-  });
-
-  if (audio.paused) {
-    audio.play();
-    btn.innerHTML = '<i class="fa-solid fa-pause"></i>';
-  } else {
-    audio.pause();
-    btn.innerHTML = '<i class="fa-solid fa-play"></i>';
   }
 }
 

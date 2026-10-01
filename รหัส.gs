@@ -2798,9 +2798,10 @@ function getDashboardDataProcess(username) {
 //      ranking เดือนปัจจุบัน, และ log ใหม่ๆ กลับมาโชว์ในชีตให้แอดมินดู
 //      (ชีตไม่ใช่เจ้าของค่าจริงอีกต่อไปแล้วสำหรับ 3 คอลัมน์นี้)
 //   3) ทุกวันตอนตี 1 (เวลาไทย): snapshot ยอด Token ของทุกคนลง Supabase
-//      (token_daily_snapshots) ใช้คำนวณ Membership Tier (Copper/Silver/Gold)
-//      จากค่าเฉลี่ยการถือครองย้อนหลัง 1 เดือน — ดู get_membership_tier /
-//      claim_monthly_cookie ฝั่ง Supabase
+//      (token_daily_snapshots) — เดิมใช้คำนวณ Membership Tier จากค่าเฉลี่ย
+//      การถือครองย้อนหลัง 1 เดือน แต่ตอนนี้ get_membership_tier /
+//      claim_monthly_cookie เปลี่ยนไปใช้ Fan Score สะสม (users.fan_cookies)
+//      แทนแล้ว ทริกเกอร์นี้จึงไม่จำเป็นอีกต่อไป (เหลือไว้เผื่อใช้งานอื่น)
 //
 // วิธีติดตั้ง (ทำครั้งเดียว):
 //   1. เปิด Project Settings (รูปเฟือง) ในตัวแก้ไข Apps Script
@@ -2899,9 +2900,10 @@ function bumpMemberLikesInSupabase_(memberName, delta) {
   }
 }
 
-// Snapshot ยอด Token ของทุกคนลง token_daily_snapshots วันละครั้ง ใช้คำนวณ
-// ค่าเฉลี่ยการถือครองย้อนหลัง 1 เดือนสำหรับระบบ Membership Tier (Copper/
-// Silver/Gold) ฟังก์ชัน snapshot_all_token_balances ฝั่ง Supabase ไม่ได้
+// Snapshot ยอด Token ของทุกคนลง token_daily_snapshots วันละครั้ง — เดิมใช้
+// คำนวณค่าเฉลี่ยย้อนหลัง 1 เดือนสำหรับ Membership Tier แต่ตอนนี้ระบบ Tier
+// เปลี่ยนไปใช้ Fan Score สะสม (users.fan_cookies) แล้ว ไม่ได้ใช้ผลจาก
+// snapshot นี้อีก ฟังก์ชัน snapshot_all_token_balances ฝั่ง Supabase ไม่ได้
 // grant ให้ anon เรียก — เรียกได้เฉพาะผ่าน service_role นี้เท่านั้น
 function snapshotTokenBalancesInSupabase_() {
   try {
@@ -2991,22 +2993,42 @@ function syncItemsToSupabase_() {
   supabaseUpsert_('items?on_conflict=collection_id,item_id', rows);
 }
 
+// 1 โค้ดตอนนี้ใส่ได้หลายแถวในชีต (Code ซ้ำกัน แต่ RewardType/RewardAmount ต่างกัน)
+// เพื่อให้โค้ดเดียวแจกรางวัลได้หลายชนิดพร้อมกัน (เช่น Token + Cookie)
+// ExpiryTime/MaxLimit จะยึดตามแถวแรกที่เจอของแต่ละ Code เท่านั้น ส่วนแถวถัดๆ ไปของ Code เดิม
+// ปล่อยช่องนั้นว่างได้ ใส่แค่ RewardType/RewardAmount ของรางวัลชนิดถัดไป
 function syncCodesToSupabase_() {
   var data = readSheetAsObjects_("codes");
-  var rows = data.filter(function (r) { return r.Code && r.Code.toString().trim() !== ""; })
+  var validRows = data.filter(function (r) { return r.Code && r.Code.toString().trim() !== ""; });
+
+  var seenCodes = {};
+  var codeRows = [];
+  validRows.forEach(function (r) {
+    var code = r.Code.toString().trim();
+    if (seenCodes[code]) return;
+    seenCodes[code] = true;
+    var expiry = null;
+    if (r.ExpiryTime instanceof Date) expiry = r.ExpiryTime.toISOString();
+    codeRows.push({
+      code: code,
+      expiry_time: expiry,
+      max_limit: Number(r.MaxLimit) || 999999,
+      updated_at: new Date().toISOString()
+    });
+  });
+  supabaseUpsert_('codes?on_conflict=code', codeRows);
+
+  var rewardRows = validRows
+    .filter(function (r) { return r.RewardType && r.RewardType.toString().trim() !== ""; })
     .map(function (r) {
-      var expiry = null;
-      if (r.ExpiryTime instanceof Date) expiry = r.ExpiryTime.toISOString();
       return {
         code: r.Code.toString().trim(),
-        reward_type: (r.RewardType || "").toString().trim().toLowerCase(),
+        reward_type: r.RewardType.toString().trim().toLowerCase(),
         reward_amount: Number(r.RewardAmount) || 0,
-        expiry_time: expiry,
-        max_limit: Number(r.MaxLimit) || 999999,
         updated_at: new Date().toISOString()
       };
     });
-  supabaseUpsert_('codes?on_conflict=code', rows);
+  supabaseUpsert_('code_rewards?on_conflict=code,reward_type', rewardRows);
 }
 
 // เฉพาะ username/password/role เท่านั้น — ไม่แตะ token/cookie/ge_token/name/profile_img ของ Supabase เด็ดขาด

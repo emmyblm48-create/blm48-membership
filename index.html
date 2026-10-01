@@ -23,6 +23,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/supabase-client.js"></script>
   <script src="assets/js/common.js"></script>
+  <script src="assets/js/campaign.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script> 
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
@@ -53,57 +54,6 @@
       --bronze: #cd7f32;
       --bg-color: #ffe372;
       --violet-border: #e0c3fc;
-    }
-
-    /* 🎙️ Voice message bubble (คลิปเสียงในโพส) - เล่นเนื้อในตัวการ์ดแทนแท็ก <audio> เดิมๆของเบราว์เซอร์ */
-    .voice-msg-bubble {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: linear-gradient(135deg, #fff0f4, #ffffff);
-      border: 1px solid #ffd6e0;
-      border-radius: 20px;
-      padding: 8px 14px 8px 8px;
-      margin-top: 12px;
-      max-width: 280px;
-    }
-    .voice-msg-play-btn {
-      flex-shrink: 0;
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      background: var(--primary-pink);
-      color: white;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 0.8rem;
-      box-shadow: 0 2px 6px rgba(255, 133, 162, 0.35);
-      transition: transform 0.15s;
-    }
-    .voice-msg-play-btn:active { transform: scale(0.9); }
-    .voice-msg-waveform {
-      flex: 1;
-      height: 5px;
-      background: #ffe0e8;
-      border-radius: 3px;
-      overflow: hidden;
-    }
-    .voice-msg-progress {
-      height: 100%;
-      width: 0%;
-      background: var(--primary-pink);
-      border-radius: 3px;
-    }
-    .voice-msg-time {
-      flex-shrink: 0;
-      font-size: 0.72rem;
-      color: #a68a90;
-      font-variant-numeric: tabular-nums;
-      min-width: 30px;
-      text-align: right;
     }
 
     body {
@@ -742,12 +692,6 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     #ranking-list.horizontal-list {
       min-height: 270px !important;
       align-items: flex-end !important; 
-    }
-
-    /* 3. จัดระเบียบกล่อง Top Fans ตอนเปิด ให้เนื้อหาพอดีและอยู่กึ่งกลาง */
-    #global-fan-list.horizontal-list {
-      align-items: center !important;
-      padding: 10px 15px !important;
     }
 
     /* 4. จัดระเบียบกล่อง Campaign และ Trending Video ให้การ์ดชิดขอบบน ไม่ดันเนื้อหาลงไปลึก */
@@ -1751,6 +1695,65 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     cursor: not-allowed;
   }
   /* =========================================
+     📅 MONTHLY LOGIN STREAK MODAL
+     ========================================= */
+  #login-streak-modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(74, 44, 54, 0.35);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  .streak-rescue-row {
+    display: flex; align-items: center; justify-content: space-between;
+    background: #fff5f7; border-radius: 14px; padding: 10px 14px; margin-bottom: 14px;
+    font-size: 0.82rem; color: #666;
+  }
+  .streak-rescue-row b { color: var(--primary-pink, #ff85a2); }
+  .streak-calendar-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 8px;
+  }
+  .streak-day {
+    aspect-ratio: 1 / 1; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700; position: relative; background: #f5f5f5; color: #bbb;
+  }
+  .streak-day.present { background: linear-gradient(135deg, #ffb6c1, var(--primary-pink, #ff85a2)); color: #fff; }
+  .streak-day.rescued { background: linear-gradient(135deg, #ffe08a, #ffc247); color: #fff; }
+  .streak-day.missed { background: #fff0f0; color: #ff8a8a; cursor: pointer; }
+  .streak-day.missed.can-rescue:active { transform: scale(0.92); }
+  .streak-day.future { background: #f8f8f8; color: #ccc; }
+  .streak-day i { font-size: 0.7rem; }
+  #streak-claim-btn {
+    width: 100%;
+    margin-top: 16px;
+    padding: 13px;
+    border: none;
+    border-radius: 14px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #eee;
+    color: #aaa;
+    box-shadow: none;
+  }
+  #streak-claim-btn.claimable {
+    background: linear-gradient(135deg, #7ee08c, #3cb371);
+    color: #fff;
+    box-shadow: 0 6px 14px rgba(60,179,113,0.35);
+    cursor: pointer;
+  }
+  #streak-claim-btn:disabled { cursor: not-allowed; }
+  /* =========================================
      🍪 CUTE MONTHLY COOKIE COUNTDOWN (COMPACT & MINIMAL)
      ========================================= */
   .cookie-countdown-container {
@@ -1858,6 +1861,31 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     top: 15px;
     right: 15px;
     z-index: 100;
+  }
+
+  .champ-special-post {
+    background: linear-gradient(to bottom, #fffdf0, #ffffff) !important;
+    border: 2px solid #d4af37 !important;
+    box-shadow: 0 8px 20px rgba(212, 175, 55, 0.15) !important;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .champ-post-badge {
+    background: linear-gradient(135deg, #d4af37, #ffd700);
+    color: #fff;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 4px 12px;
+    border-radius: 0 0 10px 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    z-index: 10;
   }
 
   /* ขยับลงมาหลบบนริบบิ้นทองสำหรับโพสต์พิเศษของแชมป์ */
@@ -2175,11 +2203,22 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
       width: 100%;                  /* บังคับความกว้างเต็มจอ 100% */
       min-height: 100vh;            /* สูงอย่างน้อยเต็มหน้าจอ (ถ้าเนื้อหายาวก็เลื่อนลงได้เรื่อยๆ) */
       box-sizing: border-box;       /* ป้องกันไม่ให้ padding ดันจนหน้าจอเกินขอบขวา */
-      padding: 20px 20px 25px 20px; 
+      padding: 20px 20px 25px 20px;
       border: none;
       box-shadow: none;
       }
-    
+
+    /* 🖥️ ตามคำขอผู้ใช้: บนจอคอม/iPad ให้โพสใน Latest Top Posts แสดงผลความกว้างเท่ากับหน้า
+       member.html (ที่คุม #posts-container ไว้ด้วย .profile-body { max-width: 720px }) แทนที่
+       จะยืดกว้างเต็มจอเหมือนเดิม - คุมเฉพาะโซนโพส ไม่กระทบ Campaign/Trending Video/ส่วนอื่น */
+    @media (min-width: 768px) {
+      #blm48-feed {
+        max-width: 720px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -2212,6 +2251,10 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
         <i class="fas fa-list-check"></i>
         <span class="noti-badge" id="mission-badge" style="display: none;"></span>
     </a>
+    <a href="javascript:void(0)" class="nav-icon icon-wrapper" title="เช็คอินรายเดือน" onclick="openLoginStreakModal()">
+        <i class="fas fa-calendar-check"></i>
+        <span class="noti-badge" id="streak-badge" style="display: none;"></span>
+    </a>
     <a href="shop" class="nav-icon" title="Shop">
         <i class="fas fa-store"></i>
     </a>
@@ -2227,12 +2270,12 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
 <div class="champ-banner" onclick="window.location.href='specialthanks?index=0'">
       <div class="champ-info">
         <div class="champ-badge"><i class="fas fa-crown"></i> Champ of the Month</div>
-        <div class="champ-title" id="home-champ-name">Mashi</div>
-        <div class="champ-month" id="home-champ-month">ประจำเดือนกรกฎาคม</div>
+        <div class="champ-title" id="home-champ-name"></div>
+        <div class="champ-month" id="home-champ-month"></div>
         <button class="champ-btn-view">view special thanks <i class="fas fa-chevron-right"></i></button>
       </div>
       <div class="champ-img-container">
-        <img src="https://lh3.googleusercontent.com/d/1cIM8MSwNeUCR4r9W8DQNQc_MsOiaFeja=s1000" id="home-champ-img" class="champ-img" alt="Champ">
+        <img src="https://lh3.googleusercontent.com/d/1rebp2F8vyP0nyvsEOFD9Nw2mPcRtVqtG=s1000" id="home-champ-img" class="champ-img" alt="Champ">
       </div>
 </div>
   
@@ -2294,18 +2337,14 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
   <div id="ranking-list" class="horizontal-list" style="position: relative; z-index: 2;"></div>
 </div>
   
-<div class="section-title" onclick="toggleTopFans()" style="cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding-right: 15px; user-select: none;">
+<div class="section-title" onclick="goToGlobalTopFans()" style="cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding-right: 15px; user-select: none;">
   <span>Top Fans</span>
   <div style="display: flex; align-items: center; gap: 10px; margin-left: auto; padding-right: 10px;">
     <div id="top-fans-preview-zone" style="display: flex; align-items: center; direction: rtl; opacity: 1; transition: opacity 0.3s ease;"></div>
   </div>
-  <i id="top-fans-arrow" class="fas fa-chevron-right" style="font-size: 14px; color: #888; transition: transform 0.3s ease;"></i>
+  <i id="top-fans-arrow" class="fas fa-chevron-right" style="font-size: 14px; color: #888;"></i>
 </div>
-<div id="top-fans-wrapper" class="ranking-wrapper" style="max-height: 0px; opacity: 0; padding: 0px 15px; overflow: hidden; transition: max-height 0.3s ease-in-out, opacity 0.3s ease, padding 0.3s ease;">
-  <div id="global-fan-list" class="horizontal-list"></div>
-</div>
- 
-  
+
 <div class="shop-banner-slider-wrapper" style="position: relative; margin: 20px 15px; border-radius: 16px; overflow: hidden;">
     
     <div id="autoBannerContainer" style="display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; background-color: #ffeef2; -ms-overflow-style: none; cursor: grab;">
@@ -2341,7 +2380,10 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
         </div>
     </div>
   
-<div class="section-title"> Campaign</div>
+<div class="section-title" onclick="window.location.href='campaign'" style="cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding-right: 15px; user-select: none;">
+  <span>Campaign</span>
+  <span style="font-size: 13px; font-weight: 500; color: #555;">View All <i class="fas fa-chevron-right" style="font-size: 12px; margin-left: 4px;"></i></span>
+</div>
 <div class="ranking-wrapper">
   <div id="campaign-scroller" class="horizontal-list" style="align-items: flex-start;">
     <div style="text-align: center; width: 100%; color: #888; padding: 20px;">
@@ -2631,23 +2673,24 @@ function applyThemeAndToggleSplash(themeData, toggleKey) {
   const mainSplash = document.getElementById('main-splash');
   const splashScreen = document.getElementById('splash-screen');
   
-  let splashToShow = champ.splash; 
+  // 🔁 วนโชว์ Splash ทีละอันต่อการเปิดแอป: Champ -> วันเกิด
+  const splashCandidates = [];
+  if (champ.splash) splashCandidates.push({ type: 'champ', src: champ.splash });
+  if (birthdaySplash) splashCandidates.push({ type: 'birthday', src: birthdaySplash });
 
-  if (birthdaySplash) {
-    const lastShown = localStorage.getItem(toggleKey);
-    
-    if (lastShown === "birthday") {
-      splashToShow = champ.splash;
-      localStorage.setItem(toggleKey, "champ");
-    } else {
-      splashToShow = birthdaySplash;
-      localStorage.setItem(toggleKey, "birthday");
-    }
+  let chosen = null;
+  if (splashCandidates.length > 0) {
+    let idx = parseInt(localStorage.getItem(toggleKey + '_idx'), 10);
+    idx = isNaN(idx) ? 0 : (idx + 1) % splashCandidates.length;
+    localStorage.setItem(toggleKey + '_idx', String(idx));
+    chosen = splashCandidates[idx];
   }
+
+  const splashToShow = chosen ? chosen.src : null;
 
   if (mainSplash && splashToShow) {
     mainSplash.src = splashToShow;
-    
+
     if(splashScreen) {
        splashScreen.style.display = "flex";
        setTimeout(() => splashScreen.style.opacity = "1", 10);
@@ -2706,16 +2749,21 @@ function initBannerFeatures() {
     const width = container.clientWidth;
     if (width === 0) return;
     
+    // นับสดทุกครั้ง เพราะแบนเนอร์ (วันเกิด / Campaign) อาจถูกแทรกเพิ่มทีหลัง
+    const liveTotal = container.querySelectorAll(".auto-banner-item").length;
     let currentIndex = Math.round(container.scrollLeft / width) + 1;
-    if (currentIndex > totalItems) currentIndex = totalItems; 
-    
+    if (currentIndex > liveTotal) currentIndex = liveTotal;
+
     const currentStr = String(currentIndex).padStart(2, '0');
-    const totalStr = String(totalItems).padStart(2, '0');
+    const totalStr = String(liveTotal).padStart(2, '0');
     counter.innerText = `${currentStr}/${totalStr}`;
   }
 
-  container.removeEventListener("scroll", updateCounterText);
-  container.addEventListener("scroll", updateCounterText);
+  // ฟังก์ชันนี้ถูกเรียกซ้ำได้หลายครั้ง (DOMContentLoaded / ธีมวันเกิด / แบนเนอร์ Campaign)
+  // ผูก listener แค่ครั้งแรกครั้งเดียว กันลากเมาส์แล้วเลื่อนเบิ้ลหลายเท่า
+  const firstInit = container.dataset.bannerInit !== '1';
+  container.dataset.bannerInit = '1';
+  if (firstInit) container.addEventListener("scroll", updateCounterText);
   updateCounterText();
 
   // ระบบเลื่อนอัตโนมัติ (Auto-play)
@@ -2743,7 +2791,9 @@ function initBannerFeatures() {
     clearInterval(window.bannerAutoPlayInterval);
   }
   
-  startAutoPlay(); 
+  startAutoPlay();
+
+  if (!firstInit) return;
 
   // ระบบคลิกแล้วลากด้วยเมาส์
   let isDown = false;
@@ -2867,10 +2917,12 @@ function initBannerCounter() {
     
     // คำนวณว่าตอนนี้สไลด์อยู่ที่หน้ารูปที่เท่าไหร่
     const currentIndex = Math.round(container.scrollLeft / width) + 1;
-    
+    // นับสด เพราะแบนเนอร์วันเกิด / Campaign ถูกแทรกเข้ามาทีหลังตอนโหลดหน้า
+    const liveTotal = container.querySelectorAll(".auto-banner-item").length;
+
     // แปลงเลขให้เป็นสไตล์ 01, 02 (ใส่ padStart เผื่อเลขหลักเดียว)
     const currentStr = String(currentIndex).padStart(2, '0');
-    const totalStr = String(totalItems).padStart(2, '0');
+    const totalStr = String(liveTotal).padStart(2, '0');
     
     counter.innerText = `${currentStr}/${totalStr}`;
   }
@@ -3013,82 +3065,29 @@ window.addEventListener('pageshow', function(event) {
 });
   
 // ==========================================
-// 🗳️ 7. FETCH CAMPAIGN DATA (ดึงแคมเปญโหวต)
+// 🏆 7. FETCH CAMPAIGN DATA (Champ of the Month Campaign)
 // ==========================================
-// 🎨 วาดการ์ดแคมเปญลงบนหน้าแรก ใช้ร่วมกันทั้งจุดที่โหลดครั้งแรกและจุดรีเฟรชแบบเรียลไทม์
-function renderCampaignCards(campaigns) {
-  const scrollerContainer = document.getElementById('campaign-scroller');
-  if (!scrollerContainer) return;
-
-  if (!campaigns || campaigns.length === 0) {
-    scrollerContainer.innerHTML = `
-      <div style="text-align: center; width: 100%; color: #999; padding: 20px; font-size: 14px;">
-        📭 ยังไม่มีแคมเปญโหวตในขณะนี้
-      </div>`;
-    return;
-  }
-
-  scrollerContainer.innerHTML = ''; // ล้างข้อความ Loading ออก
-
-  // วนลูปสร้างการ์ดจากข้อมูลชีต campaign
-  campaigns.forEach(campaign => {
-    const title = campaign.CampaignName;
-    const coverImg = campaign.CoverImage || "https://lh3.googleusercontent.com/d/1DMvowEnRuxYIUQFnb6paHJWYBHCALPCw=s1000";
-    const totalAmount = campaign.TotalAmount || 0;
-    const currencyType = campaign.CurrencyType ? campaign.CurrencyType.trim() : "token";
-
-    // กำหนดไอคอนให้ตรงกับประเภทเงิน (CurrencyType)
-    let iconHtml = '<i class="fa-solid fa-coins"></i>';
-    let displayTokenName = "Token";
-
-    if (currencyType.toLowerCase() === 'cookie') {
-      iconHtml = '<i class="fa-solid fa-cookie" style="color: #d2691e;"></i>';
-      displayTokenName = "Cookie";
-    } else if (currencyType.toLowerCase() === 'getoken') {
-      iconHtml = '<i class="fa-solid fa-gem" style="color: #4da6ff;"></i>';
-      displayTokenName = "GE Token";
-    } else if (currencyType.toLowerCase() === 'gift') {
-      iconHtml = '<i class="fa-solid fa-gift" style="color: #ff69b4;"></i>';
-      displayTokenName = "Gift";
-    }
-
-    // 🛑 แก้จุดนี้: เปลี่ยนจาก 'a' เป็น 'div' และเอา href ออก เพื่อให้เป็นแค่กล่องโชว์เฉยๆ กดไม่ได้
-    const cardLink = document.createElement('div');
-    cardLink.className = 'campaign-card';
-
-    cardLink.innerHTML = `
-      <img src="${coverImg}" alt="${title}" loading="lazy">
-      <div class="campaign-info">
-        <div class="campaign-title">${title}</div>
-        <div class="campaign-stats">
-          ${iconHtml} ${Number(totalAmount).toLocaleString()} ${displayTokenName}
-        </div>
-      </div>
-    `;
-
-    scrollerContainer.appendChild(cardLink);
-  });
-}
-
 async function fetchActiveCampaigns() {
   const scrollerContainer = document.getElementById('campaign-scroller');
   if (!scrollerContainer) return;
 
   try {
-    // ตาราง campaign ตอนนี้ sync เข้า Supabase แบบเรียลไทม์แล้ว อ่านจากตรงนั้นแทน Apps Script
-    const data = await blm48GetCampaigns();
-    if (Array.isArray(data)) {
-      const mapped = data.map(c => ({
-        CampaignID: c.campaignId,
-        CampaignName: c.campaignName,
-        CoverImage: c.coverImage,
-        TotalAmount: c.totalAmount,
-        CurrencyType: c.currencyType
-      }));
-      renderCampaignCards(mapped);
-    } else {
+    // 🏆 ส่วน Campaign หน้า Home แสดงเฉพาะ Champ of the Month Campaign (เมมเบอร์เปิดเองจากหน้า profile)
+    // Campaign เป็นแค่แรงกระตุ้นบน Champ of the Month เดิม ไม่ยุ่งกับ Splash / Banner / Theme (ระบบ Champ + วันเกิดเดิมจัดการเอง)
+    // แคมเปญโหวต (ตาราง campaign / Major Vote) ไม่แสดงที่นี่แล้ว
+    const memberCampaigns = await blm48GetActiveMemberCampaigns();
+    if (!Array.isArray(memberCampaigns)) {
       scrollerContainer.innerHTML = `<div style="color:red; padding:10px; font-size:12px;">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>`;
+      return;
     }
+    if (memberCampaigns.length === 0) {
+      scrollerContainer.innerHTML = `
+        <div style="text-align: center; width: 100%; color: #999; padding: 20px; font-size: 14px;">
+          <i class="fa-solid fa-trophy" style="color:#fcc419;"></i> ยังไม่มี Campaign ในขณะนี้
+        </div>`;
+      return;
+    }
+    scrollerContainer.innerHTML = memberCampaigns.map(c => renderMemberCampaignCard(c)).join('');
   } catch (error) {
     console.error("Fetch Campaigns Network Error:", error);
     scrollerContainer.innerHTML = `<div style="color:#999; padding:10px; font-size:13px;">ไม่สามารถเชื่อมต่อระบบแคมเปญได้</div>`;
@@ -3115,6 +3114,18 @@ function updateUI() {
   
 // ข้อมูล MV ของ BLM48 (ใส่รูปปก ชื่อเพลง และลิงก์ YouTube ได้เลย)
 const blm48MVs = [
+   { 
+    title: "【Thai ver.】Rapsodi - BLM48", 
+    date: "26 September 2026",
+    image: "https://lh3.googleusercontent.com/d/1w76J_EDRQBmuxedSm7NkJ6kLL4WCn6J9=s1000",
+    link: "https://youtu.be/g-IiXvDfBRg?si=INlaVJN0wNOd_kzz"
+  },  
+   { 
+    title: "【Thai ver.】NEW SHIP / BLM48", 
+    date: "5 September 2026",
+    image: "https://lh3.googleusercontent.com/d/17_oA1gsb5v8B3OdnAqhy_RWaGrrYh-QK=s1000",
+    link: "https://youtube.com/watch?v=z8E1PEdRCac"
+  },
    { 
     title: "【Thai ver.】Suki-ish ( 好きish ) - BLM48", 
     date: "16 August 2026",
@@ -3306,39 +3317,12 @@ function renderRanking(data) {
   saveRankingTrackingMaps(activeMembers, indicatorsByName);
 }
   
-function toggleTopFans() {
-    const wrapper = document.getElementById("top-fans-wrapper");
-    const arrow = document.getElementById("top-fans-arrow");
-    const list = document.getElementById("global-fan-list");
-    const previewZone = document.getElementById("top-fans-preview-zone"); // ดึงกล่องรูปมินิมาควบคุม
-    
-    if (wrapper.style.maxHeight === "0px" || !wrapper.style.maxHeight) {
-        // ⚡ ตอนเปิด: ยืดแผงกางออกมา
-        const contentHeight = list ? (list.scrollHeight + 40) : 250;
-        wrapper.style.maxHeight = contentHeight + "px";
-        wrapper.style.opacity = "1";
-        wrapper.style.padding = "15px";
-        arrow.style.transform = "rotate(90deg)";
-        
-        // ⚡ สั่งให้รูปวงกลมมินิหายไปตอนกางออก
-        if (previewZone) previewZone.style.opacity = "0";
-    } else {
-        // ⚡ ตอนปิด: พับเก็บแนบสนิท
-        wrapper.style.maxHeight = "0px";
-        wrapper.style.opacity = "0";
-        wrapper.style.padding = "0px 15px";
-        arrow.style.transform = "rotate(0deg)";
-        
-        // ⚡ สั่งให้รูปวงกลมมินิเฟดกลับคืนมาโชว์ใหม่ตอนพับปิด
-        if (previewZone) previewZone.style.opacity = "1";
-    }
+// กด Top Fans แล้วพาไปหน้าอันดับเต็ม (แบบเดียวกับปุ่ม Top Fan ของ member.html แต่ไม่ส่ง ?name= เพื่อขอยอดรวมทุกเมมเบอร์)
+function goToGlobalTopFans() {
+  window.location.href = 'topfans';
 }
 
 function renderGlobalFans(rawData) {
-  const list = document.getElementById('global-fan-list');
-  if (!list) return;
-  list.innerHTML = '';
-
   let fansArray = [];
   if (Array.isArray(rawData)) {
     fansArray = rawData;
@@ -3346,10 +3330,7 @@ function renderGlobalFans(rawData) {
     fansArray = Object.values(rawData).flat();
   }
 
-  if (fansArray.length === 0) {
-    list.innerHTML = '<div style="padding:20px; color:#ccc; font-size:13px; width:100%; text-align:center;">ยังไม่มีข้อมูลแฟนคลับ...</div>';
-    return;
-  }
+  if (fansArray.length === 0) return;
 
   // --- รวมยอด (Group By User) ---
   const groupedFans = fansArray.reduce((acc, current) => {
@@ -3363,20 +3344,20 @@ function renderGlobalFans(rawData) {
 
   const finalFans = Object.values(groupedFans).sort((a, b) => b.total - a.total);
 
-  // --- วาดรูปมินิกรอบทอง-เงิน-ทองแดง ไว้ด้านบนแผง ---
+  // --- รูปมินิ 3 อันดับแรกตรงหัวข้อ (พรีวิวก่อนกดเข้าไปดูหน้าเต็ม) ---
   const previewZone = document.getElementById('top-fans-preview-zone');
   if (previewZone) {
     previewZone.innerHTML = '';
     const top3Preview = finalFans.slice(0, 3).reverse();
-    
+
     top3Preview.forEach((f, index) => {
-      const actualRank = top3Preview.length - 1 - index; 
+      const actualRank = top3Preview.length - 1 - index;
       const miniBorderColor = actualRank === 0 ? '#ffd700' : actualRank === 1 ? '#c0c0c0' : actualRank === 2 ? '#cd7f32' : '#ffeef2';
-      
+
       const miniAvatar = document.createElement('img');
       miniAvatar.src = getImg(f.img);
       miniAvatar.style = `
-        width: 26px; height: 26px; border-radius: 50%; 
+        width: 26px; height: 26px; border-radius: 50%;
         border: 2px solid ${miniBorderColor}; object-fit: cover;
         margin-left: -6px; background: white;
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -3384,44 +3365,6 @@ function renderGlobalFans(rawData) {
       miniAvatar.onerror = function() { this.src = 'https://lh3.googleusercontent.com/d/1rebp2F8vyP0nyvsEOFD9Nw2mPcRtVqtG=s1000'; };
       previewZone.appendChild(miniAvatar);
     });
-  }
-
-  // --- แสดงผลการ์ดด้านล่าง ---
-  finalFans.forEach((f, i) => {
-    const isTop3 = i < 3;
-    const rankIcon = i === 0 ? '<i class="fas fa-crown"></i>' : (i + 1);
-
-    const card = document.createElement('div');
-    card.className = 'fan-card';
-    card.style = `
-      position: relative; min-width: 120px;
-      background: linear-gradient(135deg, #ff6b9d 0%, #ff8fb3 45%, #ff8fb3 55%, #e0447a 100%);
-      padding: 20px 15px; border-radius: 25px; text-align: center;
-      border: 2px solid #ff6b9d; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-      margin: 10px 5px; flex-shrink: 0;
-    `;
-
-    card.innerHTML = `
-      <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
-        background: #ffffff; color: #e0447a;
-        padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: bold;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1); white-space: nowrap;">
-        ${isTop3 ? rankIcon + ' ' : ''}อันดับ ${i + 1}
-      </div>
-      <img src="${getImg(f.img)}" style="width:65px; height:65px; border-radius:50%; border:3px solid #ffffff; margin-top:5px; object-fit:cover;" onerror="this.src='https://lh3.googleusercontent.com/d/1rebp2F8vyP0nyvsEOFD9Nw2mPcRtVqtG=s1000'">
-      <div style="font-weight:700; font-size:14px; color:#ffffff; margin-top:8px; white-space: nowrap; overflow:hidden; text-overflow:ellipsis;">
-        ${f.name || f.username}
-      </div>
-      <div style="font-size:12px; color:#ffffff; font-weight:700; margin-top:4px;">
-        <i class="fas fa-heart-circle-check"></i> ${Number(f.total).toLocaleString()}
-      </div>
-    `;
-    list.appendChild(card);
-  });
-
-  const wrapper = document.getElementById("top-fans-wrapper");
-  if (wrapper && wrapper.style.maxHeight !== "0px" && wrapper.style.maxHeight !== "") {
-      wrapper.style.maxHeight = (list.scrollHeight + 40) + "px";
   }
 }
 
@@ -3622,8 +3565,8 @@ document.addEventListener('DOMContentLoaded', renderTracker);
     function hasManagementPermission(postAuthorUsername) {
         if (!user) return false;
         
-        // CEO และ Admin จัดการได้ทุกคน
-        if (user.role === 'CEO' || user.role === 'Admin') return true;
+        // CEO และ Admin จัดการได้ทุกคน (รวมบัญชีที่ได้รับสิทธิ์ Admin ควบผ่าน is_admin)
+        if (user.role === 'CEO' || user.role === 'Admin' || user.is_admin === true) return true;
         
         // สมาชิกทั่วไปจัดการได้แค่ของตัวเอง
         return user.username === postAuthorUsername;
@@ -3858,34 +3801,8 @@ function renderPost(post) {
   const postComments = Array.isArray(post.comments) ? post.comments : [];
   const commentsHtml = buildCommentsHtml(postComments, postId);
 
-  // ... (โค้ดส่วน MediaHtml Audio/Video และรูปภาพเหมือนเดิม) ...
+  // ... (โค้ดส่วน MediaHtml Video และรูปภาพเหมือนเดิม) ...
   let mediaHtml = '';
-  if (post.audioURL) {
-    // 🎙️ โพสเก่าก่อน 2026-08-05 ชี้ไปที่โปรเจกต์ Supabase เดิมที่เลิกใช้แล้ว (kmolgfghbviwxqlhnlku) ลิงก์ตายแล้ว
-    // เลยยังต้องโชว์ข้อความแทน ส่วนคลิปเสียงใหม่ที่อัดผ่านฟีเจอร์ใน post.html (bucket post-audio) เล่นได้ปกติ
-    if (post.audioURL.includes('kmolgfghbviwxqlhnlku')) {
-      mediaHtml += `
-        <div style="margin-top: 12px; background: #fff5f7; border: 1px dashed #ffc0cb; border-radius: 16px; padding: 12px 16px; display: flex; align-items: center; gap: 10px; max-width: 400px;">
-          <i class="fa-solid fa-microphone-slash" style="color: var(--primary-pink); font-size: 1.1rem;"></i>
-          <span style="font-size: 0.8rem; color: #a68a90;">โพสนี้เคยมีข้อความเสียงแนบอยู่ แต่ลิงก์เก่าใช้งานไม่ได้แล้วนะ 🙈</span>
-        </div>
-      `;
-    } else {
-      mediaHtml += `
-        <div class="voice-msg-bubble">
-          <button type="button" class="voice-msg-play-btn" id="voice-play-btn-${postId}" onclick="toggleVoiceMessage('${postId}')">
-            <i class="fa-solid fa-play"></i>
-          </button>
-          <div class="voice-msg-waveform">
-            <div class="voice-msg-progress" id="voice-progress-${postId}"></div>
-          </div>
-          <span class="voice-msg-time" id="voice-time-${postId}">0:00</span>
-          <audio class="voice-msg-audio" id="voice-audio-${postId}" src="${post.audioURL}" preload="metadata" style="display:none;"
-            ontimeupdate="updateVoiceProgress('${postId}')" onloadedmetadata="initVoiceDuration('${postId}')" onended="onVoiceEnded('${postId}')"></audio>
-        </div>
-      `;
-    }
-  }
 
   if (post.videoURL) {
     mediaHtml += `
@@ -3964,6 +3881,22 @@ function renderPost(post) {
   `;
 }
   
+// 🌸 ฟีดหน้าแรกเคยดึง get_posts() ทั้งหมดทีเดียว (~1,200 โพสต์ + ~6,500 คอมเมนต์ ~3MB ต่อครั้ง)
+// ทุกครั้งที่โหลดหน้า "และ" ทุกครั้งที่มีการไลก์/คอมเมนต์/โพสต์ใหม่ทั่วทั้งแอป (Realtime) ทำให้ฟีด
+// โหลดช้า/ error บ่อยขึ้นเรื่อยๆ ตามจำนวนโพสต์ที่เพิ่มขึ้น (ยิ่งเยอะขึ้นหลังมีฟีเจอร์ Fan Club)
+// เปลี่ยนมาใช้ get_posts_page() แบบ cursor-based infinite scroll แทน (แบบ Facebook/Instagram):
+// เลื่อนใกล้ล่างสุดค่อยโหลดโพสต์เก่าถัดไปเองอัตโนมัติ โดยใช้ "เวลาของโพสต์เก่าสุดที่โหลดไปแล้ว" เป็น
+// cursor แทนการนับ offset ตัวเลข กันโพสต์ตกหล่น/ซ้ำเวลามีโพสต์ใหม่แทรกเข้ามาระหว่างที่เลื่อนอยู่
+// และเวลาโหลดพลาด จะไม่ล้างโพสต์ที่มีอยู่แล้วทิ้งเป็นข้อความ error เต็มจอ - แค่โชว์ปุ่มลองใหม่เล็กๆ
+// ตรงจุดที่ค้างแทน เหมือนแอปใหญ่ๆ ทำกัน
+const FEED_PAGE_SIZE = 20;
+let feedCursor = null; // createdAtEpochMs ของโพสต์เก่าสุดที่โหลดไปแล้ว, null = ยังไม่เคยโหลด/อยู่หน้าแรก
+let feedHasMore = true;
+let feedPaginated = false; // true ทันทีที่ผู้ใช้เลื่อนโหลดเกินหน้าแรกไปแล้ว - กัน realtime refresh มารีเซ็ต cursor ทับ
+let feedLoadingMore = false;
+let feedObserver = null;
+let feedIncludedSharedPost = false;
+
 async function loadTimelinePosts() {
   // 🛡️ ป้องกันการโหลดซ้อน (ถ้ากดสลับแท็บรัวๆ แล้วตัวเก่ากำลัง Fetch อยู่ ให้ข้ามฟังก์ชันนี้ไปเลย)
   if (window.isTimelineLoading) return;
@@ -3971,13 +3904,13 @@ async function loadTimelinePosts() {
   const container = document.getElementById('posts-container');
   if (!container) return;
 
-  // 🌸 ขั้นตอนที่ A: ลองดึงโพสต์เก่าจากแคชในเครื่องขึ้นมาโชว์ก่อนทันที (ถ้าหน้าจอยังว่างอยู่)
+  // 🌸 ขั้นตอนที่ A: ลองดึงหน้าแรกจากแคชในเครื่องขึ้นมาโชว์ก่อนทันที (ถ้าหน้าจอยังว่างอยู่)
   const cachedPosts = localStorage.getItem('blm48_posts_cache');
   const isContainerEmpty = container.querySelectorAll('.post-card').length === 0;
 
   if (cachedPosts && isContainerEmpty) {
     try {
-      let posts = JSON.parse(cachedPosts);
+      let posts = JSON.parse(cachedPosts).filter(p => p.postType !== 'fan');
       // ใช้กลไกการกลับด้านข้อมูลเพื่อให้ของใหม่กว่าอยู่ด้านบนเหมือนเดิม
       let tempPosts = [...posts];
       tempPosts.reverse();
@@ -4009,7 +3942,25 @@ async function loadTimelinePosts() {
 
     const currentUser = getUserSession();
     const username = currentUser ? currentUser.username : "";
-    let posts = await blm48GetPosts(username);
+    // ดึงเฉพาะหน้าแรกเสมอ (ไล่จับโพสต์/ไลก์/คอมเมนต์ใหม่สุด) - ถ้ามีลิงก์แชร์โพสต์เก่าที่ตกหน้าแรกไป
+    // ให้แนบ post id นั้นไปด้วยครั้งเดียวตอนเปิดหน้า เพื่อให้ RPC แถมโพสต์นั้นมาด้วยแม้จะอยู่นอกหน้าแรก
+    const sharedPostId = !feedIncludedSharedPost ? new URLSearchParams(window.location.search).get('post') : null;
+    const res = await blm48GetPostsPage(username, FEED_PAGE_SIZE, null, sharedPostId);
+    feedIncludedSharedPost = true;
+
+    // 🛡️ blm48Rpc คืน object { status:'error', ... } เวลาเน็ตเวิร์คมีปัญหา ต้องเช็คทิ้งตรงนี้
+    if (!res || res.status !== 'success' || !Array.isArray(res.data)) {
+      throw new Error((res && res.message) || 'ไม่สามารถดึงข้อมูลโพสต์ได้');
+    }
+
+    let posts = res.data;
+
+    // 🛡️ ถ้าผู้ใช้เลื่อนโหลดเกินหน้าแรกไปแล้ว (feedPaginated) การรีเฟรชรอบนี้มาจาก Realtime แค่ไล่จับ
+    // โพสต์/ไลก์/คอมเมนต์ใหม่สุดที่หัวฟีด ไม่ควรไปรีเซ็ต cursor/hasMore ที่ใช้ต่อโพสต์เก่าอยู่ทับ
+    if (!feedPaginated && posts.length > 0) {
+      feedCursor = posts[posts.length - 1].createdAtEpochMs; // เรียงใหม่->เก่า ตัวท้ายสุดคือเก่าสุดในหน้านี้
+      feedHasMore = !!res.hasMore;
+    }
 
     // หากดึงข้อมูลจากเซอร์เวอร์มาแล้วไม่มีโพสต์เลย
     if (!posts || posts.length === 0) {
@@ -4019,7 +3970,7 @@ async function loadTimelinePosts() {
       return;
     }
 
-    // 🌸 ขั้นตอนที่ B: ข้อมูลอัปเดตล่าสุดส่งมาถึงแล้ว บันทึกทับลงแคชเพื่อไว้ใช้ในรอบหน้า
+    // 🌸 ขั้นตอนที่ B: ข้อมูลหน้าแรกอัปเดตล่าสุดส่งมาถึงแล้ว บันทึกทับลงแคชเพื่อไว้ใช้ในรอบหน้า
     localStorage.setItem('blm48_posts_cache', JSON.stringify(posts));
 
     // ลบข้อความ "กำลังโหลด" ออกไป (ถ้ามีอยู่บนจอ)
@@ -4027,32 +3978,22 @@ async function loadTimelinePosts() {
     if (loadingMsg) loadingMsg.remove();
 
     // 🌟 ทริคเดิมของคุณเอ็มมี่: กลับด้านข้อมูลเพื่อนำของใหม่ไปหยอดแทรกไว้ "บนสุด"
-    posts.reverse(); 
+    posts.reverse();
 
     posts.forEach(post => {
       const existingPost = document.getElementById(`post-${post.id}`);
 
       if (existingPost) {
-        // 🎯 สถานการณ์ A (โพสต์เดิมมีอยู่แล้วบนจอ): อัปเดตยอดไลก์, ไอคอนหัวใจ และคอมเมนต์เงียบๆ
-        const likeCountEl = document.getElementById(`like-count-${post.id}`);
-        if (likeCountEl) likeCountEl.innerText = post.likes;
-
-        const cookieCountEl = document.getElementById(`post-cookies-count-${post.id}`);
-        if (cookieCountEl) cookieCountEl.innerText = post.cookies || 0;
-
-        const heartIcon = document.getElementById(`heart-${post.id}`);
-        if (heartIcon) heartIcon.className = post.isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
-
-        const postComments = Array.isArray(post.comments) ? post.comments : [];
-        const commentCountEl = document.getElementById(`comment-count-${post.id}`);
-        if (commentCountEl) commentCountEl.innerText = postComments.length;
-        const commentListEl = document.getElementById(`comment-list-${post.id}`);
-        if (commentListEl) commentListEl.innerHTML = buildCommentsHtml(postComments, post.id);
+        // 🎯 สถานการณ์ A (โพสต์เดิมมีอยู่แล้วบนจอ): อัปเดตยอดไลก์, ไอคอนหัวใจ และคอมเมนต์เงียบๆ เฉพาะจุดที่เปลี่ยน
+        // (ไม่เขียนทับทั้งลิสต์คอมเมนต์ - ดู patchPostLive ใน common.js)
+        patchPostLive(post);
       } else {
         // 🎯 สถานการณ์ B (มีโพสต์ใหม่เพิ่งลง หรือเพิ่งโหลดมา): เรนเดอร์ HTML แล้วแทรกดันไป "บนสุด" ทันที!
         container.insertAdjacentHTML('afterbegin', renderPost(post));
       }
     });
+
+    setupFeedInfiniteScroll();
 
   } catch (error) {
     console.error("โหลดฟีดล้มเหลว:", error);
@@ -4062,6 +4003,81 @@ async function loadTimelinePosts() {
     }
   } finally {
     window.isTimelineLoading = false; // ปลดล็อกสถานะเสมอ ไม่ว่าจะดึงข้อมูลสำเร็จหรือพัง เพื่อให้กดโหลดรอบถัดไปได้ปกติ
+  }
+}
+
+// 🌸 ตั้ง sentinel ท้ายฟีดไว้ให้ IntersectionObserver คอยจับ - เลื่อนใกล้ถึงจะโหลดโพสต์เก่าเพิ่มเองอัตโนมัติ
+// (ไม่มีปุ่มให้กด เหมือน Facebook/Instagram) ถ้าไม่มีโพสต์เก่ากว่าแล้วโชว์ข้อความจบฟีดแทน
+function setupFeedInfiniteScroll() {
+  const feedSection = document.getElementById('blm48-feed');
+  if (!feedSection) return;
+
+  let sentinel = document.getElementById('feed-scroll-sentinel');
+  if (!sentinel) {
+    sentinel = document.createElement('div');
+    sentinel.id = 'feed-scroll-sentinel';
+    sentinel.style.cssText = 'text-align:center; padding:16px 0; color:#bbb; font-size:0.85rem; min-height:20px;';
+    feedSection.appendChild(sentinel);
+  }
+
+  if (!feedHasMore) {
+    if (feedObserver) { feedObserver.disconnect(); feedObserver = null; }
+    sentinel.innerHTML = document.querySelectorAll('#posts-container .post-card').length > 0
+      ? '<i class="fa-solid fa-check"></i> คุณดูครบทุกโพสต์แล้วค่ะ'
+      : '';
+    return;
+  }
+
+  sentinel.innerHTML = '';
+  if (feedObserver) return; // observer เดิมยัง observe sentinel ตัวเดิมอยู่แล้ว ไม่ต้องสร้างซ้ำ
+
+  feedObserver = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) loadMoreFeedPosts();
+  }, { rootMargin: '400px' }); // เริ่มโหลดล่วงหน้าก่อนเลื่อนไปถึงจริงๆ กันจอกระตุกรอโหลด
+  feedObserver.observe(sentinel);
+}
+
+async function loadMoreFeedPosts() {
+  if (feedLoadingMore || window.isTimelineLoading || !feedHasMore) return;
+  const container = document.getElementById('posts-container');
+  const sentinel = document.getElementById('feed-scroll-sentinel');
+  if (!container) return;
+
+  feedLoadingMore = true;
+  feedPaginated = true; // ตั้งแต่นี้ไป realtime refresh ที่หัวฟีดจะไม่มายุ่งกับ cursor/hasMore ตัวนี้อีก
+  if (sentinel) sentinel.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังโหลด...';
+
+  try {
+    const currentUser = getUserSession();
+    const username = currentUser ? currentUser.username : "";
+    const res = await blm48GetPostsPage(username, FEED_PAGE_SIZE, feedCursor);
+
+    if (!res || res.status !== 'success' || !Array.isArray(res.data)) {
+      throw new Error((res && res.message) || 'โหลดโพสต์เพิ่มเติมไม่สำเร็จ');
+    }
+
+    // โพสต์เก่ากว่าเรียงจากใหม่ไปเก่าเหมือนเดิม - ต่อท้าย container ตามลำดับปกติ (ไม่ต้อง reverse)
+    res.data.forEach(post => {
+      if (!document.getElementById(`post-${post.id}`)) {
+        container.insertAdjacentHTML('beforeend', renderPost(post));
+      }
+    });
+
+    if (res.data.length > 0) {
+      feedCursor = res.data[res.data.length - 1].createdAtEpochMs;
+    }
+    feedHasMore = !!res.hasMore;
+
+    setupFeedInfiniteScroll();
+  } catch (error) {
+    console.error("โหลดโพสต์เพิ่มเติมล้มเหลว:", error);
+    // 🌟 สไตล์ Facebook/Instagram: โพสต์ที่โหลดไว้แล้วยังอยู่ครบ ไม่ล้างทิ้งเป็นข้อความ error เต็มจอ
+    // แค่โชว์ปุ่มลองใหม่เล็กๆ ตรงจุดที่ค้างแทน
+    if (sentinel) {
+      sentinel.innerHTML = '<span style="color:#ff4d4d; cursor:pointer;" onclick="loadMoreFeedPosts()"><i class="fa-solid fa-rotate-right"></i> โหลดไม่สำเร็จ แตะเพื่อลองใหม่</span>';
+    }
+  } finally {
+    feedLoadingMore = false;
   }
 }
 
@@ -4137,10 +4153,8 @@ async function deletePostUi(postId) {
 
     if (data.status === 'success') {
       const postEl = document.getElementById(`post-${postId}`);
-      // 🧹 ล้างรูป/เสียงของโพสต์นี้ทิ้งจาก Storage ไปด้วย (ไม่มีโพสต์อ้างอิงแล้ว ปล่อยค้างไว้เปลืองโควตาเปล่าๆ)
+      // 🧹 ล้างรูปของโพสต์นี้ทิ้งจาก Storage ไปด้วย (ไม่มีโพสต์อ้างอิงแล้ว ปล่อยค้างไว้เปลืองโควตาเปล่าๆ)
       const orphanedFiles = (postEl ? postEl.dataset.images.split(',') : []);
-      const audioEl = document.getElementById(`voice-audio-${postId}`);
-      if (audioEl && audioEl.src) orphanedFiles.push(audioEl.src);
       blm48DeleteStorageFiles(orphanedFiles);
 
       if (postEl) postEl.remove();
@@ -4277,6 +4291,25 @@ function closeImageViewer() {
   document.getElementById('image-viewer-modal').style.display = 'none';
   blm48UnlockBodyScroll();
 }
+
+// 📱 ปัดซ้าย-ขวาเพื่อเปลี่ยนรูปในโหมดดูรูปเต็มจอ (ผูกกับ document เพราะ modal ยังไม่ถูกสร้างตอนสคริปต์นี้รัน)
+(function() {
+  let touchStartX = 0;
+  let touchStartY = 0;
+  document.addEventListener('touchstart', function(e) {
+    if (!e.target.closest('#image-viewer-modal')) return;
+    touchStartX = e.changedTouches[0].clientX;
+    touchStartY = e.changedTouches[0].clientY;
+  }, { passive: true });
+  document.addEventListener('touchend', function(e) {
+    if (!e.target.closest('#image-viewer-modal')) return;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+      changeImage(dx < 0 ? 1 : -1);
+    }
+  }, { passive: true });
+})();
   
 async function redeemCode() {
     if (!user) return openLogin();
@@ -4563,6 +4596,140 @@ async function claimDailyMissionReward() {
   }
 }
 
+// ==========================================
+// 📅 MONTHLY LOGIN STREAK - บันทึกวันที่ล็อกอินอัตโนมัติทุกครั้งที่เปิดแอป (blm48RecordDailyLogin,
+// เรียกตอน boot) ถ้าพลาดวันไหนไปใช้ "ตัวช่วย" กู้คืนได้ 2 ครั้ง/เดือน (วันละ 1 ครั้ง) พอครบทุกวัน
+// ในเดือนปฏิทินแล้วกดรับ 100 Token ได้ - ถ้าลืมกด พอข้ามเดือนไปแล้วเปิดแอปอีกที ระบบจะโอนให้อัตโนมัติ
+// (ดู record_daily_login ฝั่ง SQL)
+// ==========================================
+let loginStreakData = null;
+
+async function loadLoginStreakStatus() {
+  if (!user || !user.username) return null;
+  try {
+    const res = await blm48GetLoginStreakStatus(user.username);
+    if (res && res.status !== 'error') {
+      loginStreakData = res;
+      const badge = document.getElementById('streak-badge');
+      if (badge) badge.style.display = (res.canClaim && !res.alreadyClaimed) ? 'block' : 'none';
+    }
+    return loginStreakData;
+  } catch (e) {
+    console.error('loadLoginStreakStatus error:', e);
+    return null;
+  }
+}
+
+function renderLoginStreakModal() {
+  const grid = document.getElementById('streak-calendar-grid');
+  const btn = document.getElementById('streak-claim-btn');
+  const rescueCountEl = document.getElementById('streak-rescue-count');
+  const subtitleEl = document.getElementById('streak-subtitle');
+  if (!grid || !btn || !loginStreakData) return;
+
+  const days = Array.isArray(loginStreakData.days) ? loginStreakData.days : [];
+  grid.innerHTML = days.map(d => {
+    const canRescue = d.status === 'missed' && loginStreakData.rescuesRemaining > 0 && !loginStreakData.rescueUsedToday;
+    let icon = d.day;
+    if (d.status === 'present') icon = '<i class="fas fa-check"></i>';
+    else if (d.status === 'rescued') icon = '<i class="fas fa-heart-circle-bolt"></i>';
+    else if (d.status === 'missed') icon = canRescue ? '<i class="fas fa-rotate-left"></i>' : '<i class="fas fa-xmark"></i>';
+    const clickAttr = canRescue ? `onclick="useLoginRescue('${d.date}')"` : '';
+    return `<div class="streak-day ${d.status} ${canRescue ? 'can-rescue' : ''}" ${clickAttr} title="${d.date}">${icon}</div>`;
+  }).join('');
+
+  rescueCountEl.textContent = `${loginStreakData.rescuesRemaining}/2`;
+
+  if (loginStreakData.alreadyClaimed) {
+    btn.disabled = true;
+    btn.classList.remove('claimable');
+    btn.innerHTML = '<i class="fas fa-circle-check"></i> รับของรางวัลเดือนนี้แล้ว';
+    subtitleEl.textContent = `เช็คอินครบเดือนนี้แล้ว รับ 100 Tokens ไปเรียบร้อย!`;
+  } else if (loginStreakData.canClaim) {
+    btn.disabled = false;
+    btn.classList.add('claimable');
+    btn.innerHTML = `<i class="fas fa-gift"></i> รับ 100 Tokens`;
+    subtitleEl.textContent = `เช็คอินครบทุกวันแล้ว! กดรับของรางวัลได้เลย`;
+  } else {
+    btn.disabled = true;
+    btn.classList.remove('claimable');
+    btn.textContent = 'เช็คอินให้ครบเดือนก่อนนะ';
+    subtitleEl.textContent = `เช็คอินแล้ว ${loginStreakData.presentCount}/${loginStreakData.daysInMonth} วัน • ครบเดือนรับ 100 Tokens เลย!`;
+  }
+}
+
+async function openLoginStreakModal() {
+  if (!user) {
+    Swal.fire('กรุณาเข้าสู่ระบบ', 'กรุณาเข้าสู่ระบบก่อนดูสถิติเช็คอินรายเดือน', 'info');
+    return;
+  }
+  const modal = document.getElementById('login-streak-modal');
+  if (modal) modal.style.display = 'flex';
+  blm48LockBodyScroll();
+  const grid = document.getElementById('streak-calendar-grid');
+  if (grid) grid.innerHTML = '<div style="grid-column: 1 / -1; text-align:center;color:#aaa;padding:20px 0;">กำลังโหลด...</div>';
+
+  await loadLoginStreakStatus();
+  renderLoginStreakModal();
+}
+
+function closeLoginStreakModal() {
+  const modal = document.getElementById('login-streak-modal');
+  if (modal) modal.style.display = 'none';
+  blm48UnlockBodyScroll();
+}
+
+async function useLoginRescue(dateStr) {
+  if (!user || !user.username) return;
+  const result = await Swal.fire({
+    title: 'กู้วันที่พลาดเช็คอิน?',
+    html: `ใช้สิทธิ์กู้ 1 ครั้ง เพื่อกู้วันที่ <b>${dateStr}</b> คืนมา`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: 'var(--primary-pink)',
+    confirmButtonText: 'ใช้สิทธิ์กู้',
+    cancelButtonText: 'ยกเลิก'
+  });
+  if (!result.isConfirmed) return;
+
+  Swal.fire({ title: 'กำลังกู้วันที่...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+  try {
+    const res = await blm48UseLoginRescue(user.username, dateStr);
+    if (res && res.status === 'success') {
+      await loadLoginStreakStatus();
+      renderLoginStreakModal();
+      Swal.fire('สำเร็จ!', res.message, 'success');
+    } else {
+      Swal.fire('ทำรายการไม่สำเร็จ', (res && res.message) || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง', 'error');
+    }
+  } catch (e) {
+    console.error('useLoginRescue error:', e);
+    Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้งในภายหลัง', 'error');
+  }
+}
+
+async function claimLoginStreakReward() {
+  if (!user || !user.username) return;
+  const btn = document.getElementById('streak-claim-btn');
+  if (btn) btn.disabled = true;
+  Swal.fire({ title: 'กำลังรับของรางวัล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+  try {
+    const res = await blm48ClaimLoginMonthlyReward(user.username);
+    if (res && res.status === 'success') {
+      await syncUserData();
+      await loadLoginStreakStatus();
+      renderLoginStreakModal();
+      Swal.fire('ทำรายการสำเร็จ', res.message, 'success');
+    } else {
+      Swal.fire('ทำรายการไม่สำเร็จ', (res && res.message) || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง', 'error');
+      renderLoginStreakModal();
+    }
+  } catch (e) {
+    console.error('claimLoginStreakReward error:', e);
+    Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้งในภายหลัง', 'error');
+  }
+}
+
 // ⚡ ดักจับตอนหน้าเว็บโหลดโครงสร้างเสร็จสมบูรณ์
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -4577,10 +4744,17 @@ document.addEventListener("DOMContentLoaded", () => {
   if (user) {
     syncUserData();
     loadDailyMissions();
+    blm48RecordDailyLogin(user.username).then(async (res) => {
+      if (res && Array.isArray(res.autoCreditedMonths) && res.autoCreditedMonths.length > 0) {
+        await syncUserData(); // เดือนก่อนครบแต่ลืมกดรับ ระบบโอน 100 Token ให้อัตโนมัติแล้ว
+      }
+      loadLoginStreakStatus();
+    }).catch(e => console.error('blm48RecordDailyLogin error:', e));
     setInterval(async () => {
       if (localStorage.getItem('bnl_session')) {
         await syncUserData();
         await loadDailyMissions();
+        await loadLoginStreakStatus();
       }
     }, 45000);
 
@@ -4923,7 +5097,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // ↩️ ส่งคำตอบกลับคอมเมนต์ (นับเป็นคอมเมนต์ปกติ เจ้าของโพสได้ 9 คุกกี้เหมือนกัน)
+  // ↩️ ส่งคำตอบกลับคอมเมนต์ (นับเป็นคอมเมนต์ปกติ เจ้าของโพสได้ 4 คุกกี้)
   window.submitReply = async function(postId, parentCommentId, btnElement) {
     const currentUser = getUserSession();
     if (!currentUser || !currentUser.username) {
@@ -5051,9 +5225,9 @@ document.addEventListener("DOMContentLoaded", () => {
     <img id="nav-home" src="" alt="Home" style="display: none;">
   </a>
 
-  <a href="kami" class="tab-item">
+  <a href="fanpost" class="tab-item">
     <i id="nav-kami-fallback" class="fa-solid fa-star"></i>
-    <img id="nav-kami" src="" alt="My Oshi" style="display: none;">
+    <img id="nav-kami" src="" alt="Fan Post" style="display: none;">
   </a>
 
   <a href="majorvote" class="tab-item">
@@ -5082,6 +5256,20 @@ document.addEventListener("DOMContentLoaded", () => {
     <div class="mission-card-subtitle">ทำภารกิจครบ รับ 5 Tokens ฟรี! รีเซ็ตในอีก <span id="mission-countdown">--:--:--</span></div>
     <div id="mission-item-list"></div>
     <button id="mission-claim-btn" disabled onclick="claimDailyMissionReward()">ทำภารกิจให้ครบก่อนนะ</button>
+  </div>
+</div>
+
+<div id="login-streak-modal" onclick="closeLoginStreakModal()">
+  <div class="mission-card" onclick="event.stopPropagation()">
+    <span class="mission-card-close" onclick="closeLoginStreakModal()">&times;</span>
+    <div class="mission-card-title"><i class="fas fa-calendar-check"></i> เช็คอินรายเดือน</div>
+    <div class="mission-card-subtitle" id="streak-subtitle">เช็คอินให้ครบทุกวันในเดือนนี้ รับ 100 Tokens เลย!</div>
+    <div class="streak-rescue-row">
+      <span><i class="fas fa-heart-circle-bolt"></i> สิทธิ์กู้วันที่พลาด</span>
+      <b id="streak-rescue-count">2/2</b>
+    </div>
+    <div class="streak-calendar-grid" id="streak-calendar-grid"></div>
+    <button id="streak-claim-btn" disabled onclick="claimLoginStreakReward()">เช็คอินให้ครบเดือนก่อนนะ</button>
   </div>
 </div>
 
