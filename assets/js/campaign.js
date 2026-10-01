@@ -59,8 +59,13 @@ function renderCampaignTierList(total) {
   document.head.appendChild(style);
 })();
 
+// ชื่อเมมเบอร์ + ชื่อวงต่อท้าย เช่น "Emmy BLM48" (ใช้ทุกจุดที่แสดงชื่อเมมเบอร์ในส่วน Campaign)
+function campaignMemberLabel(c) {
+  return c.groupName ? `${c.memberName} ${c.groupName}` : c.memberName;
+}
+
 function campaignTitle(c) {
-  return `ซัพพอร์ตคุกกี้ให้ ${c.memberName} ขึ้น Champ of the Month`;
+  return `ซัพพอร์ตคุกกี้ให้ ${campaignMemberLabel(c)} ขึ้น Champ of the Month`;
 }
 
 function campaignTimeLeft(endAt) {
@@ -146,4 +151,33 @@ function renderMemberCampaignCard(c, opts) {
         ${renderCampaignProgress(c)}
       </div>
     </a>`;
+}
+
+// 🛟 โหลดข้อมูล Campaign แบบทนทาน: ช่วงคนใช้งานเยอะ RPC อาจ timeout ชั่วคราว (networkError จาก blm48Rpc)
+// ลองใหม่อัตโนมัติก่อน แทนที่จะโชว์ error ทันที
+async function campaignFetchWithRetry(fetchFn, tries) {
+  tries = tries || 3;
+  const delays = [700, 1800, 3500];
+  let res = null;
+  for (let i = 0; i < tries; i++) {
+    try { res = await fetchFn(); } catch (e) { res = { status: 'error', networkError: true }; }
+    const failed = !res || (res.networkError === true);
+    if (!failed) return res;
+    if (i < tries - 1) await new Promise(r => setTimeout(r, delays[i] || 2000));
+  }
+  return res;
+}
+
+// 🔴 อัปเดตสดตาม Ranking แบบไม่ถล่มฐานข้อมูล: รวบเหตุการณ์ที่เข้ามาติดๆ กัน (กดใจรัวๆ) เป็นรีเฟรชเดียว,
+// ไม่รีเฟรชตอนแท็บถูกซ่อน (ค่อยรีเฟรชตอนกลับมาดู), และรีเฟรชตอนกดย้อนกลับมาหน้านี้ (bfcache)
+function subscribeCampaignLive(onChange) {
+  let pending = false;
+  const run = () => {
+    if (document.hidden) { pending = true; return; }
+    pending = false;
+    onChange();
+  };
+  if (typeof blm48SubscribeRanking === 'function') blm48SubscribeRanking(run, 2500);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && pending) run(); });
+  window.addEventListener('pageshow', (e) => { if (e.persisted) run(); });
 }
