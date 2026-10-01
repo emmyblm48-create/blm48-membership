@@ -144,13 +144,19 @@
     const mine = Number(detail.mySupport || 0);
     if (mine <= 0) { box.style.display = 'none'; return; }
     const c = detail.campaign;
+    // คืนคุกกี้คิดจาก "การปาคุกกี้จริง" เท่านั้น - คุกกี้จากกดใจ/คอมเมนต์โพสนับเข้ายอด Campaign แต่ไม่คืน
+    const cookieBase = Number(detail.myCookieSupport || 0);
+    const engagement = mine - cookieBase;
     let html = `🍪 คุณซัพพอร์ตแล้ว <b>${mine.toLocaleString()}</b> คุกกี้`;
+    if (engagement > 0) {
+      html += `<br><span style="font-size:12px;">(ปาคุกกี้ ${cookieBase.toLocaleString()} + กดใจ/คอมเมนต์โพส ${engagement.toLocaleString()} · คืนคุกกี้คิดจากยอดปาคุกกี้)</span>`;
+    }
     if (detail.myRefund) {
       html += `<br>✅ ได้รับคุกกี้คืนแล้ว <b>${Number(detail.myRefund.refund).toLocaleString()}</b> คุกกี้ (${detail.myRefund.refund_pct}%)${detail.myRefund.is_champ_bonus ? ' 🏆 Top Supporter เดือนเกิด' : ''}`;
     } else if (!ended) {
       const pct = Number(c.refundPct || 0);
       html += pct > 0
-        ? `<br>ตอนนี้ถึง Tier ${c.tier} แล้ว จะได้รับคุกกี้คืนอย่างน้อย <b>${Math.floor(mine * pct / 100).toLocaleString()}</b> คุกกี้ (${pct}%) เมื่อจบ Campaign`
+        ? `<br>ตอนนี้ถึง Tier ${c.tier} แล้ว จะได้รับคุกกี้คืนอย่างน้อย <b>${Math.floor(cookieBase * pct / 100).toLocaleString()}</b> คุกกี้ (${pct}%) เมื่อจบ Campaign`
         : `<br>ยังไม่ถึง Tier 1 (10,000 คุกกี้) ชวนเพื่อนๆ มาซัพพอร์ตเพิ่มกันนะ`;
     } else {
       html += `<br>⏳ กำลังสรุปผลและคืนคุกกี้...`;

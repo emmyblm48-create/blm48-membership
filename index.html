@@ -3076,63 +3076,8 @@ window.addEventListener('pageshow', function(event) {
 });
   
 // ==========================================
-// 🗳️ 7. FETCH CAMPAIGN DATA (ดึงแคมเปญโหวต)
+// 🏆 7. FETCH CAMPAIGN DATA (Champ of the Month Campaign)
 // ==========================================
-// 🎨 วาดการ์ดแคมเปญลงบนหน้าแรก ใช้ร่วมกันทั้งจุดที่โหลดครั้งแรกและจุดรีเฟรชแบบเรียลไทม์
-function renderCampaignCards(campaigns) {
-  const scrollerContainer = document.getElementById('campaign-scroller');
-  if (!scrollerContainer) return;
-
-  if (!campaigns || campaigns.length === 0) {
-    scrollerContainer.innerHTML = `
-      <div style="text-align: center; width: 100%; color: #999; padding: 20px; font-size: 14px;">
-        📭 ยังไม่มีแคมเปญโหวตในขณะนี้
-      </div>`;
-    return;
-  }
-
-  scrollerContainer.innerHTML = ''; // ล้างข้อความ Loading ออก
-
-  // วนลูปสร้างการ์ดจากข้อมูลชีต campaign
-  campaigns.forEach(campaign => {
-    const title = campaign.CampaignName;
-    const coverImg = campaign.CoverImage || "https://lh3.googleusercontent.com/d/1DMvowEnRuxYIUQFnb6paHJWYBHCALPCw=s1000";
-    const totalAmount = campaign.TotalAmount || 0;
-    const currencyType = campaign.CurrencyType ? campaign.CurrencyType.trim() : "token";
-
-    // กำหนดไอคอนให้ตรงกับประเภทเงิน (CurrencyType)
-    let iconHtml = '<i class="fa-solid fa-coins"></i>';
-    let displayTokenName = "Token";
-
-    if (currencyType.toLowerCase() === 'cookie') {
-      iconHtml = '<i class="fa-solid fa-cookie" style="color: #d2691e;"></i>';
-      displayTokenName = "Cookie";
-    } else if (currencyType.toLowerCase() === 'getoken') {
-      iconHtml = '<i class="fa-solid fa-gem" style="color: #4da6ff;"></i>';
-      displayTokenName = "GE Token";
-    } else if (currencyType.toLowerCase() === 'gift') {
-      iconHtml = '<i class="fa-solid fa-gift" style="color: #ff69b4;"></i>';
-      displayTokenName = "Gift";
-    }
-
-    // 🛑 แก้จุดนี้: เปลี่ยนจาก 'a' เป็น 'div' และเอา href ออก เพื่อให้เป็นแค่กล่องโชว์เฉยๆ กดไม่ได้
-    const cardLink = document.createElement('div');
-    cardLink.className = 'campaign-card';
-
-    cardLink.innerHTML = `
-      <img src="${coverImg}" alt="${title}" loading="lazy">
-      <div class="campaign-info">
-        <div class="campaign-title">${title}</div>
-        <div class="campaign-stats">
-          ${iconHtml} ${Number(totalAmount).toLocaleString()} ${displayTokenName}
-        </div>
-      </div>
-    `;
-
-    scrollerContainer.appendChild(cardLink);
-  });
-}
-
 // 🏆 รางวัลของ Member Campaign: Tier 1+ = Splash Screen, Tier 2+ = Banner หน้า Home
 // เก็บรายชื่อไว้ในเครื่อง เพราะ Splash ต้องโชว์ทันทีตอนเปิดแอป ก่อนที่ข้อมูลจากหลังบ้านจะตอบกลับ
 const CAMPAIGN_REWARDS_KEY = 'bnl_campaign_rewards';
@@ -3194,33 +3139,22 @@ async function fetchActiveCampaigns() {
   if (!scrollerContainer) return;
 
   try {
-    // ตาราง campaign ตอนนี้ sync เข้า Supabase แบบเรียลไทม์แล้ว อ่านจากตรงนั้นแทน Apps Script
-    // 🏆 + Member Cookie Campaign (เมมเบอร์กดเปิดเองจากหน้า member) แสดงก่อนแคมเปญโหวต
-    const [data, memberCampaigns] = await Promise.all([
-      blm48GetCampaigns(),
-      blm48GetActiveMemberCampaigns().catch(() => [])
-    ]);
-    const activeMemberCampaigns = Array.isArray(memberCampaigns) ? memberCampaigns : [];
-    applyCampaignRewards(activeMemberCampaigns);
-    if (Array.isArray(data)) {
-      const mapped = data.map(c => ({
-        CampaignID: c.campaignId,
-        CampaignName: c.campaignName,
-        CoverImage: c.coverImage,
-        TotalAmount: c.totalAmount,
-        CurrencyType: c.currencyType
-      }));
-      if (mapped.length === 0 && activeMemberCampaigns.length > 0) {
-        scrollerContainer.innerHTML = '';
-      } else {
-        renderCampaignCards(mapped);
-      }
-      if (activeMemberCampaigns.length > 0) {
-        scrollerContainer.insertAdjacentHTML('afterbegin', activeMemberCampaigns.map(c => renderMemberCampaignCard(c)).join(''));
-      }
-    } else {
+    // 🏆 ส่วน Campaign หน้า Home แสดงเฉพาะ Champ of the Month Campaign (เมมเบอร์เปิดเองจากหน้า profile)
+    // แคมเปญโหวต (ตาราง campaign / Major Vote) ไม่แสดงที่นี่แล้ว
+    const memberCampaigns = await blm48GetActiveMemberCampaigns();
+    if (!Array.isArray(memberCampaigns)) {
       scrollerContainer.innerHTML = `<div style="color:red; padding:10px; font-size:12px;">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>`;
+      return;
     }
+    applyCampaignRewards(memberCampaigns);
+    if (memberCampaigns.length === 0) {
+      scrollerContainer.innerHTML = `
+        <div style="text-align: center; width: 100%; color: #999; padding: 20px; font-size: 14px;">
+          🏆 ยังไม่มี Campaign ในขณะนี้
+        </div>`;
+      return;
+    }
+    scrollerContainer.innerHTML = memberCampaigns.map(c => renderMemberCampaignCard(c)).join('');
   } catch (error) {
     console.error("Fetch Campaigns Network Error:", error);
     scrollerContainer.innerHTML = `<div style="color:#999; padding:10px; font-size:13px;">ไม่สามารถเชื่อมต่อระบบแคมเปญได้</div>`;
