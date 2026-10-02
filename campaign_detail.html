@@ -99,7 +99,7 @@
     page.innerHTML = `
       <div class="cover-wrap"><img src="${escapeAttr(c.coverImage || 'assets/images/default-profile.png')}" alt="" draggable="false" oncontextmenu="return false">${renderCampaignStamp(c)}</div>
       <div class="head-zone">
-        <img class="member-avatar" src="${escapeAttr(c.profileImage || 'assets/images/default-profile.png')}" alt="" draggable="false">
+        <img class="member-avatar"${memberLinkAttr(c.memberName)} style="pointer-events: auto;" src="${escapeAttr(c.profileImage || 'assets/images/default-profile.png')}" alt="" draggable="false">
         <h1 class="detail-title">${escapeHtml(campaignTitle(c))}</h1>
         <div class="by-row">
           <span class="by"><img src="https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s64" alt=""> by BLM48</span>

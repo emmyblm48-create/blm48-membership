@@ -333,6 +333,34 @@ function escapeAttr(text) {
 }
 
 // =========================================================================
+// 👤 กดรูป/ชื่อแล้วเปิดโปรไฟล์: ใส่ data-fan="username" (แฟนคลับ -> fan.html, บัญชีเมมเบอร์ fan.html จะพาไปหน้า member ให้เอง)
+// หรือ data-member="ชื่อเมมเบอร์" (-> member.html) ไว้ที่ element ไหนก็ได้ ตัวดักคลิกด้านล่างจัดการให้
+// ทำงานช่วง capture + หยุด event ไม่ให้ไปเปิดการ์ด/โพสต์ที่ครอบอยู่ซ้อนกัน
+// =========================================================================
+function profileLinkAttr(username) {
+  return username ? ` data-fan="${escapeHtml(username)}"` : '';
+}
+function memberLinkAttr(memberName) {
+  return memberName ? ` data-member="${escapeHtml(memberName)}"` : '';
+}
+document.addEventListener('click', function (e) {
+  const el = e.target.closest && e.target.closest('[data-fan], [data-member]');
+  if (!el) return;
+  e.preventDefault();
+  e.stopPropagation();
+  if (el.dataset.member) {
+    window.location.href = `member?name=${encodeURIComponent(el.dataset.member)}`;
+  } else if (el.dataset.fan) {
+    window.location.href = `fan?u=${encodeURIComponent(el.dataset.fan)}`;
+  }
+}, true);
+(function addProfileLinkCursor() {
+  const style = document.createElement('style');
+  style.textContent = '[data-fan], [data-member] { cursor: pointer; }';
+  (document.head || document.documentElement).appendChild(style);
+})();
+
+// =========================================================================
 // 👑 สลิปโอน Token/Cookie/GEToken (ใช้ร่วมกันโดย admin_transfer.html ตอนโอนใหม่
 // และ admin_transfer_history.html ตอนเปิดดูสลิปย้อนหลัง) - เดิมอยู่ใน admin.html
 // เพียงไฟล์เดียวตอนที่ทั้งสองฟีเจอร์ยังเป็น modal ในหน้าเดียวกัน

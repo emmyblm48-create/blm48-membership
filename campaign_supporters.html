@@ -93,18 +93,18 @@
 
     const top = list[0];
     champZone.innerHTML = `
-      <div class="champ-wrap">
+      <div class="champ-wrap"${profileLinkAttr(top.username)}>
         <img src="${escapeAttr(top.profileImage || DEFAULT_AVATAR)}" alt="" draggable="false">
         <div class="champ-badge">1</div>
       </div>
-      <div class="champ-name">${escapeHtml(top.name || top.username)}</div>
+      <div class="champ-name"><span${profileLinkAttr(top.username)}>${escapeHtml(top.name || top.username)}</span></div>
       <div class="champ-amount">${cookieIcon} ${Number(top.amount).toLocaleString()}</div>`;
 
     listEl.innerHTML = list.slice(1).map((s, i) => {
       const rank = i + 2;
       const cls = rank === 2 ? 'silver' : rank === 3 ? 'bronze' : '';
       return `
-        <div class="sup-row">
+        <div class="sup-row"${profileLinkAttr(s.username)}>
           <div class="rank ${cls}">${rank}</div>
           <img class="sup-avatar" src="${escapeAttr(s.profileImage || DEFAULT_AVATAR)}" alt="" draggable="false">
           <div class="sup-name">${escapeHtml(s.name || s.username)}</div>
