@@ -697,6 +697,15 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     #ranking-list.horizontal-list {
       min-height: 190px !important; /* เตี้ยลงให้มือถือเห็นแบนเนอร์ด้านล่างเต็มๆ (เดิม 270px) */
       align-items: flex-end !important; 
+      /* แท่งเต็มความกว้างจอแบบรูปอ้างอิง: เริ่มห่างขอบซ้าย 12px เลื่อนทะลุขอบขวา มือถือเห็น 5 แท่ง + แท่งที่ 6 โผล่นิดๆ */
+      gap: 4px;
+      padding-left: 12px;
+      padding-right: 12px;
+    }
+    /* กล่องของ Ranking ไม่เว้นขอบซ้าย-ขวาเอง (เดิม 20px + ของลิสต์อีก 15px ทำให้แท่งหดเข้ามากลางจอ) */
+    #ranking-wrapper.ranking-wrapper {
+      padding-left: 0;
+      padding-right: 0;
     }
 
     /* 4. จัดระเบียบกล่อง Campaign และ Trending Video ให้การ์ดชิดขอบบน ไม่ดันเนื้อหาลงไปลึก */
@@ -2363,7 +2372,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
   </div>
 </div>
 
-<div class="ranking-wrapper" style="position: relative; overflow: hidden;">
+<div class="ranking-wrapper" id="ranking-wrapper" style="position: relative; overflow: hidden;">
   
   <div id="bg-decorations" class="bg-decorations">
   <i class="fa-solid fa-crown decor-item d1-1"></i>
