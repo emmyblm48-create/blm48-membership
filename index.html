@@ -1439,72 +1439,102 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
      ========================================= */
   .mv-card {
     position: relative;
-    width: 75vw;
-    max-width: 240px;
+    width: 78vw;
+    max-width: 300px;
     background: #ffffff;
-    padding: 10px;
     border-radius: 18px;
-
-    /* 📍 เปลี่ยนจาก center เป็น flex-start เพื่อให้เนื้อหาภายในชิดซ้าย */
+    overflow: hidden;
     text-align: left;
-
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.2s ease;
     display: flex;
     flex-direction: column;
-
-    /* 📍 เปลี่ยนเป็น flex-start ให้ Element ลูกเรียงชิดซ้ายทั้งหมด */
-    align-items: flex-start; 
-
     flex-shrink: 0;
+    scroll-snap-align: start;
   }
 
-  .mv-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 6px 16px rgba(255, 133, 162, 0.15);
+  .mv-card:active {
+    transform: scale(0.98);
   }
 
-  /* รูปปก MV อัตราส่วน 16:9 */
-  .mv-thumbnail {
+  /* รูปปก MV เต็มขอบการ์ด อัตราส่วน 16:9 + ป้ายมุมขวาล่าง */
+  .mv-thumb-wrap {
+    position: relative;
     width: 100%;
     aspect-ratio: 16 / 9;
-    border-radius: 10px;
-    object-fit: cover;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    background: #f1f3f5;
   }
 
-  /* ชื่อเพลง (บังคับพื้นที่ 2 บรรทัด + ชิดซ้าย) */
+  .mv-thumbnail {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .mv-badge {
+    position: absolute;
+    right: 10px;
+    bottom: 8px;
+    color: #fff;
+    font-family: 'Quicksand', 'Kanit', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+  }
+
+  .mv-body {
+    padding: 14px 16px 16px;
+  }
+
+  /* แถวช่อง: โลโก้ BLM48 + ชื่อช่อง + วันที่ */
+  .mv-channel {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .mv-channel-logo {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: #fff;
+    border: 1.5px solid #ffc107;
+  }
+
+  .mv-channel-name {
+    font-family: 'Quicksand', 'Kanit', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: #222;
+    line-height: 1.2;
+  }
+
+  .mv-date {
+    font-family: 'Quicksand', 'Kanit', sans-serif;
+    font-size: 12px;
+    color: #9e9e9e;
+    margin-top: 1px;
+  }
+
+  /* ชื่อคลิป (สูงคงที่ 3 บรรทัด ยาวเกินตัด ...) */
   .mv-title {
     font-family: 'Quicksand', 'Kanit', sans-serif;
-    font-weight: 600;
-    font-size: 12px;
-    color: #444;
-    margin-top: 8px;
-
-    /* 📍 เทคนิคบังคับให้สูงคงที่เท่ากับ 2 บรรทัดเสมอ (fontSize * lineHeight * 2) */
-    line-height: 1.4;
-    height: calc(12px * 1.4 * 2); /* สูงประมาณ 33.6px */
-
-    width: 100%;
+    font-weight: 500;
+    font-size: 13px;
+    color: #222;
+    margin-top: 12px;
+    line-height: 1.45;
+    height: calc(13px * 1.45 * 3);
     white-space: normal;
     word-wrap: break-word;
     display: -webkit-box;
-    -webkit-line-clamp: 2; /* ยาวเกิน 2 บรรทัดจะตัดเป็น ... */
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
-  }
-
-  /* วันที่ลง MV */
-  .mv-date {
-    font-family: 'Quicksand', 'Kanit', sans-serif;
-    font-size: 10px;
-    color: var(--primary-pink);
-    font-weight: 700;
-    margin-top: 4px;
-
-    /* 📍 มั่นใจว่าชิดซ้ายแน่นอน */
-    text-align: left; 
   }
 
   /* --- Gallery Layout (เน้นสี่เหลี่ยมจัตุรัส) --- */
@@ -3221,6 +3251,13 @@ const blm48MVs = [
   }
 ];
 
+// "4 April 2026" -> "Apr 4, 2026" (แบบการ์ดวิดีโอในรูปอ้างอิง) ถ้าแปลงไม่ได้ใช้ข้อความเดิม
+function formatMvDate(raw) {
+  const d = new Date(raw);
+  if (isNaN(d)) return escapeHtml(raw || '');
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
 function renderTrendingMVs() {
   const scroller = document.getElementById('mv-scroller');
   if (!scroller) return;
@@ -3233,11 +3270,23 @@ function renderTrendingMVs() {
     const card = document.createElement('div');
     card.className = 'mv-card';
     
-    // ใส่รูป ชื่อเพลง และวันที่ พร้อมไอคอนปฏิทิน
+    // ป้ายมุมรูป: ใช้ความยาวคลิปถ้าใส่ไว้ใน blm48MVs (duration: "03:45") ไม่งั้นโชว์ไอคอนเล่น
+    const badge = mv.duration ? escapeHtml(mv.duration) : '<i class="fas fa-play"></i>';
     card.innerHTML = `
-      <img src="${mv.image}" alt="MV Cover" class="mv-thumbnail">
-      <div class="mv-date"><i class="far fa-calendar-alt"></i> ${mv.date}</div>
-      <div class="mv-title">${mv.title}</div>     
+      <div class="mv-thumb-wrap">
+        <img src="${mv.image}" alt="MV Cover" class="mv-thumbnail" loading="lazy">
+        <div class="mv-badge">${badge}</div>
+      </div>
+      <div class="mv-body">
+        <div class="mv-channel">
+          <img class="mv-channel-logo" src="https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s180" alt="BLM48">
+          <div>
+            <div class="mv-channel-name">BLM48</div>
+            <div class="mv-date">${formatMvDate(mv.date)}</div>
+          </div>
+        </div>
+        <div class="mv-title">${escapeHtml(mv.title.trim())}</div>
+      </div>
     `;
     
     // คำสั่งตั้งค่าให้กดที่การ์ดแล้วเปิดหน้าต่างใหม่ไปยังลิงก์ที่ตั้งไว้
