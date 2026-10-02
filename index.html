@@ -695,7 +695,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     
     /* 2. บังคับความสูง 270px และให้ชิดขอบล่าง "เฉพาะกล่องแท่งกราฟ Ranking" เท่านั้น */
     #ranking-list.horizontal-list {
-      min-height: 270px !important;
+      min-height: 190px !important; /* เตี้ยลงให้มือถือเห็นแบนเนอร์ด้านล่างเต็มๆ (เดิม 270px) */
       align-items: flex-end !important; 
     }
 
@@ -812,7 +812,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     }
 
     /* ความสูงของแท่งกราฟ: กำหนดผ่าน inline style ตามสัดส่วนคะแนนจริงของแต่ละคน (ดู applyRankingBarHeight ใน JS) */
-    .member-card { min-height: 175px; }
+    .member-card { min-height: 130px; }
 
     .rank-1, .rank-2, .rank-3, .rank-other {
         background: rgba(254, 228, 121, 0.4) !important;
@@ -3354,8 +3354,8 @@ function renderRanking(data) {
   // 📊 ความสูงของแท่งกราฟอิงตามสัดส่วนคะแนนจริง (คนคะแนนเยอะแท่งสูง คนคะแนนน้อยแท่งเตี้ย)
   // 🛡️ ใช้ min-height แทน height ตรงๆ เพื่อกันไม่ให้ชื่อ/เนื้อหาโดนตัด จม หรือหายไปเวลาคะแนนต่างกันเยอะๆ
   const maxCookies = Math.max(...activeMembers.map(m => Number(m.monthly_cookies) || 0), 1);
-  const MIN_BAR_HEIGHT = 175; // จุดต่ำสุดที่การันตีว่าเนื้อหาในการ์ดยังโชว์ครบ ไม่จมหาย
-  const MAX_BAR_HEIGHT = 260;
+  const MIN_BAR_HEIGHT = 130; // จุดต่ำสุดที่การันตีว่าเนื้อหาในการ์ดยังโชว์ครบ ไม่จมหาย
+  const MAX_BAR_HEIGHT = 180; // เดิม 175-260 ลดลงให้มือถือเห็นแบนเนอร์ใต้ Top Fans เต็มๆ
 
   // โหลดข้อมูลอันดับ/ไอคอนค้างไว้ล่าสุดมาก่อน 1 ครั้ง แล้วใช้ร่วมกันกับทุกคนในลูปนี้
   const { lastRankMap, stickyMap } = loadRankingTrackingMaps();
