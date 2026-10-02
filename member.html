@@ -420,6 +420,11 @@
     .top-fans-avatar-stack img:first-child { margin-left: 0; }
     .top-fans-preview i.fa-chevron-right { color: #ccc; font-size: 12px; margin-left: 6px; }
 
+    /* 🏅👑 Top Fans / Top Today VIP ใช้ช่องเดียวกัน สลับกันเลื่อนขึ้นทีละอัน (แบบเดียวกับหน้า Home) */
+    .fan-ticker { height: 30px; overflow: hidden; }
+    .fan-ticker-track { will-change: transform; }
+    .fan-ticker .leaderboard-title.with-preview { height: 30px; }
+
     .post-gallery {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -740,12 +745,23 @@
       </div>
 
       <div class="leaderboard-section">
-        <div class="leaderboard-title with-preview" id="top-fans-toggle" onclick="goToTopFans()">
-          <span><i class="fas fa-trophy"></i> Top Fans</span>
-          <span id="top-fans-preview" class="top-fans-preview">
-            <span id="top-fans-avatar-stack" class="top-fans-avatar-stack"></span>
-            <i class="fas fa-chevron-right"></i>
-          </span>
+        <div class="fan-ticker">
+          <div class="fan-ticker-track" id="fan-ticker-track">
+            <div class="leaderboard-title with-preview" id="top-fans-toggle" onclick="goToTopFans()">
+              <span><i class="fas fa-trophy"></i> Top Fans</span>
+              <span id="top-fans-preview" class="top-fans-preview">
+                <span id="top-fans-avatar-stack" class="top-fans-avatar-stack"></span>
+                <i class="fas fa-chevron-right"></i>
+              </span>
+            </div>
+            <div class="leaderboard-title with-preview" onclick="goToTodayVip()">
+              <span><i class="fas fa-crown"></i> Top Today VIP</span>
+              <span class="top-fans-preview">
+                <span id="today-vip-avatar-stack" class="top-fans-avatar-stack"></span>
+                <i class="fas fa-chevron-right"></i>
+              </span>
+            </div>
+          </div>
         </div>
       </div>
       
@@ -1234,6 +1250,43 @@ function renderMemberStatsAndFans() {
       if (!memberName) return;
       window.location.href = `topfans?name=${encodeURIComponent(memberName)}`;
     }
+    function goToTodayVip() {
+      if (!memberName) return;
+      window.location.href = `topfans?name=${encodeURIComponent(memberName)}&mode=vip`;
+    }
+
+    // 👑 สแตกรูป 3 อันดับแรกของวันนี้ที่แถว Top Today VIP (รีเซ็ตทุก 00:00 เวลาไทย)
+    async function loadTodayVipPreview() {
+      const stack = document.getElementById('today-vip-avatar-stack');
+      if (!stack || !memberName) return;
+      try {
+        const fans = await blm48GetMemberFansPeriod(memberName, 'today');
+        if (!Array.isArray(fans)) return;
+        stack.innerHTML = fans.slice(0, 3).map(f =>
+          `<img src="${getImg(f.img)}" alt="${escapeHtml(f.name || f.username || '')}" onerror="this.src='https://raw.githubusercontent.com/Chatchapong-Sing/stockManagement/main/default-profile.png'">`
+        ).join('');
+      } catch (e) { console.error('Today VIP preview error:', e); }
+    }
+    loadTodayVipPreview();
+
+    // 🔄 สลับ Top Fans / Top Today VIP: เลื่อนอันบนขึ้นไป แล้วย้ายไปต่อท้าย วนไปเรื่อยๆ (เหมือนหน้า Home)
+    (function startFanTicker() {
+      const INTERVAL_MS = 4000, SLIDE_MS = 500;
+      const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      setInterval(() => {
+        const track = document.getElementById('fan-ticker-track');
+        if (!track || !track.firstElementChild || document.hidden) return;
+        const h = track.firstElementChild.offsetHeight;
+        if (reduceMotion) { track.appendChild(track.firstElementChild); return; }
+        track.style.transition = `transform ${SLIDE_MS}ms ease`;
+        track.style.transform = `translateY(-${h}px)`;
+        setTimeout(() => {
+          track.style.transition = 'none';
+          track.appendChild(track.firstElementChild);
+          track.style.transform = 'translateY(0)';
+        }, SLIDE_MS + 20);
+      }, INTERVAL_MS);
+    })();
 
     function openMoreMenu() {
       const backdrop = document.getElementById('more-menu-backdrop');
