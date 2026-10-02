@@ -168,9 +168,6 @@
         <div id="fanpost-image-preview"></div>
         <button class="btn-submit-full" onclick="submitFanPost()">โพสต์</button>
     </div>
-    <div class="fanpost-member-note" id="fanpost-member-note">
-        สมาชิกไม่สามารถสร้างโพสต์แฟนคลับได้ค่ะ แต่กดใจและดูโพสต์ได้ตามปกติน้า
-    </div>
 
     <div id="fanpost-feed">
         <div style="text-align:center; padding:40px 20px; color:var(--primary-pink);"><i class="fa-solid fa-spinner fa-spin"></i></div>
@@ -1052,8 +1049,6 @@
     if (role === 'user') {
       document.getElementById('fanpost-add-btn').style.display = 'block';
       initFanPostComposer();
-    } else if (isMemberRole) {
-      document.getElementById('fanpost-member-note').style.display = 'block';
     }
 
     const tabProfileImg = document.getElementById('tab-profile-img');
