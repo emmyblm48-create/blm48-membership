@@ -202,6 +202,13 @@
             return `member?name=${encodeURIComponent(name)}`;
         }
 
+        // การ์ด Supported Campaigns -> โพสต์ขอบคุณของ Champ เดือนนั้น (แบบเดียวกับปุ่ม View special thanks ใน champ.html)
+        function thanksLink(c) {
+            if (c.postId) return `postdetail?id=${encodeURIComponent(c.postId)}`;
+            if (c.champIndex !== undefined && c.champIndex !== null) return `specialthanks?index=${Number(c.champIndex)}`;
+            return memberLink(c.name);
+        }
+
         // "September 2026" -> "Sep 2026"
         function shortMonth(monthYear, yearMonth) {
             const d = yearMonth ? new Date(yearMonth + '-01T00:00:00') : new Date(monthYear);
@@ -242,7 +249,7 @@
                 return;
             }
             grid.innerHTML = champs.map(c => `
-                <a class="champ-card" href="${memberLink(c.name)}" style="background-image:url('${getImg(c.postImage || c.img).replace(/'/g, '%27')}')">
+                <a class="champ-card" href="${thanksLink(c)}" style="background-image:url('${getImg(c.postImage || c.img).replace(/'/g, '%27')}')">
                     <div class="cc-name">${escapeHtml(c.name)}</div>
                     <div class="cc-month">${shortMonth(c.monthYear, c.yearMonth)}</div>
                     <div class="cc-bottom">
