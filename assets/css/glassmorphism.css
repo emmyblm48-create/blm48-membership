@@ -272,3 +272,24 @@ body.glass-mesh-bg.force-white-bg {
   background: rgba(255, 133, 162, 0.35);
   border-radius: 999px;
 }
+
+/* =========================================================================
+   📰 โพสต์ในฟีด (index / member / fanpost / postdetail): ไม่มีกล่องขาวครอบทีละโพสต์
+   เต็มขอบจอ คั่นแต่ละโพสต์ด้วยแถบเทาหนาแบบแอป iAM48 - การ์ดใช้ inline style เลยต้อง !important
+   (ลบระยะ 12px ของคอนเทนเนอร์ด้วย margin ติดลบ ให้โพสต์ชนขอบจอซ้าย-ขวา)
+   ========================================================================= */
+.post-card {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  border: none !important;
+  border-bottom: 8px solid #f2f2f4 !important;
+  margin: 0 -12px !important;
+  padding: 16px 12px !important;
+}
+/* โพสต์ขอบคุณของ Champ: เลิกกรอบทองรอบกล่อง เหลือเส้นทองด้านบน + พื้นไล่สีเดิม + ป้ายมุมเดิม */
+.post-card.champ-special-post {
+  border: none !important;
+  border-top: 3px solid #d4af37 !important;
+  border-bottom: 8px solid #f2f2f4 !important;
+  box-shadow: none !important;
+}
