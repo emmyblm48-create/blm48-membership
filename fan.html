@@ -228,8 +228,8 @@
             const oshi = res.oshi || [];
             document.title = `BLM48 Membership | ${p.name}`;
 
-            // ภาพปก: ปกของเมมเบอร์ Kami-Oshi -> รูปเมมเบอร์ Kami-Oshi -> รูปเมมเบอร์ Oshi คนแรก -> พื้นเหลือง
-            const coverUrl = (kami[0] && (kami[0].cover || kami[0].img)) || (oshi[0] && oshi[0].img) || '';
+            // ภาพปก: รูปโปรไฟล์ของแฟนคลับเอง (ไม่มีรูป -> พื้นเหลือง)
+            const coverUrl = (p.img && String(p.img).trim()) ? p.img : '';
             const cover = document.getElementById('cover');
             if (coverUrl) {
                 cover.style.backgroundImage = `url("${getImg(coverUrl).replace(/"/g, '%22')}")`;
