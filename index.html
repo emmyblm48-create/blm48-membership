@@ -896,11 +896,13 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     }
 
     @media (max-width: 480px) {
+        /* 📱 มือถือ: แบ่งความกว้างจอให้เห็นพอดี 5 แท่ง = (จอ - ขอบซ้ายขวา 12px*2 - ช่องว่าง 4px*4) / 5 (จอ 390px ได้แท่งละ 70px) */
         .member-card {
-            width: 66px !important;
-            min-width: 66px !important;
-            flex: 0 0 66px !important;
-            border-radius: 33px 33px 0 0 !important; /* ครึ่งวงกลมเป๊ะๆ สำหรับแท่ง 66px */
+            --rank-bar-w: calc((100vw - 40px) / 5);
+            width: var(--rank-bar-w) !important;
+            min-width: var(--rank-bar-w) !important;
+            flex: 0 0 var(--rank-bar-w) !important;
+            border-radius: calc(var(--rank-bar-w) / 2) calc(var(--rank-bar-w) / 2) 0 0 !important; /* ครึ่งวงกลมเป๊ะๆ ตามความกว้างแท่ง */
             /* ✅ เคลียร์ระยะขอบด้านใน (Padding) ซ้าย-ขวา ที่อาจจะดันกราฟให้เบี้ยวออกไปข้างนึง */
             padding-left: 0 !important;
             padding-right: 0 !important;
@@ -912,8 +914,8 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
         .rank-2 .img-wrapper,
         .rank-3 .img-wrapper,
         .rank-other .img-wrapper { 
-            width: 58px !important; 
-            height: 58px !important; 
+            width: calc((100vw - 40px) / 5 - 8px) !important; /* รูปเล็กกว่าแท่ง 8px ขยายตามแท่ง (จอ 390px ได้ 62px) */
+            height: calc((100vw - 40px) / 5 - 8px) !important; 
             display: block !important; /* 👈 บังคับให้เป็นทรงกล่อง เพื่อให้คำสั่งดันซ้ายขวาทำงานสมบูรณ์ */
             margin-top: -13px !important; 
             margin-bottom: 6px !important; /* ระยะห่างด้านล่าง 6px */
@@ -2419,7 +2421,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
   </div>
 </div>
 
-<div class="shop-banner-slider-wrapper" style="position: relative; margin: 20px 15px; border-radius: 16px; overflow: hidden;">
+<div class="shop-banner-slider-wrapper" style="position: relative; margin: 20px -20px; border-radius: 0; overflow: hidden;"><!-- เต็มขอบจอซ้าย-ขวา (หักล้าง padding 20px ของ .main-content-container) -->
     
     <div id="autoBannerContainer" style="display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; background-color: #ffeef2; -ms-overflow-style: none; cursor: grab;">
         
