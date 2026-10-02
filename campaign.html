@@ -109,7 +109,13 @@
     const list = document.getElementById('campaign-list');
     const sort = currentSort;
     // Already Ended = เฉพาะที่จบแล้ว, ตัวเลือกอื่นแสดงเฉพาะที่ยังเปิดอยู่
-    const pool = campaigns.filter(c => sort === 'ended' ? isCampaignEnded(c) : !isCampaignEnded(c));
+    if (sort === 'ended' && !endedLoaded) {
+      list.innerHTML = `<div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i>Loading...</div>`;
+      loadEndedCampaigns();
+      return;
+    }
+    // ตัวเลือกอื่นใช้รายการ active (ซึ่งมีที่เพิ่งจบ 7 วันติดมาด้วย -> กรองออก)
+    const pool = sort === 'ended' ? endedCampaigns.slice() : campaigns.filter(c => !isCampaignEnded(c));
     if (pool.length === 0) {
       list.innerHTML = sort === 'ended'
         ? `<div class="empty-state"><i class="fa-solid fa-flag-checkered"></i>ยังไม่มี Campaign ที่จบแล้ว</div>`
@@ -127,11 +133,26 @@
     list.innerHTML = sorted.map(c => renderMemberCampaignCard(c, { full: true })).join('');
   }
 
+  // Already Ended ดึงแยกจาก RPC ที่ไม่มีลิมิต 7 วัน (โหลดครั้งแรกตอนเลือกแท็บ)
+  let endedCampaigns = [];
+  let endedLoaded = false;
+  async function loadEndedCampaigns() {
+    const res = await campaignFetchWithRetry(() => blm48GetEndedMemberCampaigns());
+    if (Array.isArray(res)) { endedLoaded = true; endedCampaigns = res; if (currentSort === 'ended') renderList(); return; }
+    if (endedLoaded || currentSort !== 'ended') return;
+    document.getElementById('campaign-list').innerHTML = `<div class="empty-state">${escapeHtml('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาลองใหม่อีกครั้ง')}<br><button type="button" onclick="loadEndedCampaigns()" style="margin-top:14px; border:none; border-radius:20px; padding:8px 20px; background:#ffd43b; font-family:inherit; font-weight:600; cursor:pointer;">ลองใหม่</button></div>`;
+  }
+
   let loaded = false;
   async function loadCampaigns() {
     const list = document.getElementById('campaign-list');
     const res = await campaignFetchWithRetry(() => blm48GetActiveMemberCampaigns());
-    if (Array.isArray(res)) { loaded = true; campaigns = res; renderList(); return; }
+    if (Array.isArray(res)) {
+      loaded = true; campaigns = res;
+      // realtime refresh -> รายการที่จบแล้วอาจเปลี่ยนด้วย
+      if (currentSort === 'ended') loadEndedCampaigns(); else { endedLoaded = false; renderList(); }
+      return;
+    }
     // รีเฟรชไม่สำเร็จชั่วคราว -> คงรายการเดิมไว้
     if (loaded) return;
     list.innerHTML = `<div class="empty-state">${escapeHtml('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาลองใหม่อีกครั้ง')}<br><button type="button" onclick="location.reload()" style="margin-top:14px; border:none; border-radius:20px; padding:8px 20px; background:#ffd43b; font-family:inherit; font-weight:600; cursor:pointer;">ลองใหม่</button></div>`;
