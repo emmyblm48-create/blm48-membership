@@ -2166,7 +2166,8 @@ document.addEventListener('click', function() {
       if (commentListEl) {
         const placeholder = commentListEl.querySelector('.no-comment-placeholder');
         if (placeholder) placeholder.remove();
-        commentListEl.insertAdjacentHTML('beforeend', buildSingleCommentHtml({
+        // กันคอมเมนต์ซ้ำ: ถ้า Realtime วาดคอมเมนต์นี้ขึ้นจอไปก่อนแล้ว (ระหว่างรอ server ตอบ) ไม่ต้องแทรกซ้ำ
+        if (!commentAlreadyOnScreen(result.commentId)) commentListEl.insertAdjacentHTML('beforeend', buildSingleCommentHtml({
           commentId: result.commentId,
           username: currentUser.username,
           name: currentUser.name || currentUser.username || 'Anonymous',
@@ -2350,7 +2351,8 @@ document.addEventListener('click', function() {
 
       const repliesEl = document.getElementById(`replies-${parentCommentId}`);
       if (repliesEl) {
-        repliesEl.insertAdjacentHTML('beforeend', buildSingleCommentHtml({
+        // กันคอมเมนต์ซ้ำ: ถ้า Realtime วาดคอมเมนต์นี้ขึ้นจอไปก่อนแล้ว (ระหว่างรอ server ตอบ) ไม่ต้องแทรกซ้ำ
+        if (!commentAlreadyOnScreen(result.commentId)) repliesEl.insertAdjacentHTML('beforeend', buildSingleCommentHtml({
           commentId: result.commentId,
           username: currentUser.username,
           name: currentUser.name || currentUser.username || 'Anonymous',

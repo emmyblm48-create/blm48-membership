@@ -830,7 +830,10 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
       text-align: center;
     }
     .member-card .cookie-text {
-      font-size: 10px; /* ไอคอนขึ้น/ลง/เท่าเดิมอยู่ในนี้ เลยเล็กลงตามไปด้วย */
+      font-size: 11px; /* ไอคอนขึ้น/ลง/เท่าเดิมอยู่ในนี้ เลยเล็กลงตามไปด้วย */
+      font-weight: 700;
+      /* Quicksand หนาสุดได้แค่ 700 ซึ่งดูยังบาง เลยเติมเส้นขอบตัวอักษรบางๆ ให้ตัวเลขดูหนาขึ้น (ยังเป็นฟอนต์ Quicksand เหมือนเดิม) */
+      -webkit-text-stroke: 0.35px currentColor;
     }
     .member-card .rank-badge {
       width: 15px;
@@ -5052,7 +5055,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (commentListEl) {
         const placeholder = commentListEl.querySelector('.no-comment-placeholder');
         if (placeholder) placeholder.remove();
-        commentListEl.insertAdjacentHTML('beforeend', buildSingleCommentHtml({
+        // กันคอมเมนต์ซ้ำ: ถ้า Realtime วาดคอมเมนต์นี้ขึ้นจอไปก่อนแล้ว (ระหว่างรอ server ตอบ) ไม่ต้องแทรกซ้ำ
+        if (!commentAlreadyOnScreen(result.commentId)) commentListEl.insertAdjacentHTML('beforeend', buildSingleCommentHtml({
           commentId: result.commentId,
           username: currentUser.username,
           name: currentUser.name || currentUser.username || 'Anonymous',
@@ -5245,7 +5249,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const repliesEl = document.getElementById(`replies-${parentCommentId}`);
       if (repliesEl) {
-        repliesEl.insertAdjacentHTML('beforeend', buildSingleCommentHtml({
+        // กันคอมเมนต์ซ้ำ: ถ้า Realtime วาดคอมเมนต์นี้ขึ้นจอไปก่อนแล้ว (ระหว่างรอ server ตอบ) ไม่ต้องแทรกซ้ำ
+        if (!commentAlreadyOnScreen(result.commentId)) repliesEl.insertAdjacentHTML('beforeend', buildSingleCommentHtml({
           commentId: result.commentId,
           username: currentUser.username,
           name: currentUser.name || currentUser.username || 'Anonymous',
