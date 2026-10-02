@@ -791,13 +791,13 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
         /* สไตล์หลักของแท่งกราฟ */
     .member-card { 
       box-sizing: border-box; 
-      width: 85px; 
-      min-width: 85px; 
-      flex: 0 0 85px; 
+      width: 70px; 
+      min-width: 70px; 
+      flex: 0 0 70px; 
       text-align: center; 
       background: #fffcf0; 
       padding: 0 2px 12px 2px; 
-      border-radius: 42.5px 42.5px 0 0; /* ครึ่งวงกลมเป๊ะๆ */
+      border-radius: 35px 35px 0 0; /* ครึ่งวงกลมเป๊ะๆ */
       box-shadow: 0 -2px 8px rgba(0,0,0,0.02); 
       transition: 0.3s ease; 
       display: flex; 
@@ -807,8 +807,26 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
       position: relative;
     }
 
-    .member-card:hover { 
-      transform: translateY(-4px); 
+    .member-card:hover {
+      transform: translateY(-4px);
+    }
+
+    /* แท่งแคบลง (85->70px): ย่อชื่อ คะแนน ไอคอนขึ้น/ลง/เท่าเดิม และป้ายอันดับให้เล็กลงตามสัดส่วน (~82%) */
+    .member-card .name-text {
+      width: 100%;
+      font-size: 10px;
+      padding: 0 2px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    .member-card .cookie-text {
+      font-size: 10px; /* ไอคอนขึ้น/ลง/เท่าเดิมอยู่ในนี้ เลยเล็กลงตามไปด้วย */
+    }
+    .member-card .rank-badge {
+      width: 15px;
+      height: 15px;
+      font-size: 7px;
+      border-width: 1.5px;
     }
 
     /* ความสูงของแท่งกราฟ: กำหนดผ่าน inline style ตามสัดส่วนคะแนนจริงของแต่ละคน (ดู applyRankingBarHeight ใน JS) */
@@ -860,20 +878,20 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     .rank-1 .img-wrapper,
     .rank-2 .img-wrapper,
     .rank-3 .img-wrapper { 
-        width: 78px !important; 
-        height: 78px !important; 
+        width: 64px !important; 
+        height: 64px !important; 
     }
     .rank-other .img-wrapper {  
-        width: 74px !important; 
-        height: 74px !important;
+        width: 60px !important; 
+        height: 60px !important;
     }
 
     @media (max-width: 480px) {
         .member-card {
-            width: 80px !important;
-            min-width: 80px !important;
-            flex: 0 0 80px !important;
-            border-radius: 40px 40px 0 0 !important; /* ครึ่งวงกลมเป๊ะๆ สำหรับแท่ง 80px */
+            width: 66px !important;
+            min-width: 66px !important;
+            flex: 0 0 66px !important;
+            border-radius: 33px 33px 0 0 !important; /* ครึ่งวงกลมเป๊ะๆ สำหรับแท่ง 66px */
             /* ✅ เคลียร์ระยะขอบด้านใน (Padding) ซ้าย-ขวา ที่อาจจะดันกราฟให้เบี้ยวออกไปข้างนึง */
             padding-left: 0 !important;
             padding-right: 0 !important;
@@ -885,10 +903,10 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
         .rank-2 .img-wrapper,
         .rank-3 .img-wrapper,
         .rank-other .img-wrapper { 
-            width: 70px !important; 
-            height: 70px !important; 
+            width: 58px !important; 
+            height: 58px !important; 
             display: block !important; /* 👈 บังคับให้เป็นทรงกล่อง เพื่อให้คำสั่งดันซ้ายขวาทำงานสมบูรณ์ */
-            margin-top: -16px !important; 
+            margin-top: -13px !important; 
             margin-bottom: 6px !important; /* ระยะห่างด้านล่าง 6px */
             margin-left: auto !important; /* 👈 ดันจากขอบซ้าย */
             margin-right: auto !important; /* 👈 ดันจากขอบขวา (ทำให้ตรงกลางเป๊ะ) */
@@ -920,7 +938,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
         background: #f8f8f8; 
         color: #999; 
         border: 1.5px solid #fff;
-        font-size: 8px;
+        font-size: 7px; /* ย่อตามแท่งที่แคบลง (เดิม 8px) */
         font-weight: 600;
     }
     .name-text { 
@@ -3386,9 +3404,9 @@ function renderRanking(data) {
         <img src="${getImg(m.profile_img)}" loading="lazy">
         <div class="rank-badge">${badgeContent}</div>
       </div>
-      <div class="name-text" style="margin-bottom: 10px;">${escapeHtml(m.name)}</div>
+      <div class="name-text" style="margin-bottom: 8px;">${escapeHtml(m.name)}</div>
 
-      <div class="cookie-text" style="margin-bottom: 15px;">
+      <div class="cookie-text" style="margin-bottom: 12px;">
         <i class="fas ${rankChange.icon}" style="color: ${rankChange.color};"></i>
         ${Number(m.monthly_cookies || 0).toLocaleString()}
       </div>
