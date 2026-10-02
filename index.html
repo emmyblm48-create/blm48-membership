@@ -517,7 +517,7 @@ body {
     padding: 10px 16px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     backdrop-filter: blur(5px);
-    margin: 10px;
+    margin: 10px 0; /* ชิดขอบซ้าย-ขวาเท่าส่วนอื่นของหน้า Home */
 }
 .public-member-widget .widget-icon {
     font-size: 20px;
@@ -596,12 +596,12 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
    /* 1. สไตล์หลัก (ใช้สำหรับ Desktop/Tablet) */
 .section-title { 
   font-family: 'Quicksand', 'Kanit', sans-serif; font-weight: 600; color: #444; 
-  margin: 30px 0 15px 20px; font-size: 18px; 
+  margin: 30px 0 15px 0; font-size: 18px; 
   border-left: 5px solid var(--primary-pink); padding-left: 12px; 
 }
     
 /* 🏅👑 ช่อง Top Fans / Top Today VIP สลับกันแบบเลื่อนขึ้น (แถบชมพูด้านซ้ายอยู่กับที่ เลื่อนแค่เนื้อหา) */
-.fan-ticker { height: 32px; overflow: hidden; padding-right: 15px; user-select: none; }
+.fan-ticker { height: 32px; overflow: hidden; padding-right: 0; user-select: none; }
 .fan-ticker-track { will-change: transform; }
 .fan-ticker-item { height: 32px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
 
@@ -615,15 +615,15 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
       background: transparent !important; 
 
       /* 🚀 2. ดึงกล่องให้กว้างทะลุขอบจอ ชนขอบโทรศัพท์พอดีเป๊ะ */
-      margin-left: -20px;
-      margin-right: -20px;
+      margin-left: -12px;
+      margin-right: -12px;
       border-radius: 0;
 
       /* ❌ 3. เอาลายน้ำรูปเครื่องหมายบวก (SVG) อันเก่าออกให้แล้วครับ */
       background-image: none !important; 
 
       /* 🎀 4. ดันเนื้อหารายชื่อ ranking ขยับเข้ามา ไม่ให้ไปเบียดชิดขอบจอ */
-      padding: 15px 20px;
+      padding: 15px 0; /* ซ้าย-ขวาให้ลิสต์ข้างในเว้นเอง 12px แล้วเลื่อนทะลุขอบจอได้ */
       overflow: hidden;
 
       /* 🙅‍♂️ เอาเงาและเส้นขอบออกทั้งหมด เพื่อให้เนียนล่องหนไปกับพื้นหลังหลัก */
@@ -685,7 +685,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
       margin: 0 auto;
       -webkit-overflow-scrolling: touch; 
       gap: 6px; 
-      padding: 0px 15px 0 15px; 
+      padding: 0px 12px 0 12px; 
       cursor: grab; 
       user-select: none; 
       min-height: auto !important;
@@ -695,7 +695,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     
     /* 2. บังคับความสูง 270px และให้ชิดขอบล่าง "เฉพาะกล่องแท่งกราฟ Ranking" เท่านั้น */
     #ranking-list.horizontal-list {
-      min-height: 190px !important; /* เตี้ยลงให้มือถือเห็นแบนเนอร์ด้านล่างเต็มๆ (เดิม 270px) */
+      min-height: 210px !important; /* เตี้ยกว่าเดิม (270px) ให้มือถือเห็นแบนเนอร์ด้านล่าง */
       align-items: flex-end !important; 
       /* แท่งเต็มความกว้างจอแบบรูปอ้างอิง: เริ่มห่างขอบซ้าย 12px เลื่อนทะลุขอบขวา มือถือเห็น 5 แท่ง + แท่งที่ 6 โผล่นิดๆ */
       gap: 4px;
@@ -712,7 +712,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     #campaign-scroller.horizontal-list,
     #mv-scroller.horizontal-list {
       align-items: flex-start !important;
-      padding: 10px 15px 5px 15px !important;
+      padding: 10px 12px 5px 12px !important;
     }
 
     /* ซ่อนแถบเลื่อน (Scrollbar) ทุกเบราว์เซอร์ */
@@ -839,7 +839,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     }
 
     /* ความสูงของแท่งกราฟ: กำหนดผ่าน inline style ตามสัดส่วนคะแนนจริงของแต่ละคน (ดู applyRankingBarHeight ใน JS) */
-    .member-card { min-height: 130px; }
+    .member-card { min-height: 145px; }
 
     .rank-1, .rank-2, .rank-3, .rank-other {
         background: rgba(254, 228, 121, 0.4) !important;
@@ -2267,7 +2267,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
       width: 100%;                  /* บังคับความกว้างเต็มจอ 100% */
       min-height: 100vh;            /* สูงอย่างน้อยเต็มหน้าจอ (ถ้าเนื้อหายาวก็เลื่อนลงได้เรื่อยๆ) */
       box-sizing: border-box;       /* ป้องกันไม่ให้ padding ดันจนหน้าจอเกินขอบขวา */
-      padding: 20px 20px 25px 20px;
+      padding: 20px 12px 25px 12px; /* ชิดขอบซ้าย-ขวาเหลือ 12px ทั้งหน้า (เดิม 20px) - ป้าย Champ ด้านบนอยู่นอกกล่องนี้ ไม่โดนผล */
       border: none;
       box-shadow: none;
       }
@@ -2421,7 +2421,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
   </div>
 </div>
 
-<div class="shop-banner-slider-wrapper" style="position: relative; margin: 20px -20px; border-radius: 0; overflow: hidden;"><!-- เต็มขอบจอซ้าย-ขวา (หักล้าง padding 20px ของ .main-content-container) -->
+<div class="shop-banner-slider-wrapper" style="position: relative; margin: 20px -12px; border-radius: 0; overflow: hidden;"><!-- เต็มขอบจอซ้าย-ขวา (หักล้าง padding 12px ของ .main-content-container) -->
     
     <div id="autoBannerContainer" style="display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; background-color: #ffeef2; -ms-overflow-style: none; cursor: grab;">
         
@@ -2456,7 +2456,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
         </div>
     </div>
   
-<div class="section-title" onclick="window.location.href='campaign'" style="cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding-right: 15px; user-select: none;">
+<div class="section-title" onclick="window.location.href='campaign'" style="cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding-right: 0; user-select: none;">
   <span>Campaign</span>
   <span style="font-size: 13px; font-weight: 500; color: #555;">View All <i class="fas fa-chevron-right" style="font-size: 12px; margin-left: 4px;"></i></span>
 </div>
@@ -3383,8 +3383,8 @@ function renderRanking(data) {
   // 📊 ความสูงของแท่งกราฟอิงตามสัดส่วนคะแนนจริง (คนคะแนนเยอะแท่งสูง คนคะแนนน้อยแท่งเตี้ย)
   // 🛡️ ใช้ min-height แทน height ตรงๆ เพื่อกันไม่ให้ชื่อ/เนื้อหาโดนตัด จม หรือหายไปเวลาคะแนนต่างกันเยอะๆ
   const maxCookies = Math.max(...activeMembers.map(m => Number(m.monthly_cookies) || 0), 1);
-  const MIN_BAR_HEIGHT = 130; // จุดต่ำสุดที่การันตีว่าเนื้อหาในการ์ดยังโชว์ครบ ไม่จมหาย
-  const MAX_BAR_HEIGHT = 180; // เดิม 175-260 ลดลงให้มือถือเห็นแบนเนอร์ใต้ Top Fans เต็มๆ
+  const MIN_BAR_HEIGHT = 145; // จุดต่ำสุดที่การันตีว่าเนื้อหาในการ์ดยังโชว์ครบ ไม่จมหาย
+  const MAX_BAR_HEIGHT = 200; // เดิม 175-260 ลดลงให้มือถือเห็นแบนเนอร์ใต้ Top Fans
 
   // โหลดข้อมูลอันดับ/ไอคอนค้างไว้ล่าสุดมาก่อน 1 ครั้ง แล้วใช้ร่วมกันกับทุกคนในลูปนี้
   const { lastRankMap, stickyMap } = loadRankingTrackingMaps();
