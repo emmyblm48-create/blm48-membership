@@ -381,6 +381,27 @@ function buildPostImagesHtml(displayImage) {
 }
 
 // =========================================================================
+// 🕒 เวลาของคอมเมนต์แบบ "7 minutes ago" / "Last week" / "2 months ago" (ใต้ฟองคอมเมนต์ทุกหน้า)
+// =========================================================================
+function commentTimeAgo(ts) {
+  const t = typeof ts === 'number' ? ts : Date.parse(ts);
+  if (!t || isNaN(t)) return '';
+  const sec = Math.round((Date.now() - t) / 1000);
+  if (sec < 60) return 'Just now';
+  const units = [['year', 31536000], ['month', 2592000], ['week', 604800], ['day', 86400], ['hour', 3600], ['minute', 60]];
+  const rtf = (typeof Intl !== 'undefined' && Intl.RelativeTimeFormat) ? new Intl.RelativeTimeFormat('en', { numeric: 'auto' }) : null;
+  for (const [unit, size] of units) {
+    if (sec >= size) {
+      const n = Math.floor(sec / size);
+      if (!rtf) return `${n} ${unit}${n > 1 ? 's' : ''} ago`;
+      const txt = rtf.format(-n, unit); // "last week", "2 months ago", "yesterday"
+      return txt.charAt(0).toUpperCase() + txt.slice(1);
+    }
+  }
+  return 'Just now';
+}
+
+// =========================================================================
 // 👤 กดรูป/ชื่อแล้วเปิดโปรไฟล์: ใส่ data-fan="username" (แฟนคลับ -> fan.html, บัญชีเมมเบอร์ fan.html จะพาไปหน้า member ให้เอง)
 // หรือ data-member="ชื่อเมมเบอร์" (-> member.html) ไว้ที่ element ไหนก็ได้ ตัวดักคลิกด้านล่างจัดการให้
 // ทำงานช่วง capture + หยุด event ไม่ให้ไปเปิดการ์ด/โพสต์ที่ครอบอยู่ซ้อนกัน
