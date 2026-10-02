@@ -90,15 +90,6 @@
             margin: 0 0 4px;
             word-break: break-word;
         }
-        .oshi-line {
-            font-size: 15px;
-            font-weight: 500;
-            opacity: 0.95;
-            line-height: 1.5;
-        }
-        .oshi-line a { color: #fff; text-decoration: none; }
-        .oshi-line .kami-name { font-weight: 700; }
-        .oshi-line .kami-name i { color: #ffc107; font-size: 12px; margin-right: 3px; }
         .oshi-count { font-size: 15px; margin-top: 2px; }
         .oshi-count b { font-size: 20px; margin-right: 4px; }
 
@@ -224,8 +215,6 @@
 
         function renderProfile(res) {
             const p = res.profile;
-            const kami = res.kami || [];
-            const oshi = res.oshi || [];
             document.title = `BLM48 Membership | ${p.name}`;
 
             // ภาพปก: รูปโปรไฟล์ของแฟนคลับเอง (ไม่มีรูป -> พื้นเหลือง)
@@ -236,16 +225,12 @@
                 cover.classList.remove('no-image');
             }
 
-            const names = [
-                ...kami.map(m => `<a class="kami-name" href="${memberLink(m.name)}"><i class="fas fa-crown"></i>${escapeHtml(m.name)}</a>`),
-                ...oshi.map(m => `<a href="${memberLink(m.name)}">${escapeHtml(m.name)}</a>`)
-            ];
-            const total = kami.length + oshi.length;
+            // ไม่บอกว่าเป็น Kami-Oshi/Oshi ของใคร (ตามคำขอ) - โชว์แค่จำนวนเมมเบอร์ที่ Oshi
+            const total = Number(res.oshiCount || 0);
 
             document.getElementById('identity').innerHTML = `
                 <img class="fan-avatar" src="${getImg(p.img)}" alt="${escapeHtml(p.name)}" onerror="this.src='${DEFAULT_AVATAR}'">
                 <h1 class="fan-name">${escapeHtml(p.name)}</h1>
-                ${names.length ? `<div class="oshi-line">${names.join(', ')}</div>` : ''}
                 <div class="oshi-count"><b>${total}</b>Oshi Members</div>
             `;
 
