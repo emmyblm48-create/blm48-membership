@@ -30,10 +30,8 @@ function renderCampaignTierList(total) {
   .mc-card { flex: 0 0 280px; width: 280px; background: #fff; border: 1px solid #ececec; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; text-decoration: none; color: #222; margin-bottom: 10px; transition: transform .2s ease; box-sizing: border-box; }
   .mc-card:active { transform: scale(0.98); }
   .mc-card.mc-full { flex: none; width: 100%; }
-  .mc-cover { position: relative; width: 100%; aspect-ratio: 2048 / 1427; overflow: hidden; background: linear-gradient(135deg, #ffeef2, #e7f1ff); }
-  .mc-cover img { width: 100%; height: 100%; object-fit: cover; object-position: center 20%; display: block; pointer-events: none; -webkit-touch-callout: none; user-select: none; }
-  .mc-cover-tag { position: absolute; left: 10px; top: 10px; background: rgba(255,255,255,.92); color: #ff6b8b; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
-  .mc-cover-bday { position: absolute; right: 10px; top: 10px; background: #fff4d6; color: #d9480f; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+  .mc-cover { position: relative; width: 100%; aspect-ratio: 1320 / 662; overflow: hidden; background: linear-gradient(135deg, #ffeef2, #e7f1ff); }
+  .mc-cover img { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; pointer-events: none; -webkit-touch-callout: none; user-select: none; }
   .mc-body { padding: 12px 14px 14px; display: flex; flex-direction: column; }
   .mc-title { font-size: 15px; font-weight: 600; line-height: 1.4; color: #222; min-height: 42px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .mc-stats { display: flex; border-top: 1px solid #e5e5e5; border-bottom: 1px solid #e5e5e5; margin: 10px 0 12px; padding: 8px 0; }
@@ -137,8 +135,6 @@ function renderMemberCampaignCard(c, opts) {
     <a class="mc-card ${opts.full ? 'mc-full' : ''}" href="${href}">
       <div class="mc-cover">
         <img src="${escapeAttr(c.coverImage || 'assets/images/default-profile.png')}" alt="" loading="lazy" draggable="false" oncontextmenu="return false">
-        <span class="mc-cover-tag"><i class="fa-solid fa-trophy"></i> Champ Campaign</span>
-        ${c.isBirthMonth ? '<span class="mc-cover-bday"><i class="fa-solid fa-cake-candles"></i> Birthday Month</span>' : ''}
         ${renderCampaignStamp(c)}
       </div>
       <div class="mc-body">
