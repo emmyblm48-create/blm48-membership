@@ -353,15 +353,21 @@
       border: 3px solid var(--search-group-color, var(--blmem-pink));
       background: #fdfdfd;
     }
+    /* ป้ายสีเดียวกับ .kami-days-badge ในหน้า member.html */
     .my-kami-days {
       margin-top: -14px;
       position: relative;
-      background: var(--blmem-pink);
-      color: #fff;
-      font-size: 13px;
-      font-weight: 600;
-      padding: 3px 16px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: linear-gradient(135deg, #ffe08a, #ffc107);
+      color: #6b4a00;
+      font-size: 11px;
+      font-weight: bold;
+      padding: 4px 14px;
       border-radius: 20px;
+      letter-spacing: 0.3px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.08);
       white-space: nowrap;
     }
     .my-kami-name {
@@ -572,7 +578,7 @@
       card.href = `member?name=${encodeURIComponent(m.name)}`;
       card.innerHTML = `
         <img src="${getImg(imgUrl)}" class="my-kami-avatar" onerror="this.onerror=null; this.src='${fallbackAvatarURL}';" alt="${escapeHtml(m.name)}">
-        <span class="my-kami-days">Kami-Oshi ${Number(myKami.days) || 1} Days</span>
+        <span class="my-kami-days"><i class="fas fa-crown"></i> Kami-Oshi ${Number(myKami.days) || 1} Days</span>
         <div class="my-kami-name">${escapeHtml(m.name)}</div>
         ${fullNameText ? `<div class="my-kami-fullname">${escapeHtml(fullNameText)}</div>` : ''}
       `;

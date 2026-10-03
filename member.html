@@ -33,7 +33,7 @@
       object-fit: cover;
       object-position: center;
       flex-shrink: 0;
-      border: 3px solid #ffccd7;
+      border: 3px solid #ffc107; /* กรอบเหลือง BLM48 (เดิมชมพู #ffccd7) */
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
 
@@ -201,7 +201,7 @@
     }
     .member-sub {
       font-size: 13px;
-      color: var(--blmem-pink);
+      color: #222;
       font-weight: 500;
       letter-spacing: 1.5px;
       margin-top: 4px;
@@ -236,9 +236,14 @@
       font-weight: bold;
       padding: 4px 14px;
       border-radius: 20px;
-      margin-top: 8px;
       letter-spacing: 0.3px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+      /* 📍 คาบทับขอบล่างของรูปโปรไฟล์วงกลม (ตำแหน่งเดียวกับหน้า Search) */
+      width: fit-content;
+      margin: -14px auto 0;
+      position: relative;
+      z-index: 4;
+      white-space: nowrap;
     }
 
 
@@ -697,13 +702,13 @@
       <img id="mb-avatar-circle" src="assets/images/default-profile.png" class="member-profile-img">
       <div id="avatar-grad-icon" class="grad-profile-badge" style="display: none;"><i class="fas fa-graduation-cap"></i></div>
     </div>
+    <div id="mb-kami-days-badge" class="kami-days-badge"><i class="fas fa-crown"></i> Kami-Oshi <span id="mb-kami-days-num">1</span> Days</div>
 
     <div class="member-header-block">
       <div id="mb-name" class="member-name">กำลังโหลด...</div>
       <!-- 🎓 ป้ายกำกับสีเทา GRADUATED ใต้ชื่อ -->
       <div id="mb-grad-badge" class="graduated-badge"><i class="fas fa-graduation-cap"></i> Graduated</div>
-      <div id="mb-sub" class="member-sub">BLM48 MEMBER</div>
-      <div id="mb-kami-days-badge" class="kami-days-badge"><i class="fas fa-crown"></i> Kami-Oshi <span id="mb-kami-days-num">1</span> Days</div>
+      <div id="mb-sub" class="member-sub">BLM48</div>
     </div>
 
      <div class="stats-bar">
