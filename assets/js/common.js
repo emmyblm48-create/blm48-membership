@@ -1102,3 +1102,19 @@ function blm48UnlockBodyScroll() {
   if (__blm48ScrollLockCount === 0) document.body.style.overflow = '';
 }
 document.addEventListener("DOMContentLoaded", applyGroupTheme);
+
+// =========================================================================
+// 🌟 Special Fans Day: ไทม์ไลน์ 7 วัน (Today + อีก 6 วันถัดไป ตามเวลาไทย)
+// ใช้ร่วมกัน index.html (หัวข้อเหนือ Member Ranking) และ specialfansday.html - สไตล์ .sfd-* อยู่ใน glassmorphism.css
+// =========================================================================
+function buildSpecialFansDaysHtml() {
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Bangkok' }));
+  let html = '';
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
+    const label = i === 0 ? 'Today' : `${d.getDate()} ${MONTHS[d.getMonth()]}`;
+    html += `<div class="sfd-day${i === 0 ? ' today' : ''}"><div class="sfd-circle">${i + 1}</div><span class="sfd-label">${label}</span></div>`;
+  }
+  return `<div class="sfd-days">${html}</div>`;
+}

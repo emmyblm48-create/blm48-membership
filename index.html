@@ -2347,12 +2347,13 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
 </div>
   
 <div class="main-content-container">
-<div class="monthly-tracker-container">
-  <div class="tracker-header">
-    <div class="countdown-subtitle" id="countdown-month-text">Loading...</div>
-  </div>
-  
-  <div id="weekly-tracker-grid" class="tracker-grid"></div>
+<!-- 🌟 Special Fans Day: หัวข้อ + ไทม์ไลน์ 7 วัน เหนือ Member Ranking -> กดแล้วไปหน้าอันดับแนวตั้ง specialfansday.html -->
+<div class="section-title" onclick="window.location.href='specialfansday'" style="cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding-right: 0; user-select: none;">
+  <span>Special Fans Day</span>
+  <span style="font-size: 13px; font-weight: 500; color: #555;">View All <i class="fas fa-chevron-right" style="font-size: 12px; margin-left: 4px;"></i></span>
+</div>
+<div class="monthly-tracker-container" style="max-width: none; margin-top: 0;">
+  <div id="weekly-tracker-grid" class="tracker-grid" onclick="window.location.href='specialfansday'" style="cursor: pointer;"></div>
 
   <div class="countdown-timer-box" id="finale-countdown" style="display: none;">
     <div class="time-segment">
@@ -3619,42 +3620,8 @@ function renderTracker() {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   
-  const currentWeekNumber = Math.ceil(today / 7);
-  const startDay = ((currentWeekNumber - 1) * 7) + 1;
-  const endDay = Math.min(startDay + 6, daysInMonth);
-
-  document.getElementById('countdown-month-text').innerText = `${monthNames[month]} - Week ${currentWeekNumber}`;
-
-  let daysHtml = '';
-  const shortMonthName = monthNames[month].substring(0, 3);
-
-  for (let day = startDay; day <= endDay; day++) {
-    let statusClass = 'future';
-    let content = day;
-
-    if (day < today) {
-      statusClass = 'checked';
-      content = '<i class="fas fa-check"></i>';
-    } else if (day === today) {
-      statusClass = 'current';
-      content = '<i class="fas fa-cookie-bite"></i>';
-    }
-
-    daysHtml += `
-      <div class="day-item">
-        <div class="day-circle ${statusClass}">${content}</div>
-        <span class="day-date">${day} ${shortMonthName}</span>
-      </div>
-    `;
-  }
-
-  container.innerHTML = `
-    <div class="week-block">
-      <div class="days-row">
-        ${daysHtml}
-      </div>
-    </div>
-  `;
+  // 🌟 Special Fans Day: Today + อีก 6 วัน (buildSpecialFansDaysHtml อยู่ใน common.js ใช้ร่วมกับ specialfansday.html)
+  container.innerHTML = buildSpecialFansDaysHtml();
 
   const countdownBox = document.getElementById('finale-countdown');
   if (today === daysInMonth) {
