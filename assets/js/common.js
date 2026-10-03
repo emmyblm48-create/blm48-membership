@@ -1104,17 +1104,39 @@ function blm48UnlockBodyScroll() {
 document.addEventListener("DOMContentLoaded", applyGroupTheme);
 
 // =========================================================================
-// 🌟 Special Fans Day: ไทม์ไลน์ 7 วัน (Today + อีก 6 วันถัดไป ตามเวลาไทย)
-// ใช้ร่วมกัน index.html (หัวข้อเหนือ Member Ranking) และ specialfansday.html - สไตล์ .sfd-* อยู่ใน glassmorphism.css
+// 🌟 Special Fans Day: นับวันของเดือน (Countdown เดือน) - โชว์สัปดาห์ปัจจุบันของเดือน
+// วันที่ผ่านแล้ว = ✓, วันนี้ = 🍪, วันที่ยังไม่ถึง = เลขวันที่ (เวลาไทย)
+// ใช้ร่วมกัน index.html (เหนือ Member Ranking) และ specialfansday.html - สไตล์อยู่ใน glassmorphism.css
 // =========================================================================
 function buildSpecialFansDaysHtml() {
   const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Bangkok' }));
-  let html = '';
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
-    const label = i === 0 ? 'Today' : `${d.getDate()} ${MONTHS[d.getMonth()]}`;
-    html += `<div class="sfd-day${i === 0 ? ' today' : ''}"><div class="sfd-circle">${i + 1}</div><span class="sfd-label">${label}</span></div>`;
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const today = now.getDate();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const currentWeekNumber = Math.ceil(today / 7);
+  const startDay = ((currentWeekNumber - 1) * 7) + 1;
+  const endDay = Math.min(startDay + 6, daysInMonth);
+
+  let daysHtml = '';
+  for (let day = startDay; day <= endDay; day++) {
+    let statusClass = 'future';
+    let content = day;
+    if (day < today) {
+      statusClass = 'checked';
+      content = '<i class="fas fa-check"></i>';
+    } else if (day === today) {
+      statusClass = 'current';
+      content = '<i class="fas fa-cookie-bite"></i>';
+    }
+    daysHtml += `
+      <div class="day-item">
+        <div class="day-circle ${statusClass}">${content}</div>
+        <span class="day-date">${day} ${MONTHS[month]}</span>
+      </div>
+    `;
   }
-  return `<div class="sfd-days">${html}</div>`;
+  return `<div class="week-block"><div class="days-row">${daysHtml}</div></div>`;
 }
