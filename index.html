@@ -2755,16 +2755,21 @@ function applyThemeAndToggleSplash(themeData, toggleKey) {
   if (!themeData || !themeData.champ) return;
   
   const champ = themeData.champ;
-  const birthdaySplash = themeData.birthdaySplash; 
-  const birthdayBanner = themeData.birthdayBanner; 
-  
+  // 🎂 เมมเบอร์ทุกคนที่อยู่ในช่วงวันเกิด (ก่อนวันเกิด 1 วัน -> หมดวันเกิด) เรียงตามไทม์ไลน์จากหลังบ้าน
+  // แคชเก่าอาจยังเป็นแบบคนเดียว (birthdaySplash / birthdayBanner) ก็แปลงให้เป็นลิสต์เหมือนกัน
+  const birthdays = Array.isArray(themeData.birthdays)
+    ? themeData.birthdays
+    : ((themeData.birthdaySplash || themeData.birthdayBanner)
+        ? [{ name: '', splash: themeData.birthdaySplash, banner: themeData.birthdayBanner }]
+        : []);
+
   const mainSplash = document.getElementById('main-splash');
   const splashScreen = document.getElementById('splash-screen');
-  
-  // 🔁 วนโชว์ Splash ทีละอันต่อการเปิดแอป: Champ -> วันเกิด
+
+  // 🔁 วนโชว์ Splash ทีละอันต่อการเปิดแอป: Champ -> วันเกิดคนที่ 1 -> วันเกิดคนที่ 2 -> ...
   const splashCandidates = [];
   if (champ.splash) splashCandidates.push({ type: 'champ', src: champ.splash });
-  if (birthdaySplash) splashCandidates.push({ type: 'birthday', src: birthdaySplash });
+  birthdays.forEach(b => { if (b.splash) splashCandidates.push({ type: 'birthday', src: b.splash }); });
 
   let chosen = null;
   if (splashCandidates.length > 0) {
@@ -2790,21 +2795,22 @@ function applyThemeAndToggleSplash(themeData, toggleKey) {
   }
 
   // 🎂 📌 ส่วน HBD Banner
-  if (birthdayBanner && birthdayBanner !== "") {
+  const birthdayBanners = birthdays.filter(b => b.banner && b.banner !== "");
+  if (birthdayBanners.length > 0) {
     const bannerContainer = document.getElementById("autoBannerContainer");
-    
-    if (bannerContainer && !document.getElementById("hbd-banner-img")) {
-        const hbdBannerHTML = `
-            <a href="#" class="auto-banner-item" style="flex: 0 0 100%; min-width: 100%; scroll-snap-align: start; text-decoration: none; display: block;">
-                <img id="hbd-banner-img" src="${birthdayBanner}" alt="Happy Birthday Banner" style="width: 100%; height: auto; display: block; object-fit: cover;">
+
+    if (bannerContainer && !bannerContainer.querySelector(".hbd-banner-item")) {
+        // แทรกทุกคนไว้หน้าสุด เรียงตามไทม์ไลน์ (วันเกิดวันนี้ก่อน แล้วค่อยพรุ่งนี้)
+        const hbdBannerHTML = birthdayBanners.map(b => `
+            <a href="#" class="auto-banner-item hbd-banner-item" style="flex: 0 0 100%; min-width: 100%; scroll-snap-align: start; text-decoration: none; display: block;">
+                <img src="${b.banner}" alt="Happy Birthday ${b.name || ''}" style="width: 100%; height: auto; display: block; object-fit: cover;">
             </a>
-        `;
-        
+        `).join('');
+
         bannerContainer.insertAdjacentHTML('afterbegin', hbdBannerHTML);
-        
-        // 🚀 เรียกใช้ระบบสไลด์ตัวใหม่ หลังจากแทรกรูปวันเกิดเสร็จ!
-        initBannerFeatures();
     }
+    // 🚀 เรียกใช้ระบบสไลด์ตัวใหม่ หลังจากแทรกรูปวันเกิดเสร็จ!
+    initBannerFeatures();
   } else {
     // 🚀 กรณีไม่มีวันเกิด ก็เรียกใช้ระบบสไลด์ตัวใหม่เพื่อนับ 3 รูปปกติ
     initBannerFeatures();
