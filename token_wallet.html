@@ -52,6 +52,7 @@
         }
         .token-logo.logo-token { background: #fff1c9; color: #f59f00; }
         .token-logo.logo-getoken { background: #dcefff; color: #339af0; }
+        .token-logo.logo-cookie { background: #fbe7d6; color: #d2691e; }
         .token-label { flex: 1; min-width: 0; font-size: 18px; font-weight: 700; color: #222; }
         .token-amount { font-size: 18px; font-weight: 700; color: #111; white-space: nowrap; }
         .token-name { margin-top: 14px; font-size: 14px; color: #333; }
@@ -88,6 +89,16 @@
         <div class="token-name"><b>Token name:</b> BLM48 GE Token</div>
         <div class="token-desc">ใช้โหวตกิจกรรม Major Vote ที่รับ GE Token</div>
     </div>
+
+    <div class="token-item">
+        <div class="token-row">
+            <div class="token-logo logo-cookie"><i class="fas fa-cookie-bite"></i></div>
+            <div class="token-label">Cookie</div>
+            <div class="token-amount" id="cookie-balance">-</div>
+        </div>
+        <div class="token-name"><b>Token name:</b> BLM48 Cookie</div>
+        <div class="token-desc">ใช้มอบให้เมมเบอร์เพื่อสะสม Fan Score และร่วมกิจกรรม Special Fans Day</div>
+    </div>
 </div>
 
 <script>
@@ -98,9 +109,10 @@
         else window.location.href = 'majorvote';
     }
 
-    function showBalances(tokenVal, geTokenVal) {
+    function showBalances(tokenVal, geTokenVal, cookieVal) {
         document.getElementById('token-balance').textContent = Number(tokenVal || 0).toLocaleString();
         document.getElementById('getoken-balance').textContent = Number(geTokenVal || 0).toLocaleString();
+        document.getElementById('cookie-balance').textContent = Number(cookieVal || 0).toLocaleString();
     }
 
     // แสดงยอดจากแคชเดียวกับหน้า Major Vote ก่อน แล้วค่อยดึงค่าจริงจาก Supabase
@@ -109,7 +121,7 @@
             const cached = localStorage.getItem('bnl_vote_wallet_cache') || localStorage.getItem('bnl_user_data_cache');
             if (!cached) return;
             const w = JSON.parse(cached);
-            showBalances(w.Token !== undefined ? w.Token : w.token, w.GEToken !== undefined ? w.GEToken : w.geToken);
+            showBalances(w.Token !== undefined ? w.Token : w.token, w.GEToken !== undefined ? w.GEToken : w.geToken, w.Cookie !== undefined ? w.Cookie : w.cookie);
         } catch (e) { console.error(e); }
     }
 
@@ -117,7 +129,7 @@
         try {
             const wallet = await blm48GetWallet(username);
             if (wallet && wallet.token !== undefined) {
-                showBalances(wallet.token, wallet.geToken);
+                showBalances(wallet.token, wallet.geToken, wallet.cookie);
                 localStorage.setItem('bnl_vote_wallet_cache', JSON.stringify(wallet));
             }
         } catch (e) {

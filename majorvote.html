@@ -100,6 +100,7 @@
         }
         .balance-logo.logo-token { background: #fff1c9; color: #f59f00; }
         .balance-logo.logo-getoken { background: #dcefff; color: #339af0; }
+        .balance-logo.logo-cookie { background: #fbe7d6; color: #d2691e; }
         .balance-info { min-width: 0; }
         .balance-label { font-size: 18px; font-weight: 700; color: #222; }
         .balance-amount {
@@ -297,6 +298,13 @@
                 <div class="balance-amount" id="getoken-balance">-</div>
             </div>
         </div>
+        <div class="balance-card">
+            <div class="balance-logo logo-cookie"><i class="fas fa-cookie-bite"></i></div>
+            <div class="balance-info">
+                <div class="balance-label">Cookie</div>
+                <div class="balance-amount" id="cookie-balance">-</div>
+            </div>
+        </div>
     </div>
 
 <div class="wallet-actions-container">
@@ -483,22 +491,15 @@
 
     function loadWalletFromCache() {
         try {
-            const cachedUserData = localStorage.getItem('bnl_vote_wallet_cache');
-            if (cachedUserData) {
-                const user = JSON.parse(cachedUserData);
+            const cached = localStorage.getItem('bnl_vote_wallet_cache') || localStorage.getItem('bnl_user_data_cache');
+            if (cached) {
+                const user = JSON.parse(cached);
                 const tokenVal = user.Token !== undefined ? user.Token : (user.token || 0);
                 const geTokenVal = user.GEToken !== undefined ? user.GEToken : (user.geToken || 0);
+                const cookieVal = user.Cookie !== undefined ? user.Cookie : (user.cookie || 0);
                 document.getElementById("token-balance").textContent = Number(tokenVal).toLocaleString();
                 document.getElementById("getoken-balance").textContent = Number(geTokenVal).toLocaleString();
-            } else {
-                const primaryCache = localStorage.getItem('bnl_user_data_cache');
-                if (primaryCache) {
-                    const user = JSON.parse(primaryCache);
-                    const tokenVal = user.Token !== undefined ? user.Token : (user.token || 0);
-                    const geTokenVal = user.GEToken !== undefined ? user.GEToken : (user.geToken || 0);
-                    document.getElementById("token-balance").textContent = Number(tokenVal).toLocaleString();
-                    document.getElementById("getoken-balance").textContent = Number(geTokenVal).toLocaleString();
-                }
+                document.getElementById("cookie-balance").textContent = Number(cookieVal).toLocaleString();
             }
         } catch (e) { console.error(e); }
     }
@@ -510,6 +511,7 @@
             if (wallet && wallet.token !== undefined) {
                 document.getElementById("token-balance").textContent = Number(wallet.token).toLocaleString();
                 document.getElementById("getoken-balance").textContent = Number(wallet.geToken).toLocaleString();
+                document.getElementById("cookie-balance").textContent = Number(wallet.cookie || 0).toLocaleString();
 
                 localStorage.setItem('bnl_vote_wallet_cache', JSON.stringify(wallet));
             }
