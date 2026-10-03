@@ -2153,7 +2153,7 @@ document.addEventListener('click', function() {
     const commentText = inputEl.value.trim();
     if (!commentText || (btnElement && btnElement.disabled)) return;
 
-    let originalText = btnElement ? btnElement.innerText : "SEND";
+    let originalText = btnElement ? btnElement.innerHTML : "SEND";
     if (btnElement) { btnElement.innerText = "..."; btnElement.disabled = true; }
     inputEl.disabled = true;
 
@@ -2184,7 +2184,7 @@ document.addEventListener('click', function() {
 
       inputEl.value = "";
     } catch (error) { Swal.fire('เกิดข้อผิดพลาด', 'ส่งคอมเมนต์ไม่สำเร็จงับ', 'error'); }
-    finally { if (btnElement) { btnElement.innerText = originalText; btnElement.disabled = false; } inputEl.disabled = false; }
+    finally { if (btnElement) { btnElement.innerHTML = originalText; btnElement.disabled = false; } inputEl.disabled = false; }
   };
 
   // 💖 กดใจคอมเมนต์/reply (เจ้าของโพสได้ 9 คุกกี้เหมือนกดใจโพส)
@@ -2339,7 +2339,7 @@ document.addEventListener('click', function() {
 
     let originalText = "";
     if (btnElement) {
-      originalText = btnElement.innerText;
+      originalText = btnElement.innerHTML;
       btnElement.innerText = "...";
       btnElement.disabled = true;
     }
@@ -2384,7 +2384,7 @@ document.addEventListener('click', function() {
       Swal.fire('เกิดข้อผิดพลาด', 'ส่งการตอบกลับไม่สำเร็จงับ', 'error');
     } finally {
       if (btnElement) {
-        btnElement.innerText = originalText;
+        btnElement.innerHTML = originalText;
         btnElement.disabled = false;
       }
       inputEl.disabled = false;

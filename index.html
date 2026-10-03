@@ -5045,7 +5045,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let originalText = "";
     if (btnElement) {
-      originalText = btnElement.innerText;
+      originalText = btnElement.innerHTML;
       btnElement.innerText = "กำลังส่ง...";
       btnElement.disabled = true;
     }
@@ -5084,7 +5084,7 @@ document.addEventListener("DOMContentLoaded", () => {
       Swal.fire('เกิดข้อผิดพลาด', 'ส่งคอมเมนต์ไม่สำเร็จงับ', 'error');
     } finally {
       if (btnElement) {
-        btnElement.innerText = originalText;
+        btnElement.innerHTML = originalText;
         btnElement.disabled = false;
       }
       inputEl.disabled = false;
@@ -5243,7 +5243,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let originalText = "";
     if (btnElement) {
-      originalText = btnElement.innerText;
+      originalText = btnElement.innerHTML;
       btnElement.innerText = "...";
       btnElement.disabled = true;
     }
@@ -5288,7 +5288,7 @@ document.addEventListener("DOMContentLoaded", () => {
       Swal.fire('เกิดข้อผิดพลาด', 'ส่งการตอบกลับไม่สำเร็จงับ', 'error');
     } finally {
       if (btnElement) {
-        btnElement.innerText = originalText;
+        btnElement.innerHTML = originalText;
         btnElement.disabled = false;
       }
       inputEl.disabled = false;
