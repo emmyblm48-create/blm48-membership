@@ -596,7 +596,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
    /* 1. สไตล์หลัก (ใช้สำหรับ Desktop/Tablet) */
 .section-title { 
   font-family: 'Quicksand', 'Kanit', sans-serif; font-weight: 600; color: #444; 
-  margin: 30px 0 15px 0; font-size: 18px; 
+  margin: 14px 0 8px 0; font-size: 18px; /* หัวข้อแต่ละส่วนชิดกันขึ้น (เดิม 30px/15px) */
   border-left: 5px solid var(--primary-pink); padding-left: 12px; 
 }
     
@@ -623,7 +623,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
       background-image: none !important; 
 
       /* 🎀 4. ดันเนื้อหารายชื่อ ranking ขยับเข้ามา ไม่ให้ไปเบียดชิดขอบจอ */
-      padding: 15px 0; /* ซ้าย-ขวาให้ลิสต์ข้างในเว้นเอง 12px แล้วเลื่อนทะลุขอบจอได้ */
+      padding: 4px 0; /* เดิม 15px - ลดช่องว่างระหว่างส่วน; ซ้าย-ขวาให้ลิสต์ข้างในเว้นเอง 12px แล้วเลื่อนทะลุขอบจอได้ */
       overflow: hidden;
 
       /* 🙅‍♂️ เอาเงาและเส้นขอบออกทั้งหมด เพื่อให้เนียนล่องหนไปกับพื้นหลังหลัก */
@@ -712,7 +712,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     #campaign-scroller.horizontal-list,
     #mv-scroller.horizontal-list {
       align-items: flex-start !important;
-      padding: 10px 12px 5px 12px !important;
+      padding: 4px 12px 4px 12px !important;
     }
 
     /* ซ่อนแถบเลื่อน (Scrollbar) ทุกเบราว์เซอร์ */
@@ -2078,7 +2078,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
   background: transparent; /* ลบกล่องขาวและเงาออก */
   border-radius: 20px;
   padding: 0;
-  margin: 15px auto;
+  margin: 0 auto 4px;      /* เดิม 15px auto - ชิดหัวข้อ Special Fans Day และ Ranking */
   width: 100%;             /* 👈 ยืดเต็มจอซ้ายขวาเวลาเปิดในมือถือ */
   max-width: 420px;        /* 👈 ล็อกขนาดไม่ให้กางกว้างเกินไปเวลาเปิดใน iPad หรือคอม */
   box-sizing: border-box;
@@ -2343,7 +2343,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
   </div>
 </div>
 
-<div class="shop-banner-slider-wrapper" style="position: relative; margin: 20px -12px; border-radius: 0; overflow: hidden;"><!-- เต็มขอบจอซ้าย-ขวา (หักล้าง padding 12px ของ .main-content-container) -->
+<div class="shop-banner-slider-wrapper" style="position: relative; margin: 14px -12px; border-radius: 0; overflow: hidden;"><!-- เต็มขอบจอซ้าย-ขวา (หักล้าง padding 12px ของ .main-content-container) -->
     
     <div id="autoBannerContainer" style="display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; background-color: #ffeef2; -ms-overflow-style: none; cursor: grab;">
         
@@ -2362,7 +2362,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     </div>
 </div>
 
-    <div class="public-member-widget" style="background: linear-gradient(135deg, #fffcfd 0%, #ffeef2 100%); border: 1px solid #ffe1e7; padding: 12px 15px; border-radius: 16px; display: flex; align-items: center; justify-content: space-between; margin-top: 20px; box-shadow: 0 4px 12px rgba(255,133,162,0.03);">
+    <div class="public-member-widget" style="background: linear-gradient(135deg, #fffcfd 0%, #ffeef2 100%); border: 1px solid #ffe1e7; padding: 12px 15px; border-radius: 16px; display: flex; align-items: center; justify-content: space-between; margin-top: 14px; box-shadow: 0 4px 12px rgba(255,133,162,0.03);">
         <div style="display: flex; align-items: center; gap: 10px;">
             <div style="color: var(--primary-pink); font-size: 14px; background: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(255,133,162,0.1);">
                 <i class="fas fa-users"></i>
