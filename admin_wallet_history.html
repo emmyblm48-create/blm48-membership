@@ -297,7 +297,7 @@
                         <div class="entry-icon" style="background:${currency.color};color:#fff;"><i class="fa-solid ${currency.icon}"></i></div>
                     </div>
                     <div class="entry-body">
-                        <div class="entry-user">${escapeHtml(row.name || row.username)} <span style="color:#ccc;">@${escapeHtml(row.username)}</span>${row.walletCode ? ` <span style="color:#999;">· <i class="fas fa-wallet" style="color:#ffc107;"></i> ${escapeHtml(row.walletCode)}</span>` : ''}</div>
+                        <div class="entry-user">${escapeHtml(row.name || row.username)} <span style="color:#ccc;">@${escapeHtml(row.username)}</span>${row.walletCode ? ` <span style="color:#999;">· <i class="fas fa-wallet" style="color:#ffc107;"></i> BLM-${escapeHtml(row.walletCode)}</span>` : ''}</div>
                         <div class="entry-title">${escapeHtml(row.title || '')}</div>
                         <div class="entry-subtitle">${escapeHtml(subtitleText)}</div>
                         <div class="entry-timestamp">${formatTime(row.timestamp)}</div>

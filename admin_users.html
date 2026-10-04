@@ -230,7 +230,7 @@
       rows = rows.filter(u =>
         (u.name || '').toLowerCase().includes(q) ||
         (u.username || '').toLowerCase().includes(q) ||
-        (u.walletCode || '').includes(q)
+        (u.walletCode ? 'blm-' + u.walletCode : '').includes(q)
       );
     }
 
@@ -272,7 +272,7 @@
             </div>
           </td>
           <td><span class="role-chip ${roleChipClass(u.role)}">${escapeHtml(u.role || '')}</span></td>
-          <td class="wallet-code">${escapeHtml(u.walletCode || '-')}</td>
+          <td class="wallet-code">${u.walletCode ? 'BLM-' + escapeHtml(u.walletCode) : '-'}</td>
           <td class="num">${Number(u.token || 0).toLocaleString()}</td>
           <td class="num">${Number(u.cookie || 0).toLocaleString()}</td>
           <td class="num">${Number(u.geToken || 0).toLocaleString()}</td>

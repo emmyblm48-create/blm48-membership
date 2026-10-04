@@ -18,7 +18,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="assets/css/glassmorphism.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="assets/js/supabase-client.js"></script>
     <script src="assets/js/common.js"></script>
@@ -75,14 +74,6 @@
             color: var(--text-dark); background: rgba(255, 255, 255, 0.7);
         }
         .form-field input:focus { outline: none; border-color: var(--primary-pink); }
-        .code-input-row { display: flex; gap: 8px; }
-        .code-input-row input { flex: 1; min-width: 0; }
-        .scan-btn {
-            flex: 0 0 auto; border: none; border-radius: 12px; padding: 0 14px;
-            background: var(--soft-pink); color: var(--primary-pink); font-weight: 700; font-size: 13px;
-            font-family: 'Quicksand', 'Kanit', sans-serif; cursor: pointer;
-        }
-        #qr-reader { width: 100%; border-radius: 12px; overflow: hidden; }
 
         .btn-primary {
             width: 100%; border: none; border-radius: 20px; padding: 13px;
@@ -112,6 +103,8 @@
         .transfer-list .t-label { color: #999; margin-bottom: 4px; font-size: 12.5px; }
         .transfer-list div.item { padding: 2px 0; color: #333; font-weight: 600; }
 
+        .my-balance { background: #fffbea; border: 1px solid #ffe8a3; border-radius: 12px; padding: 10px 12px; margin-bottom: 14px; }
+        .my-balance .t-label { color: #b8860b; font-size: 12px; font-weight: 600; margin-bottom: 4px; }
         #access-denied { display: none; text-align: center; padding: 80px 20px; color: #999; }
         #access-denied i { font-size: 40px; color: #ffd7e1; display: block; margin-bottom: 14px; }
         #page-content { display: none; }
@@ -135,18 +128,24 @@
     <div id="page-content">
         <div class="header-title-zone">
             <h1><i class="fa-solid fa-money-bill-transfer"></i> โอนเงินในระบบ</h1>
-            <p>โอน Token / Cookie / GEToken ให้ User หรือ Member</p>
+            <p>โอน Token / Cookie / GEToken จากบัญชีของคุณให้ User หรือ Member (หักจากยอดของคุณจริง)</p>
         </div>
 
         <div class="form-card" id="form-step">
             <div id="form-msg" class="form-msg"></div>
 
-            <div class="form-field">
-                <label>Wallet Code ผู้รับ (User หรือ Member เท่านั้น)</label>
-                <div class="code-input-row">
-                    <input id="tr-wallet" type="text" inputmode="numeric" maxlength="10" placeholder="เลข 10 หลัก เช่น 3002071739">
-                    <button type="button" class="scan-btn" onclick="scanWalletQr()"><i class="fas fa-qrcode"></i> Scan</button>
+            <div class="my-balance">
+                <div class="t-label">ยอดของคุณ (ผู้โอน)</div>
+                <div class="balance-line" style="margin-bottom:0;">
+                    <span><i class="fas fa-coins" style="color:#f59f00;"></i> <span class="my-token">-</span></span>
+                    <span><i class="fas fa-cookie-bite" style="color:#d2691e;"></i> <span class="my-cookie">-</span></span>
+                    <span><i class="fas fa-gem" style="color:#4dabf7;"></i> <span class="my-getoken">-</span></span>
                 </div>
+            </div>
+
+            <div class="form-field">
+                <label>Username ผู้รับ (User หรือ Member เท่านั้น)</label>
+                <input id="tr-username" type="text" placeholder="เช่น 00-191">
             </div>
             <div class="form-field">
                 <label>Token</label>
@@ -180,8 +179,16 @@
                 <span><i class="fas fa-cookie-bite" style="color:#d2691e;"></i> <span id="cf-cur-cookie"></span></span>
                 <span><i class="fas fa-gem" style="color:#4dabf7;"></i> <span id="cf-cur-getoken"></span></span>
             </div>
+            <div class="my-balance">
+                <div class="t-label">ยอดของคุณก่อนโอน (จะถูกหักตามรายการด้านล่าง)</div>
+                <div class="balance-line" style="margin-bottom:0;">
+                    <span><i class="fas fa-coins" style="color:#f59f00;"></i> <span class="my-token">-</span></span>
+                    <span><i class="fas fa-cookie-bite" style="color:#d2691e;"></i> <span class="my-cookie">-</span></span>
+                    <span><i class="fas fa-gem" style="color:#4dabf7;"></i> <span class="my-getoken">-</span></span>
+                </div>
+            </div>
             <div class="transfer-list">
-                <div class="t-label">จะโอนให้เพิ่ม:</div>
+                <div class="t-label">จะโอนให้เพิ่ม (หักจากบัญชีคุณ):</div>
                 <div id="cf-transfer-items"></div>
             </div>
             <button class="btn-primary" id="confirm-btn" onclick="confirmTransfer()" style="margin-top:14px;">
@@ -197,6 +204,22 @@
 <script>
   let user = null;
   let pendingTransfer = null;
+  let myBalance = null;
+
+  // ยอดของแอดมินผู้โอน - การโอนหักจากบัญชีนี้จริง
+  function renderMyBalance() {
+    if (!myBalance) return;
+    const fmt = v => Number(v || 0).toLocaleString();
+    document.querySelectorAll('.my-token').forEach(el => el.textContent = fmt(myBalance.token));
+    document.querySelectorAll('.my-cookie').forEach(el => el.textContent = fmt(myBalance.cookie));
+    document.querySelectorAll('.my-getoken').forEach(el => el.textContent = fmt(myBalance.geToken));
+  }
+  async function loadMyBalance() {
+    try {
+      const w = await blm48GetWallet(user.username);
+      if (w && w.token !== undefined) { myBalance = { token: Number(w.token) || 0, cookie: Number(w.cookie) || 0, geToken: Number(w.geToken) || 0 }; renderMyBalance(); }
+    } catch (e) { console.error('โหลดยอดของแอดมินไม่สำเร็จ:', e); }
+  }
 
   function goBack() {
     if (document.referrer && window.history.length > 1) {
@@ -235,24 +258,32 @@
 
   async function lookupTransferTarget() {
     clearFormError();
-    const walletCode = document.getElementById('tr-wallet').value.replace(/\D/g, '');
+    const uname = document.getElementById('tr-username').value.trim();
     const token = parseFloat(document.getElementById('tr-token').value) || 0;
     const cookie = parseFloat(document.getElementById('tr-cookie').value) || 0;
     const getoken = parseFloat(document.getElementById('tr-getoken').value) || 0;
 
-    if (!/^[0-9]{10}$/.test(walletCode)) { showFormError('กรุณากรอก Wallet Code ผู้รับให้ครบ 10 หลัก'); return; }
+    if (!uname) { showFormError('กรุณากรอก Username ผู้รับ'); return; }
     if (token < 0 || cookie < 0 || getoken < 0) { showFormError('จำนวนต้องไม่ติดลบ'); return; }
     if (token === 0 && cookie === 0 && getoken === 0) { showFormError('กรุณากรอกจำนวนที่ต้องการโอนอย่างน้อย 1 ช่อง'); return; }
+    if (uname === user.username) { showFormError('ไม่สามารถโอนให้บัญชีตัวเองได้'); return; }
+    if (myBalance) {
+      const short = [];
+      if (token > myBalance.token) short.push('Token');
+      if (cookie > myBalance.cookie) short.push('Cookie');
+      if (getoken > myBalance.geToken) short.push('GEToken');
+      if (short.length) { showFormError('ยอดในบัญชีของคุณไม่พอ: ' + short.join(', ')); return; }
+    }
 
     const btn = document.getElementById('lookup-btn');
     btn.disabled = true;
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังตรวจสอบ...';
     try {
-      const lookup = await blm48AdminLookupWallet(user.username, walletCode);
+      const lookup = await blm48AdminLookupUser(user.username, uname);
       if (lookup.status !== 'success') {
         showFormError(lookup.message || 'ไม่พบผู้ใช้งานนี้');
       } else {
-        pendingTransfer = { target: lookup.data, walletCode, token, cookie, getoken };
+        pendingTransfer = { target: lookup.data, token, cookie, getoken };
         showConfirmStep();
       }
     } catch (e) {
@@ -266,7 +297,7 @@
     const { target, token, cookie, getoken } = pendingTransfer;
     document.getElementById('cf-avatar').src = resolveDriveImage(target.profile_img);
     document.getElementById('cf-name').textContent = target.name || target.username;
-    document.getElementById('cf-sub').textContent = `Wallet ${pendingTransfer.walletCode} · @${target.username} · ${(target.role || '').toUpperCase()}`;
+    document.getElementById('cf-sub').textContent = `@${target.username} · ${(target.role || '').toUpperCase()}`;
     document.getElementById('cf-cur-token').textContent = Number(target.token || 0).toLocaleString();
     document.getElementById('cf-cur-cookie').textContent = Number(target.cookie || 0).toLocaleString();
     document.getElementById('cf-cur-getoken').textContent = Number(target.geToken || 0).toLocaleString();
@@ -283,11 +314,11 @@
 
   async function confirmTransfer() {
     if (!pendingTransfer) return;
-    const { target, walletCode, token, cookie, getoken } = pendingTransfer;
+    const { target, token, cookie, getoken } = pendingTransfer;
 
     const confirmResult = await Swal.fire({
       title: 'ยืนยันการโอน',
-      html: `<b>${escapeHtml(target.name || target.username)}</b> (Wallet ${escapeHtml(walletCode)}) จะได้รับตามรายการที่ระบุค่ะ`,
+      html: `<b>${escapeHtml(target.name || target.username)}</b> (@${escapeHtml(target.username)}) จะได้รับตามรายการที่ระบุ และยอดจะถูกหักจากบัญชีของคุณค่ะ`,
       icon: 'question',
       showCancelButton: true,
       confirmButtonColor: 'var(--primary-pink)',
@@ -298,10 +329,11 @@
 
     Swal.fire({ title: 'กำลังโอน...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
     try {
-      const res = await blm48AdminTransferByWallet(user.username, walletCode, token, cookie, getoken);
+      const res = await blm48AdminTransferWallet(user.username, target.username, token, cookie, getoken);
       if (res.status === 'success') {
+        if (res.adminBalance) { myBalance = { token: Number(res.adminBalance.token) || 0, cookie: Number(res.adminBalance.cookie) || 0, geToken: Number(res.adminBalance.geToken) || 0 }; renderMyBalance(); }
         await generateTransferSlip({ admin: user.username, adminName: user.name || user.username, adminAvatar: user.profile_img, target: res.data, token, cookie, getoken, refNo: res.refNo, createdAt: res.createdAt });
-        document.getElementById('tr-wallet').value = '';
+        document.getElementById('tr-username').value = '';
         document.getElementById('tr-token').value = 0;
         document.getElementById('tr-cookie').value = 0;
         document.getElementById('tr-getoken').value = 0;
@@ -311,34 +343,6 @@
       }
     } catch (e) {
       Swal.fire('การเชื่อมต่อขัดข้อง', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้งในภายหลัง', 'error');
-    }
-  }
-
-  // 📷 สแกน QR จากหน้า My Wallet ของผู้รับ (QR เก็บเลข Wallet Code 10 หลัก)
-  async function scanWalletQr() {
-    if (typeof Html5Qrcode === 'undefined') { showFormError('โหลดตัวสแกน QR ไม่สำเร็จ กรุณากรอก Wallet Code เอง'); return; }
-    let scanner = null;
-    let scanned = null;
-    await Swal.fire({
-      title: 'Scan Wallet QR',
-      html: '<div id="qr-reader"></div><div style="font-size:12px;color:#999;margin-top:8px;">หันกล้องไปที่ QR บนหน้า My Wallet ของผู้รับ</div>',
-      showConfirmButton: false,
-      showCancelButton: true,
-      cancelButtonText: 'ยกเลิก',
-      didOpen: () => {
-        scanner = new Html5Qrcode('qr-reader');
-        scanner.start({ facingMode: 'environment' }, { fps: 10, qrbox: 220 }, (text) => {
-          const code = String(text).replace(/\D/g, '');
-          if (/^[0-9]{10}$/.test(code)) { scanned = code; Swal.close(); }
-        }).catch(() => {
-          Swal.showValidationMessage('เปิดกล้องไม่ได้ กรุณาอนุญาตการใช้กล้อง หรือกรอก Wallet Code เอง');
-        });
-      },
-      willClose: () => { if (scanner && scanner.isScanning) scanner.stop().catch(() => {}); }
-    });
-    if (scanned) {
-      document.getElementById('tr-wallet').value = scanned;
-      clearFormError();
     }
   }
 
@@ -353,6 +357,7 @@
       return;
     }
     document.getElementById('page-content').style.display = 'block';
+    loadMyBalance();
   });
 </script>
 </body>
