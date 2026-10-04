@@ -48,7 +48,7 @@
 
         /* การ์ด QR + รูปโปรไฟล์ลอยทับขอบบน (แบบ My Wallet ของแอปออฟฟิเชียล) */
         .qr-card {
-            position: relative; width: 100%; max-width: 280px;
+            position: relative; width: 100%; max-width: 310px;
             background: #fff; border-radius: 12px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
             padding: 66px 20px 16px; margin-top: 50px;
@@ -64,7 +64,7 @@
         .qr-hint { margin-top: 18px; font-size: 13px; font-weight: 600; color: #666; }
 
         .code-row {
-            width: 100%; max-width: 280px; margin-top: 18px;
+            width: 100%; max-width: 310px; margin-top: 18px;
             display: flex; border: 1px solid #333; border-radius: 4px; overflow: hidden;
         }
         .code-row .code-text {
@@ -128,14 +128,14 @@
     function showWallet(code, profileImg) {
         if (!code) return;
         walletCode = code;
-        document.getElementById('wallet-code').textContent = code;
+        document.getElementById('wallet-code').textContent = 'BLM-' + code;
         document.getElementById('share-btn').disabled = false;
         if (profileImg) document.getElementById('wallet-avatar').src = typeof getImg === 'function' ? getImg(profileImg) : profileImg;
 
-        // QR เก็บแค่ตัวเลข Wallet Code - หน้าโอนของแอดมินสแกนแล้วได้เลขนี้ไปค้นหาผู้รับ
+        // QR เก็บ "BLM-" + เลข 10 หลัก - หน้าโอนของแอดมินตัดทุกอย่างที่ไม่ใช่ตัวเลขออกก่อนค้นหาผู้รับ
         const box = document.getElementById('qr-box');
         box.innerHTML = '';
-        new QRCode(box, { text: code, width: 312, height: 312, correctLevel: QRCode.CorrectLevel.M });
+        new QRCode(box, { text: 'BLM-' + code, width: 312, height: 312, correctLevel: QRCode.CorrectLevel.M });
         box.removeAttribute('title');
     }
 
@@ -179,7 +179,7 @@
     async function copyWalletCode() {
         if (!walletCode) return;
         const btn = document.getElementById('copy-btn');
-        if (await copyText(walletCode)) {
+        if (await copyText('BLM-' + walletCode)) {
             btn.textContent = 'Copied';
             setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
         }
@@ -187,7 +187,7 @@
 
     async function shareWalletCode() {
         if (!walletCode) return;
-        const text = `My BLM48 Wallet Code: ${walletCode}`;
+        const text = `My BLM48 Wallet Code: BLM-${walletCode}`;
         if (navigator.share) {
             try { await navigator.share({ title: 'BLM48 My Wallet', text }); } catch (e) { /* ผู้ใช้กดยกเลิก */ }
             return;
