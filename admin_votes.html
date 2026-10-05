@@ -192,22 +192,6 @@
         .cp-chip button { background: none; border: none; color: #ff5c7a; cursor: pointer; }
         .btn-checkpoints { width: 100%; margin-bottom: 10px; border: 1px solid #e3d9ff; background: #f7f3ff; color: #5b3fa8; border-radius: 20px; padding: 9px; font-family: 'Quicksand', 'Kanit', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; }
 
-        .cp-list { display: flex; flex-direction: column; gap: 8px; text-align: left; margin-top: 12px; max-height: 50vh; overflow-y: auto; }
-        .cp-item { border: 1px solid #eee; border-radius: 12px; padding: 10px 12px; }
-        .cp-item-head { display: flex; align-items: center; gap: 8px; }
-        .cp-item-time { flex: 1; min-width: 0; font-weight: 700; font-size: 13.5px; color: #333; }
-        .cp-item-label { font-size: 12px; color: #888; font-weight: 500; }
-        .cp-badge { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 10px; white-space: nowrap; }
-        .cp-badge.done { background: #e6f9ee; color: #1f9d55; }
-        .cp-badge.wait { background: #fff4cc; color: #8a6d00; }
-        .cp-actions { display: flex; gap: 6px; margin-top: 8px; }
-        .cp-actions button { border: none; border-radius: 14px; padding: 6px 12px; font-size: 12px; font-family: 'Quicksand', 'Kanit', sans-serif; font-weight: 600; cursor: pointer; }
-        .cp-view { background: #ede7ff; color: #5b3fa8; }
-        .cp-del { background: #ffeef0; color: #ff5c7a; }
-        .cp-rank-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
-        .cp-rank-table th { font-size: 11.5px; color: #999; font-weight: 600; padding: 6px 4px; border-bottom: 1px solid #eee; }
-        .cp-rank-table td { padding: 7px 4px; border-bottom: 1px solid #f4f4f4; }
-        .cp-rank-table td.num { text-align: right; white-space: nowrap; }
     </style>
     <link rel="stylesheet" href="assets/css/admin-theme.css">
 </head>
@@ -410,7 +394,7 @@
           </div>
           ${isGift ? `<div class="cc-note"><i class="fa-solid fa-circle-info"></i> กิจกรรมนี้โหวตด้วย Gift (Cookie) ซึ่งไม่ได้ใช้โหมด Token — โหมดจะมีผลกับการโหวตด้วย Token / GE Token เท่านั้น</div>` : ''}
 
-          <button type="button" class="btn-checkpoints" onclick="openCheckpoints(${i})"><i class="fa-solid fa-stopwatch"></i> ผลด่วน (${fmt(c.checkpointCount)})</button>
+          <button type="button" class="btn-checkpoints" onclick="window.location.href='admin_vote_results?id=' + encodeURIComponent('${escapeAttr(c.voteCollectionId)}')"><i class="fa-solid fa-stopwatch"></i> ผลด่วน (${fmt(c.checkpointCount)})</button>
 
           <div class="field-label">สถานะ</div>
           <select class="status-select" onchange="setStatus(${i}, this.value)">
@@ -782,134 +766,6 @@
     }
     btn.disabled = false;
     btn.innerHTML = '<i class="fas fa-check"></i> สร้างกิจกรรมโหวต';
-  }
-
-  // =========================================================
-  // ⏱️ ผลด่วนของกิจกรรมที่มีอยู่แล้ว (หลังบ้านเท่านั้น)
-  // =========================================================
-  let cpEvent = null;      // กิจกรรมที่เปิดดูผลด่วนอยู่
-  let cpItems = [];
-
-  async function openCheckpoints(i) {
-    cpEvent = campaignCache[i];
-    if (!cpEvent) return;
-    Swal.fire({
-      title: 'ผลด่วน',
-      html: `
-        <div style="font-size:13px; color:#666;">${escapeHtml(cpEvent.title || cpEvent.voteCollectionId)}</div>
-        <div class="cp-hint" style="margin-top:6px;"><i class="fa-solid fa-lock"></i> เก็บไว้หลังบ้านเท่านั้น ไม่แสดงหน้าบ้าน</div>
-        <div class="cp-add-row" style="margin-top:12px;">
-          <input id="cp-at" type="datetime-local">
-          <input id="cp-label" type="text" maxlength="60" placeholder="ชื่อเรียก (ไม่บังคับ)">
-          <button type="button" class="chip-btn" onclick="addCheckpointForEvent()"><i class="fas fa-plus"></i> เพิ่ม</button>
-        </div>
-        <div class="cp-list" id="cp-list"><div class="loading-state"><i class="fa-solid fa-spinner fa-spin"></i> กำลังโหลด...</div></div>`,
-      showConfirmButton: false,
-      showCloseButton: true,
-      width: 560,
-      didOpen: () => loadCheckpointList(),
-      willClose: () => loadCampaigns()
-    });
-  }
-
-  async function loadCheckpointList() {
-    const box = document.getElementById('cp-list');
-    if (!box || !cpEvent) return;
-    try {
-      const res = await blm48AdminListVoteCheckpoints(user.username, cpEvent.voteCollectionId);
-      if (!res || res.status !== 'success') { box.innerHTML = `<div class="empty-state">${escapeHtml((res && res.message) || 'โหลดข้อมูลไม่สำเร็จ')}</div>`; return; }
-      cpItems = res.data || [];
-      renderCheckpointList();
-    } catch (e) {
-      box.innerHTML = `<div class="empty-state">เชื่อมต่อเซิร์ฟเวอร์ไม่ได้</div>`;
-    }
-  }
-
-  function renderCheckpointList() {
-    const box = document.getElementById('cp-list');
-    if (!box) return;
-    if (cpItems.length === 0) {
-      box.innerHTML = `<div class="empty-state" style="padding:20px;"><i class="fa-solid fa-stopwatch"></i>ยังไม่ได้ตั้งเวลาผลด่วน</div>`;
-      return;
-    }
-    box.innerHTML = cpItems.map((c, i) => {
-      const done = !!c.takenAt;
-      return `
-        <div class="cp-item">
-          <div class="cp-item-head">
-            <div class="cp-item-time">${escapeHtml(formatCpTime(c.scheduledAt))}${c.label ? `<div class="cp-item-label">${escapeHtml(c.label)}</div>` : ''}</div>
-            <span class="cp-badge ${done ? 'done' : 'wait'}">${done ? 'เก็บผลแล้ว' : 'รอถึงเวลา'}</span>
-          </div>
-          <div class="cp-actions">
-            ${done ? `<button type="button" class="cp-view" onclick="viewCheckpoint(${i})"><i class="fa-solid fa-ranking-star"></i> ดูอันดับ</button>` : ''}
-            <button type="button" class="cp-del" onclick="deleteCheckpoint(${i})"><i class="fas fa-trash"></i> ลบ</button>
-          </div>
-        </div>`;
-    }).join('');
-  }
-
-  async function addCheckpointForEvent() {
-    const atRaw = document.getElementById('cp-at').value;
-    const label = document.getElementById('cp-label').value.trim();
-    if (!atRaw) { Swal.showValidationMessage('กรุณาเลือกวันเวลาผลด่วน'); return; }
-    Swal.resetValidationMessage();
-    try {
-      const res = await blm48AdminAddVoteCheckpoint(user.username, cpEvent.voteCollectionId, new Date(atRaw).toISOString(), label);
-      if (!res || res.status !== 'success') { Swal.showValidationMessage((res && res.message) || 'เพิ่มไม่สำเร็จ'); return; }
-      document.getElementById('cp-at').value = '';
-      document.getElementById('cp-label').value = '';
-      loadCheckpointList();
-    } catch (e) {
-      Swal.showValidationMessage('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้');
-    }
-  }
-
-  // ดูอันดับในหน้าต่างเดิม แล้วกดกลับมาที่รายการผลด่วนได้
-  function viewCheckpoint(i) {
-    const c = cpItems[i];
-    if (!c) return;
-    const rows = (c.ranking || []).map(r => `
-      <tr>
-        <td style="width:34px; font-weight:700;">${escapeHtml(r.rank)}</td>
-        <td>${escapeHtml(r.memberName)}</td>
-        <td class="num">${fmt(r.votes)}</td>
-        <td class="num" style="color:#aaa;">${escapeHtml(r.percentage)}%</td>
-      </tr>`).join('');
-    const box = document.getElementById('cp-list');
-    box.innerHTML = `
-      <button type="button" class="chip-btn" onclick="renderCheckpointList()"><i class="fa-solid fa-chevron-left"></i> กลับ</button>
-      <div style="font-weight:700; color:#333; margin-top:10px;">${escapeHtml(formatCpTime(c.scheduledAt))}${c.label ? ' · ' + escapeHtml(c.label) : ''}</div>
-      <div style="font-size:12px; color:#999; margin-bottom:6px;">คะแนนรวม ${fmt(c.totalVotes)}</div>
-      <table class="cp-rank-table">
-        <thead><tr><th>#</th><th>ผู้สมัคร</th><th style="text-align:right;">คะแนน</th><th style="text-align:right;">%</th></tr></thead>
-        <tbody>${rows || '<tr><td colspan="4" style="color:#aaa;">ไม่มีข้อมูล</td></tr>'}</tbody>
-      </table>`;
-  }
-
-  async function deleteCheckpoint(i) {
-    const c = cpItems[i];
-    if (!c) return;
-    const box = document.getElementById('cp-list');
-    // ยืนยันในหน้าต่างเดิม (Swal ซ้อนกันไม่ได้)
-    box.innerHTML = `
-      <div style="text-align:center; padding:10px 0;">
-        <div style="font-size:14px; color:#333;">ลบผลด่วน <b>${escapeHtml(formatCpTime(c.scheduledAt))}</b>?</div>
-        <div style="font-size:12px; color:#999; margin:6px 0 12px;">${c.takenAt ? 'อันดับที่เก็บไว้จะหายไปถาวร' : 'ยังไม่ได้เก็บผล'}</div>
-        <button type="button" class="chip-btn" onclick="renderCheckpointList()">ยกเลิก</button>
-        <button type="button" class="chip-btn" style="background:#ffeef0; color:#ff5c7a; border-color:#ffd0d8;" onclick="confirmDeleteCheckpoint(${i})">ลบ</button>
-      </div>`;
-  }
-
-  async function confirmDeleteCheckpoint(i) {
-    const c = cpItems[i];
-    if (!c) return;
-    try {
-      const res = await blm48AdminDeleteVoteCheckpoint(user.username, c.id);
-      if (!res || res.status !== 'success') Swal.showValidationMessage((res && res.message) || 'ลบไม่สำเร็จ');
-    } catch (e) {
-      Swal.showValidationMessage('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้');
-    }
-    loadCheckpointList();
   }
 
   window.addEventListener('DOMContentLoaded', () => {
