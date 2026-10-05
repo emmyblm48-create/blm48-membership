@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8">
+    <title>BLM48 Membership | ตั้งค่าโหมดโหวต</title>
+    <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s32">
+    <meta name="theme-color" content="#ffc0cb">
+    <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s180">
+    <link rel="icon" sizes="192x192" href="https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s192">
+    <meta name="apple-mobile-web-app-title" content="BLM48">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/glassmorphism.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/supabase-client.js"></script>
+    <script src="assets/js/common.js"></script>
+
+    <style>
+        :root {
+            --primary-pink: #ff85a2;
+            --soft-pink: #ffe4e1;
+            --card-border: #ffeef2;
+            --text-dark: #444;
+        }
+        * { box-sizing: border-box; }
+        body { font-family: 'Quicksand', 'Kanit', sans-serif; margin: 0; padding: 0; min-height: 100vh; color: var(--text-dark); background: #ffffff; }
+
+        .top-navigation-bar {
+            display: flex; align-items: center; gap: 12px;
+            background: var(--glass-bg-strong);
+            -webkit-backdrop-filter: blur(var(--glass-blur-lg));
+            backdrop-filter: blur(var(--glass-blur-lg));
+            padding: 14px 16px; border-bottom: 1px solid var(--glass-border);
+            position: sticky; top: 0; z-index: 100; box-shadow: var(--glass-shadow-sm);
+        }
+        .back-circle-btn {
+            flex: 0 0 auto; background: var(--glass-bg-strong);
+            -webkit-backdrop-filter: blur(var(--glass-blur-sm));
+            backdrop-filter: blur(var(--glass-blur-sm));
+            border: 1px solid var(--glass-border);
+            width: 38px; height: 38px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--primary-pink); cursor: pointer; transition: 0.2s;
+        }
+        .back-circle-btn:hover { background: var(--primary-pink); color: white; transform: scale(1.05); }
+        .top-bar-title { font-family: 'Quicksand', 'Kanit', sans-serif; font-weight: 600; font-size: 16px; color: #333; }
+
+        .page-wrapper { max-width: 640px; margin: 0 auto; padding: 18px 12px 50px; }
+        @media (min-width: 768px) { .page-wrapper { max-width: 760px; padding: 24px 24px 60px; } }
+
+        .header-title-zone { text-align: center; margin-bottom: 20px; }
+        .header-title-zone h1 { color: var(--primary-pink); font-family: 'Quicksand', 'Kanit', sans-serif; font-size: 24px; margin: 0 0 6px 0; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .header-title-zone p { color: #999; font-size: 13px; margin: 0; }
+
+        .mode-legend { background: #fffaf0; border: 1px solid #ffe6ae; border-radius: 14px; padding: 12px 14px; font-size: 12.5px; color: #6b5a3a; line-height: 1.8; margin-bottom: 18px; }
+        .mode-legend b { color: #333; }
+
+        .campaign-list { display: flex; flex-direction: column; gap: 14px; }
+        .campaign-card {
+            background: var(--glass-bg-strong);
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border); border-radius: 16px;
+            padding: 14px; box-shadow: var(--glass-shadow-sm);
+        }
+        .cc-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+        .cc-title { font-weight: 700; font-size: 15px; color: #333; }
+        .cc-id { font-size: 11px; color: #aaa; margin-top: 2px; word-break: break-all; }
+        .status-pill { flex: 0 0 auto; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
+        .status-pill.open { background: #e6f9ee; color: #1f9d55; }
+        .status-pill.closed { background: #f1f1f1; color: #888; }
+
+        .cc-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 12px 0; }
+        .cc-stat { background: rgba(255,255,255,0.6); border: 1px solid var(--glass-border); border-radius: 10px; padding: 7px 4px; text-align: center; }
+        .cc-stat .v { font-weight: 700; font-size: 14px; color: #333; }
+        .cc-stat .k { font-size: 10.5px; color: #999; margin-top: 1px; }
+        @media (max-width: 380px) { .cc-stats { grid-template-columns: repeat(2, 1fr); } }
+
+        .field-label { font-size: 12.5px; color: #666; font-weight: 600; margin: 4px 0 6px; }
+        .mode-seg { display: flex; gap: 6px; margin-bottom: 10px; }
+        .mode-btn {
+            flex: 1; border: 1.5px solid #ececec; background: #fafafa; color: #888;
+            border-radius: 12px; padding: 9px 4px; font-family: 'Quicksand', 'Kanit', sans-serif;
+            font-size: 12.5px; font-weight: 700; cursor: pointer;
+        }
+        .mode-btn.active.burn { background: #fff4cc; border-color: #ffd75e; color: #6b5200; }
+        .mode-btn.active.lock { background: #e3f1ff; border-color: #8cc4ff; color: #1c5d99; }
+        .mode-btn.active.partial { background: #fff0e0; border-color: #ffb877; color: #8a4b00; }
+
+        .pct-row { display: none; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 13px; color: #666; }
+        .pct-row.show { display: flex; }
+        .pct-row input, .status-select {
+            border: 1px solid var(--glass-border); border-radius: 12px;
+            padding: 9px 12px; font-size: 14px; font-family: 'Quicksand', 'Kanit', sans-serif;
+            color: var(--text-dark); background: rgba(255, 255, 255, 0.7);
+        }
+        .pct-row input { width: 90px; }
+        .pct-row input:focus, .status-select:focus { outline: none; border-color: var(--primary-pink); }
+        .status-select { width: 100%; margin-bottom: 10px; }
+
+        .cc-note { font-size: 11.5px; color: #999; margin-bottom: 10px; line-height: 1.6; }
+        .btn-primary {
+            width: 100%; border: none; border-radius: 20px; padding: 11px;
+            background: var(--primary-pink); color: #fff; font-weight: 700; font-size: 14px;
+            font-family: 'Quicksand', 'Kanit', sans-serif; cursor: pointer;
+        }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .empty-state { text-align: center; color: #bbb; font-family: 'Quicksand', 'Kanit', sans-serif; font-size: 13px; padding: 40px 20px; }
+        .empty-state i { font-size: 28px; color: #ffd7e1; display: block; margin-bottom: 10px; }
+        .loading-state { text-align: center; color: #bbb; font-size: 13px; padding: 30px 20px; }
+
+        #access-denied { display: none; text-align: center; padding: 80px 20px; color: #999; }
+        #access-denied i { font-size: 40px; color: #ffd7e1; display: block; margin-bottom: 14px; }
+        #page-content { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="top-navigation-bar">
+    <button type="button" class="back-circle-btn" onclick="goBack()" aria-label="ย้อนกลับ">
+        <i class="fa-solid fa-chevron-left"></i>
+    </button>
+    <div class="top-bar-title">ตั้งค่าโหมดโหวต</div>
+</div>
+
+<div class="page-wrapper">
+    <div id="access-denied">
+        <i class="fa-solid fa-lock"></i>
+        หน้านี้สำหรับ Role Admin เท่านั้นค่ะ
+    </div>
+
+    <div id="page-content">
+        <div class="header-title-zone">
+            <h1><i class="fa-solid fa-sliders"></i> ตั้งค่าโหมดโหวต</h1>
+            <p>เลือกโหมด Token และเปิด/ปิดโหวตของแต่ละแคมเปญ Major Vote</p>
+        </div>
+
+        <div class="mode-legend">
+            <div><b>Burned</b> — Token ที่ใช้โหวตถูกหักถาวร ไม่ได้คืน</div>
+            <div><b>Locked</b> — Token ถูกล็อกไว้ ได้คืนครบ 100% เมื่อปิดโหวต</div>
+            <div><b>Partially Burned</b> — ได้คืนบางส่วนตาม % ที่กำหนด เมื่อปิดโหวต</div>
+            <div style="margin-top:4px; color:#999;">ระบบคืน Token อัตโนมัติทันทีที่เปลี่ยนสถานะเป็น Closed · คะแนนโหวตของเมมเบอร์ไม่ลดลง · คนที่โหวตไปแล้วได้คืนตามโหมดตอนที่โหวต</div>
+        </div>
+
+        <div class="campaign-list" id="campaign-list">
+            <div class="loading-state"><i class="fa-solid fa-spinner fa-spin"></i> กำลังโหลดข้อมูล...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+  let user = null;
+  let campaignCache = [];
+  // ค่าที่แอดมินกำลังแก้อยู่ (ยังไม่บันทึก) แยกตามแคมเปญ
+  const drafts = {};
+  const MODE_LABELS = { burn: 'Burned', lock: 'Locked', partial: 'Partially Burned' };
+  const TOKEN_LABELS = { token: 'Token', getoken: 'GE Token', gift: 'Gift (Cookie)', cookie: 'Cookie' };
+
+  function goBack() {
+    if (document.referrer && window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.location.href = 'admin';
+    }
+  }
+
+  function isOpenStatus(s) { return String(s || '').toLowerCase() === 'open'; }
+  function fmt(n) { return Number(n || 0).toLocaleString(); }
+
+  async function loadCampaigns() {
+    const list = document.getElementById('campaign-list');
+    try {
+      const res = await blm48AdminListVoteCampaigns(user.username);
+      if (!res || res.status !== 'success') { list.innerHTML = `<div class="empty-state">${escapeHtml((res && res.message) || 'โหลดข้อมูลไม่สำเร็จ')}</div>`; return; }
+      campaignCache = res.data || [];
+      campaignCache.forEach(c => {
+        drafts[c.voteCollectionId] = {
+          mechanic: c.tokenMechanic || 'burn',
+          pct: Number(c.refundPercent) || 0,
+          status: isOpenStatus(c.status) ? 'Open' : 'Closed'
+        };
+      });
+      renderCampaigns();
+    } catch (e) {
+      list.innerHTML = `<div class="empty-state">เชื่อมต่อเซิร์ฟเวอร์ไม่ได้</div>`;
+    }
+  }
+
+  function renderCampaigns() {
+    const list = document.getElementById('campaign-list');
+    if (campaignCache.length === 0) {
+      list.innerHTML = `<div class="empty-state"><i class="fa-solid fa-crown"></i>ยังไม่มีแคมเปญโหวตในระบบ</div>`;
+      return;
+    }
+    list.innerHTML = campaignCache.map((c, i) => {
+      const d = drafts[c.voteCollectionId];
+      const open = isOpenStatus(c.status);
+      const tokenType = String(c.tokenType || '').toLowerCase();
+      const isGift = tokenType === 'gift';
+      const modeBtn = (m) => `<button type="button" class="mode-btn ${m} ${d.mechanic === m ? 'active' : ''}" onclick="setMode(${i}, '${m}')">${MODE_LABELS[m]}</button>`;
+      return `
+        <div class="campaign-card">
+          <div class="cc-head">
+            <div style="min-width:0;">
+              <div class="cc-title">${escapeHtml(c.title || c.voteCollectionId)}</div>
+              <div class="cc-id">${escapeHtml(c.voteCollectionId)} · ${escapeHtml(TOKEN_LABELS[tokenType] || c.tokenType || '-')}</div>
+            </div>
+            <span class="status-pill ${open ? 'open' : 'closed'}">${open ? 'OPEN' : 'CLOSED'}</span>
+          </div>
+
+          <div class="cc-stats">
+            <div class="cc-stat"><div class="v">${fmt(c.voterCount)}</div><div class="k">คนโหวต</div></div>
+            <div class="cc-stat"><div class="v">${fmt(c.tokensUsed)}</div><div class="k">Token ที่ใช้</div></div>
+            <div class="cc-stat"><div class="v">${fmt(c.pendingRefund)}</div><div class="k">รอคืน</div></div>
+            <div class="cc-stat"><div class="v">${fmt(c.refunded)}</div><div class="k">คืนแล้ว</div></div>
+          </div>
+
+          <div class="field-label">โหมด Token</div>
+          <div class="mode-seg">${modeBtn('burn')}${modeBtn('lock')}${modeBtn('partial')}</div>
+          <div class="pct-row ${d.mechanic === 'partial' ? 'show' : ''}">
+            คืน <input type="number" min="1" max="99" step="1" value="${d.pct || ''}" placeholder="เช่น 30" oninput="setPct(${i}, this.value)"> % เมื่อปิดโหวต
+          </div>
+          ${isGift ? `<div class="cc-note"><i class="fa-solid fa-circle-info"></i> แคมเปญนี้โหวตด้วย Gift (Cookie) ซึ่งไม่ได้ใช้โหมด Token — โหมดจะมีผลกับการโหวตด้วย Token / GE Token เท่านั้น</div>` : ''}
+
+          <div class="field-label">สถานะ</div>
+          <select class="status-select" onchange="setStatus(${i}, this.value)">
+            <option value="Open" ${d.status === 'Open' ? 'selected' : ''}>Open (เปิดรับโหวต)</option>
+            <option value="Closed" ${d.status === 'Closed' ? 'selected' : ''}>Closed (ปิดโหวต + คืน Token)</option>
+          </select>
+
+          <button type="button" class="btn-primary" id="save-btn-${i}" onclick="saveCampaign(${i})"><i class="fas fa-check"></i> บันทึก</button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function setMode(i, mechanic) {
+    const c = campaignCache[i];
+    drafts[c.voteCollectionId].mechanic = mechanic;
+    renderCampaigns();
+  }
+  function setPct(i, value) {
+    drafts[campaignCache[i].voteCollectionId].pct = value === '' ? 0 : Number(value);
+  }
+  function setStatus(i, value) {
+    drafts[campaignCache[i].voteCollectionId].status = value;
+  }
+
+  async function saveCampaign(i) {
+    const c = campaignCache[i];
+    const d = drafts[c.voteCollectionId];
+    const wasOpen = isOpenStatus(c.status);
+    const pct = d.mechanic === 'partial' ? d.pct : 0;
+
+    if (d.mechanic === 'partial' && (!Number.isInteger(pct) || pct < 1 || pct > 99)) {
+      Swal.fire('กรุณากำหนด %', 'Partially Burned ต้องกำหนด % ที่คืนเป็นจำนวนเต็ม 1–99', 'warning');
+      return;
+    }
+
+    // ยืนยันก่อนทำรายการที่ย้อนกลับไม่ได้ / มีผลกับคนที่โหวตไปแล้ว
+    const notes = [];
+    const modeChanged = d.mechanic !== (c.tokenMechanic || 'burn') || pct !== (Number(c.refundPercent) || 0);
+    if (modeChanged && Number(c.voteCount) > 0) {
+      notes.push('มีคนโหวตไปแล้ว — คนที่โหวตก่อนหน้านี้ยังได้คืนตามโหมดเดิมตอนที่โหวต โหมดใหม่มีผลกับการโหวตครั้งถัดไปเท่านั้น');
+    }
+    if (wasOpen && d.status === 'Closed') {
+      notes.push(Number(c.pendingRefund) > 0
+        ? `ปิดโหวตแล้วระบบจะคืน Token ประมาณ <b>${fmt(c.pendingRefund)}</b> ให้ผู้โหวต ${fmt(c.voterCount)} คนทันที (ย้อนกลับไม่ได้)`
+        : 'ปิดโหวตแคมเปญนี้ (ไม่มี Token ที่ต้องคืน)');
+    }
+    const modeText = d.mechanic === 'partial' ? `Partially Burned (คืน ${pct}%)` : MODE_LABELS[d.mechanic];
+    const confirm = await Swal.fire({
+      title: 'บันทึกการตั้งค่า?',
+      html: `<b>${escapeHtml(c.title || c.voteCollectionId)}</b><br>โหมด: ${modeText} · สถานะ: ${d.status}` +
+            (notes.length ? `<div style="text-align:left; font-size:13px; margin-top:12px; color:#8a4b00;">${notes.map(n => '• ' + n).join('<br>')}</div>` : ''),
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#ff85a2',
+      confirmButtonText: 'บันทึก',
+      cancelButtonText: 'ยกเลิก'
+    });
+    if (!confirm.isConfirmed) return;
+
+    const btn = document.getElementById('save-btn-' + i);
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึก...';
+    try {
+      const res = await blm48AdminUpdateVoteCampaign(user.username, c.voteCollectionId, d.mechanic, pct, d.status);
+      if (res && res.status === 'success') {
+        const refundText = Number(res.refundedTotal) > 0 ? `คืน Token ${fmt(res.refundedTotal)} ให้ ${fmt(res.refundedUsers)} คนแล้ว` : '';
+        await Swal.fire({ icon: 'success', title: 'บันทึกเรียบร้อย', text: refundText, timer: refundText ? 2500 : 1200, showConfirmButton: false });
+      } else {
+        await Swal.fire('เกิดข้อผิดพลาด', (res && res.message) || 'ไม่สามารถบันทึกได้', 'error');
+      }
+    } catch (e) {
+      await Swal.fire('การเชื่อมต่อขัดข้อง', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้งในภายหลัง', 'error');
+    }
+    loadCampaigns();
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    user = getUserSession();
+    if (!user) {
+      window.location.href = 'login';
+      return;
+    }
+    if (!(user.is_admin === true || (user.role && user.role.toLowerCase() === 'admin'))) {
+      document.getElementById('access-denied').style.display = 'block';
+      return;
+    }
+    document.getElementById('page-content').style.display = 'block';
+    loadCampaigns();
+  });
+</script>
+</body>
+</html>

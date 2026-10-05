@@ -646,6 +646,13 @@ function blm48AdminGetStockSummary(adminUsername) {
 
 // Redeem Code management (admin.html "จัดการโค้ด Redeem") - one code can now carry several
 // reward rows at once (e.g. Token + Cookie together), stored in the code_rewards table.
+// Major Vote: โหมด Token (burn/lock/partial) + % คืน + เปิด/ปิดโหวต (ปิดแล้วระบบคืน Token อัตโนมัติ)
+function blm48AdminListVoteCampaigns(adminUsername) {
+  return blm48Rpc('admin_list_vote_campaigns', { p_admin_username: adminUsername });
+}
+function blm48AdminUpdateVoteCampaign(adminUsername, collectionId, tokenMechanic, refundPercent, status) {
+  return blm48Rpc('admin_update_vote_campaign', { p_admin_username: adminUsername, p_collection_id: collectionId, p_token_mechanic: tokenMechanic, p_refund_percent: refundPercent, p_status: status });
+}
 function blm48AdminListCodes(adminUsername) {
   return blm48Rpc('admin_list_codes', { p_admin_username: adminUsername });
 }
