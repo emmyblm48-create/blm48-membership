@@ -653,6 +653,18 @@ function blm48AdminListVoteCampaigns(adminUsername) {
 function blm48AdminUpdateVoteCampaign(adminUsername, collectionId, tokenMechanic, refundPercent, status) {
   return blm48Rpc('admin_update_vote_campaign', { p_admin_username: adminUsername, p_collection_id: collectionId, p_token_mechanic: tokenMechanic, p_refund_percent: refundPercent, p_status: status });
 }
+// สร้างกิจกรรมโหวตใหม่ (แยกจากแคมเปญคุกกี้) - candidates: [{ name, profile, thankYouCard }]
+function blm48AdminListVoteMembers(adminUsername) {
+  return blm48Rpc('admin_list_vote_members', { p_admin_username: adminUsername });
+}
+function blm48AdminCreateVoteEvent(adminUsername, ev) {
+  return blm48Rpc('admin_create_vote_event', {
+    p_admin_username: adminUsername, p_title: ev.title, p_description: ev.description, p_cover_image: ev.coverImage,
+    p_start_time: ev.startTime, p_end_time: ev.endTime, p_status: ev.status,
+    p_token_type: ev.tokenType, p_enable_gift: ev.enableGift, p_token_mechanic: ev.tokenMechanic, p_refund_percent: ev.refundPercent,
+    p_candidates: ev.candidates
+  });
+}
 function blm48AdminListCodes(adminUsername) {
   return blm48Rpc('admin_list_codes', { p_admin_username: adminUsername });
 }

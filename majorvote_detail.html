@@ -337,7 +337,7 @@
 
     async function initDetailPage() {
         if (!campaignId) {
-            Swal.fire('ข้อผิดพลาด', 'ไม่พบรหัสกิจกรรมแคมเปญโหวตในระบบ', 'error').then(() => window.history.back());
+            Swal.fire('ข้อผิดพลาด', 'ไม่พบรหัสกิจกรรมโหวตในระบบ', 'error').then(() => window.history.back());
             return;
         }
         renderWalletStrip();
@@ -544,7 +544,7 @@
 
         const list = activeGroup === 'All' ? votingCandidates : votingCandidates.filter(m => getCandidateGroup(m.MemberName) === activeGroup);
         if (list.length === 0) {
-            container.innerHTML = `<div style="text-align:center; color:#999; padding:20px;">ไม่มีข้อมูลผู้สมัครในแคมเปญโหวตนี้</div>`;
+            container.innerHTML = `<div style="text-align:center; color:#999; padding:20px;">ไม่มีข้อมูลผู้สมัครในกิจกรรมโหวตนี้</div>`;
             return;
         }
 
