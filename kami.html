@@ -83,19 +83,20 @@
             text-decoration: none; color: inherit; cursor: pointer;
             display: inline-flex; flex-direction: column; align-items: center;
         }
-        .kami-avatar-frame { position: relative; width: 112px; height: 112px; }
+        /* กรอบรูปใช้สีประจำวงของเมมเบอร์ (BLM48 = เหลือง, NPT48 = ฟ้า) เหมือนหน้า search / member */
+        .kami-avatar-frame { position: relative; width: 104px; height: 104px; }
         .kami-img {
-            width: 112px; height: 112px; border-radius: 50%; object-fit: cover; display: block;
-            border: 3px solid transparent;
-            background: linear-gradient(#ffe5ec, #ffe5ec) padding-box,
-                        linear-gradient(135deg, #d896c8, #f48fb1) border-box;
+            width: 104px; height: 104px; border-radius: 50%; object-fit: cover; display: block;
+            border: 3px solid var(--group-color, #ffc107); background: #fdfdfd;
         }
+        /* ป้ายสีเดียวกับ .my-kami-days (search.html) / .kami-days-badge (member.html) */
         .kami-days-badge {
-            position: relative; margin-top: -16px; z-index: 3;
-            background: linear-gradient(90deg, #d39bc8, #f48fb1);
-            color: #fff; font-size: 13.5px; font-weight: 500; white-space: nowrap;
-            padding: 3px 12px; border-radius: 20px; border: 2px solid #fff;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+            position: relative; margin-top: -14px; z-index: 3;
+            display: inline-flex; align-items: center; gap: 5px;
+            background: linear-gradient(135deg, #ffe08a, #ffc107);
+            color: #6b4a00; font-size: 11px; font-weight: bold; letter-spacing: 0.3px;
+            padding: 4px 14px; border-radius: 20px; white-space: nowrap;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
         }
         .kami-grad-cap {
             position: absolute; bottom: 14px; right: 4px; z-index: 4;
@@ -103,7 +104,7 @@
             display: flex; align-items: center; justify-content: center;
             font-size: 11px; border: 2px solid #fff;
         }
-        .kami-title-name { font-size: 16px; font-weight: 500; color: #222; margin-top: 12px; display: flex; align-items: center; gap: 6px; }
+        .kami-title-name { font-size: 17px; font-weight: 600; color: #222; margin-top: 10px; text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
         .kami-fullname { font-size: 15px; color: #222; margin-top: 4px; }
 
         /* ❌ ปุ่มลบ (ไอคอน X) ใช้ทั้ง Kami-Oshi และ Oshi */
@@ -137,9 +138,8 @@
         .oshi-pic-wrapper { position: relative; width: 54px; height: 54px; flex-shrink: 0; }
         .oshi-pic {
             width: 54px; height: 54px; border-radius: 50%; object-fit: cover; display: block;
-            border: 2px solid transparent;
-            background: linear-gradient(#ffe5ec, #ffe5ec) padding-box,
-                        linear-gradient(135deg, #f48fb1, #7dd3c0) border-box;
+            background: #fdfdfd; border: 2px solid var(--group-color, #ffc107);
+            box-shadow: 0 0 0 2px #fffdf0;
         }
         .oshi-grad-cap {
             position: absolute; bottom: -2px; right: -4px; z-index: 2;
@@ -219,6 +219,12 @@
         let memberFullDataMap = {}; // 🌟 เพิ่มกล่องเก็บตัวเลขสถิติจริง (Kami, Oshi, Total Cookie)
         let rawOshiBoardData = null; 
         let memberFullNameMap = {}; // ชื่อจริงภาษาอังกฤษของเมมเบอร์ (บรรทัดที่สองใต้ชื่อ)
+        let memberGroupMap = {};    // วงของเมมเบอร์ (BLM48 / NPT48) ใช้เลือกสีกรอบรูป
+
+        // 🎨 สีกรอบรูปประจำวง - ค่าเดียวกับหน้า search.html (BLM48 = เหลือง, NPT48 = ฟ้า)
+        function getGroupColor(memberKey) {
+            return memberGroupMap[memberKey] === 'NPT48' ? '#6acbfc' : '#ffc107';
+        }
 
         window.onload = async () => {
             if (!user || !currentUsername) {
@@ -317,22 +323,30 @@
         // 📇 ดึงชื่อจริง (Full Name EN) ของเมมเบอร์ทุกคน - โชว์จากแคชก่อนแล้วค่อยอัปเดตเงียบๆ
         async function fetchMembersFullNames() {
             const cacheKey = 'blm48_members_fullname_cache';
+            const groupCacheKey = 'blm48_members_group_cache';
             try {
                 const cached = localStorage.getItem(cacheKey);
                 if (cached) memberFullNameMap = JSON.parse(cached);
+                const cachedGroup = localStorage.getItem(groupCacheKey);
+                if (cachedGroup) memberGroupMap = JSON.parse(cachedGroup);
             } catch (e) {}
 
             try {
                 const res = await blm48GetAllMembers();
                 if (res && res.status === "success" && Array.isArray(res.data)) {
                     const tempMap = {};
+                    const tempGroupMap = {};
                     res.data.forEach(m => {
                         if (!m.name) return;
+                        const key = m.name.toString().trim().toLowerCase();
                         const fullName = m['Full Name(EN)'] || m.full_name || '';
-                        if (fullName) tempMap[m.name.toString().trim().toLowerCase()] = fullName.toString().trim();
+                        if (fullName) tempMap[key] = fullName.toString().trim();
+                        tempGroupMap[key] = (m.group_name || 'BLM48').toString().trim().toUpperCase();
                     });
                     memberFullNameMap = tempMap;
+                    memberGroupMap = tempGroupMap;
                     localStorage.setItem(cacheKey, JSON.stringify(tempMap));
+                    localStorage.setItem(groupCacheKey, JSON.stringify(tempGroupMap));
                     if (rawOshiBoardData) renderContent(rawOshiBoardData);
                 }
             } catch (err) {
@@ -365,6 +379,7 @@ function hideThemeLoadingScreen() {
             }
             if (Object.keys(memberFullNameMap).length === 0) {
                 try { memberFullNameMap = JSON.parse(localStorage.getItem('blm48_members_fullname_cache')) || {}; } catch (e) {}
+                try { memberGroupMap = JSON.parse(localStorage.getItem('blm48_members_group_cache')) || {}; } catch (e) {}
             }
 
             // 👑 เรนเดอร์ คามิโอชิหลัก (Kami-Oshi) + เปลี่ยนเป็นเรียก openMemberProfile
@@ -384,10 +399,10 @@ function hideThemeLoadingScreen() {
                         </button>
                         <a href="javascript:void(0);" onclick="openMemberProfile('${escapeAttr(kamiName)}', '${escapeAttr(getImg(rawImg))}', '${isGraduated ? 'Graduated' : 'Active'}')" class="member-profile-link">
                             <div class="kami-avatar-frame">
-                                <img src="${getImg(rawImg)}" class="kami-img" alt="${escapeAttr(kamiName)}" loading="lazy" onerror="${clearBrokenImg}">
+                                <img src="${getImg(rawImg)}" class="kami-img" style="--group-color: ${getGroupColor(kamiKey)};" alt="${escapeAttr(kamiName)}" loading="lazy" onerror="${clearBrokenImg}">
                                 ${isGraduated ? `<div class="kami-grad-cap"><i class="fa-solid fa-graduation-cap"></i></div>` : ''}
                             </div>
-                            <span class="kami-days-badge">Kami-Oshi ${Number(data.kamioshiDays) || 1} Days</span>
+                            <span class="kami-days-badge"><i class="fa-solid fa-crown"></i> Kami-Oshi ${Number(data.kamioshiDays) || 1} Days</span>
                             <div class="kami-title-name">${escapeHtml(kamiName)}${isGraduated ? ` <span class="badge-graduated">GRADUATED</span>` : ''}</div>
                             ${kamiFullName ? `<div class="kami-fullname">${escapeHtml(kamiFullName)}</div>` : ''}
                         </a>
@@ -415,7 +430,7 @@ function hideThemeLoadingScreen() {
                         <div class="oshi-box-card">
                             <a href="javascript:void(0);" onclick="openMemberProfile('${escapeAttr(oshiName)}', '${escapeAttr(getImg(rawImg))}', '${isGraduated ? 'Graduated' : 'Active'}')" class="oshi-card-link">
                                 <div class="oshi-pic-wrapper">
-                                    <img src="${getImg(rawImg)}" class="oshi-pic" alt="${escapeAttr(oshiName)}" loading="lazy" onerror="${clearBrokenImg}">
+                                    <img src="${getImg(rawImg)}" class="oshi-pic" style="--group-color: ${getGroupColor(oshiKey)};" alt="${escapeAttr(oshiName)}" loading="lazy" onerror="${clearBrokenImg}">
                                     ${isGraduated ? `<div class="oshi-grad-cap"><i class="fa-solid fa-graduation-cap"></i></div>` : ''}
                                 </div>
                                 <div class="oshi-info-center">
