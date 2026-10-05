@@ -662,8 +662,18 @@ function blm48AdminCreateVoteEvent(adminUsername, ev) {
     p_admin_username: adminUsername, p_title: ev.title, p_description: ev.description, p_cover_image: ev.coverImage,
     p_start_time: ev.startTime, p_end_time: ev.endTime, p_status: ev.status,
     p_token_type: ev.tokenType, p_enable_gift: ev.enableGift, p_token_mechanic: ev.tokenMechanic, p_refund_percent: ev.refundPercent,
-    p_candidates: ev.candidates
+    p_candidates: ev.candidates, p_checkpoints: ev.checkpoints || null
   });
+}
+// ผลด่วน: อันดับคะแนน ณ เวลาที่ตั้งไว้ เก็บหลังบ้านเท่านั้น (แอดมินดูย้อนหลังได้ หน้าบ้านไม่แสดง)
+function blm48AdminListVoteCheckpoints(adminUsername, collectionId) {
+  return blm48Rpc('admin_list_vote_checkpoints', { p_admin_username: adminUsername, p_collection_id: collectionId });
+}
+function blm48AdminAddVoteCheckpoint(adminUsername, collectionId, scheduledAt, label) {
+  return blm48Rpc('admin_add_vote_checkpoint', { p_admin_username: adminUsername, p_collection_id: collectionId, p_scheduled_at: scheduledAt, p_label: label || null });
+}
+function blm48AdminDeleteVoteCheckpoint(adminUsername, checkpointId) {
+  return blm48Rpc('admin_delete_vote_checkpoint', { p_admin_username: adminUsername, p_checkpoint_id: checkpointId });
 }
 function blm48AdminListCodes(adminUsername) {
   return blm48Rpc('admin_list_codes', { p_admin_username: adminUsername });
