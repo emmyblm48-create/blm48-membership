@@ -21,6 +21,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="assets/js/supabase-client.js"></script>
     <script src="assets/js/common.js"></script>
+    <script src="assets/js/admin-pin.js"></script>
 
     <style>
         :root {
@@ -214,6 +215,10 @@
         <div class="header-title-zone">
             <h1><i class="fa-solid fa-crown"></i> จัดการกิจกรรมโหวต</h1>
             <p>สร้างกิจกรรมโหวตใหม่ เลือกโหมด Token และเปิด/ปิดโหวตของแต่ละกิจกรรม Major Vote</p>
+        </div>
+
+        <div class="menu-section" style="margin-bottom:16px;">
+            <a class="menu-item" href="admin_votes_access"><div class="menu-icon icon-purple"><i class="fas fa-clock-rotate-left"></i></div><span class="menu-text">ประวัติการเข้าหน้านี้<span class="menu-sub">ใครเข้ามาเมื่อไหร่ และการใส่ PIN ผิด</span></span><i class="fas fa-chevron-right menu-arrow"></i></a>
         </div>
 
         <div class="mode-legend">
@@ -768,7 +773,7 @@
     btn.innerHTML = '<i class="fas fa-check"></i> สร้างกิจกรรมโหวต';
   }
 
-  window.addEventListener('DOMContentLoaded', () => {
+  window.addEventListener('DOMContentLoaded', async () => {
     user = getUserSession();
     if (!user) {
       window.location.href = 'login';
@@ -778,6 +783,8 @@
       document.getElementById('access-denied').style.display = 'block';
       return;
     }
+    // 🔒 ต้องใส่ PIN ก่อนเห็นเนื้อหา (บันทึกประวัติการเข้าหน้าไว้ที่เซิร์ฟเวอร์)
+    await blm48RequireAdminPin(user, { page: 'admin_votes', cancelUrl: 'admin' });
     document.getElementById('page-content').style.display = 'block';
     loadCampaigns();
   });
