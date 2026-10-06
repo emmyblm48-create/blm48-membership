@@ -586,13 +586,13 @@
         let buttons = '';
         if (types.includes('token')) {
             buttons += `
-                <button class="vote-action-btn" onclick="handleVoteClick('${escapeAttr(mName)}', 'Token')">
+                <button class="vote-action-btn" onclick="handleVoteClick('${escapeAttr(mName)}', 'Token', '${escapeAttr(mImg)}')">
                     Vote
                 </button>`;
         }
         if (types.includes('getoken')) {
             buttons += `
-                <button class="getoken-action-btn" onclick="handleVoteClick('${escapeAttr(mName)}', 'GEToken')">
+                <button class="getoken-action-btn" onclick="handleVoteClick('${escapeAttr(mName)}', 'GEToken', '${escapeAttr(mImg)}')">
                     GE Vote
                 </button>`;
         }
@@ -654,14 +654,11 @@
         container.innerHTML = `<div class="ranking-heading">${escapeHtml(campaignTitle || 'Major Vote')}</div>${rows}`;
     }
 
-    const TOKEN_TYPE_LABELS = { Token: 'BLM48 Token', GEToken: 'GE Token' };
-
-    function handleVoteClick(candidateName, tokenType) {
+    // กด Vote / GE Vote แล้วไปหน้าโหวตแยก (majorvote_vote): เลือกจำนวน > Confirm transaction > Submission completed > Thank you card
+    function handleVoteClick(candidateName, tokenType, candidateImg) {
         tokenType = tokenType === 'GEToken' ? 'GEToken' : 'Token';
-        const tokenLabel = TOKEN_TYPE_LABELS[tokenType];
 
-        const username = getUsername();
-        if (!username) {
+        if (!getUsername()) {
             Swal.fire({
                 title: 'กรุณาเข้าสู่ระบบ',
                 text: 'คุณต้องเข้าสู่ระบบก่อนทำการลงคะแนนโหวต',
@@ -672,110 +669,8 @@
             return;
         }
 
-        const balance = getUserBalance(tokenType);
-
-        Swal.fire({
-            title: `ยืนยันการลงคะแนนโหวตให้ ${candidateName}`,
-            text: `ลงคะแนนโดยใช้ ${tokenLabel} (ยอดคงเหลือ ${balance.toLocaleString()}) — ${getMechanicInfo(campaignMechanic, campaignRefundPercent).confirmNote}`,
-            input: 'number',
-            inputAttributes: { min: 1, step: 1 },
-            showCancelButton: true,
-            confirmButtonText: 'ยืนยัน',
-            cancelButtonText: 'ยกเลิก',
-            confirmButtonColor: 'var(--primary-pink)',
-            inputValidator: (value) => {
-                if (!value || value.trim() === "" || Number(value) <= 0 || value.includes('.')) {
-                    return `ขั้นต่ำในการโหวตคือ 1 ${tokenLabel}`;
-                }
-                if (Number(value) > balance) {
-                    return `${tokenLabel} ไม่พอ (คุณมี ${balance.toLocaleString()})`;
-                }
-            }
-        }).then(async (result) => {
-            if (result.isConfirmed && result.value) {
-                const sanitizedAmount = Math.floor(Number(result.value));
-                executeVoteAPI(candidateName, sanitizedAmount, tokenType);
-            }
-        });
-    }
-
-    async function executeVoteAPI(candidateName, voteAmount, tokenType) {
-        tokenType = tokenType === 'GEToken' ? 'GEToken' : 'Token';
-
-        Swal.fire({
-            title: 'กำลังลงคะแนน...',
-            allowOutsideClick: false,
-            didOpen: () => Swal.showLoading()
-        });
-
-        try {
-            const username = getUsername();
-            const res = await blm48SubmitMajorVote(username, campaignId, candidateName, voteAmount, tokenType);
-
-            if (res.status === "success") {
-                // เช็กชนิดของ Token เพื่อแสดงคำให้ถูกต้อง (ถ้าหลังบ้านไม่ส่งมาให้ใช้ชนิดที่เราส่งไปเป็นค่าเริ่มต้น)
-                const usedTokenType = res.tokenType ? res.tokenType : tokenType;
-                const usedMechanic = normalizeMechanic(res.tokenMechanic || campaignMechanic);
-                const refundNote = usedMechanic === 'lock'
-                    ? ' (Locked: จะได้คืนครบเมื่อปิดโหวต)'
-                    : usedMechanic === 'partial'
-                        ? ` (Partially Burned: จะได้คืน ${Number(res.refundPercent ?? campaignRefundPercent) || 0}% เมื่อปิดโหวต)`
-                        : '';
-
-                // อัปเดตยอดคงเหลือใน session ให้ตรงกับหลังบ้านทันที
-                try {
-                    const sessionUpdate = JSON.parse(localStorage.getItem('bnl_session'));
-                    const userData = sessionUpdate.data || sessionUpdate.user || sessionUpdate;
-                    if (res.newBalance !== undefined) {
-                        if (usedTokenType === 'GEToken') userData.GEToken = Number(res.newBalance);
-                        else userData.token = Number(res.newBalance);
-                    } else {
-                        if (usedTokenType === 'GEToken') userData.GEToken = Math.max(0, Number(getUserBalance('GEToken')) - voteAmount);
-                        else userData.token = Math.max(0, Number(getUserBalance('Token')) - voteAmount);
-                    }
-                    localStorage.setItem('bnl_session', JSON.stringify(sessionUpdate));
-                    renderWalletStrip();
-                } catch (e) { console.error("Session Update Error:", e); }
-
-                if (res.thankYouCard && res.thankYouCard.trim() !== "") {
-                    Swal.fire({
-                        title: 'การลงคะแนนโหวตสำเร็จ',
-                        text: `ระบบได้ทำการหัก ${usedTokenType} และลงคะแนนโหวตจำนวน ${Number(voteAmount).toLocaleString()} ${usedTokenType}เรียบร้อยแล้ว${refundNote}`,
-                        imageUrl: fixSecureImageUrl(res.thankYouCard),
-                        imageWidth: 280,
-                        imageAlt: 'Thank You Card',
-                        confirmButtonText: 'ตกลง',
-                        confirmButtonColor: 'var(--primary-pink)'
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'ดำเนินการลงคะแนนโหวตสำเร็จ',
-                        text: `ระบบได้ทำการหัก ${usedTokenType} และบันทึกคะแนนสะสมจำนวน ${Number(voteAmount).toLocaleString()} ${usedTokenType}เรียบร้อยแล้ว${refundNote}`,
-                        confirmButtonText: 'ตกลง',
-                        confirmButtonColor: 'var(--primary-pink)'
-                    });
-                }
-                fetchCandidatesFromBackend();
-            } else {
-                Swal.fire({
-                    title: 'การลงคะแนนโหวตไม่สำเร็จ',
-                    text: res.message || 'เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์หรือการหักเหรียญ',
-                    icon: 'error',
-                    confirmButtonText: 'ตกลง',
-                    confirmButtonColor: 'var(--primary-pink)'
-                });
-            }
-        } catch (err) {
-            console.error("Submit Vote Error:", err);
-            Swal.fire({
-                title: 'เกิดข้อผิดพลาด',
-                text: 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้ในขณะนี้ กรุณาลองใหม่อีกครั้งในภายหลัง',
-                icon: 'error',
-                confirmButtonText: 'ตกลง',
-                confirmButtonColor: 'var(--primary-pink)'
-            });
-        }
+        const params = new URLSearchParams({ id: campaignId, candidate: candidateName, type: tokenType, img: candidateImg || '' });
+        window.location.href = `majorvote_vote?${params.toString()}`;
     }
 
     // =========================================================
