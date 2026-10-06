@@ -489,6 +489,16 @@
         renderEntries(btn.dataset.type);
     });
 
+    // เปิดหน้าพร้อมแท็บที่ระบุใน ?tab= (เช่น history?tab=vote จากหน้า Major Vote)
+    (function applyInitialTab() {
+        const tab = new URLSearchParams(location.search).get('tab');
+        const btn = tab && document.querySelector(`.filter-tab[data-type="${CSS.escape(tab)}"]`);
+        if (!btn) return;
+        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = tab;
+    })();
+
     // เรียกโหลดข้อมูลทันทีที่เปิดหน้า
     loadHistory();
 </script>
