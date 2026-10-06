@@ -836,7 +836,7 @@ function updateSubPageIcon(imgId, fallbackId, iconUrl) {
             item.style.cursor = "pointer";
             item.addEventListener("click", (e) => {
               if (e.target.closest(".btn-del-item")) return;
-              window.location.href = "my_preorders_history.html";
+              window.location.href = "my_preorders.html?tab=shipped";
             });
           }
           // แจ้งเตือนจากเมมเบอร์: กดรูป/ชื่อแล้วไปหน้าเมมเบอร์ (แจ้งเตือนเก็บแค่ชื่อที่แสดง ไม่มี username ของแฟนคลับ เลยลิงก์ได้เฉพาะเมมเบอร์)

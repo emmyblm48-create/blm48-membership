@@ -30,135 +30,125 @@
         * { box-sizing: border-box; }
         body {
             font-family: 'Quicksand', 'Kanit', sans-serif;
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            color: var(--text-dark);
-            background: #ffffff;
+            margin: 0; padding: 0; min-height: 100vh;
+            color: var(--text-dark); background: #ffffff;
         }
+
+        /* 📡 แถบบนสีขาว: ปุ่มย้อนกลับซ้าย + ชื่อหน้าตรงกลาง (แบบเดียวกับหน้า Kami / Inventory) */
         .top-navigation-bar {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: var(--glass-bg-strong);
-            -webkit-backdrop-filter: blur(var(--glass-blur-lg));
-            backdrop-filter: blur(var(--glass-blur-lg));
-            padding: 14px 16px;
-            border-bottom: 1px solid var(--glass-border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: var(--glass-shadow-sm);
+            position: sticky; top: 0; z-index: 100;
+            height: 56px; display: flex; align-items: center; justify-content: center;
+            background: #ffffff; border-bottom: 1px solid #e8e8e8;
+            padding-top: env(safe-area-inset-top, 0px); box-sizing: content-box;
         }
-        .back-circle-btn {
-            flex: 0 0 auto;
-            background: var(--glass-bg-strong);
-            -webkit-backdrop-filter: blur(var(--glass-blur-sm));
-            backdrop-filter: blur(var(--glass-blur-sm));
-            border: 1px solid var(--glass-border);
-            width: 38px; height: 38px; border-radius: 50%;
+        .nav-back-btn {
+            position: absolute; left: 6px; bottom: 6px;
+            width: 44px; height: 44px; background: none; border: none;
+            color: #222; font-size: 22px; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
-            color: var(--primary-pink); cursor: pointer; transition: 0.2s;
         }
-        .back-circle-btn:hover { background: var(--primary-pink); color: white; transform: scale(1.05); }
-        .top-bar-title { font-family: 'Quicksand', 'Kanit', sans-serif; font-weight: 600; font-size: 16px; color: #333; }
+        .top-bar-page-title { font-size: 18px; font-weight: 600; color: #222; }
 
-        .page-wrapper { max-width: 640px; margin: 0 auto; padding: 18px 12px 50px; }
-        @media (min-width: 768px) { .page-wrapper { max-width: 760px; padding: 24px 24px 60px; } }
-        @media (min-width: 1024px) { .page-wrapper { max-width: 900px; padding: 32px 32px 70px; } }
+        .page-wrapper { max-width: 720px; margin: 0 auto; padding: 16px 20px 50px; }
 
-        .header-title-zone { text-align: center; margin-bottom: 20px; }
-        .header-title-zone h1 {
-            color: var(--primary-pink);
-            font-family: 'Quicksand', 'Kanit', sans-serif;
-            font-size: 22px;
-            margin: 0 0 6px 0;
-            font-weight: 700;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
+        /* 🔀 สลับ รอจัดส่ง / จัดส่งแล้ว ในหน้าเดียว (เดิมแยกเป็น 2 หน้า) */
+        .segmented {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
+            background: #f2f2f5; border-radius: 12px; padding: 4px; margin-bottom: 18px;
         }
-        .header-title-zone p { color: #999; font-size: 13px; margin: 0; }
+        .segmented button {
+            border: none; background: none; border-radius: 9px; padding: 9px 8px; cursor: pointer;
+            font-family: 'Quicksand', 'Kanit', sans-serif; font-size: 14px; font-weight: 600; color: #777;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .segmented button.active { background: #fff; color: #222; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+        .seg-count {
+            min-width: 20px; padding: 0 6px; height: 20px; border-radius: 10px;
+            font-size: 11.5px; line-height: 20px; background: #e4e4e8; color: #666;
+        }
+        .segmented button.active .seg-count { background: var(--primary-pink); color: #fff; }
 
-        .preorder-orders-list { display: flex; flex-direction: column; gap: 12px; }
-        .preorder-order-card {
-            background: var(--glass-bg-strong);
-            -webkit-backdrop-filter: blur(var(--glass-blur));
-            backdrop-filter: blur(var(--glass-blur));
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 14px 16px;
-            box-shadow: var(--glass-shadow-sm);
+        .pending-note {
+            display: flex; gap: 10px; align-items: flex-start;
+            background: #fafafa; border-radius: 12px; padding: 12px 14px; margin-bottom: 16px;
+            font-size: 12.5px; color: #777; line-height: 1.5;
         }
-        .preorder-order-head {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 6px;
-        }
-        .preorder-order-title { font-weight: 700; color: #333; font-size: 14.5px; font-family: 'Quicksand', 'Kanit', sans-serif; }
-        .preorder-order-meta { font-size: 12px; color: #999; margin-bottom: 10px; }
-        .preorder-status-pill {
-            font-size: 11px;
-            font-weight: 700;
-            padding: 4px 12px;
-            border-radius: 999px;
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-        .preorder-status-pending { background: #fff3e0; color: #e08e2e; }
+        .pending-note i { color: #aaa; margin-top: 3px; }
 
-        .preorder-item-row {
-            display: flex; align-items: center; gap: 10px;
-            font-size: 12.5px; color: #555; background: #fdf7f8;
-            border-radius: 12px; padding: 8px 10px; margin-bottom: 6px;
+        /* 🧾 การ์ดคำสั่งซื้อ: พื้นขาวเงานุ่ม (แบบการ์ดยอดเงินหน้า Major Vote) */
+        .orders-list { display: flex; flex-direction: column; gap: 14px; }
+        .order-card {
+            background: #ffffff; border-radius: 16px; padding: 16px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
         }
-        .preorder-item-row:last-child { margin-bottom: 0; }
-        .preorder-item-thumb {
-            width: 30px; height: 30px; border-radius: 8px; object-fit: cover;
-            background: #f3f3f3; flex-shrink: 0;
+        .order-head {
+            display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+            padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid #f0f0f0;
         }
-        .preorder-item-icon {
-            width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
+        .order-title { font-weight: 700; font-size: 15px; color: #222; line-height: 1.35; min-width: 0; }
+        .order-status {
+            flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
+            font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px;
+        }
+        .order-status.is-pending { background: #fff3e0; color: #e08e2e; }
+        .order-status.is-shipped { background: #e6f9ed; color: #2e9e5b; }
+
+        .order-item {
+            display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
+        }
+        .order-item:last-of-type { margin-bottom: 0; }
+        .order-thumb, .order-item-icon {
+            width: 56px; height: 56px; border-radius: 12px; flex-shrink: 0;
+        }
+        .order-thumb { object-fit: cover; background: #f6f6f8; }
+        .order-item-icon {
             display: flex; align-items: center; justify-content: center;
-            background: #ffe4e1; color: var(--primary-pink);
+            background: #f6f6f8; color: #999; font-size: 20px;
         }
-        .preorder-random-tag {
-            margin-left: auto; font-size: 10px; font-weight: 700; color: #c9932c;
-            background: #fff6e0; padding: 2px 8px; border-radius: 999px; flex-shrink: 0;
+        .order-item-icon.is-gem { background: #dcefff; color: #339af0; }
+        .order-item-info { flex: 1; min-width: 0; }
+        .order-item-name {
+            font-size: 14px; font-weight: 500; color: #222;
+            overflow: hidden; text-overflow: ellipsis; display: -webkit-box;
+            -webkit-line-clamp: 2; -webkit-box-orient: vertical;
         }
-        .preorder-pending-note { font-size: 11.5px; color: #bbb; margin-top: 8px; font-style: italic; }
+        .order-item-sub { font-size: 12.5px; color: #999; margin-top: 2px; display: flex; align-items: center; gap: 6px; }
+        .random-tag {
+            font-size: 10.5px; font-weight: 700; color: #c9932c;
+            background: #fff6e0; padding: 2px 8px; border-radius: 999px;
+        }
 
-        .empty-state { text-align: center; color: #bbb; font-family: 'Quicksand', 'Kanit', sans-serif; font-size: 13px; padding: 60px 20px; }
-        .empty-state i { font-size: 30px; color: #ffd7e1; display: block; margin-bottom: 10px; }
-        .loading-state { text-align: center; color: #bbb; font-size: 13px; padding: 40px 20px; }
-
-        .history-link-row { display: flex; justify-content: center; margin: -8px 0 18px; }
-        .history-link-btn {
-            display: flex; align-items: center; gap: 6px;
-            font-size: 12.5px; font-weight: 600; color: var(--primary-pink);
-            background: #fff0f4; border: 1px solid #ffd7e1; border-radius: 999px;
-            padding: 7px 16px; text-decoration: none; transition: 0.2s;
+        .order-foot {
+            display: flex; align-items: flex-end; justify-content: space-between; gap: 10px;
+            margin-top: 14px; padding-top: 12px; border-top: 1px solid #f0f0f0;
         }
-        .history-link-btn:hover { background: var(--primary-pink); color: #fff; }
+        .order-dates { font-size: 12px; color: #999; line-height: 1.6; }
+        .order-total { text-align: right; flex-shrink: 0; }
+        .order-total-label { font-size: 12px; color: #999; }
+        .order-total-value { font-size: 16px; font-weight: 700; color: #222; }
+
+        .empty-state { text-align: center; color: #aaa; font-size: 13.5px; padding: 60px 20px; }
+        .empty-state i { font-size: 30px; color: #d5d5d5; display: block; margin-bottom: 12px; }
+        .empty-state a {
+            display: inline-block; margin-top: 14px; padding: 9px 18px; border-radius: 20px;
+            background: var(--primary-pink); color: #fff; text-decoration: none; font-weight: 600; font-size: 13.5px;
+        }
+        .loading-state { text-align: center; color: #aaa; font-size: 13.5px; padding: 40px 20px; }
     </style>
 </head>
 <body>
 
 <div class="top-navigation-bar">
-    <button type="button" class="back-circle-btn" onclick="goBack()" aria-label="ย้อนกลับ">
+    <button type="button" class="nav-back-btn" onclick="goBack()" aria-label="ย้อนกลับ">
         <i class="fa-solid fa-chevron-left"></i>
     </button>
-    <div class="top-bar-title">My Order</div>
+    <div class="top-bar-page-title">My Orders</div>
 </div>
 
 <div class="page-wrapper">
-    <div class="header-title-zone">
-        <h1><i class="fa-solid fa-box"></i> My Pre-orders</h1>
-        <p>Combine all pre-order requests and their shipping status</p>
-    </div>
-
-    <div class="history-link-row">
-        <a href="my_preorders_history" class="history-link-btn"><i class="fa-solid fa-clock-rotate-left"></i> รายการที่จัดส่งแล้ว</a>
+    <div class="segmented" role="tablist">
+        <button type="button" role="tab" id="tab-pending" onclick="selectTab('pending')">รอจัดส่ง <span class="seg-count" id="count-pending">0</span></button>
+        <button type="button" role="tab" id="tab-shipped" onclick="selectTab('shipped')">จัดส่งแล้ว <span class="seg-count" id="count-shipped">0</span></button>
     </div>
 
     <div id="orders-list">
@@ -168,6 +158,9 @@
 
 <script>
   let user = null;
+  let allOrders = null;
+  // เปิดแท็บตาม ?tab= (ลิงก์เก่า my_preorders_history จะ redirect มาที่ ?tab=shipped)
+  let currentTab = new URLSearchParams(location.search).get('tab') === 'shipped' ? 'shipped' : 'pending';
 
   function goBack() {
     if (document.referrer && window.history.length > 1) {
@@ -177,43 +170,91 @@
     }
   }
 
-  function renderOrders(orders) {
-    const list = document.getElementById('orders-list');
-    const pendingOrders = (orders || []).filter(o => o.status !== 'shipped');
+  function formatThaiDate(value) {
+    return value ? new Date(value).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+  }
 
-    if (pendingOrders.length === 0) {
-      list.innerHTML = `<div class="empty-state"><i class="fa-solid fa-box-open"></i>There is no order yet.</div>`;
+  function selectTab(tab) {
+    currentTab = tab;
+    history.replaceState(null, '', tab === 'shipped' ? '?tab=shipped' : location.pathname);
+    renderOrders();
+  }
+
+  function renderItem(it) {
+    if (it.kind === 'ge_token') {
+      return `
+        <div class="order-item">
+          <div class="order-item-icon is-gem"><i class="fas fa-gem"></i></div>
+          <div class="order-item-info">
+            <div class="order-item-name">${escapeHtml(it.label)}</div>
+            <div class="order-item-sub">+${Number(it.amount).toLocaleString()}</div>
+          </div>
+        </div>`;
+    }
+    const thumb = it.imageUrl
+      ? `<img class="order-thumb" src="${escapeAttr(it.imageUrl)}" loading="lazy" onerror="this.outerHTML='<div class=\\'order-item-icon\\'><i class=\\'fas fa-image\\'></i></div>'">`
+      : `<div class="order-item-icon"><i class="fas fa-image"></i></div>`;
+    const randomTag = it.isRandom ? '<span class="random-tag"><i class="fas fa-dice"></i> สุ่มลาย</span>' : '';
+    return `
+      <div class="order-item">
+        ${thumb}
+        <div class="order-item-info">
+          <div class="order-item-name">${escapeHtml(it.label)}</div>
+          <div class="order-item-sub">x1 ${randomTag}</div>
+        </div>
+      </div>`;
+  }
+
+  function renderOrders() {
+    const list = document.getElementById('orders-list');
+    document.getElementById('tab-pending').classList.toggle('active', currentTab === 'pending');
+    document.getElementById('tab-shipped').classList.toggle('active', currentTab === 'shipped');
+    if (!allOrders) return;
+
+    const pending = allOrders.filter(o => o.status !== 'shipped');
+    const shipped = allOrders.filter(o => o.status === 'shipped');
+    document.getElementById('count-pending').textContent = pending.length;
+    document.getElementById('count-shipped').textContent = shipped.length;
+
+    const isShippedTab = currentTab === 'shipped';
+    const orders = isShippedTab ? shipped : pending;
+
+    if (orders.length === 0) {
+      list.innerHTML = isShippedTab
+        ? `<div class="empty-state"><i class="fa-solid fa-box-open"></i>ยังไม่มีรายการที่จัดส่งแล้วค่ะ</div>`
+        : `<div class="empty-state"><i class="fa-solid fa-box-open"></i>ยังไม่มีคำสั่งซื้อที่รอจัดส่งค่ะ<br><a href="shop">ไปที่ Shop</a></div>`;
       return;
     }
 
-    list.innerHTML = pendingOrders.map(o => {
-      const statusHTML = '<span class="preorder-status-pill preorder-status-pending"><i class="fa-solid fa-hourglass-half"></i> รอจัดส่ง</span>';
-      const dt = o.createdAt ? new Date(o.createdAt).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+    const note = isShippedTab ? '' : `
+      <div class="pending-note"><i class="fa-solid fa-circle-info"></i>
+        <span>ลายการ์ดที่สุ่มได้ และ Token/Cookie/GE Token ที่ได้รับ จะเปิดเผยและเข้ากระเป๋าของคุณเมื่อสินค้าจัดส่งแล้วเท่านั้นค่ะ</span>
+      </div>`;
 
-      const itemsHTML = (o.items || []).map(it => {
-        if (it.kind === 'ge_token') {
-          return `<div class="preorder-item-row"><div class="preorder-item-icon"><i class="fas fa-gem"></i></div> ${escapeHtml(it.label)} +${Number(it.amount).toLocaleString()}</div>`;
-        }
-        const thumb = it.imageUrl
-          ? `<img class="preorder-item-thumb" src="${it.imageUrl}" onerror="this.style.visibility='hidden'">`
-          : `<div class="preorder-item-icon"><i class="fas fa-image"></i></div>`;
-        const randomTag = it.isRandom ? '<span class="preorder-random-tag"><i class="fas fa-dice"></i> สุ่มลาย</span>' : '';
-        return `<div class="preorder-item-row">${thumb} ${escapeHtml(it.label)} ${randomTag}</div>`;
-      }).join('');
-
-      const pendingNote = `<div class="preorder-pending-note"><i class="fa-solid fa-circle-info"></i> ลายการ์ดที่สุ่มได้ และ Token/Cookie/GE Token ที่ได้รับ จะเปิดเผยและเข้ากระเป๋าของคุณเมื่อสินค้าจัดส่งแล้วเท่านั้นค่ะ</div>`;
-
+    list.innerHTML = note + '<div class="orders-list">' + orders.map(o => {
+      const items = o.items || [];
+      const status = isShippedTab
+        ? '<span class="order-status is-shipped"><i class="fa-solid fa-circle-check"></i> จัดส่งแล้ว</span>'
+        : '<span class="order-status is-pending"><i class="fa-solid fa-hourglass-half"></i> รอจัดส่ง</span>';
+      const dates = isShippedTab
+        ? `สั่งซื้อ ${formatThaiDate(o.createdAt)}<br>จัดส่งแล้ว ${formatThaiDate(o.shippedAt)}`
+        : `สั่งซื้อ ${formatThaiDate(o.createdAt)}`;
       return `
-        <div class="preorder-order-card">
-            <div class="preorder-order-head">
-                <span class="preorder-order-title">${escapeHtml(o.productName)} x${o.quantity}</span>
-                ${statusHTML}
+        <div class="order-card">
+          <div class="order-head">
+            <div class="order-title">${escapeHtml(o.productName)} x${o.quantity}</div>
+            ${status}
+          </div>
+          ${items.map(renderItem).join('')}
+          <div class="order-foot">
+            <div class="order-dates">${dates}</div>
+            <div class="order-total">
+              <div class="order-total-label">รวม ${items.length} รายการ</div>
+              <div class="order-total-value">${Number(o.totalCostTokens).toLocaleString()} Tokens</div>
             </div>
-            <div class="preorder-order-meta">${dt} · ${Number(o.totalCostTokens).toLocaleString()} Tokens</div>
-            ${itemsHTML}
-            ${pendingNote}
+          </div>
         </div>`;
-    }).join('');
+    }).join('') + '</div>';
   }
 
   async function loadOrders() {
@@ -224,7 +265,8 @@
         list.innerHTML = `<div class="empty-state">โหลดข้อมูลไม่สำเร็จค่ะ</div>`;
         return;
       }
-      renderOrders(res.data || []);
+      allOrders = res.data || [];
+      renderOrders();
     } catch (e) {
       list.innerHTML = `<div class="empty-state">เชื่อมต่อเซิร์ฟเวอร์ไม่ได้</div>`;
     }
@@ -236,6 +278,7 @@
       window.location.href = 'login';
       return;
     }
+    renderOrders();
     loadOrders();
   });
 </script>
