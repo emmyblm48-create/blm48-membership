@@ -324,6 +324,82 @@ body {
     .btn-pf-push .icon-circle { background: #ebfbee; color: #40c057; }
     .btn-pf-push.is-on .icon-circle { background: #40c057; color: #fff; }
     .btn-pf-campaign.is-open .icon-circle { background: #fcc419; color: #fff; }
+
+    /* =====================================================================
+       🤍 ปรับหน้าตาให้เข้าชุดกับหน้าอื่นของแอป (Major Vote / Kami / Inventory / Shop):
+       การ์ดสถิติพื้นเทาอ่อนเงานุ่ม, ปุ่มวงกลมพาสเทลไอคอนสีเข้ม, เมนูเป็นแถวรายการคั่นเส้นบาง
+       วางท้ายสุดเพื่อทับสไตล์เดิมด้วยลำดับใน source
+       ===================================================================== */
+    .profile-body { padding: 0 20px 35px; }
+    .profile-avatar { border-width: 4px; box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
+    .edit-photo-overlay { background: #222; }
+    .member-header-block { margin-bottom: 20px; }
+    .member-name { font-size: 24px; font-weight: 700; color: #222; }
+    .member-role {
+      display: block; width: fit-content; margin: 6px auto 0; padding: 3px 12px; border-radius: 20px;
+      background: #fff0f3; color: var(--blmem-pink); font-size: 12px; font-weight: 600; letter-spacing: 0.8px;
+    }
+
+    .stats-bar {
+      background: #fafafa; border-radius: 16px; padding: 16px 0; margin-bottom: 24px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    }
+    .stat-box:not(:last-child) { border-right: 1px solid #ececec; }
+    .stat-box .stat-num { color: #222 !important; font-size: 17px; font-weight: 700; }
+    .stat-box:nth-child(2) .stat-num i { color: #d2691e; }
+    .stat-box:nth-child(3) .stat-num i { color: #f59f00; }
+    .stat-box:nth-child(4) .stat-num i { color: #4dabf7; }
+    .stat-box .stat-num i { font-size: 13px; }
+    .stat-title { font-size: 11.5px; color: #888; font-weight: 500; }
+
+    /* ปุ่มวงกลมแบบเดียวกับปุ่ม Receive / Redeem / Inventory / History ในหน้า Major Vote */
+    .pf-circle-row { margin: 0 0 24px; gap: 4px; }
+    .pf-circle-btn { font-size: 13px; font-weight: 500; color: #333; gap: 10px; }
+    .pf-circle-btn:hover { transform: none; }
+    .pf-circle-btn:active { transform: scale(0.92); }
+    .pf-circle-btn .icon-circle { width: 62px; height: 62px; font-size: 22px; box-shadow: none; color: #333; }
+    .btn-pf-monthly .icon-circle { background: #fde9ec; color: #333; }
+    .btn-pf-redeem .icon-circle { background: #e0edfb; color: #333; }
+    .btn-pf-card .icon-circle { background: #fdf1bf; color: #333; }
+    .btn-pf-campaign .icon-circle { background: #fff1c9; color: #333; }
+    .btn-pf-push .icon-circle { background: #ddf5ec; color: #333; }
+    .btn-pf-push.is-on .icon-circle { background: #40c057; color: #fff; }
+    .btn-pf-campaign.is-open .icon-circle { background: #fcc419; color: #fff; }
+
+    /* 💗 Fan Score: แถวการ์ดเรียบๆ แทนกล่องไล่สีชมพูเข้ม */
+    .pf-fanscore-box {
+      align-items: center; gap: 12px; background: #fafafa; border-radius: 16px;
+      padding: 14px 16px; margin-bottom: 10px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    }
+    .pf-fanscore-icon {
+      width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: #fde9ec; color: #e0447a; font-size: 18px;
+    }
+    .pf-fanscore-label { flex: 1; font-size: 15px; font-weight: 600; color: #222; }
+    .pf-fanscore-value { font-size: 20px; font-weight: 700; color: #222; }
+    .pf-fanscore-detail { background: #fafafa; border-radius: 16px; padding: 4px 16px; margin-bottom: 20px; }
+
+    /* 📋 เมนู: แถวรายการคั่นเส้นบาง ไอคอนวงกลมพาสเทล (แบบแถว My Pre-orders หน้า Inventory) */
+    .menu-section-title { font-size: 20px; font-weight: 700; color: #222; margin: 8px 0 4px; }
+    .menu-section { background: none; border-radius: 0; box-shadow: none; padding: 0; }
+    .menu-item { padding: 12px 0; border-bottom: 1px solid #eeeeee; color: #222; }
+    .menu-item:hover { background: none; }
+    .menu-item:active { opacity: 0.6; }
+    .menu-icon { width: 42px; height: 42px; border-radius: 50%; margin-right: 14px; font-size: 16px; }
+    .menu-icon.icon-pink, .menu-icon.icon-blue, .menu-icon.icon-gold, .menu-icon.icon-gray,
+    .menu-icon.icon-purple, .menu-icon.icon-dark, .menu-icon.icon-green { color: #333; }
+    .icon-pink { background: #fde9ec !important; }
+    .icon-blue { background: #e0edfb !important; }
+    .icon-gold { background: #fdf1bf !important; }
+    .icon-gray { background: #f0f0f3 !important; }
+    .icon-purple { background: #ece6ff !important; }
+    .icon-dark { background: #ececec !important; }
+    .icon-green { background: #ddf5ec !important; }
+    .menu-text { font-size: 15px; font-weight: 500; }
+    .menu-arrow { color: #aaa; font-size: 13px; }
+    .menu-logout { border-bottom: none; margin-top: 12px; }
+    .menu-logout .menu-icon { background: #fff0f0; color: #ff4d6d; }
   </style>
 </head>
 <body class="glass-mesh-bg force-white-bg">
@@ -407,15 +483,15 @@ body {
         </button>
       </div>
 
-      <div id="pf-fanscore-box" style="display: none; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(135deg, #ff6b9d 0%, #ff8fb3 45%, #ff8fb3 55%, #e0447a 100%); border-radius: 18px; padding: 14px 16px; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(255, 107, 157, 0.4); border: 1px solid #ff6b9d;">
-        <i class="fas fa-heart-circle-check" style="color: #ffffff; font-size: 22px;"></i>
-        <span id="pf-fanscore" style="color: #ffffff; font-size: 20px; font-weight: 700;">0</span>
-        <span style="color: #ffffff; font-size: 12px; opacity: 0.85; font-weight: bold;">Fan Score</span>
+      <div id="pf-fanscore-box" class="pf-fanscore-box" style="display: none;">
+        <span class="pf-fanscore-icon"><i class="fas fa-heart-circle-check"></i></span>
+        <span class="pf-fanscore-label">Fan Score</span>
+        <span id="pf-fanscore" class="pf-fanscore-value">0</span>
       </div>
 
-      <div id="pf-fanscore-detail-box" style="display: none; background: #fff; border-radius: 18px; padding: 4px 16px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #f4d4de;">
+      <div id="pf-fanscore-detail-box" class="pf-fanscore-detail" style="display: none;">
         <div onclick="toggleFanScoreDetail()" style="cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding: 12px 0; user-select: none;">
-          <span style="font-weight: 700; color: #555; font-size: 13.5px;"><i class="fas fa-heart-circle-check" style="color: #e0447a; margin-right: 7px;"></i>Fan Score แยกตามเมมเบอร์</span>
+          <span style="font-weight: 600; color: #222; font-size: 14px;">Fan Score แยกตามเมมเบอร์</span>
           <i id="pf-fanscore-detail-arrow" class="fas fa-chevron-right" style="font-size: 13px; color: #888; transition: transform 0.3s ease;"></i>
         </div>
         <div id="pf-fanscore-detail-wrapper" style="max-height: 0px; opacity: 0; overflow: hidden; transition: max-height 0.3s ease-in-out, opacity 0.3s ease;">
@@ -423,6 +499,7 @@ body {
         </div>
       </div>
 
+      <div class="menu-section-title">Menu</div>
       <div class="menu-section">
   <a href="index" class="menu-item">
     <div class="menu-icon icon-pink"><i class="fas fa-home"></i></div>
