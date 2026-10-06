@@ -747,7 +747,7 @@
         .merch-category, .card-tag {
             font-size: 0.8rem !important;
             font-weight: bold;
-            color: #c53f5a !important;
+            color: #c53f5a;
             margin-bottom: 4px;
         }
 
@@ -1356,20 +1356,135 @@
           100% { opacity: 0.6; }
         }
 
+
+        /* =====================================================================
+           🛍️ หน้าตาแบบ iAM Shop ให้เข้าชุดกับหน้าอื่นของแอป (Major Vote / Kami / Inventory):
+           พื้นขาว, แถบบนขาวเรียบ + ไอคอน My Orders / My Items, แท็บหมวดขีดเส้นใต้,
+           การ์ดสินค้าไม่มีกรอบ (มีกรอบที่รูป) ชื่อสินค้าสีเทา + แท็กเส้นขอบ + ราคาตัวหนา
+           วางท้ายสุดเพื่อทับสไตล์ธีมครีมโซดาเดิมด้วยลำดับใน source
+           ===================================================================== */
+        body.glass-mesh-bg.force-white-bg { background: #ffffff; }
+        .top-navbar { height: 56px; padding: 0 8px; box-shadow: none; border-bottom: 1px solid #e8e8e8; }
+        .top-navbar::before, .top-navbar::after { display: none; }
+        .nav-brand { font-size: 18px; font-weight: 600; color: #222; letter-spacing: 0; }
+        .shop-nav-icon {
+            width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+            background: none; border: none; color: #222; font-size: 20px; text-decoration: none; cursor: pointer;
+        }
+        .shop-nav-back { position: absolute; left: 6px; font-size: 22px; }
+        .shop-nav-right { position: absolute; right: 6px; display: flex; }
+        body { padding-top: 56px !important; }
+        @media (min-width: 768px) {
+            .top-navbar { height: 56px; padding: 0 8px; }
+            body { padding-top: 56px !important; }
+            .nav-brand { font-size: 18px; }
+        }
+
+        .shop-tabs {
+            position: sticky; top: 56px; z-index: 900; background: #fff;
+            display: flex; gap: 28px; overflow-x: auto; scrollbar-width: none;
+            padding: 0 20px; border-bottom: 1px solid #e8e8e8;
+        }
+        .shop-tabs::-webkit-scrollbar { display: none; }
+        .shop-tab {
+            flex-shrink: 0; background: none; border: none; cursor: pointer;
+            font-family: 'Quicksand', 'Kanit', sans-serif; font-size: 16px; font-weight: 600;
+            color: #aaa; padding: 14px 0 12px; position: relative;
+        }
+        .shop-tab.active { color: #222; }
+        .shop-tab.active::after {
+            content: ''; position: absolute; left: 0; right: 0; bottom: 8px; height: 5px;
+            background: var(--primary-pink); opacity: .55; border-radius: 2px; z-index: -1;
+        }
+
+        /* 💰 ยอดเงินแบบแถบเตี้ยๆ */
+        .user-profile-bar {
+            max-width: none; margin: 14px 20px 0; padding: 12px 0;
+            background: #fafafa; border: none; border-image: none; border-radius: 14px; box-shadow: none;
+        }
+        .wallet-value { font-size: 15px; color: #222 !important; }
+        .wallet-value i { font-size: 13px; }
+        .wallet-item:nth-child(1) .wallet-value i { color: var(--cookie-brown); }
+        .wallet-item:nth-child(2) .wallet-value i { color: #c9932c; }
+        .wallet-item:nth-child(3) .wallet-value i { color: #4dabf7; }
+        .wallet-item:not(:last-child) { border-right: 1px solid #ececec; }
+        .wallet-label { color: #999; }
+
+        .section-title {
+            border-left: none; padding-left: 0; margin: 26px 20px 0; border-radius: 0;
+            font-size: 20px; font-weight: 700; color: #222; scroll-margin-top: 110px;
+        }
+        .preorder-category-title {
+            background: none; padding: 4px 0 0; margin: 6px 0 -4px; color: #555; font-size: 15px;
+        }
+        .preorder-category-title i { display: none; }
+
+        .merch-grid, .shop-container { gap: 22px 14px !important; padding: 14px 20px !important; }
+
+        .merch-card, .merch-card-large { border: none !important; border-radius: 0 !important; overflow: visible; }
+        .merch-card:hover, .merch-card-large:hover { border-color: transparent !important; animation: none; }
+        .merch-card:hover .merch-image, .merch-card-large:hover .merch-image { transform: none; }
+        .merch-card:active { transform: scale(0.98); }
+        .merch-image-container, .card-img-wrapper {
+            border: 1px solid #ececec; border-radius: 12px; background: #f6f6f8 !important;
+        }
+        .merch-image-container::after { display: none; }
+
+        /* ชื่อ → แท็ก → คำอธิบาย → ราคา/ปุ่ม เรียงซ้ายเหมือน iAM Shop */
+        .merch-info, .card-info {
+            padding: 10px 0 0 !important; align-items: flex-start; text-align: left;
+            flex-direction: row; flex-wrap: wrap; align-content: flex-start; gap: 6px;
+        }
+        .merch-title, .card-title {
+            order: 1; width: 100%; margin: 0 !important;
+            font-size: 15px !important; font-weight: 500; color: #555; min-height: calc(1.3em * 2) !important;
+        }
+        .merch-category, .merch-badge, .merch-badge-bestseller, .merch-badge-comingsoon, .merch-badge-soldout {
+            order: 2; margin: 0 !important; transform: none; box-shadow: none;
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 12px !important; font-weight: 600; letter-spacing: 0; line-height: 1.2;
+            padding: 2px 6px; border-radius: 4px; background: #fff; border: 1px solid currentColor;
+        }
+        .merch-badge { color: var(--primary-pink); }
+        .merch-badge-bestseller { color: #e08e2e; }
+        .merch-badge-comingsoon { color: #a89686; }
+        .merch-badge-soldout { color: #8b7d99; }
+        .merch-subtitle, .card-subtitle { order: 3; width: 100%; margin: 0 !important; font-size: 12.5px !important; color: #999; }
+        .merch-button, .card-action, .merch-gacha-actions { order: 4; margin-top: 6px !important; }
+
+        /* ราคา/ปุ่มซื้อ: ตัวหนาสีเข้มบนพื้นเทาอ่อน */
+        .merch-button, .btn-token-buy {
+            background: #f2f2f5 !important; color: #222 !important;
+            border-radius: 10px !important; font-size: 15px !important; font-weight: 700;
+            padding: 9px 0 !important;
+        }
+        .merch-button i { color: #c9932c; }
+        .merch-button:hover, .btn-token-buy:hover { background: #e9e9ee !important; color: #222 !important; transform: none; }
+        .merch-button.merch-button-disabled, .merch-button.merch-button-disabled:hover { background: #f6f6f8 !important; color: #aaa !important; }
+        .merch-button.merch-button-disabled i { color: #bbb; }
+        .merch-gacha-actions .merch-button .pull-tier { color: #888; }
     </style>
 </head>
 <body class="glass-mesh-bg force-white-bg">
 
 <div class="top-navbar">
-    <div class="nav-left-actions">
-        <button class="nav-btn" title="กลับ" onclick="history.back()" style="background: none; border: none; padding: 0; cursor: pointer;">
-            <i class="fas fa-chevron-left"></i>
-        </button>
+    <button class="shop-nav-icon shop-nav-back" title="กลับ" aria-label="ย้อนกลับ" onclick="history.back()">
+        <i class="fas fa-chevron-left"></i>
+    </button>
+    <span class="nav-brand">BLM48 Shop</span>
+    <div class="shop-nav-right">
+        <a href="my_preorders" class="shop-nav-icon" title="My Orders" aria-label="My Orders"><i class="fa-regular fa-clipboard"></i></a>
+        <a href="inventory" class="shop-nav-icon" title="My Items" aria-label="My Items"><i class="fas fa-box-open"></i></a>
     </div>
-    <div class="nav-brand-wrap">
-        <span class="nav-brand-tag">✦ BLM48 MEMBERSHIP ✦</span>
-        <span class="nav-brand">BLM48 Shop</span>
-    </div>
+</div>
+
+<!-- แท็บหมวดสินค้า (แบบ iAM Shop) - กรองให้เห็นเฉพาะหมวดที่เลือก -->
+<div class="shop-tabs" id="shop-tabs">
+    <button type="button" class="shop-tab active" data-tab="all" onclick="selectShopTab('all')">All</button>
+    <button type="button" class="shop-tab" data-tab="preorder" onclick="selectShopTab('preorder')">Pre-order</button>
+    <button type="button" class="shop-tab" data-tab="gacha" onclick="selectShopTab('gacha')">Merchandise</button>
+    <button type="button" class="shop-tab" data-tab="cookie" onclick="selectShopTab('cookie')">Cookie</button>
+    <button type="button" class="shop-tab" data-tab="cafe" onclick="selectShopTab('cafe')">Cafe</button>
 </div>
 
 <div id="image-preview-modal" class="preview-modal" style="display: none;" onclick="closeImagePreview()">
@@ -1399,7 +1514,6 @@
 </div>
 
 <div class="user-profile-bar">
-    <div class="wallet-card-header"><i class="fas fa-wallet"></i> My Wallet</div>
     <div class="wallet" id="shop-wallet-bar">
         <div class="wallet-item">
             <div class="wallet-value" style="color:var(--cookie-brown);"><i class="fas fa-cookie-bite"></i> -</div>
@@ -1416,35 +1530,25 @@
     </div>
 </div>
 
-<div class="shop-quick-tiles">
-    <a href="#section-preorder" class="quick-tile">
-        <div class="quick-tile-icon" style="background:#fff6e0;color:#c9932c;"><i class="fas fa-box"></i></div>
-        <span class="quick-tile-label">Pre-order</span>
-    </a>
-    <a href="#section-cookie" class="quick-tile">
-        <div class="quick-tile-icon" style="background:#fdf0e6;color:var(--cookie-brown);"><i class="fas fa-cookie-bite"></i></div>
-        <span class="quick-tile-label">Cookie Shop</span>
-    </a>
-    <a href="#section-gacha" class="quick-tile">
-        <div class="quick-tile-icon" style="background:#ffe3ee;color:var(--primary-pink);"><i class="fas fa-gifts"></i></div>
-        <span class="quick-tile-label">Merchandise</span>
-    </a>
-    <a href="#section-cafe" class="quick-tile">
-        <div class="quick-tile-icon" style="background:#e8f7ee;color:#5fa896;"><i class="fas fa-mug-hot"></i></div>
-        <span class="quick-tile-label">Cafe</span>
-    </a>
-    <a href="inventory" class="quick-tile">
-        <div class="quick-tile-icon" style="background:#e7f5ff;color:#4dabf7;"><i class="fas fa-box-open"></i></div>
-        <span class="quick-tile-label">My Items</span>
-    </a>
-    <a href="my_preorders" class="quick-tile">
-        <div class="quick-tile-icon" style="background:#e0f0ff;color:#4d8fdb;"><i class="fas fa-clipboard-list"></i></div>
-        <span class="quick-tile-label">My Order</span>
-    </a>
+<section class="shop-section" data-shop-section="preorder">
+<div class="section-title" id="section-preorder">Pre-order
+</div>
+<div class="shop-container" id="preorder-container">
+    <!-- เพิ่มสินค้าพรีออเดอร์โดยระบบโหลดอัตโนมัติ -->
+</div>
+</section>
+
+<section class="shop-section" data-shop-section="gacha">
+<div class="section-title" id="section-gacha">Official Merchandise
 </div>
 
-<h2 class="section-title" id="section-cookie"><i class="fas fa-cookie-bite" style="color: var(--cookie-brown);"></i> Cookie Shop <i class="fas fa-star sparkle-icon"></i></h2>
-<p class="section-caption">sweet · everyday · treats</p>
+<div class="merch-grid" id="merch-container">
+    <!-- เพิ่มสินค้าโดยระบบโหลดอัตโนมัติ -->
+</div>
+</section>
+
+<section class="shop-section" data-shop-section="cookie">
+<h2 class="section-title" id="section-cookie">Cookie Shop</h2>
 <div class="shop-container" id="cookie-shop-container">
     <!-- 100Cookie -->
     <div class="merch-card" data-token-price="10">
@@ -1452,7 +1556,7 @@
             <img src="https://lh3.googleusercontent.com/d/1iYnw_eiQS4LZvHXF2bLEF7utf0wHi-FF=s1000" alt="100 Cookies" class="merch-image">
         </div>
         <div class="merch-info">
-            <span class="merch-category">[Pack]</span>
+            <span class="merch-category" style="color: #8b5a3c;">Pack</span>
             <h3 class="merch-title">100 Cookies</h3>
             <p class="merch-subtitle">เติมคุกกี้สำหรับใช้งานทั่วไป</p>
             <button class="merch-button" onclick="buyCookies(10, 100, 'https://lh3.googleusercontent.com/d/1iYnw_eiQS4LZvHXF2bLEF7utf0wHi-FF=s1000')">
@@ -1468,7 +1572,7 @@
 
         <div class="merch-info">
             <span class="merch-badge"><i class="fas fa-star"></i> Best Value</span>
-            <span class="merch-category" style="color: #c53f5a;">[Value Pack]</span>
+            <span class="merch-category" style="color: #8b5a3c;">Value Pack</span>
             <h3 class="merch-title">1,000 Cookies</h3>
             <p class="merch-subtitle">เติมคุกกี้สำหรับใช้งานทั่วไป</p>
             <button class="merch-button" onclick="buyCookies(100, 1000, 'https://lh3.googleusercontent.com/d/15UzuRt7ArZ-wUuoLLdZfqF9pdgCJt6ZQ=s1000')">
@@ -1477,28 +1581,11 @@
         </div>
     </div>
 </div>
+</section>
 
-<div class="section-title" id="section-gacha">
-   <i class="fas fa-gifts" style="color: var(--primary-pink);"></i> Official Merchandise <i class="fas fa-star sparkle-icon"></i>
+<section class="shop-section" data-shop-section="cafe">
+<div class="section-title" id="section-cafe">BLM48 Cafe
 </div>
-<p class="section-caption">limited · collector · pulls</p>
-
-<div class="merch-grid" id="merch-container">
-    <!-- เพิ่มสินค้าโดยระบบโหลดอัตโนมัติ -->
-</div>
-
-<div class="section-title" id="section-preorder">
-   <i class="fas fa-box" style="color: #c9932c;"></i> Pre-order <i class="fas fa-star sparkle-icon"></i>
-</div>
-<p class="section-caption">order today · ship later</p>
-<div class="shop-container" id="preorder-container">
-    <!-- เพิ่มสินค้าพรีออเดอร์โดยระบบโหลดอัตโนมัติ -->
-</div>
-
-<div class="section-title" id="section-cafe">
-   <i class="fas fa-mug-hot" style="color: #8b5a3c;"></i> BLM48 Cafe <i class="fas fa-star sparkle-icon"></i>
-</div>
-<p class="section-caption">cream · soda · pudding</p>
 <div class="shop-container" id="cafe-shop-container">
     <!-- Suiito Matcha -->
     <div class="merch-card" data-item-name="Suiito Matcha">
@@ -1506,7 +1593,7 @@
             <img src="https://lh3.googleusercontent.com/d/1hc_AQblGKyamIOmspWseUcnY2gwW9dyg=s1000" alt="Suiito Matcha" class="merch-image">
         </div>
         <div class="merch-info">
-            <span class="merch-category" style="color: #afddd2;">[BLM48 Cafe]</span>
+            <span class="merch-category" style="color: #5fa896;">Cafe</span>
             <h3 class="merch-title">Suiito Matcha</h3>
             <p class="merch-subtitle">いちごミニパフェ</p>
             <button class="merch-button" onclick="buyCafeItem('cafe_matcha_01', 5, 'Suiito Matcha', 'https://lh3.googleusercontent.com/d/1thW4VJVyFLsgMQNI0wAFaIC7gsqnATeM=s1000')">
@@ -1521,7 +1608,7 @@
             <img src="https://lh3.googleusercontent.com/d/1_KC4glssnDILv1GP7BtUnjT1-uP1omlB=s1000" alt="Pinku Milk" class="merch-image">
         </div>
         <div class="merch-info">
-            <span class="merch-category" style="color: #c53f5a;">[BLM48 Cafe]</span>
+            <span class="merch-category" style="color: #5fa896;">Cafe</span>
             <h3 class="merch-title">Pinku Milk</h3>
             <p class="merch-subtitle">ピンクミルク</p>
             <button class="merch-button" onclick="buyCafeItem('cafe_pinkmilk_01', 5, 'Pinku Milk', 'https://lh3.googleusercontent.com/d/1b_wl3lpi_QPd9-9nXBofw5mBL-jUu0Hn=s1000')">
@@ -1536,7 +1623,7 @@
             <img src="https://lh3.googleusercontent.com/d/1ERV8sH_M0fv3dIFqfGGyf23JTTK3z0F-=s1000" alt="Koi Cocoa" class="merch-image">
         </div>
         <div class="merch-info">
-            <span class="merch-category" style="color: #c53f5a;">[BLM48 Cafe]</span>
+            <span class="merch-category" style="color: #5fa896;">Cafe</span>
             <h3 class="merch-title">Koi Cocoa</h3>
             <p class="merch-subtitle">濃いココア</p>
             <button class="merch-button" onclick="buyCafeItem('cafe_cocoa_01', 5, 'Koi Cocoa', 'https://lh3.googleusercontent.com/d/1fHP-8N6VcRalynHDEZZWrjWhd7zYyHfF=s1000')">
@@ -1551,7 +1638,7 @@
             <img src="https://lh3.googleusercontent.com/d/11kPILdW6tOh5xZZ-Kl6JpAUsJeYWrlXE=s1000" alt="Thai Miruku Tea" class="merch-image">
         </div>
         <div class="merch-info">
-            <span class="merch-category" style="color: #c53f5a;">[BLM48 Cafe]</span>
+            <span class="merch-category" style="color: #5fa896;">Cafe</span>
             <h3 class="merch-title">Thai Miruku Tea</h3>
             <p class="merch-subtitle">タイミルクティー</p>
             <button class="merch-button" onclick="buyCafeItem('cafe_thaimirukutea_01', 5, 'Thai Miruku Tea', 'https://lh3.googleusercontent.com/d/1HBOXvqFCL_-wrxbZlaEf15JvrGDUurhf=s1000')">
@@ -1566,7 +1653,7 @@
             <img src="https://lh3.googleusercontent.com/d/1xhN872cKyptZ-vO8N6jHkCfSACE2okVo=s1000" alt="BLM48 Cafe BG V.1" class="merch-image">
         </div>
         <div class="merch-info">
-            <span class="merch-category" style="color: #c53f5a;">[BLM48 Cafe]</span>
+            <span class="merch-category" style="color: #5fa896;">Cafe</span>
             <h3 class="merch-title">BLM48 Cafe</h3>
             <p class="merch-subtitle">Background V.1</p>
             <button class="merch-button" onclick="buyCafeItem('cafe_BLM48CafeBackground_01', 0, 'BLM48 Cafe BG V.1', 'https://lh3.googleusercontent.com/d/1MLtVYBkoWNrkqWr2AJqYtAfy6q7q2jJO=s1000')">
@@ -1575,16 +1662,9 @@
         </div>
     </div>
 </div>
+</section>
 
-<footer style="padding: 44px 20px 50px; text-align: center; color: #bbb; font-size: 12px;">
-  <!-- 🧺 แถบลายผ้าปิกนิกตารางเล็กๆ ล้อผ้าปูโต๊ะในโปสเตอร์ -->
-  <div style="width: 64px; height: 8px; margin: 0 auto 16px; border-radius: 999px; opacity: .55;
-              background-image: repeating-conic-gradient(var(--soda-sky-pink) 0% 25%, #fff 0% 50%);
-              background-size: 8px 8px;"></div>
-  <div style="font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--primary-pink); margin-bottom: 4px;">BLM48 Shop</div>
-  <div style="color: var(--caramel-soft); margin-bottom: 2px;">BLM48 MEMBERSHIP</div>
-  <div>© 2026 Virtual Idol Cover Group</div>
-</footer>
+
 
 <!-- 🎰 4. กล่องตู้สุ่มกาชาเดิมตามเดิม (ใช้สำหรับการสุ่มเพื่อความตื่นเต้น) -->
 <div id="blm-gacha-modal" class="blm-overlay">
@@ -1687,6 +1767,17 @@ function celebrateSSR() {
         document.body.appendChild(piece);
         setTimeout(() => piece.remove(), 1800);
     }
+}
+
+// 🗂️ แท็บหมวดสินค้า: All = แสดงทุกหมวด, อื่นๆ = เฉพาะหมวดนั้น
+function selectShopTab(tab) {
+    document.querySelectorAll('#shop-tabs .shop-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tab);
+    });
+    document.querySelectorAll('.shop-section').forEach(sec => {
+        sec.style.display = (tab === 'all' || sec.dataset.shopSection === tab) ? '' : 'none';
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // 2. อัปเดตการแสดงผลยอดเงินในกระเป๋า (หน้าตาเดียวกับสถิติ Cookies/Tokens/GE Tokens ในหน้า profile.html)
@@ -2129,7 +2220,7 @@ async function loadGachaCollections() {
             </div>
             <div class="merch-info">
               ${badgeHTML}
-              <span class="merch-category" style="color: #c53f5a;">[Merchandise]</span>
+              <span class="merch-category" style="color: #c53f5a;">Merchandise</span>
               <h3 class="merch-title">${col.CollectionName}</h3>
               <p class="merch-subtitle">${subtitle}</p>
               ${drawsInfoHTML}
@@ -2221,7 +2312,7 @@ async function loadPreorderProducts() {
               </div>
               <div class="merch-info">
                 ${badgeHTML}
-                <span class="merch-category" style="color: #c9932c;">[Pre-order]</span>
+                <span class="merch-category" style="color: #3d8bfd;">Pre-order</span>
                 <h3 class="merch-title">${escapePreorderText(p.name)}</h3>
                 <p class="merch-subtitle">${subtitle}</p>
                 ${buttonHTML}
