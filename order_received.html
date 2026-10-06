@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <title>BLM48 Membership | Success!</title>
     <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s32">
-    <meta name="theme-color" content="#b9f0e6">
+    <meta name="theme-color" content="#ffc107">
     <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s180">
     <meta name="apple-mobile-web-app-title" content="BLM48">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -18,11 +18,11 @@
     <script src="assets/js/supabase-client.js"></script>
     <script src="assets/js/common.js"></script>
     <style>
-        /* หัวไล่สีมิ้นต์ -> ม่วง -> ชมพู ขอบล่างโค้ง (แบบหน้า Success ของ iAM) */
+        /* หัวสีเหลืองประจำวง BLM48 ขอบล่างโค้ง (แบบหน้า Success ของ iAM) */
         .success-header {
             position: relative; height: calc(80px + env(safe-area-inset-top, 0px));
             padding-top: env(safe-area-inset-top, 0px);
-            background: linear-gradient(90deg, #a8f0e0 0%, #d7dcf6 50%, #f6b9ee 100%);
+            background: #ffc107;
             display: flex; align-items: center; justify-content: center;
             border-bottom-left-radius: 50% 18px; border-bottom-right-radius: 50% 18px;
         }
@@ -79,7 +79,7 @@
   }
 
   function burst(gold) {
-    const colors = gold ? ['#f3ce6e', '#ffd700', '#fff6da', '#ffffff'] : ['#a8f0e0', '#f6b9ee', '#ffd76e', '#d7dcf6', '#e1546f'];
+    const colors = gold ? ['#f3ce6e', '#ffd700', '#fff6da', '#ffffff'] : ['#ffc107', '#ffb300', '#ffd54f', '#ffe082', '#ffffff'];
     const count = gold ? 60 : 28;
     for (let i = 0; i < count; i++) {
       const p = document.createElement('div');
