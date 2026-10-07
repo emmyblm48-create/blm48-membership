@@ -263,11 +263,26 @@ input.form-input, select.form-input, textarea.form-input {
     border-top: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0;
 }
 
-/* กล่องข้อความแจ้ง/คำอธิบาย: คงสีพื้นไว้ให้อ่านง่าย แต่ไม่มีมุมโค้ง */
+/* กล่องข้อความแจ้ง/คำอธิบายที่มีสีพื้น: มุมโค้ง (คำขอของเอ้มมี่ 2026-10-07) */
 .mode-legend, .hint, .reco, .confirm-box, .msg, .form-msg, .grand-card {
-    border-radius: 0 !important;
+    border-radius: 14px !important;
     box-shadow: none !important;
 }
+
+/* ช่องกรอก: ไม่ให้ล้นจอบนมือถือ (width:100% + padding ต้องนับรวมในความกว้าง) */
+.form-field input, .form-field select, .form-field textarea {
+    box-sizing: border-box; max-width: 100%; min-width: 0;
+}
+/* ช่องวันเวลา: iOS Safari ให้ความกว้างขั้นต่ำเองจนล้นจอ -> ปิดสไตล์ native แล้วชิดซ้าย */
+input[type=datetime-local], input[type=date], input[type=time] {
+    -webkit-appearance: none; appearance: none;
+    display: block; box-sizing: border-box;
+    width: 100%; max-width: 100%; min-width: 0;
+    min-height: 44px; text-align: left;
+}
+input[type=datetime-local]::-webkit-date-and-time-value,
+input[type=date]::-webkit-date-and-time-value,
+input[type=time]::-webkit-date-and-time-value { text-align: left; }
 
 /* รูปปกกิจกรรม: มุมเหลี่ยม */
 .cc-cover, .cc-cover-empty, .ev-cover, .ev-cover-empty { border-radius: 0 !important; }
