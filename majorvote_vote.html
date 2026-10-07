@@ -159,7 +159,7 @@
     <div class="thank-overlay" id="thank-overlay" onclick="closeThankCard()">
         <div class="thank-wrap" onclick="event.stopPropagation()">
             <button type="button" class="thank-close" onclick="closeThankCard()" title="ปิด"><i class="fa-solid fa-xmark"></i></button>
-            <img id="thank-card" class="thank-card" src="" alt="Thank You Card" onerror="closeThankCard()">
+            <img id="thank-card" class="thank-card" alt="Thank You Card" onerror="if (document.getElementById('thank-overlay').classList.contains('show')) closeThankCard();">
         </div>
         <a class="thank-history" href="history" onclick="event.stopPropagation()"><i class="fa-solid fa-circle-info"></i> See transaction history</a>
     </div>
