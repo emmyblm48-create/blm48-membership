@@ -73,7 +73,8 @@
         .cc-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
 
         /* รูปกิจกรรม (รูปปก 2:1 แบบหน้าโหวตฝั่งผู้ใช้) */
-        .cc-cover { position: relative; width: 100%; aspect-ratio: 2 / 1; border-radius: 12px; overflow: hidden; margin-bottom: 12px;
+        /* รูปปกเต็มความกว้างจอ (เลยขอบ 12px ของหน้า) */
+        .cc-cover { position: relative; width: calc(100% + 24px); margin-left: -12px; aspect-ratio: 2 / 1; border-radius: 0; overflow: hidden; margin-bottom: 12px;
             background: linear-gradient(135deg, #fff8e1 0%, #ffe9a8 100%); }
         .cc-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .cc-cover-empty { position: absolute; inset: 0; border: 1.5px dashed #ffd36b; border-radius: 12px; background: #fffbf0;

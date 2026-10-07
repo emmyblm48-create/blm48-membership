@@ -30,7 +30,8 @@
         .page-wrapper { max-width: 640px; margin: 0 auto; padding-top: 18px; padding-bottom: 60px; }
 
         /* รูปปก 2:1 */
-        .ev-cover { position: relative; width: 100%; aspect-ratio: 2 / 1; border-radius: 14px; overflow: hidden; margin-bottom: 14px;
+        /* รูปปกเต็มความกว้างจอ (เลยขอบ 12px ของหน้า) */
+        .ev-cover { position: relative; width: calc(100% + 24px); margin-left: -12px; margin-top: -18px; aspect-ratio: 2 / 1; border-radius: 0; overflow: hidden; margin-bottom: 14px;
             background: linear-gradient(135deg, #fff8e1 0%, #ffe9a8 100%); }
         .ev-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .ev-cover-empty { position: absolute; inset: 0; width: 100%; border: 1.5px dashed #ffd36b; border-radius: 14px; background: #fffbf0;
@@ -342,10 +343,8 @@
           <label>Description</label>
           <textarea id="ed-desc" placeholder="อธิบายกิจกรรม ระยะเวลาโหวต รางวัล ฯลฯ">${escapeHtml(ev.description || '')}</textarea>
         </div>
-        <div class="form-row-2">
           <div class="form-field"><label>Start</label><input id="ed-start" type="datetime-local" value="${toLocalInput(ev.startTime)}"></div>
           <div class="form-field"><label>End</label><input id="ed-end" type="datetime-local" value="${toLocalInput(ev.endTime)}"></div>
-        </div>
         ${isGift ? '' : `<div class="form-field"><label class="check-label"><input id="ed-enable-gift" type="checkbox" ${ev.enableGift ? 'checked' : ''}> Allow Gifts: ส่ง Gift (Cookie) เป็นคะแนนเพิ่มได้ด้วย</label></div>`}
         <div class="note" style="margin-bottom:12px;"><i class="fa-solid fa-circle-info"></i> สกุลที่ใช้โหวตเปลี่ยนไม่ได้หลังสร้างกิจกรรม · ประวัติ Token เดิมยังแสดงชื่อกิจกรรมตอนที่ทำรายการ</div>
         <button type="button" class="btn-primary" id="save-detail-btn" onclick="saveDetails()"><i class="fas fa-check"></i> Save Info</button>
