@@ -30,7 +30,7 @@
         :root {
             --primary-pink: #ff85a2;
             --vote-yellow: #ffd76e;
-            --ring-yellow: #ffc107; /* สีเหลืองประจำวง BLM48 */
+            --ring-yellow: #ffde5b; /* สีกรอบประจำวง (BLM48 ค่าเริ่มต้น, เปลี่ยนตามวงของผู้สมัครใน JS) */
             --done-green: #2eb872;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -412,6 +412,7 @@
         avatar.src = fixSecureImageUrl(candidateImg);
         avatar.onerror = () => { avatar.src = BLANK_IMG; };
         avatar.alt = candidateName;
+        document.documentElement.style.setProperty('--ring-yellow', groupFrameColor(candidateName));
 
         const coin = document.getElementById('token-coin');
         coin.classList.toggle('ge', tokenType === 'GEToken');

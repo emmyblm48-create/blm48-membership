@@ -1091,6 +1091,15 @@ const GROUP_THEMES = {
   BLM48: { primary: '#ff85a2', light: '#ffe4e1', metaColor: '#ffc0cb' }
 };
 
+// สีกรอบรูปโปรไฟล์ประจำวง — ใช้กับรูปเมมเบอร์ในกิจกรรมโหวต และกิจกรรมอื่นๆ ที่จะตามมา
+// รับได้ทั้งชื่อวง ("NPT48") และชื่อผู้สมัครแบบมีวงต่อท้าย ("April NPT48"); ไม่รู้วง = BLM48
+const GROUP_FRAME_COLORS = { BLM48: '#ffde5b', NPT48: '#66cbff' };
+function groupFrameColor(groupOrName) {
+  const s = String(groupOrName || '').trim().toUpperCase();
+  const key = Object.keys(GROUP_FRAME_COLORS).find(g => s === g || s.endsWith(' ' + g));
+  return GROUP_FRAME_COLORS[key || 'BLM48'];
+}
+
 // เขียนค่าตัวแปรสี CSS ทุกชื่อ (ทุกหน้า) ให้ตรงกับวงที่ระบุ ("BLM48" คือค่าปกติ)
 function applyGroupThemeVars(groupName) {
   const group = (groupName || 'BLM48').toString().trim().toUpperCase();
