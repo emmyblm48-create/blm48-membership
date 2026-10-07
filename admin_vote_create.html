@@ -233,9 +233,6 @@
             <div class="form-field">
                 <label class="check-label"><input id="ev-admin-only" type="checkbox"> Test Event: เห็นและโหวตได้เฉพาะแอดมิน</label>
             </div>
-            <div class="form-field" id="ev-gift-field">
-                <label class="check-label"><input id="ev-enable-gift" type="checkbox"> Allow Gifts: ส่ง Gift (Cookie) เป็นคะแนนเพิ่มได้ด้วย</label>
-            </div>
             <div class="form-field" id="ev-mode-field">
                 <label>Token Mode</label>
                 <div class="mode-seg" id="ev-mode-seg"></div>
@@ -445,10 +442,9 @@
   }
   function setNewEventMode(m) { newEventMode = m; renderNewEventMode(); }
 
-  // Gift (Cookie) ไม่ได้ใช้โหมด Token และเปิดรับ Gift อยู่แล้วในตัว -> ซ่อนสองช่องนี้
+  // Gift (Cookie) ไม่ได้ใช้โหมด Token -> ซ่อนช่องโหมด (Gift เปิดได้เฉพาะกิจกรรมสกุล Gift เท่านั้น)
   function onTokenTypeChange() {
     const isGift = document.getElementById('ev-token-type').value === 'gift';
-    document.getElementById('ev-gift-field').style.display = isGift ? 'none' : '';
     document.getElementById('ev-mode-field').style.display = isGift ? 'none' : '';
   }
 
@@ -498,7 +494,7 @@
     const tokenType = document.getElementById('ev-token-type').value;
     const status = document.getElementById('ev-status').value;
     const isGift = tokenType === 'gift';
-    const enableGift = isGift || document.getElementById('ev-enable-gift').checked;
+    const enableGift = isGift; // กิจกรรม Token / GE Token ไม่เปิด Gift
     const mechanic = isGift ? 'burn' : newEventMode;
     const pct = mechanic === 'partial' ? Number(document.getElementById('ev-pct').value) : 0;
     const adminOnly = document.getElementById('ev-admin-only').checked;

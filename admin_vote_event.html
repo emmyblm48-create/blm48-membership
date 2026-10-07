@@ -313,7 +313,7 @@
         <div class="card-title"><i class="fa-solid fa-circle-info"></i> Event Info</div>
         <div class="info-row"><div class="k">Start</div><div class="v">${escapeHtml(fmtTime(ev.startTime))}</div></div>
         <div class="info-row"><div class="k">End</div><div class="v">${escapeHtml(fmtTime(ev.endTime))}</div></div>
-        <div class="info-row"><div class="k">Vote Currency</div><div class="v">${escapeHtml(TOKEN_LABELS[tt] || ev.tokenType || '-')}${tt !== 'gift' && ev.enableGift ? ' + Gift (Cookie)' : ''}</div></div>
+        <div class="info-row"><div class="k">Vote Currency</div><div class="v">${escapeHtml(TOKEN_LABELS[tt] || ev.tokenType || '-')}</div></div>
         <div class="info-row"><div class="k">Token Mode</div><div class="v">${escapeHtml(modeText)}</div></div>
         <div class="info-row"><div class="k">Visibility</div><div class="v">${ev.adminOnly ? 'Admins only (Test Event)' : 'Everyone'}</div></div>
         <div class="info-row"><div class="k">Description</div><div class="v">${escapeHtml(ev.description || '-')}</div></div>
@@ -345,7 +345,6 @@
         </div>
           <div class="form-field"><label>Start</label><input id="ed-start" type="datetime-local" value="${toLocalInput(ev.startTime)}"></div>
           <div class="form-field"><label>End</label><input id="ed-end" type="datetime-local" value="${toLocalInput(ev.endTime)}"></div>
-        ${isGift ? '' : `<div class="form-field"><label class="check-label"><input id="ed-enable-gift" type="checkbox" ${ev.enableGift ? 'checked' : ''}> Allow Gifts: ส่ง Gift (Cookie) เป็นคะแนนเพิ่มได้ด้วย</label></div>`}
         <div class="note" style="margin-bottom:12px;"><i class="fa-solid fa-circle-info"></i> สกุลที่ใช้โหวตเปลี่ยนไม่ได้หลังสร้างกิจกรรม · ประวัติ Token เดิมยังแสดงชื่อกิจกรรมตอนที่ทำรายการ</div>
         <button type="button" class="btn-primary" id="save-detail-btn" onclick="saveDetails()"><i class="fas fa-check"></i> Save Info</button>
       </div>
@@ -414,7 +413,6 @@
     const description = document.getElementById('ed-desc').value.trim();
     const startRaw = document.getElementById('ed-start').value;
     const endRaw = document.getElementById('ed-end').value;
-    const giftEl = document.getElementById('ed-enable-gift');
     if (!title) { setMsg('detail-msg', 'กรุณากรอกชื่อกิจกรรมโหวต'); return; }
     if (startRaw && endRaw && new Date(endRaw) <= new Date(startRaw)) { setMsg('detail-msg', 'วันสิ้นสุดต้องอยู่หลังวันเริ่มกิจกรรม'); return; }
 
@@ -426,7 +424,7 @@
         title, description,
         startTime: startRaw ? new Date(startRaw).toISOString() : null,
         endTime: endRaw ? new Date(endRaw).toISOString() : null,
-        enableGift: giftEl ? giftEl.checked : true
+        enableGift: tokenTypeOf() === 'gift' // Gift เปิดได้เฉพาะกิจกรรมสกุล Gift
       });
       if (res && res.status === 'success') {
         await loadEvent();

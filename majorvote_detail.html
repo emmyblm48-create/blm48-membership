@@ -592,11 +592,11 @@
                     Vote
                 </button>`;
         }
-        if (campaignEnableGift) {
-            // กิจกรรม Gift อย่างเดียว = ปุ่ม "Vote"; ถ้ามีทั้ง Token และ Gift ปุ่มที่สองต้องเขียน "Gift" ไม่งั้นจะมี Vote ซ้ำสองปุ่ม
+        // Gift เปิดได้เฉพาะกิจกรรมสกุล Gift (บังคับด้วย trigger ฝั่ง DB) จึงไม่มีกรณีปุ่มซ้ำกับ Token
+        if (campaignEnableGift && !buttons) {
             buttons += `
                 <button class="vote-action-btn" onclick="openGiftModal('${escapeAttr(mName)}', '${escapeAttr(mImg)}')">
-                    ${buttons ? 'Gift' : 'Vote'}
+                    Vote
                 </button>`;
         }
         return buttons;
