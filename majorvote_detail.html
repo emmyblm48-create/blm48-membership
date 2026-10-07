@@ -97,15 +97,13 @@
         .cand-avatar-fallback { position: absolute; color: #ccc; font-size: 2rem; z-index: 1; }
         .candidate-name { flex: 1; min-width: 0; font-weight: 700; font-size: 15px; color: #111; overflow: hidden; text-overflow: ellipsis; }
         .candidate-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
-        .vote-action-btn, .getoken-action-btn, .gift-action-btn {
+        .vote-action-btn {
             min-width: 84px; border: none; padding: 8px 16px; border-radius: 999px;
             font-family: 'Quicksand', 'Kanit', sans-serif; font-size: 14px; font-weight: 700;
             cursor: pointer; transition: transform 0.1s; white-space: nowrap;
         }
         .vote-action-btn { background: #ffd75e; color: #222; }
-        .getoken-action-btn { background: #cfe8ff; color: #1c5d99; }
-        .gift-action-btn { background: #ffe1ea; color: #c2335b; }
-        .vote-action-btn:active, .getoken-action-btn:active, .gift-action-btn:active { transform: scale(0.95); }
+        .vote-action-btn:active { transform: scale(0.95); }
 
         /* Gift Sheet (แบบแผงส่งของขวัญของแอป: รูปเมมเบอร์ลอยขอบบน > แท็บขีดเส้นใต้ > กริด 4x2 ปัดเปลี่ยนหน้า > ปุ่มจำนวน > แถบ Send) */
         .gift-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45); z-index: 2000; align-items: flex-end; justify-content: center; }
@@ -587,16 +585,18 @@
                     Vote
                 </button>`;
         }
+        // ทุกกิจกรรมใช้ปุ่มคำว่า "Vote" สีเหลืองเดียวกันหมด (Token / GE Token / Gift)
         if (types.includes('getoken')) {
             buttons += `
-                <button class="getoken-action-btn" onclick="handleVoteClick('${escapeAttr(mName)}', 'GEToken', '${escapeAttr(mImg)}')">
-                    GE Vote
+                <button class="vote-action-btn" onclick="handleVoteClick('${escapeAttr(mName)}', 'GEToken', '${escapeAttr(mImg)}')">
+                    Vote
                 </button>`;
         }
         if (campaignEnableGift) {
+            // กิจกรรม Gift อย่างเดียว = ปุ่ม "Vote"; ถ้ามีทั้ง Token และ Gift ปุ่มที่สองต้องเขียน "Gift" ไม่งั้นจะมี Vote ซ้ำสองปุ่ม
             buttons += `
-                <button class="gift-action-btn" onclick="openGiftModal('${escapeAttr(mName)}', '${escapeAttr(mImg)}')">
-                    Gift
+                <button class="vote-action-btn" onclick="openGiftModal('${escapeAttr(mName)}', '${escapeAttr(mImg)}')">
+                    ${buttons ? 'Gift' : 'Vote'}
                 </button>`;
         }
         return buttons;
@@ -651,7 +651,7 @@
         container.innerHTML = `<div class="ranking-heading">${escapeHtml(campaignTitle || 'Major Vote')}</div>${rows}`;
     }
 
-    // กด Vote / GE Vote แล้วไปหน้าโหวตแยก (majorvote_vote): เลือกจำนวน > Confirm transaction > Submission completed > Thank you card
+    // กด Vote (Token / GE Token) แล้วไปหน้าโหวตแยก (majorvote_vote): เลือกจำนวน > Confirm transaction > Submission completed > Thank you card
     function handleVoteClick(candidateName, tokenType, candidateImg) {
         tokenType = tokenType === 'GEToken' ? 'GEToken' : 'Token';
 
