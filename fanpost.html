@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
+  <script src="assets/js/i18n.js" charset="utf-8"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta charset="UTF-8">
     <title>BLM48 Membership | Fan Post</title>
@@ -261,7 +262,7 @@
           <div style="font-size: 0.88rem; width: 100%;">
             <div class="cmt-bubble">
             <b${profileLinkAttr(cmt.username)} style="color: var(--primary-pink);">${escapeHtml(cmt.name)}</b>
-            <div id="cmt-text-${commentId}" style="color: #333; word-break: break-word; overflow-wrap: break-word; margin-top: 2px;">${escapeHtml(cmt.text)}</div>
+            <div id="cmt-text-${commentId}" translate="no" style="color: #333; word-break: break-word; overflow-wrap: break-word; margin-top: 2px;">${escapeHtml(cmt.text)}</div>
             </div>
             <div class="cmt-actions" style="display: flex; align-items: center; gap: 14px; margin-top: 4px;">
               <span class="cmt-time">${commentTimeAgo(cmt.timestamp)}</span>
@@ -373,7 +374,7 @@
         </div>
 
         <div class="post-body" style="margin-bottom: 15px;">
-          <p id="content-${postId}" style="margin: 0; white-space: pre-wrap; word-break: break-word; overflow-wrap: break-word;">${postContent}</p>
+          <p id="content-${postId}" translate="no" style="margin: 0; white-space: pre-wrap; word-break: break-word; overflow-wrap: break-word;">${postContent}</p>
           <div id="post-images-${postId}">${imagesHtml}</div>
         </div>
 
