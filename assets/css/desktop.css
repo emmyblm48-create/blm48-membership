@@ -107,6 +107,12 @@
   .dt-nav a:hover i { color: var(--dt-ink); }
   .dt-nav a.active { background: var(--dt-pink-soft); color: var(--dt-ink); font-weight: 700; }
   .dt-nav a.active i { color: var(--dt-pink); }
+  /* ไอคอนธีม Champ of the Month / รูปโปรไฟล์ (เหมือนแถบล่างบนมือถือ) */
+  .dt-nav-img { display: none; width: 32px; height: 32px; object-fit: contain; flex-shrink: 0; margin: -6px -5px; transition: transform .15s ease; }
+  .dt-nav a.dt-has-img > i { display: none; }
+  .dt-nav a.dt-has-img > .dt-nav-img { display: block; }
+  .dt-nav a.active > .dt-nav-img { transform: scale(1.12); }
+  .dt-nav-avatar { width: 26px; height: 26px; margin: -2px; border-radius: 50%; object-fit: cover; border: 2px solid #ffb3c1; box-sizing: border-box; }
   .dt-nav.dt-nav-sub a { padding: 9px 12px; font-size: 14px; font-weight: 500; }
   .dt-nav.dt-nav-sub a i { font-size: 15px; }
   .dt-dot {

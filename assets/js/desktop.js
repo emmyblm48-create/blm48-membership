@@ -34,11 +34,11 @@
   };
 
   const MAIN_NAV = [
-    { key: 'index', href: 'index', icon: 'fa-house', label: 'Home' },
-    { key: 'fanpost', href: 'fanpost', icon: 'fa-star', label: 'Fan Post' },
-    { key: 'majorvote', href: 'majorvote', icon: 'fa-crown', label: 'Major Vote' },
-    { key: 'notification', href: 'notification', icon: 'fa-bell', label: 'Notification', dot: 'noti' },
-    { key: 'profile', href: 'profile', icon: 'fa-user', label: 'Profile' }
+    { key: 'index', href: 'index', icon: 'fa-house', label: 'Home', champIcon: 'homeIcon' },
+    { key: 'fanpost', href: 'fanpost', icon: 'fa-star', label: 'Fan Post', champIcon: 'kamiIcon' },
+    { key: 'majorvote', href: 'majorvote', icon: 'fa-crown', label: 'Major Vote', champIcon: 'cartIcon' },
+    { key: 'notification', href: 'notification', icon: 'fa-bell', label: 'Notification', dot: 'noti', champIcon: 'notiIcon' },
+    { key: 'profile', href: 'profile', icon: 'fa-user', label: 'Profile', avatar: true }
   ];
   const SUB_NAV = [
     { key: 'missions', href: 'missions', icon: 'fa-list-check', label: 'Missions', dot: 'mission' },
@@ -81,8 +81,11 @@
 
   // ---------------- Sidebar ----------------
   function navLink(item, activeKey) {
+    const iconImg = item.champIcon
+      ? `<img class="dt-nav-img" data-dt-champ-icon="${item.champIcon}" alt="">`
+      : item.avatar ? `<img class="dt-nav-img dt-nav-avatar" id="dt-nav-avatar" alt="">` : '';
     return `<a href="${item.href}" class="${item.key === activeKey ? 'active' : ''}">
-      <i class="fa-solid ${item.icon}"></i><span>${esc(item.label)}</span>
+      <i class="fa-solid ${item.icon}"></i>${iconImg}<span>${esc(item.label)}</span>
       ${item.dot ? `<span class="dt-dot" data-dt-dot="${item.dot}"></span>` : ''}
     </a>`;
   }
@@ -115,6 +118,16 @@
     const me = document.getElementById('dt-me');
     if (!me) return;
     if (!u || !u.username) { me.innerHTML = ''; return; }
+    // แท็บ Profile ใช้รูปโปรไฟล์ผู้ใช้เหมือนแถบล่างบนมือถือ
+    const navAvatar = document.getElementById('dt-nav-avatar');
+    if (navAvatar) {
+      const src = img(u.profile_img);
+      if (navAvatar.getAttribute('src') !== src) {
+        navAvatar.onerror = () => { navAvatar.onerror = null; navAvatar.src = FALLBACK_AVATAR; };
+        navAvatar.src = src;
+      }
+      navAvatar.parentElement.classList.add('dt-has-img');
+    }
     me.innerHTML = `
       <img src="${esc(img(u.profile_img))}" alt="" onerror="this.onerror=null;this.src='${FALLBACK_AVATAR}'">
       <div class="dt-me-text"><b>${esc(u.name || u.username)}</b><span>@${esc(u.username)}</span></div>`;
@@ -123,6 +136,44 @@
     if (postBtn) postBtn.classList.toggle('on', role === 'member');
     const admin = document.getElementById('dt-admin-link');
     if (admin) admin.style.display = (role === 'admin' || u.is_admin === true) ? 'flex' : 'none';
+  }
+
+  // ไอคอนเมนูหลัก 4 อันมาจากธีม Champ of the Month (homeIcon/kamiIcon/cartIcon/notiIcon)
+  // เหมือนแถบล่างบนมือถือ อ่านจาก cache เดียวกับที่หน้าอื่นๆ ใช้ (bnl_winner_theme_cache)
+  // ถ้ายังไม่มี cache (เช่นเปิดหน้าย่อยเป็นหน้าแรก) ดึงเองจาก get_winner_theme แล้วเก็บ cache ไว้
+  const THEME_CACHE_KEY = 'bnl_winner_theme_cache';
+  function applyChampIcons(champ) {
+    document.querySelectorAll('[data-dt-champ-icon]').forEach(im => {
+      const url = champ && champ[im.dataset.dtChampIcon];
+      const link = im.parentElement;
+      if (url && String(url).trim() !== '') {
+        if (im.getAttribute('src') !== url) {
+          im.onerror = () => link.classList.remove('dt-has-img');
+          im.src = url;
+        }
+        link.classList.add('dt-has-img');
+      } else {
+        link.classList.remove('dt-has-img');
+      }
+    });
+  }
+  function readCachedChamp() {
+    try {
+      const obj = JSON.parse(localStorage.getItem(THEME_CACHE_KEY) || 'null');
+      return obj ? (obj.champ || obj) : null;
+    } catch (e) { return null; }
+  }
+  function loadChampIcons() {
+    const cached = readCachedChamp();
+    if (cached) { applyChampIcons(cached); return; }
+    if (typeof blm48GetWinnerTheme !== 'function') return;
+    blm48GetWinnerTheme().then(data => {
+      const champ = data && (data.champ || data);
+      if (champ && champ.name) {
+        try { localStorage.setItem(THEME_CACHE_KEY, JSON.stringify(data)); } catch (e) {}
+        applyChampIcons(champ);
+      }
+    }).catch(() => {});
   }
 
   // จุดแดง: แจ้งเตือนใช้ค่าเดียวกับ checkNotificationBadge(), ภารกิจดูจากจุดแดงบนหัว Home หรือข้อมูลภารกิจในแถบขวา
@@ -330,10 +381,11 @@
   // ---------------- start ----------------
   function start() {
     buildSidebar();
+    loadChampIcons();
     if (RAIL_PAGES.includes(page)) buildRail();
     updateDots();
     scanFixed();
-    [600, 1800, 4000].forEach(t => setTimeout(() => { scanFixed(); updateDots(); renderSidebarUser(); }, t));
+    [600, 1800, 4000].forEach(t => setTimeout(() => { scanFixed(); updateDots(); renderSidebarUser(); const c = readCachedChamp(); if (c) applyChampIcons(c); }, t));
     window.addEventListener('resize', scheduleScan);
     DESKTOP_MQ.addEventListener && DESKTOP_MQ.addEventListener('change', scheduleScan);
     new MutationObserver(() => { scheduleScan(); updateDots(); })
