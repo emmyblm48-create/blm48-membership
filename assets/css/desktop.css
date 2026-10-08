@@ -1,0 +1,239 @@
+/* =========================================================================
+   🖥️ BLM48 Desktop layout (จอคอม ≥ 1024px) — โหลดอัตโนมัติจาก desktop.js ผ่าน common.js
+   มือถือ/แท็บเล็ต (< 1024px) ไม่โดนอะไรเลย ทุกกฎอยู่ใน @media ด้านล่างเท่านั้น
+
+   โครง 3 คอลัมน์:
+   - ซ้าย  .dt-sidebar  เมนูหลักแทน .bottom-tab-bar (+ ภารกิจ / Shop / Inventory / ค้นหา ฯลฯ)
+   - กลาง  เนื้อหาเดิมของแต่ละหน้า (body ถูกดันด้วย margin ซ้าย/ขวา)
+   - ขวา   .dt-rail  กระเป๋าเงิน / Kami-Oshi / ภารกิจวันนี้ (เฉพาะหน้าใน RAIL_PAGES และจอ ≥ 1280px)
+   แถบ position:fixed เต็มความกว้างของแต่ละหน้า (navbar/top bar/แถบล่าง) ถูก desktop.js
+   ติดคลาส .dt-fixbar / .dt-fixcenter ให้ขยับมาอยู่ในช่องกลางแทนที่จะไปทับเมนูซ้าย
+   ========================================================================= */
+
+:root {
+  --dt-left: 0px;
+  --dt-right: 0px;
+  --dt-sidebar-w: 248px;
+  --dt-rail-w: 320px;
+  --dt-ink: #252525;
+  --dt-muted: #8a8a8a;
+  --dt-line: #f0e6e9;
+  --dt-pink: #ff85a2;
+  --dt-pink-soft: #fff0f4;
+  --dt-yellow: #ffde5b;
+}
+
+.dt-sidebar, .dt-rail { display: none; }
+
+@media (min-width: 1024px) {
+  html.dt-shell { --dt-left: var(--dt-sidebar-w); }
+
+  html.dt-shell body {
+    margin-left: var(--dt-left) !important;
+    margin-right: var(--dt-right) !important;
+    width: auto !important;
+  }
+
+  /* แถบล่างแบบมือถือ -> ใช้เมนูซ้ายแทน */
+  html.dt-shell .bottom-tab-bar,
+  html.dt-shell .bottom-nav { display: none !important; }
+
+  /* แถบ fixed เต็มจอเดิม -> กว้างเท่าช่องกลาง */
+  html.dt-shell .dt-fixbar {
+    left: var(--dt-left) !important;
+    right: var(--dt-right) !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+  /* ของ fixed ที่จัดกึ่งกลางจอ (toast, ปุ่มลอย) -> กึ่งกลางช่องกลาง */
+  html.dt-shell .dt-fixcenter {
+    translate: calc((var(--dt-left) - var(--dt-right)) / 2) 0;
+  }
+  /* ปุ่มลอยที่เกาะขอบซ้าย/ขวา -> เกาะขอบช่องกลางแทน */
+  html.dt-shell .dt-fixleft { translate: var(--dt-left) 0; }
+  html.dt-shell .dt-fixright { translate: calc(-1 * var(--dt-right)) 0; }
+
+  /* ---------- Sidebar ---------- */
+  html.dt-shell .dt-sidebar {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: var(--dt-sidebar-w);
+    box-sizing: border-box;
+    padding: 22px 14px 18px;
+    background: #ffffff;
+    border-right: 1px solid var(--dt-line);
+    z-index: 950;
+    overflow-y: auto;
+    scrollbar-width: none;
+    font-family: 'Quicksand', 'Kanit', sans-serif;
+    color: var(--dt-ink);
+  }
+  html.dt-shell .dt-sidebar::-webkit-scrollbar { display: none; }
+
+  .dt-brand {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 10px 22px;
+    text-decoration: none; color: inherit;
+  }
+  .dt-brand-mark {
+    width: 38px; height: 38px; border-radius: 12px;
+    background: var(--dt-yellow);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; letter-spacing: .5px; color: #252525;
+  }
+  .dt-brand-text { display: flex; flex-direction: column; line-height: 1.15; }
+  .dt-brand-text b { font-size: 17px; letter-spacing: 1px; }
+  .dt-brand-text span { font-size: 11px; color: var(--dt-muted); letter-spacing: .5px; }
+
+  .dt-nav { display: flex; flex-direction: column; gap: 2px; }
+  .dt-nav-label {
+    font-size: 11px; font-weight: 700; color: #b5a9ad; letter-spacing: 1px;
+    text-transform: uppercase; padding: 16px 12px 6px;
+  }
+  .dt-nav a {
+    position: relative;
+    display: flex; align-items: center; gap: 14px;
+    padding: 11px 12px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: #4a4a4a;
+    font-size: 15px; font-weight: 600;
+    transition: background .15s ease, color .15s ease;
+  }
+  .dt-nav a i { width: 22px; text-align: center; font-size: 18px; color: #9c9c9c; transition: color .15s ease; }
+  .dt-nav a:hover { background: #fafafa; color: var(--dt-ink); }
+  .dt-nav a:hover i { color: var(--dt-ink); }
+  .dt-nav a.active { background: var(--dt-pink-soft); color: var(--dt-ink); font-weight: 700; }
+  .dt-nav a.active i { color: var(--dt-pink); }
+  .dt-nav.dt-nav-sub a { padding: 9px 12px; font-size: 14px; font-weight: 500; }
+  .dt-nav.dt-nav-sub a i { font-size: 15px; }
+  .dt-dot {
+    display: none;
+    position: absolute; left: 30px; top: 9px;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #ff4d6d; border: 2px solid #fff;
+  }
+  .dt-dot.on { display: block; }
+
+  .dt-post-btn {
+    display: none;
+    margin: 16px 4px 0;
+    padding: 12px;
+    border-radius: 14px;
+    background: var(--dt-pink); color: #fff !important;
+    text-align: center; text-decoration: none;
+    font-weight: 700; font-size: 15px;
+  }
+  .dt-post-btn.on { display: block; }
+  .dt-post-btn:hover { filter: brightness(.96); }
+
+  .dt-me {
+    margin-top: auto;
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px; border-radius: 14px;
+    text-decoration: none; color: inherit;
+  }
+  .dt-me:hover { background: #fafafa; }
+  .dt-me img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--dt-yellow); flex-shrink: 0; }
+  .dt-me-text { min-width: 0; display: flex; flex-direction: column; line-height: 1.25; }
+  .dt-me-text b { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dt-me-text span { font-size: 12px; color: var(--dt-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ---------- Home (index) ---------- */
+  html.dt-shell.dt-page-index .champ-banner,
+  html.dt-shell.dt-page-index .main-content-container,
+  html.dt-shell.dt-page-index body > footer {
+    max-width: 680px;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box;
+  }
+  html.dt-shell.dt-page-index .champ-banner { border-radius: 0 0 22px 22px; }
+  /* ไอคอนภารกิจ/Shop/Inventory/ค้นหาบนหัว Home อยู่ในเมนูซ้ายแล้ว */
+  html.dt-shell.dt-page-index .navbar .nav-btns { display: none !important; }
+  html.dt-shell.dt-page-index #btn-create-post { display: none !important; }
+}
+
+/* ---------- Right rail (จอ ≥ 1280px เฉพาะหน้าที่เปิดใช้) ---------- */
+@media (min-width: 1280px) {
+  html.dt-shell.dt-has-rail { --dt-right: var(--dt-rail-w); }
+
+  html.dt-shell.dt-has-rail .dt-rail {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    width: var(--dt-rail-w);
+    box-sizing: border-box;
+    padding: 22px 18px;
+    background: #ffffff;
+    border-left: 1px solid var(--dt-line);
+    z-index: 950;
+    overflow-y: auto;
+    scrollbar-width: none;
+    font-family: 'Quicksand', 'Kanit', sans-serif;
+    color: var(--dt-ink);
+  }
+  html.dt-shell.dt-has-rail .dt-rail::-webkit-scrollbar { display: none; }
+
+  .dt-card {
+    display: block;
+    border: 1px solid var(--dt-line);
+    border-radius: 16px;
+    padding: 14px;
+    background: #fff;
+    text-decoration: none; color: inherit;
+  }
+  a.dt-card:hover { border-color: #ffd1dc; }
+  .dt-card-head {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 13px; font-weight: 700; color: var(--dt-ink); margin-bottom: 10px;
+  }
+  .dt-card-head span { font-size: 12px; font-weight: 500; color: var(--dt-muted); }
+
+  .dt-profile { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .dt-profile img { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid var(--dt-yellow); }
+  .dt-profile b { display: block; font-size: 15px; }
+  .dt-profile span { font-size: 12px; color: var(--dt-muted); }
+
+  .dt-wallet { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .dt-wallet div {
+    background: #fafafa; border-radius: 12px; padding: 9px 6px; text-align: center;
+  }
+  .dt-wallet b { display: block; font-size: 15px; font-weight: 700; }
+  .dt-wallet span { font-size: 11px; color: var(--dt-muted); display: inline-flex; align-items: center; gap: 4px; }
+
+  .dt-kami { display: flex; align-items: center; gap: 12px; }
+  .dt-kami img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 3px solid var(--dt-yellow); }
+  .dt-kami b { display: block; font-size: 16px; }
+  .dt-kami-days {
+    display: inline-flex; align-items: center; gap: 5px;
+    margin-top: 4px; padding: 3px 9px; border-radius: 20px;
+    background: #fff6d6; color: #8a6d00; font-size: 12px; font-weight: 700;
+  }
+  .dt-empty { font-size: 13px; color: var(--dt-muted); }
+
+  .dt-mission { margin-top: 10px; }
+  .dt-mission:first-of-type { margin-top: 0; }
+  .dt-mission-row { display: flex; justify-content: space-between; gap: 8px; font-size: 12.5px; color: #4a4a4a; }
+  .dt-mission-row i { width: 16px; color: var(--dt-pink); }
+  .dt-mission-row.done { color: var(--dt-muted); }
+  .dt-mission-row.done i { color: #3cb371; }
+  .dt-bar { height: 6px; border-radius: 6px; background: #f3f3f3; margin-top: 5px; overflow: hidden; }
+  .dt-bar > div { height: 100%; background: var(--dt-pink); border-radius: 6px; }
+  .dt-mission-row.done + .dt-bar > div { background: #3cb371; }
+
+  .dt-links { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .dt-links a {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 12px; border-radius: 12px; background: #fafafa;
+    text-decoration: none; color: #4a4a4a; font-size: 13px; font-weight: 600;
+  }
+  .dt-links a:hover { background: var(--dt-pink-soft); color: var(--dt-ink); }
+  .dt-links a i { color: var(--dt-pink); width: 16px; text-align: center; }
+
+  .dt-foot { font-size: 11px; color: #c5c5c5; text-align: center; padding-top: 4px; letter-spacing: .3px; }
+}
