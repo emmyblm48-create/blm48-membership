@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <script src="assets/js/i18n.js" charset="utf-8"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>BLM48 Membership | My Profile</title>
@@ -374,16 +373,6 @@ body {
     .btn-pf-push.is-on .menu-value { color: #2e9e5b; }
     .menu-arrow { color: #aaa; font-size: 14px; }
     .pf-fanscore-detail { padding: 0 0 4px 46px; }
-    .pf-lang-options { padding: 0 0 6px 46px; }
-    .pf-lang-option {
-      width: 100%; display: flex; align-items: center; gap: 10px; background: none; border: none;
-      padding: 11px 0; font-family: inherit; font-size: 15px; font-weight: 500; color: #555; cursor: pointer; text-align: left;
-    }
-    .pf-lang-option:active { opacity: 0.55; }
-    .pf-lang-option .pf-lang-code { font-size: 12px; font-weight: 600; color: #aaa; }
-    .pf-lang-option i { margin-left: auto; color: var(--blmem-pink); font-size: 14px; visibility: hidden; }
-    .pf-lang-option.is-active { color: #222; font-weight: 700; }
-    .pf-lang-option.is-active i { visibility: visible; }
 
     .pf-sticky-header {
       position: fixed; top: 0; left: 0; right: 0; z-index: 900;
@@ -536,18 +525,6 @@ body {
           <span id="pf-push-status" class="menu-value is-muted">Off</span>
           <i class="fas fa-chevron-right menu-arrow"></i>
         </button>
-        <!-- 🌐 เปลี่ยนภาษา (ไทย ค่าเริ่มต้น / EN / JP) — กดแล้วกางตัวเลือกในหน้าเลย ไม่ใช้ popup -->
-        <button type="button" id="btn-pf-lang" class="menu-item" onclick="toggleLangOptions()">
-          <span class="menu-icon"><i class="fas fa-language"></i></span>
-          <span class="menu-text">Language</span>
-          <span id="pf-lang-value" class="menu-value notranslate"></span>
-          <i id="pf-lang-arrow" class="fas fa-chevron-right menu-arrow" style="transition: transform 0.3s ease;"></i>
-        </button>
-        <div id="pf-lang-options" class="pf-lang-options notranslate" style="display: none;">
-          <button type="button" class="pf-lang-option" data-lang="th" onclick="blm48SetLang('th')"><span>ไทย</span><span class="pf-lang-code">TH</span><i class="fas fa-check"></i></button>
-          <button type="button" class="pf-lang-option" data-lang="en" onclick="blm48SetLang('en')"><span>English</span><span class="pf-lang-code">EN</span><i class="fas fa-check"></i></button>
-          <button type="button" class="pf-lang-option" data-lang="ja" onclick="blm48SetLang('ja')"><span>日本語</span><span class="pf-lang-code">JP</span><i class="fas fa-check"></i></button>
-        </div>
         <a href="admin" id="menu-admin-dashboard" class="menu-item" style="display:none;">
           <span class="menu-icon"><i class="fas fa-gauge-high"></i></span>
           <span class="menu-text">Admin Dashboard</span>
@@ -1171,24 +1148,6 @@ function updateSubPageIcon(imgId, fallbackId, iconUrl) {
     }
     return null;
   }
-
-  // 🌐 เมนูภาษา: โชว์ภาษาปัจจุบัน + กางตัวเลือก (blm48SetLang อยู่ใน assets/js/i18n.js — บันทึกแล้วรีโหลดหน้า)
-  function renderLangMenu() {
-    const lang = window.BLM48_LANG || 'th';
-    const valueEl = document.getElementById('pf-lang-value');
-    if (valueEl) valueEl.textContent = (window.BLM48_LANGS || {})[lang] || 'ไทย';
-    document.querySelectorAll('.pf-lang-option').forEach(btn => {
-      btn.classList.toggle('is-active', btn.dataset.lang === lang);
-    });
-  }
-  function toggleLangOptions() {
-    const box = document.getElementById('pf-lang-options');
-    const arrow = document.getElementById('pf-lang-arrow');
-    const open = box.style.display === 'none';
-    box.style.display = open ? 'block' : 'none';
-    if (arrow) arrow.style.transform = open ? 'rotate(90deg)' : '';
-  }
-  document.addEventListener('DOMContentLoaded', renderLangMenu);
 
   function renderProfilePushBtn() {
     const btn = document.getElementById('btn-pf-push');

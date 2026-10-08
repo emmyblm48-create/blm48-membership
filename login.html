@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <script src="assets/js/i18n.js" charset="utf-8"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Login - BLM48 Membership</title>
@@ -223,26 +222,11 @@
       color: var(--blm-yellow);
       font-weight: 700;
     }
-    /* 🌐 ตัวเลือกภาษา (มุมขวาบน) */
-    .login-lang { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); right: 12px; display: flex; gap: 4px; z-index: 10; }
-    .login-lang button {
-      border: 1px solid #e5e5e5; background: #fff; color: #888; font-family: inherit; font-size: 12px; font-weight: 600;
-      padding: 5px 10px; border-radius: 14px; cursor: pointer;
-    }
-    .login-lang button.is-active { background: #222; border-color: #222; color: #fff; }
   </style>
   <script src="assets/js/pull-to-refresh.js"></script>
 </head>
 <body class="glass-mesh-bg force-white-bg">
 
-  <div class="login-lang notranslate">
-    <button type="button" data-lang="th" onclick="blm48SetLang('th')">TH</button>
-    <button type="button" data-lang="en" onclick="blm48SetLang('en')">EN</button>
-    <button type="button" data-lang="ja" onclick="blm48SetLang('ja')">JP</button>
-  </div>
-  <script>
-    document.querySelectorAll('.login-lang button').forEach(b => b.classList.toggle('is-active', b.dataset.lang === (window.BLM48_LANG || 'th')));
-  </script>
 
   <div class="login-container">
     <h1 class="title">BLM48 Login</h1>
