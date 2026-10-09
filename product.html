@@ -21,7 +21,7 @@
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background: #ffffff; color: #222; font-family: 'Quicksand', 'Kanit', sans-serif;
-            padding-top: calc(60px + env(safe-area-inset-top)); padding-bottom: calc(150px + env(safe-area-inset-bottom)); }
+            padding-top: calc(60px + env(safe-area-inset-top)); padding-bottom: calc(190px + env(safe-area-inset-bottom)); }
 
         /* แถบบน: ย้อนกลับ · Details · ตะกร้า */
         .top-navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: #fff;
@@ -293,7 +293,15 @@
 
         document.getElementById('pd-bottom').style.display = '';
         updateBottom();
+        fitBottomSpace();
     }
+
+    // เว้นที่ด้านล่างเท่าความสูงจริงของแถบ Quantity/Add to cart (รวมขอบล่างของ iPhone) ให้เลื่อนดู Description ได้สุด
+    function fitBottomSpace() {
+        const bar = document.getElementById('pd-bottom');
+        if (bar && bar.offsetHeight) document.body.style.paddingBottom = (bar.offsetHeight + 24) + 'px';
+    }
+    window.addEventListener('resize', fitBottomSpace);
 
     function maxQty() {
         if (product && product.col && product.hasCap) {
