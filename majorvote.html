@@ -163,8 +163,6 @@
             display: flex; justify-content: space-between; align-items: center; gap: 6px;
         }
         .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; }
-        .status-open { background: #e6f9ed; color: #2e7d32; }
-        .status-closed { background: #ffebee; color: #c62828; }
         .status-test { background: #ffc107; color: #222; }
         .end-date-pill {
             margin-left: auto; padding: 4px 10px; border-radius: 20px; white-space: nowrap;
@@ -692,7 +690,6 @@
                     </div>
                     <img src="${imageSrc}" alt="${escapeHtml(camp.Title || 'Vote')}" style="${hasValidImage ? 'display:block;' : 'display:none;'}" onerror="this.style.display='none';">
                     <div class="card-overlay-top">
-                        <span class="status-badge ${isOpen ? 'status-open' : 'status-closed'}">${isOpen ? 'OPEN' : 'CLOSED'}</span>
                         ${camp.AdminOnly ? `<span class="status-badge status-test">TEST</span>` : ''}
                         ${endDateText ? `<span class="end-date-pill">End date: ${endDateText}</span>` : ''}
                     </div>
