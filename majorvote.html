@@ -404,6 +404,11 @@
         return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
     }
 
+    // ปี ค.ศ. ตามเวลาไทย (Asia/Bangkok) ของ timestamp (ms)
+    function bangkokYear(ms) {
+        return Number(new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Bangkok', year: 'numeric' }).format(new Date(ms)));
+    }
+
     // 👑 ชื่อ Tier บนแถวมงกุฎ: Member ได้ "Member" เสมอ, user ได้ Copper/Silver/Gold ตาม Fan Score
     async function loadMembershipTier() {
         const el = document.getElementById('tier-name');
@@ -653,21 +658,32 @@
         container.innerHTML = ""; 
         
         const now = new Date().getTime();
+        const thisYear = bangkokYear(now);
+        const timeOf = v => { const t = v ? new Date(v).getTime() : NaN; return isNaN(t) ? null : t; };
+
+        // แสดงกิจกรรมทั้งหมดของปีนี้ (เวลาไทย) ทั้งที่กำลังเปิดและจบไปแล้ว — กิจกรรมที่จบแล้ว หน้า detail จะแสดงผลอันดับแทนการโหวต
+        // กิจกรรมที่ยังไม่ถึงวันเริ่มยังซ่อนไว้เหมือนเดิม | กิจกรรมทดสอบ (Admin only) แสดงเสมอ — แอดมินต้องเข้าไปทดสอบได้ก่อนเปิดจริง
+        const visible = campaignsList.filter(camp => {
+            if (camp.AdminOnly) return true;
+            const start = timeOf(camp.StartTime), end = timeOf(camp.EndTime);
+            if (start !== null && start > now) return false;
+            const firstYear = bangkokYear(start !== null ? start : (end !== null ? end : now));
+            const lastYear = end !== null ? bangkokYear(end) : thisYear;
+            return firstYear <= thisYear && lastYear >= thisYear;
+        });
+        // กิจกรรมที่ยังเปิดอยู่ขึ้นก่อน (ลำดับเดิม) ตามด้วยกิจกรรมที่จบแล้ว เรียงจากจบล่าสุด
+        const hasEnded = camp => { const end = timeOf(camp.EndTime); return end !== null && end < now; };
+        visible.sort((a, b) => {
+            const ea = hasEnded(a), eb = hasEnded(b);
+            if (ea !== eb) return ea ? 1 : -1;
+            return ea ? timeOf(b.EndTime) - timeOf(a.EndTime) : 0;
+        });
 
         renderedCampaigns = campaignsList;
-        campaignsList.forEach(camp => {
+        visible.forEach(camp => {
             const status = (camp.Status || "Closed").trim().toUpperCase();
-            const isOpen = status === "OPEN"; 
-            
-            // กิจกรรมทดสอบ (Admin only) แสดงเสมอ ไม่สนวันเริ่ม/จบ — แอดมินต้องเข้าไปทดสอบได้ก่อนเปิดจริง
-            if (camp.StartTime && !camp.AdminOnly) {
-                const startTimeParsed = new Date(camp.StartTime).getTime();
-                if (!isNaN(startTimeParsed) && startTimeParsed > now) return;
-            }
-            if (camp.EndTime && !camp.AdminOnly) {
-                const endTimeParsed = new Date(camp.EndTime).getTime();
-                if (!isNaN(endTimeParsed) && endTimeParsed < now) return; 
-            }
+            // จบแล้วตามเวลา ถือว่าปิด แม้สถานะในตารางยังเป็น Open (ไม่ต้องขึ้นป๊อปอัปเช็ก Token)
+            const isOpen = status === "OPEN" && (camp.AdminOnly || !hasEnded(camp));
 
             let coverImgUrl = camp.CoverImage || camp["รูปจากไดร์ฟ"] || "";
             
