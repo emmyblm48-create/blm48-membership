@@ -625,8 +625,6 @@
         const unit = tokenType === 'GEToken' ? 'GE Token' : 'Token';
         const balance = getGateBalance(tokenType);
         const enough = balance >= VOTE_GATE_MIN;
-        // แคมเปญที่เปิด Gift ไว้ด้วย ยังเข้าไปส่งของขวัญได้ แม้ Token ไม่พอ
-        const canEnter = enough || camp.EnableGift === true || String(camp.EnableGift).toLowerCase() === 'true';
 
         voteGateHref = event.currentTarget.getAttribute('href');
         const coin = document.getElementById('vote-gate-coin');
@@ -638,7 +636,8 @@
         balEl.textContent = `${balance.toLocaleString()} ${unit}`;
         balEl.classList.toggle('insufficient', !enough);
         document.getElementById('vote-gate-remark').textContent = getGateRemark(camp);
-        document.getElementById('vote-gate-enter').disabled = !canEnter;
+        // Token ไม่พอก็ยังกด Enter เข้าไปดูรายละเอียดกิจกรรมได้ — หน้าโหวต (majorvote_vote) จะกันไม่ให้โหวตเกินยอดเอง
+        document.getElementById('vote-gate-enter').disabled = false;
         document.getElementById('vote-gate-overlay').classList.add('show');
         return false;
     }
