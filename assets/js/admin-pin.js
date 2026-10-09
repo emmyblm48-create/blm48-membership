@@ -3,17 +3,20 @@
 // หน้าฝั่งผู้ใช้: { page: 'majorvote', cancelUrl: 'index', mode: 'user' } (ทุกบัญชี, PIN ชุดเดียวกับหลังบ้าน)
 // - แอดมินแต่ละคนมี PIN ของตัวเอง (ครั้งแรกให้ตั้ง PIN + ยืนยันอีกรอบ)
 // - ตรวจ PIN ที่เซิร์ฟเวอร์ (เก็บแบบ hash) ผิด 5 ครั้งล็อก 15 นาที และบันทึกประวัติการเข้าหน้าทุกครั้ง
-// - ปลดล็อกแล้วเปลี่ยนไปมาระหว่างหน้าที่ล็อกด้วย PIN ได้ 10 นาทีโดยไม่ต้องใส่ซ้ำ (ต่อเวลาทุกครั้งที่เปิดหน้า)
+// - หน้า Admin: ถาม PIN ทุกครั้งที่เข้าหน้า (ไม่จำการปลดล็อก)
+// - หน้า Major Vote (mode 'user'): ปลดล็อกแล้วเข้าได้ 10 นาทีโดยไม่ต้องใส่ซ้ำ (ต่อเวลาทุกครั้งที่เปิดหน้า) แยกจากหน้า Admin
 (function () {
-  const UNLOCK_KEY = 'blm48_admin_pin_unlock';
+  const USER_UNLOCK_KEY = 'blm48_majorvote_pin_unlock';
   const UNLOCK_MS = 10 * 60 * 1000;
   const PIN_LENGTH = 6;
+  // ล้างสถานะปลดล็อกแบบเก่า (เคยใช้ร่วมกันระหว่างหน้า Admin กับ Major Vote)
+  try { sessionStorage.removeItem('blm48_admin_pin_unlock'); } catch (e) { /* ไม่มี storage */ }
 
   function readUnlock() {
-    try { return JSON.parse(sessionStorage.getItem(UNLOCK_KEY) || 'null'); } catch (e) { return null; }
+    try { return JSON.parse(sessionStorage.getItem(USER_UNLOCK_KEY) || 'null'); } catch (e) { return null; }
   }
   function writeUnlock(username) {
-    try { sessionStorage.setItem(UNLOCK_KEY, JSON.stringify({ username, until: Date.now() + UNLOCK_MS })); } catch (e) { /* ไม่มี storage = ถาม PIN ทุกครั้ง */ }
+    try { sessionStorage.setItem(USER_UNLOCK_KEY, JSON.stringify({ username, until: Date.now() + UNLOCK_MS })); } catch (e) { /* ไม่มี storage = ถาม PIN ทุกครั้ง */ }
   }
 
   // อุปกรณ์แบบสั้นๆ ไว้ดูในประวัติ เช่น "iPhone · Safari"
@@ -66,7 +69,7 @@
     const setPin = isUser ? blm48UserSetPin : blm48AdminSetPin;
     const verifyPin = isUser ? blm48UserVerifyPin : blm48AdminVerifyPin;
 
-    const unlock = readUnlock();
+    const unlock = isUser ? readUnlock() : null; // หน้า Admin ไม่ข้าม PIN เลย
     if (unlock && unlock.username === user.username && unlock.until > Date.now()) {
       writeUnlock(user.username); // ต่อเวลา
       return Promise.resolve();
@@ -115,7 +118,7 @@
       }
 
       function finish() {
-        writeUnlock(user.username);
+        if (isUser) writeUnlock(user.username); // จำการปลดล็อกเฉพาะหน้า Major Vote
         document.removeEventListener('keydown', onKey);
         document.documentElement.style.overflow = '';
         screen.remove();
