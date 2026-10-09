@@ -427,8 +427,10 @@ function blm48RemovePushSubscription(username, endpoint) {
 }
 
 // Major Vote - candidates list already reflects open/closed sort + percentages server-side.
+// ส่ง username ไปด้วย: กิจกรรมที่หมดเวลาแล้วแต่ยังไม่ประกาศผล server ส่งคะแนนให้เฉพาะแอดมิน
 function blm48GetMajorVoteCandidates(collectionId) {
-  return blm48Rpc('get_major_vote_candidates', { p_collection_id: collectionId });
+  const username = typeof getUsername === 'function' ? getUsername() : '';
+  return blm48Rpc('get_major_vote_candidates', { p_collection_id: collectionId, p_username: username || null });
 }
 function blm48SubmitMajorVote(username, collectionId, candidateName, voteAmount, tokenType) {
   return blm48Rpc('submit_major_vote', { p_username: username, p_collection_id: collectionId, p_candidate_name: candidateName, p_vote_amount: voteAmount, p_token_type: tokenType || null });
@@ -697,6 +699,10 @@ function blm48AdminCreateVoteEvent(adminUsername, ev) {
 // กิจกรรมทดสอบ: true = เห็น/โหวตได้เฉพาะแอดมิน, false = เปิดให้ทุกคน
 function blm48AdminSetVoteAdminOnly(adminUsername, collectionId, adminOnly) {
   return blm48Rpc('admin_set_vote_admin_only', { p_admin_username: adminUsername, p_collection_id: collectionId, p_admin_only: !!adminOnly });
+}
+// แสดงผล / ซ่อนผลกิจกรรมโหวต (แสดงได้หลังหมดเวลาโหวตแล้วเท่านั้น)
+function blm48AdminSetVoteResultsPublished(adminUsername, collectionId, published) {
+  return blm48Rpc('admin_set_vote_results_published', { p_admin_username: adminUsername, p_collection_id: collectionId, p_published: !!published });
 }
 function blm48AdminUpdateVoteCover(adminUsername, collectionId, coverImage) {
   return blm48Rpc('admin_update_vote_cover', { p_admin_username: adminUsername, p_collection_id: collectionId, p_cover_image: coverImage });

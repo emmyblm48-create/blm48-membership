@@ -576,7 +576,8 @@
                     EnableGift: c.enableGift,
                     TokenMechanic: c.tokenMechanic,
                     RefundPercent: c.refundPercent,
-                    AdminOnly: !!c.adminOnly
+                    AdminOnly: !!c.adminOnly,
+                    ResultsPublished: !!c.resultsPublished
                 }));
                 // ไม่เก็บกิจกรรมทดสอบลง cache เครื่อง (กันบัญชีอื่นที่ล็อกอินเครื่องเดียวกันเห็น)
                 localStorage.setItem('blm48_major_votes_cache', JSON.stringify(mapped.filter(c => !c.AdminOnly)));
@@ -661,9 +662,14 @@
         const thisYear = bangkokYear(now);
         const timeOf = v => { const t = v ? new Date(v).getTime() : NaN; return isNaN(t) ? null : t; };
 
+        const isClosedStatus = camp => String(camp.Status || 'Closed').trim().toLowerCase() !== 'open';
+        const hasEnded = camp => { const end = timeOf(camp.EndTime); return isClosedStatus(camp) || (end !== null && end < now); };
+
         // แสดงกิจกรรมทั้งหมดของปีนี้ (เวลาไทย) ทั้งที่กำลังเปิดและจบไปแล้ว — กิจกรรมที่จบแล้ว หน้า detail จะแสดงผลอันดับแทนการโหวต
+        // หมดเวลาโหวตแล้วจะซ่อนการ์ดไว้จนกว่าแอดมินกด "แสดงผล" ในหลังบ้าน (server กรองให้แล้ว กรองซ้ำเผื่อข้อมูลจาก cache เครื่อง)
         // กิจกรรมที่ยังไม่ถึงวันเริ่มยังซ่อนไว้เหมือนเดิม | กิจกรรมทดสอบ (Admin only) แสดงเสมอ — แอดมินต้องเข้าไปทดสอบได้ก่อนเปิดจริง
         const visible = campaignsList.filter(camp => {
+            if (hasEnded(camp) && !camp.ResultsPublished) return false;
             if (camp.AdminOnly) return true;
             const start = timeOf(camp.StartTime), end = timeOf(camp.EndTime);
             if (start !== null && start > now) return false;
@@ -672,7 +678,6 @@
             return firstYear <= thisYear && lastYear >= thisYear;
         });
         // กิจกรรมที่ยังเปิดอยู่ขึ้นก่อน (ลำดับเดิม) ตามด้วยกิจกรรมที่จบแล้ว เรียงจากจบล่าสุด
-        const hasEnded = camp => { const end = timeOf(camp.EndTime); return end !== null && end < now; };
         visible.sort((a, b) => {
             const ea = hasEnded(a), eb = hasEnded(b);
             if (ea !== eb) return ea ? 1 : -1;
@@ -682,8 +687,8 @@
         renderedCampaigns = campaignsList;
         visible.forEach(camp => {
             const status = (camp.Status || "Closed").trim().toUpperCase();
-            // จบแล้วตามเวลา ถือว่าปิด แม้สถานะในตารางยังเป็น Open (ไม่ต้องขึ้นป๊อปอัปเช็ก Token)
-            const isOpen = status === "OPEN" && (camp.AdminOnly || !hasEnded(camp));
+            // หมดเวลาแล้ว ถือว่าปิด แม้สถานะในตารางยังเป็น Open (ไม่ต้องขึ้นป๊อปอัปเช็ก Token)
+            const isOpen = !hasEnded(camp);
 
             let coverImgUrl = camp.CoverImage || camp["รูปจากไดร์ฟ"] || "";
             
