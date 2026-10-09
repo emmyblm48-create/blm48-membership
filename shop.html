@@ -1464,7 +1464,9 @@
         .merch-button.merch-button-disabled, .merch-button.merch-button-disabled:hover { background: #f6f6f8 !important; color: #aaa !important; }
         .merch-button.merch-button-disabled i { color: #bbb; }
         .merch-gacha-actions .merch-button .pull-tier { color: #888; }
-    </style>
+      /* แตะการ์ดเพื่อเปิดหน้ารายละเอียดสินค้า */
+  .merch-card[data-product] { cursor: pointer; }
+</style>
 </head>
 <body class="glass-mesh-bg force-white-bg">
 
@@ -1560,7 +1562,7 @@
 <h2 class="section-title" id="section-cookie">Cookie Shop</h2>
 <div class="shop-container" id="cookie-shop-container">
     <!-- 100Cookie -->
-    <div class="merch-card" data-token-price="10">
+    <div class="merch-card" data-token-price="10" data-product="cookie:10">
         <div class="merch-image-container">
             <img src="https://lh3.googleusercontent.com/d/1iYnw_eiQS4LZvHXF2bLEF7utf0wHi-FF=s1000" alt="100 Cookies" class="merch-image">
         </div>
@@ -1574,7 +1576,7 @@
         </div>
     </div>
     <!-- 1000Cookie -->
-    <div class="merch-card" data-token-price="100">
+    <div class="merch-card" data-token-price="100" data-product="cookie:100">
         <div class="merch-image-container">
             <img src="https://lh3.googleusercontent.com/d/15UzuRt7ArZ-wUuoLLdZfqF9pdgCJt6ZQ=s1000" alt="1,000 Cookies" class="merch-image">
         </div>
@@ -1597,7 +1599,7 @@
 </div>
 <div class="shop-container" id="cafe-shop-container">
     <!-- Suiito Matcha -->
-    <div class="merch-card" data-item-name="Suiito Matcha">
+    <div class="merch-card" data-item-name="Suiito Matcha" data-product="cafe:cafe_matcha_01">
         <div class="merch-image-container">
             <img src="https://lh3.googleusercontent.com/d/1hc_AQblGKyamIOmspWseUcnY2gwW9dyg=s1000" alt="Suiito Matcha" class="merch-image">
         </div>
@@ -1612,7 +1614,7 @@
     </div>
 
     <!-- Pinku Milk -->
-    <div class="merch-card" data-item-name="Pinku Milk">
+    <div class="merch-card" data-item-name="Pinku Milk" data-product="cafe:cafe_pinkmilk_01">
         <div class="merch-image-container">
             <img src="https://lh3.googleusercontent.com/d/1_KC4glssnDILv1GP7BtUnjT1-uP1omlB=s1000" alt="Pinku Milk" class="merch-image">
         </div>
@@ -1627,7 +1629,7 @@
     </div>
 
     <!-- Koi Cocoa -->
-    <div class="merch-card" data-item-name="Koi Cocoa">
+    <div class="merch-card" data-item-name="Koi Cocoa" data-product="cafe:cafe_cocoa_01">
         <div class="merch-image-container">
             <img src="https://lh3.googleusercontent.com/d/1ERV8sH_M0fv3dIFqfGGyf23JTTK3z0F-=s1000" alt="Koi Cocoa" class="merch-image">
         </div>
@@ -1642,7 +1644,7 @@
     </div>
 
     <!-- Thai Miruku Tea -->
-    <div class="merch-card" data-item-name="Thai Miruku Tea">
+    <div class="merch-card" data-item-name="Thai Miruku Tea" data-product="cafe:cafe_thaimirukutea_01">
         <div class="merch-image-container">
             <img src="https://lh3.googleusercontent.com/d/11kPILdW6tOh5xZZ-Kl6JpAUsJeYWrlXE=s1000" alt="Thai Miruku Tea" class="merch-image">
         </div>
@@ -1657,7 +1659,7 @@
     </div>
   
     <!-- BLM48 Cafe Background -->
-    <div class="merch-card">
+    <div class="merch-card" data-product="cafe:cafe_BLM48CafeBackground_01">
         <div class="merch-image-container">
             <img src="https://lh3.googleusercontent.com/d/1xhN872cKyptZ-vO8N6jHkCfSACE2okVo=s1000" alt="BLM48 Cafe BG V.1" class="merch-image">
         </div>
@@ -1802,6 +1804,14 @@ function refreshLuckyPrices() {
     });
 }
 document.addEventListener('blm48-cart-change', refreshLuckyPrices);
+
+// 🛍️ แตะการ์ดสินค้า (นอกปุ่มราคา) -> หน้ารายละเอียดสินค้า product?kind=&id= · ปุ่มราคาบนการ์ดยังหยิบใส่ตะกร้าได้ทันทีเหมือนเดิม
+document.addEventListener('click', (e) => {
+    const card = e.target.closest('.merch-card[data-product]');
+    if (!card || e.target.closest('button, a')) return;
+    const [kind, ...rest] = card.dataset.product.split(':');
+    location.href = 'product?kind=' + encodeURIComponent(kind) + '&id=' + encodeURIComponent(rest.join(':'));
+});
 
 function addGachaToCart(collectionId, pullCount) {
     if (!userData) return;
@@ -2070,7 +2080,7 @@ async function loadGachaCollections() {
       }
 
       const cardHTML = `
-          <div class="merch-card${isSoldOut ? ' merch-item-unavailable' : ''}" data-collection-name="${escapeHtml(col.CollectionName)}">
+          <div class="merch-card${isSoldOut ? ' merch-item-unavailable' : ''}" data-collection-name="${escapeHtml(col.CollectionName)}" data-product="gacha:${col.CollectionID}">
             <div class="merch-image-container">
               <img src="${coverImg}" alt="${col.CollectionName}" class="merch-image" onerror="this.src='https://placehold.co/500x500/fff0f2/ff85a2?text=BLM48+Gacha'">
             </div>
@@ -2145,7 +2155,7 @@ async function loadPreorderProducts() {
       grouped[category].forEach(p => {
         const isSoldOut = p.status === 'sold_out';
         const isComingSoon = p.status === 'coming_soon';
-        const goToDetail = `location.href='preorder_detail?id=' + encodeURIComponent('${p.productId}')`;
+        const goToDetail = `location.href='product?kind=preorder&id=' + encodeURIComponent('${p.productId}')`;
 
         let badgeHTML = '';
         let buttonHTML = `<button class="merch-button" onclick="${goToDetail}"><i class="fas fa-coins"></i> ${Number(p.costTokens).toLocaleString()} Tokens</button>`;
