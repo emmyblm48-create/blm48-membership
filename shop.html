@@ -1845,15 +1845,42 @@ document.addEventListener('DOMContentLoaded', updateCartBadge);
 // กลับมาจากหน้าตะกร้า (bfcache) ให้ตัวเลขบนไอคอนตรงกับของจริง
 window.addEventListener('pageshow', updateCartBadge);
 // 🗂️ แท็บหมวดสินค้า: All = แสดงทุกหมวด, อื่นๆ = เฉพาะหมวดนั้น
+let activeShopTab = 'all';
 function selectShopTab(tab) {
+    activeShopTab = tab;
     document.querySelectorAll('#shop-tabs .shop-tab').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.tab === tab);
     });
     document.querySelectorAll('.shop-section').forEach(sec => {
-        sec.style.display = (tab === 'all' || sec.dataset.shopSection === tab) ? '' : 'none';
+        const empty = sec.dataset.empty === '1';
+        sec.style.display = !empty && (tab === 'all' || sec.dataset.shopSection === tab) ? '' : 'none';
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+// 🙈 หมวดที่ไม่มีสินค้า (ไม่มีการ์ดสินค้าเลย) ไม่ต้องแสดง ทั้งหัวข้อหมวดและแท็บด้านบน
+// ยกเว้นกรณีโหลดข้อมูลไม่สำเร็จ ยังแสดงข้อความแจ้ง error ให้เห็น · คอยเช็กใหม่ทุกครั้งที่รายการในหมวดเปลี่ยน
+function refreshEmptyShopSections() {
+    document.querySelectorAll('.shop-section').forEach(sec => {
+        const hasItems = !!sec.querySelector('.merch-card');
+        const hasError = !!sec.querySelector('.shop-empty-state .fa-triangle-exclamation');
+        const empty = !hasItems && !hasError;
+        sec.dataset.empty = empty ? '1' : '0';
+        const tabBtn = document.querySelector(`#shop-tabs .shop-tab[data-tab="${sec.dataset.shopSection}"]`);
+        if (tabBtn) tabBtn.style.display = empty ? 'none' : '';
+    });
+    const activeBtn = document.querySelector(`#shop-tabs .shop-tab[data-tab="${activeShopTab}"]`);
+    if (activeShopTab !== 'all' && activeBtn && activeBtn.style.display === 'none') activeShopTab = 'all';
+    document.querySelectorAll('#shop-tabs .shop-tab').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === activeShopTab));
+    document.querySelectorAll('.shop-section').forEach(sec => {
+        sec.style.display = sec.dataset.empty !== '1' && (activeShopTab === 'all' || sec.dataset.shopSection === activeShopTab) ? '' : 'none';
+    });
+}
+document.addEventListener('DOMContentLoaded', () => {
+    const observer = new MutationObserver(refreshEmptyShopSections);
+    document.querySelectorAll('.shop-section').forEach(sec => observer.observe(sec, { childList: true, subtree: true }));
+    refreshEmptyShopSections();
+});
 
 // 2. อัปเดตการแสดงผลยอดเงินในกระเป๋า (หน้าตาเดียวกับสถิติ Cookies/Tokens/GE Tokens ในหน้า profile.html)
 function updateWalletUI() {
