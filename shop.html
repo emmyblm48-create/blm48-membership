@@ -2064,13 +2064,9 @@ async function loadGachaCollections() {
       let drawsInfoHTML = (!isComingSoon && !isSoldOut && hasDrawCap)
         ? `<p class="merch-subtitle" style="color:#c53f5a;">${limitReached ? 'You have used all your draws for this collection.' : `Draws remaining: ${drawsRemaining} / ${col.MaxDrawsPerAccount}`}</p>`
         : '';
-      // 🎁 Lucky Box: สุ่มฟรีที่เหลือ + อีกกี่ครั้งการันตี SSR (นับรายบัญชี) + SSR ที่ยังเหลือในกล่อง
-      if (col.IsLucky && !isComingSoon && !isSoldOut) {
-        const lines = [];
-        if (col.FreeRemaining !== null && col.FreeRemaining !== undefined) lines.push(`Free draws left: ${col.FreeRemaining} / ${col.FreeDraws}`);
-        if (Number(col.SSRLeft) > 0 && col.PityRemaining !== null && col.PityRemaining !== undefined) lines.push(`SSR guaranteed within ${col.PityRemaining} draw${col.PityRemaining > 1 ? 's' : ''}`);
-        if (col.SSRLeft !== null && col.SSRLeft !== undefined) lines.push(Number(col.SSRLeft) > 0 ? `SSR left in box: ${col.SSRLeft}` : 'All SSR have been drawn');
-        drawsInfoHTML = lines.map(t => `<p class="merch-subtitle" style="color:#c53f5a;">${t}</p>`).join('');
+      // 🎁 Lucky Box: แสดงแค่สิทธิ์สุ่มฟรีที่เหลือ (ไม่บอกเรื่อง SSR / การันตี SSR ให้ผู้ใช้เห็น)
+      if (col.IsLucky && !isComingSoon && !isSoldOut && col.FreeRemaining !== null && col.FreeRemaining !== undefined) {
+        drawsInfoHTML = `<p class="merch-subtitle" style="color:#c53f5a;">Free draws left: ${col.FreeRemaining} / ${col.FreeDraws}</p>`;
       }
 
       const cardHTML = `
