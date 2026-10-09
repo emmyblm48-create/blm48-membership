@@ -366,7 +366,7 @@ function blm48SubscribePosts(onChange, debounceMs) {
 // Apps Script/Sheets onto Supabase. Same "anon key can only call RPCs" lockdown.
 // ---------------------------------------------------------------------------
 
-// Monthly login streak (index.html modal): 2 rescue tickets/month to backfill a missed day
+// Monthly login streak (index.html modal): 5 rescue tickets/month to backfill a missed day
 // (1 rescue use per real day), 100 Token once the whole calendar month is checked in - either
 // clicked to claim on the last day, or auto-credited next time record_daily_login runs if they
 // never clicked.
