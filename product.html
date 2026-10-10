@@ -2,7 +2,8 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <script src="assets/js/back-nav.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>BLM48 | Details</title>
     <meta name="theme-color" content="#ffffff">
     <meta name="apple-mobile-web-app-title" content="BLM48">
@@ -154,8 +155,7 @@
     let variant = 1;      // Draw ×1 / ×5 (เฉพาะกาชา)
 
     function goBack() {
-        if (document.referrer && history.length > 1) history.back();
-        else location.href = 'shop';
+        blm48Back('shop');
     }
 
     // ---------- Lucky Box: สิทธิ์สุ่มฟรีที่เหลือ (หักที่อยู่ในตะกร้าแล้ว) ----------

@@ -62,11 +62,11 @@ document.addEventListener('DOMContentLoaded', function initSwipeBackGesture() {
     const deltaX = touch.clientX - startX;
     const deltaY = Math.abs(touch.clientY - startY);
     if (deltaX >= MIN_DISTANCE_PX && deltaY <= MAX_VERTICAL_DRIFT_PX) {
-      if (window.history.length > 1) {
-        window.history.back();
-      } else {
-        window.location.href = 'index';
-      }
+      // ใช้ปุ่มย้อนกลับของหน้านั้นเอง (แต่ละหน้ามีปลายทางสำรองของตัวเอง) ไม่มีปุ่มก็ใช้ระบบย้อนกลับกลาง (back-nav.js)
+      const backBtn = document.querySelector('.nav-back-btn, .back-btn, .back-circle-btn, .nav-back, .nav-back-transparent, .top-bar-back-btn, .shop-nav-back, .pd-back-icon, .back-icon');
+      if (backBtn) backBtn.click();
+      else if (window.blm48Back) window.blm48Back('index');
+      else window.history.back();
     }
   }, { passive: true });
 });

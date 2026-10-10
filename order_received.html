@@ -3,7 +3,8 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta charset="UTF-8">
-    <title>BLM48 Membership | Success!</title>
+        <script src="assets/js/back-nav.js"></script>
+<title>BLM48 Membership | Success!</title>
     <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s32">
     <meta name="theme-color" content="#ffc107">
     <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s180">
@@ -22,7 +23,8 @@
     <style>
         /* หัวสีเหลืองประจำวง BLM48 ขอบล่างโค้ง (แบบหน้า Success ของ iAM) */
         .success-header {
-            position: relative; height: calc(80px + env(safe-area-inset-top, 0px));
+            /* ล็อกหัวพร้อมปุ่มย้อนกลับไว้บนสุดเสมอ */
+            position: sticky; top: 0; z-index: 50; height: calc(80px + env(safe-area-inset-top, 0px));
             padding-top: env(safe-area-inset-top, 0px);
             background: #ffc107;
             display: flex; align-items: center; justify-content: center;
@@ -79,8 +81,8 @@
   const justRedeemed = params.get('new') === '1';
 
   function goBack() {
-    // หลังกด Redeem กลับไปที่ Order Details (ซึ่งจะโหลดสถานะใหม่) แทนการย้อนประวัติ
-    window.location.replace('order_detail?id=' + orderId);
+    // หลังกด Redeem กลับไปที่ Order Details (โหลดสถานะใหม่) — ย้อนในประวัติแทนการเปิดหน้าซ้อน
+    blm48BackTo('order_detail?id=' + orderId, { refresh: true });
   }
 
   function burst(gold) {
@@ -186,7 +188,7 @@
     if (packs.some(p => p.cards.length)) {
       await blm48OpenPacks(packs);
       // เปิดซองแล้ว: กด back/รีเฟรชไม่ต้องเปิดซองซ้ำ
-      history.replaceState(null, '', 'order_received?id=' + orderId);
+      history.replaceState(history.state, '', 'order_received?id=' + orderId);
     }
     if (justRedeemed) burst(rewards.some(r => r.isSSR));
   }
