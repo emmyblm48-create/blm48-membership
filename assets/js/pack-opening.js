@@ -41,13 +41,14 @@
         animation: po-sheen 3.2s linear infinite; }
       @keyframes po-sheen { from { background-position: 150% 0; } to { background-position: -100% 0; } }
       .po-top .po-mini { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #c8151d; font-weight: 700; font-size: 11px; letter-spacing: 2px; }
-      /* รอยปะ + มือชี้ */
+      /* รอยปะ + จุดแสงวิ่งตามรอยปะบอกทิศปัด (แทนอิโมจิมือชี้) */
       .po-guide { position: absolute; left: -4%; right: -4%; top: 15.6%; height: 2px; z-index: 4; pointer-events: none;
         background: repeating-linear-gradient(90deg, rgba(255,255,255,0.95) 0 8px, transparent 8px 14px); }
       .po-cut { position: absolute; left: 0; top: 15%; height: 6px; width: 0; z-index: 4; pointer-events: none;
         background: linear-gradient(#fff, #ffd0d2); border-radius: 3px; }
-      .po-finger { position: absolute; top: calc(15.6% - 4px); left: 0; z-index: 6; font-size: 30px; pointer-events: none;
-        animation: po-finger 1.6s ease-in-out infinite; text-shadow: 0 4px 10px rgba(0,0,0,0.4); }
+      .po-finger { position: absolute; top: calc(15.6% - 6px); left: 0; z-index: 6; width: 14px; height: 14px; border-radius: 50%; pointer-events: none;
+        background: #fff; box-shadow: 0 0 6px 2px rgba(255,255,255,0.95), 0 0 16px 6px rgba(255,214,214,0.6), -14px 0 12px -2px rgba(255,255,255,0.55);
+        animation: po-finger 1.6s ease-in-out infinite; }
       @keyframes po-finger { 0% { transform: translate(-10%, 0); opacity: 0; } 15% { opacity: 1; } 80% { opacity: 1; } 100% { transform: translate(230px, 0); opacity: 0; } }
       .po-hint { margin-top: 30px; font-size: 14px; color: rgba(255,255,255,0.85); text-align: center; min-height: 20px; }
 
@@ -165,7 +166,7 @@
               <div class="po-sheen"></div>
             </div>
           </div>
-          <div class="po-guide"></div><div class="po-cut"></div><div class="po-finger">👆</div>`;
+          <div class="po-guide"></div><div class="po-cut"></div><div class="po-finger"></div>`;
         hint.textContent = 'Swipe along the dotted line to tear open';
 
         const packEl = stage.querySelector('.po-pack');
