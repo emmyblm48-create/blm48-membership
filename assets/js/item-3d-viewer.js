@@ -318,10 +318,11 @@
     return c;
   }
   // แสงสะท้อนรอบแก้ว: ห้องสตูดิโอมีไฟ softbox + พื้นสีแดงให้เข้ากับฉากหลัง
-  function studioEnv(T, renderer) {
+  // neutral = ฉากสีกลาง (ใช้กับรูปโชว์บนการ์ดพื้นขาว) ไม่งั้นพื้นแดงให้เข้ากับหน้าดู 3D
+  function studioEnv(T, renderer, neutral) {
     const pm = new T.PMREMGenerator(renderer);
     const sc = new T.Scene();
-    sc.add(new T.Mesh(new T.BoxGeometry(12, 8, 12), new T.MeshBasicMaterial({ color: 0x2a1416, side: T.BackSide })));
+    sc.add(new T.Mesh(new T.BoxGeometry(12, 8, 12), new T.MeshBasicMaterial({ color: neutral ? 0x3a3c40 : 0x2a1416, side: T.BackSide })));
     const panel = (w, h, x, y, z, r, gg, b) => {
       const m = new T.Mesh(new T.PlaneGeometry(w, h), new T.MeshBasicMaterial({ color: new T.Color(r, gg, b), side: T.DoubleSide }));
       m.position.set(x, y, z); m.lookAt(0, 0, 0); sc.add(m);
@@ -330,74 +331,63 @@
     panel(0.9, 5.5, 3.8, 0.4, 0.8, 5, 5, 5.2);    // ไฟแถบยาว ขวา (ทำเส้นวาวแนวตั้งบนแก้ว)
     panel(5, 1.2, 0, 3.6, 0, 3, 3, 3);            // ไฟเพดาน
     panel(1.2, 4, 1.5, 0.5, -3.8, 2.6, 2.6, 2.8); // ไฟขอบด้านหลัง
-    panel(10, 10, 0, -3.9, 0, 1.6, 0.18, 0.2);    // พื้นแดง
+    if (neutral) panel(10, 10, 0, -3.9, 0, 1.4, 1.4, 1.45); // พื้นเทาอ่อน
+    else panel(10, 10, 0, -3.9, 0, 1.6, 0.18, 0.2);    // พื้นแดง
     const rt = pm.fromScene(sc, 0.03);
     pm.dispose();
     return rt;
   }
 
-  async function buildCafeCupGL(card, imageUrl) {
-    if (!webglOk()) return null;
-    const [T, im] = await Promise.all([loadThree(), (async () => {
-      const i = new Image(); i.crossOrigin = 'anonymous'; i.src = imageUrl; await i.decode(); return i;
-    })()]);
+  // โหลดพิกเซลรูปแก้ว (ต้องเป็นแม่แบบแก้วเดียวกัน) → { d, iw, ih } หรือ null
+  async function loadCupPixels(imageUrl) {
+    const im = new Image(); im.crossOrigin = 'anonymous'; im.src = imageUrl;
+    await im.decode();
     const iw = im.naturalWidth, ih = im.naturalHeight;
     if (!iw || Math.abs(iw / ih - CUP.aspect) > 0.02) return null;
     const cv = document.createElement('canvas'); cv.width = iw; cv.height = ih;
     const cx2 = cv.getContext('2d'); cx2.drawImage(im, 0, 0);
     const d = cx2.getImageData(0, 0, iw, ih).data;
-    if (!looksLikeCup(d, iw, ih)) return null;
+    return looksLikeCup(d, iw, ih) ? { d, iw, ih } : null;
+  }
 
-    const D = Math.PI / 180;
-    const Y = yn => 0.5 - yn; // พิกัดรูป (บนลงล่าง) → three (ล่างขึ้นบน), สูง 1 หน่วย = สูงรูป
-    const rAt = (part, yn) => part.rTop + (part.rBot - part.rTop) * ((yn - part.y0) / (part.y1 - part.y0));
-
-    // ---------- renderer / ฉาก ----------
-    const cw = card.clientWidth, ch = card.clientHeight;
-    const W = Math.round(cw * 1.5), H = Math.round(ch * 1.25);
-    const renderer = new T.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    renderer.setSize(W, H);
+  function setupRenderer(T, renderer) {
     renderer.outputEncoding = T.sRGBEncoding;
     // ไม่ใช้ ACES (ทำสีซีด) ใช้แบบเส้นตรงให้สีเครื่องดื่มตรงกับรูปจริง
     renderer.toneMapping = T.LinearToneMapping;
     renderer.toneMappingExposure = 1;
     renderer.setClearColor(0x000000, 0);
-    const el = renderer.domElement;
-    el.className = 'v3d-cup-gl';
-    el.style.cssText = `position:absolute;left:${(cw - W) / 2}px;top:${(ch - H) / 2}px;width:${W}px;height:${H}px;pointer-events:none;`;
+  }
 
-    const scene = new T.Scene();
-    const envRT = studioEnv(T, renderer);
-    scene.environment = envRT.texture;
-    const camera = new T.PerspectiveCamera(26, W / H, 0.05, 20);
-    camera.position.set(0, 0, (1.25 / 2) / Math.tan(13 * D));
-    camera.lookAt(0, 0, 0);
-    scene.add(new T.AmbientLight(0xffffff, 0.35));
-    const key = new T.DirectionalLight(0xffffff, 0.9); key.position.set(-2, 2.5, 3); scene.add(key);
-    const rim = new T.DirectionalLight(0xffe2e2, 0.6); rim.position.set(2.5, 1, -2.5); scene.add(rim);
-
-    const maxAniso = renderer.capabilities.getMaxAnisotropy();
+  // โมเดลแก้ว 1 ใบ (ไม่ผูกกับ renderer) ใช้ได้ทั้งหน้าดู 3D และรูปโชว์ในกระเป๋า
+  // opts: { texSize, aniso, shadow: 'rgb' }
+  function createCupModel(T, px, opts) {
+    const { d, iw, ih } = px;
+    const D = Math.PI / 180;
+    const Y = yn => 0.5 - yn; // พิกัดรูป (บนลงล่าง) → three (ล่างขึ้นบน), สูง 1 หน่วย = สูงรูป
+    const rAt = (part, yn) => part.rTop + (part.rBot - part.rTop) * ((yn - part.y0) / (part.y1 - part.y0));
     const tex = (canvas, srgb) => {
       const t = new T.CanvasTexture(canvas);
       if (srgb) t.encoding = T.sRGBEncoding;
-      t.anisotropy = maxAniso;
+      t.anisotropy = opts.aniso || 1;
       return t;
     };
 
+    const scene = new T.Scene();
+    scene.add(new T.AmbientLight(0xffffff, 0.35));
+    const key = new T.DirectionalLight(0xffffff, 0.9); key.position.set(-2, 2.5, 3); scene.add(key);
+    const rim = new T.DirectionalLight(0xffe2e2, 0.6); rim.position.set(2.5, 1, -2.5); scene.add(rim);
     const cupG = new T.Group();
     scene.add(cupG);
 
     // ---------- น้ำในแก้ว (ลายชั้นเครื่องดื่ม + โลโก้ จากรูปจริง) ----------
     const LIQ = { y0: 0.378, y1: 0.918 };
     const liqPart = { y0: LIQ.y0, y1: LIQ.y1, rTop: rAt(CUP.body, LIQ.y0), rBot: rAt(CUP.body, LIQ.y1) };
-    const liqTex = tex(unwrapTexture(d, iw, ih, liqPart, 2048), true);
+    const liqTex = tex(unwrapTexture(d, iw, ih, liqPart, opts.texSize || 2048), true);
     liqTex.wrapS = T.RepeatWrapping; liqTex.offset.x = 0.5;
     const liqPts = [];
     for (let k = 0; k <= 24; k++) { const yn = LIQ.y1 - (LIQ.y1 - LIQ.y0) * k / 24; liqPts.push(new T.Vector2(rAt(CUP.body, yn) * 0.955, Y(yn))); }
-    const liquid = new T.Mesh(new T.LatheGeometry(liqPts, 128),
-      new T.MeshStandardMaterial({ map: liqTex, roughness: 0.55, metalness: 0, envMapIntensity: 0.55 }));
-    cupG.add(liquid);
+    cupG.add(new T.Mesh(new T.LatheGeometry(liqPts, 128),
+      new T.MeshStandardMaterial({ map: liqTex, roughness: 0.55, metalness: 0, envMapIntensity: 0.55 })));
     const liqBottom = new T.Mesh(new T.CircleGeometry(rAt(CUP.body, LIQ.y1) * 0.955, 64), new T.MeshStandardMaterial({ color: new T.Color(pixelAt(d, iw, ih, 0.527, 0.9)), roughness: 0.6 }));
     liqBottom.rotation.x = Math.PI / 2; liqBottom.position.y = Y(LIQ.y1); cupG.add(liqBottom);
 
@@ -418,22 +408,19 @@
     for (let k = 1; k <= 30; k++) { const yn = (by - 0.014) - ((by - 0.014) - CUP.body.y0) * k / 30; shellPts.push(new T.Vector2(rAt(CUP.body, yn) + 0.002, Y(yn))); }
     const dropTex = tex(dropletCanvas(), false);
     dropTex.wrapS = dropTex.wrapT = T.RepeatWrapping; dropTex.repeat.set(3, 1.6);
-    const shellMat = new T.MeshPhysicalMaterial({
+    cupG.add(new T.Mesh(new T.LatheGeometry(shellPts, 128), new T.MeshPhysicalMaterial({
       color: 0xffffff, metalness: 0, roughness: 0.05, transmission: 1, thickness: 0.015, ior: 1.46,
       clearcoat: 1, clearcoatRoughness: 0.03, normalMap: dropTex, normalScale: new T.Vector2(0.9, 0.9),
       specularIntensity: 1, envMapIntensity: 1.3, transparent: true
-    });
-    const shell = new T.Mesh(new T.LatheGeometry(shellPts, 128), shellMat);
-    cupG.add(shell);
+    })));
 
     // ---------- ฝาโดมใส ----------
     const lidPts = [[0.1944, 0.36], [0.1962, 0.346], [0.1905, 0.336], [0.171, 0.322], [0.1655, 0.302], [0.162, 0.276], [0.153, 0.263], [0.118, 0.2565], [0.06, 0.2545], [0.0001, 0.254]]
       .map(([r, yn]) => new T.Vector2(r, Y(yn)));
-    const lid = new T.Mesh(new T.LatheGeometry(lidPts, 128), new T.MeshPhysicalMaterial({
+    cupG.add(new T.Mesh(new T.LatheGeometry(lidPts, 128), new T.MeshPhysicalMaterial({
       color: 0xf6f8fb, metalness: 0, roughness: 0.22, transmission: 0.25, opacity: 0.94, thickness: 0.01, ior: 1.45,
       clearcoat: 0.9, clearcoatRoughness: 0.05, side: T.DoubleSide, transparent: true
-    }));
-    cupG.add(lid);
+    })));
 
     // จุกแดง
     const plug = new T.Mesh(new T.CylinderGeometry(CUP.plug.r, CUP.plug.r * 1.08, CUP.plug.h, 32),
@@ -443,9 +430,9 @@
 
     // หลอดฟ้าใส (เป็นท่อกลวง เห็นผนังสองชั้น)
     const sLenOut = CUP.straw.len + 0.03, sLenIn = 0.32, sLen = sLenOut + sLenIn;
-    const strawMat = new T.MeshPhysicalMaterial({ color: 0x56ade4, metalness: 0, roughness: 0.15, transmission: 0.12, opacity: 0.96, thickness: 0.02, ior: 1.4,
-      clearcoat: 1, clearcoatRoughness: 0.05, side: T.DoubleSide, transparent: true });
-    const straw = new T.Mesh(new T.CylinderGeometry(CUP.straw.r, CUP.straw.r, sLen, 48, 1, true), strawMat);
+    const straw = new T.Mesh(new T.CylinderGeometry(CUP.straw.r, CUP.straw.r, sLen, 48, 1, true),
+      new T.MeshPhysicalMaterial({ color: 0x56ade4, metalness: 0, roughness: 0.15, transmission: 0.12, opacity: 0.96, thickness: 0.02, ior: 1.4,
+        clearcoat: 1, clearcoatRoughness: 0.05, side: T.DoubleSide, transparent: true }));
     const strawHold = new T.Group();
     strawHold.position.set(CUP.straw.x, Y(CUP.straw.y), 0);
     strawHold.rotation.z = -CUP.straw.tilt * D;
@@ -454,22 +441,20 @@
     cupG.add(strawHold);
 
     // ---------- เงาบนพื้น ----------
+    const sh = opts.shadow || '40,0,0';
     const sc = document.createElement('canvas'); sc.width = sc.height = 128;
     const sg = sc.getContext('2d'); const grd = sg.createRadialGradient(64, 64, 0, 64, 64, 64);
-    grd.addColorStop(0, 'rgba(40,0,0,0.55)'); grd.addColorStop(0.55, 'rgba(40,0,0,0.25)'); grd.addColorStop(1, 'rgba(40,0,0,0)');
+    grd.addColorStop(0, `rgba(${sh},0.55)`); grd.addColorStop(0.55, `rgba(${sh},0.25)`); grd.addColorStop(1, `rgba(${sh},0)`);
     sg.fillStyle = grd; sg.fillRect(0, 0, 128, 128);
     const shadow = new T.Mesh(new T.PlaneGeometry(0.55, 0.55), new T.MeshBasicMaterial({ map: tex(sc, false), transparent: true, depthWrite: false }));
     shadow.rotation.x = -Math.PI / 2; shadow.position.y = Y(by) - 0.002;
     cupG.add(shadow);
 
-    card.appendChild(el);
-
     // ---------- น้ำกระเพื่อม (สปริง) ----------
-    let lastRy = null, lastRx = null, lastV = 0, wob = 0, wobV = 0, t0 = performance.now();
+    let lastRy = null, lastV = 0, wob = 0, wobV = 0;
     return {
-      gl: true,
-      update(rx, ry) {
-        const now = performance.now(), dt = Math.min(0.05, (now - t0) / 1000) || 0.016; t0 = now;
+      scene,
+      step(rx, ry, dt) {
         cupG.rotation.set(-rx * D, ry * D, 0, 'XYZ');
         // ความเร่งของการหมุน → น้ำกระฉอก แล้วค่อยๆ นิ่ง
         const v = lastRy == null ? 0 : (ry - lastRy) / dt;
@@ -481,16 +466,52 @@
         // ผิวน้ำพยายามอยู่ระนาบ (ชดเชยการเอียงแก้วครึ่งหนึ่ง) + เอียงตามแรงกระฉอก
         surfHold.rotation.y = -ry * D;
         surfTilt.rotation.set(rx * D * 0.45, 0, wob);
-        lastRx = rx;
         rippleTex.offset.x = (rippleTex.offset.x + dt * 0.015) % 1;
         rippleTex.offset.y = (rippleTex.offset.y + dt * 0.009) % 1;
-        renderer.render(scene, camera);
       },
       dispose() {
         scene.traverse(o => {
           if (o.geometry) o.geometry.dispose();
           if (o.material) { ['map', 'normalMap'].forEach(k => o.material[k] && o.material[k].dispose()); o.material.dispose(); }
         });
+      }
+    };
+  }
+
+  // หน้าดู 3D แบบเต็มจอ: renderer ของตัวเอง ปิดแล้วคืนหน่วยความจำ
+  async function buildCafeCupGL(card, imageUrl) {
+    if (!webglOk()) return null;
+    const [T, px] = await Promise.all([loadThree(), loadCupPixels(imageUrl)]);
+    if (!px) return null;
+    const D = Math.PI / 180;
+    const cw = card.clientWidth, ch = card.clientHeight;
+    const W = Math.round(cw * 1.5), H = Math.round(ch * 1.25);
+    const renderer = new T.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(W, H);
+    setupRenderer(T, renderer);
+    const el = renderer.domElement;
+    el.className = 'v3d-cup-gl';
+    el.style.cssText = `position:absolute;left:${(cw - W) / 2}px;top:${(ch - H) / 2}px;width:${W}px;height:${H}px;pointer-events:none;`;
+
+    const envRT = studioEnv(T, renderer);
+    const model = createCupModel(T, px, { texSize: 2048, aniso: renderer.capabilities.getMaxAnisotropy() });
+    model.scene.environment = envRT.texture;
+    const camera = new T.PerspectiveCamera(26, W / H, 0.05, 20);
+    camera.position.set(0, 0, (1.25 / 2) / Math.tan(13 * D));
+    camera.lookAt(0, 0, 0);
+    card.appendChild(el);
+
+    let t0 = performance.now();
+    return {
+      gl: true,
+      update(rx, ry) {
+        const now = performance.now(), dt = Math.min(0.05, (now - t0) / 1000) || 0.016; t0 = now;
+        model.step(rx, ry, dt);
+        renderer.render(model.scene, camera);
+      },
+      dispose() {
+        model.dispose();
         envRT.dispose();
         renderer.dispose();
         try { renderer.forceContextLoss(); } catch (e) { /* ปิดไปแล้ว */ }
@@ -498,6 +519,97 @@
       }
     };
   }
+
+  // =========================================================================
+  // 🥤 รูปโชว์สินค้าในกระเป๋าเป็นแก้ว 3D หมุนช้าๆ
+  // ใช้ renderer เดียวร่วมกันทุกใบ (เบราว์เซอร์จำกัดจำนวน WebGL ต่อหน้า) วาดแล้วคัดลอกลง canvas ของแต่ละการ์ด
+  // หมุนเฉพาะใบที่เห็นบนจอ, 30fps, ไม่รองรับ WebGL ก็ใช้รูปเดิม
+  // ใช้: blm48CupThumb(imgElement, imageUrl)
+  // =========================================================================
+  const TH = { ready: null, T: null, renderer: null, env: null, camera: null, models: new Map(), items: [], io: null, raf: 0, last: 0 };
+
+  function thumbSetup() {
+    if (!TH.ready) {
+      TH.ready = loadThree().then(T => {
+        TH.T = T;
+        const r = new T.WebGLRenderer({ antialias: true, alpha: true });
+        r.setPixelRatio(1);
+        setupRenderer(T, r);
+        TH.renderer = r;
+        TH.env = studioEnv(T, r, true);
+        TH.camera = new T.PerspectiveCamera(24, 1, 0.05, 20);
+        TH.io = new IntersectionObserver(entries => entries.forEach(e => {
+          const it = TH.items.find(x => x.canvas === e.target);
+          if (it) it.visible = e.isIntersecting;
+        }), { rootMargin: '80px' });
+      }).catch(err => { TH.ready = null; throw err; });
+    }
+    return TH.ready;
+  }
+  function thumbModel(url) {
+    if (!TH.models.has(url)) {
+      TH.models.set(url, loadCupPixels(url).then(px => {
+        if (!px) return null;
+        const m = createCupModel(TH.T, px, { texSize: 1024, aniso: TH.renderer.capabilities.getMaxAnisotropy(), shadow: '0,0,0' });
+        m.scene.environment = TH.env.texture;
+        return m;
+      }).catch(() => null));
+    }
+    return TH.models.get(url);
+  }
+  function thumbTick(now) {
+    TH.raf = requestAnimationFrame(thumbTick);
+    if (now - TH.last < 33) return;
+    const dt = Math.min(0.1, (now - (TH.last || now)) / 1000) || 0.033;
+    TH.last = now;
+    TH.items = TH.items.filter(it => { if (it.canvas.isConnected) return true; TH.io.unobserve(it.canvas); return false; });
+    if (!TH.items.length) { cancelAnimationFrame(TH.raf); TH.raf = 0; TH.last = 0; return; }
+    const T = TH.T, r = TH.renderer, cam = TH.camera;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const size = r.getSize(new T.Vector2());
+    for (const it of TH.items) {
+      if (!it.visible) continue;
+      const w = Math.round(it.canvas.clientWidth * dpr), h = Math.round(it.canvas.clientHeight * dpr);
+      if (!w || !h) continue;
+      if (it.canvas.width !== w || it.canvas.height !== h) { it.canvas.width = w; it.canvas.height = h; }
+      if (size.x !== w || size.y !== h) { r.setSize(w, h, false); size.set(w, h); }
+      // จัดกล้องให้แก้วเต็มกรอบพอดีเหมือนรูปเดิม (สูงรูป = 1 หน่วย)
+      const ext = 1.06;
+      cam.aspect = w / h;
+      cam.position.set(0, 0, (ext / 2) / Math.tan(12 * Math.PI / 180));
+      cam.lookAt(0, 0, 0);
+      cam.updateProjectionMatrix();
+      it.ry += dt * 26;
+      it.model.step(-10, it.ry, dt);
+      r.render(it.model.scene, cam);
+      it.ctx.clearRect(0, 0, w, h);
+      it.ctx.drawImage(r.domElement, 0, 0);
+    }
+  }
+  window.blm48CupThumb = async function (img, imageUrl) {
+    if (!img || !webglOk() || !window.IntersectionObserver) return false;
+    try {
+      await thumbSetup();
+      const model = await thumbModel(imageUrl);
+      if (!model || !img.isConnected) return false;
+      const canvas = document.createElement('canvas');
+      canvas.className = img.className + ' is-3d-cup';
+      canvas.setAttribute('role', 'img');
+      canvas.setAttribute('aria-label', img.alt || '');
+      canvas.style.cssText = 'width:100%;height:100%;display:block;';
+      img.style.display = 'none';
+      img.parentNode.insertBefore(canvas, img);
+      // แต่ละใบเริ่มมุมต่างกันนิดหน่อย ไม่หมุนพร้อมกันเป๊ะ
+      const it = { canvas, ctx: canvas.getContext('2d'), model, ry: -30 + TH.items.length * 47, visible: true };
+      TH.items.push(it);
+      TH.io.observe(canvas);
+      if (!TH.raf) TH.raf = requestAnimationFrame(thumbTick);
+      return true;
+    } catch (err) {
+      console.warn('cup thumb 3d:', err);
+      return false;
+    }
+  };
 
   window.blm48Open3DViewer = function (opts) {
     injectStyles();

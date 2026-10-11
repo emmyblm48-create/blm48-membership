@@ -607,6 +607,11 @@
 
     // ⭐ เช็กจากชื่อไอเทมตรงๆ ว่ามีคำว่า "SSR" อยู่ไหม (ไม่ใช่แค่เช็กจาก category)
     // เพื่อให้ของหายากที่ได้จากกาชาคอลเลกชันอื่นๆ (ไม่ใช่แค่หมวด SSR Photo โดยตรง) ก็ได้กรอบทองด้วย
+    // 🥤 เครื่องดื่ม BLM48 Cafe = แก้ว 3D จริง (ยกเว้นไอเทมพื้นหลัง "BG")
+    function isCafeDrinkItem(item) {
+        return item.category === 'BLM48 Cafe' && !/\bBG\b/i.test(item.name || '');
+    }
+
     function isSsrByName(name) {
         return /ssr/i.test(name || '');
     }
@@ -790,6 +795,7 @@ function renderInventoryData() {
     }
 
     // จัดกลุ่มไอเทมแยกตามชื่องานย่อยเพื่อทำกล่อง Section หัวข้อ
+    const cupThumbs = [];
     const grouped = {};
     filteredItems.forEach(item => {
         if (!grouped[item.subCollection]) grouped[item.subCollection] = [];
@@ -838,11 +844,15 @@ function renderInventoryData() {
                 <div class="item-name" title="${escapeAttr(item.name)}"><span>${escapeHtml(item.name)}</span></div>
             `;
             grid.appendChild(card);
+            if (isCafeDrinkItem(item)) cupThumbs.push([card.querySelector('.item-img'), item.img]);
         });
-        
+
         section.appendChild(grid);
         container.appendChild(section);
     });
+
+    // 🥤 เครื่องดื่ม BLM48 Cafe โชว์เป็นแก้ว 3D หมุนช้าๆ (ไม่รองรับก็เป็นรูปเดิม)
+    if (window.blm48CupThumb) cupThumbs.forEach(([img, url]) => blm48CupThumb(img, url));
 }
 
     let currentPreviewItem = null;
@@ -890,8 +900,7 @@ function renderInventoryData() {
         // 📖 โฟโต้บุ๊ค = หนังสือ 3D เปิดอ่านได้
         if (currentPreviewItem.fileUrl) { openPhotobook3D(currentPreviewItem); return; }
         blm48Open3DViewer({ image: currentPreviewItem.img, label: currentPreviewItem.name, isSSR: isSsrByName(currentPreviewItem.name), collection: currentPreviewItem.subCollection,
-            // 🥤 เครื่องดื่ม BLM48 Cafe = แก้ว 3D จริง (ยกเว้นไอเทมพื้นหลัง "BG")
-            cup: currentPreviewItem.category === 'BLM48 Cafe' && !/\bBG\b/i.test(currentPreviewItem.name || '') });
+            cup: isCafeDrinkItem(currentPreviewItem) });
     }
 
     function closePreview() {
