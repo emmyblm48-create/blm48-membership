@@ -524,7 +524,7 @@
   // 🥤 รูปโชว์สินค้าในกระเป๋าเป็นแก้ว 3D หมุนช้าๆ
   // ใช้ renderer เดียวร่วมกันทุกใบ (เบราว์เซอร์จำกัดจำนวน WebGL ต่อหน้า) วาดแล้วคัดลอกลง canvas ของแต่ละการ์ด
   // หมุนเฉพาะใบที่เห็นบนจอ, 30fps, ไม่รองรับ WebGL ก็ใช้รูปเดิม
-  // ใช้: blm48CupThumb(imgElement, imageUrl)
+  // ใช้: blm48CupThumb(imgElement, imageUrl, { style })  (style = CSS ของ canvas ถ้าไม่ใช้ขนาดเต็มกรอบ)
   // =========================================================================
   const TH = { ready: null, T: null, renderer: null, env: null, camera: null, models: new Map(), items: [], io: null, raf: 0, last: 0 };
 
@@ -586,17 +586,19 @@
       it.ctx.drawImage(r.domElement, 0, 0);
     }
   }
-  window.blm48CupThumb = async function (img, imageUrl) {
+  window.blm48CupThumb = async function (img, imageUrl, opts) {
     if (!img || !webglOk() || !window.IntersectionObserver) return false;
     try {
       await thumbSetup();
       const model = await thumbModel(imageUrl);
       if (!model || !img.isConnected) return false;
+      // ระหว่างโหลด รูปอาจถูกเปลี่ยนเป็นไอเทมอื่นแล้ว (เช่นหน้าพรีวิวเปิดชิ้นใหม่) → ไม่ต้องใส่แก้ว
+      if (img.src !== new URL(imageUrl, location.href).href) return false;
       const canvas = document.createElement('canvas');
       canvas.className = img.className + ' is-3d-cup';
       canvas.setAttribute('role', 'img');
       canvas.setAttribute('aria-label', img.alt || '');
-      canvas.style.cssText = 'width:100%;height:100%;display:block;';
+      canvas.style.cssText = (opts && opts.style) || 'width:100%;height:100%;display:block;';
       img.style.display = 'none';
       img.parentNode.insertBefore(canvas, img);
       // แต่ละใบเริ่มมุมต่างกันนิดหน่อย ไม่หมุนพร้อมกันเป๊ะ

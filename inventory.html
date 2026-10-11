@@ -863,7 +863,16 @@ function renderInventoryData() {
 
     function openPreview(item) {
         currentPreviewItem = item;
-        document.getElementById('previewImg').src = item.img;
+        const previewImg = document.getElementById('previewImg');
+        previewImg.src = item.img;
+        // 🥤 เครื่องดื่ม Cafe: โชว์แก้ว 3D หมุนช้าๆ แทนรูปแบน (ล้างแก้วของชิ้นก่อนหน้าออกก่อน)
+        previewImg.parentNode.querySelectorAll('canvas.is-3d-cup').forEach(c => c.remove());
+        previewImg.style.display = '';
+        if (isCafeDrinkItem(item) && window.blm48CupThumb) {
+            blm48CupThumb(previewImg, item.img, {
+                style: 'width:100%;height:300px;display:block;border-radius:14px;background:#f6f6f8;margin-bottom:14px;'
+            });
+        }
         document.getElementById('saveImgBtn').href = item.img;
         document.getElementById('previewName').textContent = item.name;
 
