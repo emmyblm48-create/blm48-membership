@@ -184,7 +184,9 @@
     // แตะของที่ได้ (ไอเทม/การ์ด) เพื่อหมุนดูแบบ 3D
     box.querySelectorAll('.received-item.can-view').forEach(el => el.addEventListener('click', () => {
       const r = rewards[Number(el.dataset.i)];
-      blm48Open3DViewer({ image: r.image, label: r.label, isSSR: r.isSSR, collection: r.collection, collectionId: r.collectionId });
+      blm48Open3DViewer({ image: r.image, label: r.label, isSSR: r.isSSR, collection: r.collection, collectionId: r.collectionId,
+        // 🥤 เครื่องดื่ม BLM48 Cafe = แก้ว 3D จริง (ยกเว้นไอเทมพื้นหลัง "BG")
+        cup: r.collectionId === 'coll_cafe' && !/\bBG\b/i.test(r.label || '') });
     }));
 
     if (packs.some(p => p.cards.length)) {

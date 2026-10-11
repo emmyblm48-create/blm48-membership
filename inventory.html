@@ -889,7 +889,9 @@ function renderInventoryData() {
         if (!currentPreviewItem) return;
         // 📖 โฟโต้บุ๊ค = หนังสือ 3D เปิดอ่านได้
         if (currentPreviewItem.fileUrl) { openPhotobook3D(currentPreviewItem); return; }
-        blm48Open3DViewer({ image: currentPreviewItem.img, label: currentPreviewItem.name, isSSR: isSsrByName(currentPreviewItem.name), collection: currentPreviewItem.subCollection });
+        blm48Open3DViewer({ image: currentPreviewItem.img, label: currentPreviewItem.name, isSSR: isSsrByName(currentPreviewItem.name), collection: currentPreviewItem.subCollection,
+            // 🥤 เครื่องดื่ม BLM48 Cafe = แก้ว 3D จริง (ยกเว้นไอเทมพื้นหลัง "BG")
+            cup: currentPreviewItem.category === 'BLM48 Cafe' && !/\bBG\b/i.test(currentPreviewItem.name || '') });
     }
 
     function closePreview() {
