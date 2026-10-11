@@ -3,7 +3,7 @@
 (function () {
   const BACK_LOGO = 'https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s300';
 
-  // 🖼️ พื้นหลังตามรูปทรงของสินค้าในแต่ละคอลเลกชัน (ไม่อยู่ในรายการ = พื้นแดงเดิม)
+  // 🖼️ ด้านหลังของสินค้าตามรูปทรงในแต่ละคอลเลกชัน (ไม่อยู่ในรายการ = ด้านหลังสีเหลือง + โลโก้เดิม)
   const BG_OCTAGON   = 'https://lh3.googleusercontent.com/d/1FfSfvrqEYzpYerms1NQtRyU8XkXnxi7K=s1000';
   const BG_CIRCLE    = 'https://lh3.googleusercontent.com/d/1cD2O5kLlkbAqQ31S88t1YWzlmoUGMnHs=s1000';
   const BG_PHOTOCARD = 'https://lh3.googleusercontent.com/d/1LRRKV6c7W-bV-_0x5Uhd4CKUkxVNJ4u2=s1000';
@@ -22,7 +22,7 @@
     gacha_single9: BG_CIRCLE, gacha_5thGenNewShip: BG_CIRCLE,
     votemajor_tanabata2026: BG_PHOTOCARD
   };
-  function bgFor(opts) {
+  function backFor(opts) {
     const name = String(opts.collection || '').trim();
     return COLLECTION_BG[name] || COLLECTION_ID_BG[opts.collectionId] || '';
   }
@@ -36,10 +36,6 @@
         background: radial-gradient(circle at 50% 40%, #f0454b 0%, #c8151d 55%, #8f0c12 100%); font-family: 'Quicksand', 'Kanit', sans-serif; color: #fff;
         touch-action: none; user-select: none; -webkit-user-select: none; opacity: 0; transition: opacity 0.25s; }
       .v3d-overlay.show { opacity: 1; }
-      .v3d-overlay.has-bg { background-color: #8f0c12; background-size: cover; background-position: center; background-repeat: no-repeat; }
-      .v3d-overlay.has-bg .v3d-title, .v3d-overlay.has-bg .v3d-hint { text-shadow: 0 1px 4px rgba(0,0,0,0.55); }
-      .v3d-overlay.has-bg .v3d-hint { color: rgba(255,255,255,0.85); }
-      .v3d-overlay.has-bg .v3d-close, .v3d-overlay.has-bg .v3d-btn { background: rgba(0,0,0,0.28); }
       .v3d-close { position: absolute; top: calc(14px + env(safe-area-inset-top)); right: 14px; width: 40px; height: 40px; border-radius: 50%;
         border: none; background: rgba(255,255,255,0.12); color: #fff; font-size: 18px; cursor: pointer; }
       .v3d-title { position: absolute; top: calc(22px + env(safe-area-inset-top)); left: 16px; right: 64px; font-size: 15px; font-weight: 600;
@@ -56,6 +52,12 @@
       .v3d-back { transform: rotateY(180deg); background: linear-gradient(135deg, #ffe680, #ffd23f); display: flex; align-items: center; justify-content: center;
         overflow: hidden; box-shadow: 0 24px 50px rgba(0,0,0,0.45); }
       .v3d-back img { width: 42%; border-radius: 22%; pointer-events: none; }
+      /* ด้านหลังเป็นรูปจริงของสินค้า: Coaster ทรงแปดเหลี่ยม/วงกลม (พื้นใส) ใช้เงาตามรูปทรง, Photocard เต็มใบ */
+      .v3d-back.is-art { background: none; box-shadow: none; overflow: visible; border-radius: 0; }
+      .v3d-back.is-art img { width: 100%; height: 100%; object-fit: contain; border-radius: 0; -webkit-touch-callout: none;
+        filter: drop-shadow(0 22px 26px rgba(0,0,0,0.5)); }
+      .v3d-back.is-art.is-card { overflow: hidden; border-radius: 14px; box-shadow: 0 24px 50px rgba(0,0,0,0.45); }
+      .v3d-back.is-art.is-card img { object-fit: cover; filter: none; }
       .v3d-hint { margin-top: 34px; font-size: 12.5px; color: rgba(255,255,255,0.6); text-align: center; }
       .v3d-actions { margin-top: 14px; display: flex; gap: 10px; }
       .v3d-btn { border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.08); color: #fff; border-radius: 999px; padding: 8px 16px;
@@ -68,15 +70,15 @@
     injectStyles();
     const o = document.createElement('div');
     o.className = 'v3d-overlay';
-    const bg = bgFor(opts);
-    if (bg) { o.classList.add('has-bg'); o.style.backgroundImage = `url("${bg}")`; }
+    const backArt = backFor(opts);
+    const backClass = backArt ? ' is-art' + (backArt === BG_PHOTOCARD ? ' is-card' : '') : '';
     o.innerHTML = `
       <div class="v3d-title"></div>
       <button type="button" class="v3d-close" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
       <div class="v3d-scene">
         <div class="v3d-card${opts.isSSR ? ' is-ssr' : ''}">
           <div class="v3d-face v3d-front"><img alt="" draggable="false"></div>
-          <div class="v3d-face v3d-back"><img src="${BACK_LOGO}" alt="" draggable="false"></div>
+          <div class="v3d-face v3d-back${backClass}"><img src="${backArt || BACK_LOGO}" alt="" draggable="false"></div>
         </div>
       </div>
       <div class="v3d-hint">Drag to rotate · Double-tap to flip</div>
