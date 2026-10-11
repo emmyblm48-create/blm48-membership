@@ -612,6 +612,29 @@
         return item.category === 'BLM48 Cafe' && !/\bBG\b/i.test(item.name || '');
     }
 
+    // 📸 บันทึกภาพแก้ว 3D (ถ้าสร้างไม่ได้ ก็เปิดรูปเดิมให้บันทึกแทน)
+    async function saveCup3D(item, btn) {
+        if (btn.dataset.busy) return;
+        btn.dataset.busy = '1';
+        const label = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Save';
+        try {
+            const blob = await blm48CupSnapshot(item.img);
+            if (!blob) { window.open(item.img, '_blank'); return; }
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'BLM48 ' + (item.name || 'Cafe').replace(/[\\/:*?"<>|]/g, '') + ' 3D.png';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 30000);
+        } finally {
+            btn.innerHTML = label;
+            delete btn.dataset.busy;
+        }
+    }
+
     function isSsrByName(name) {
         return /ssr/i.test(name || '');
     }
@@ -873,7 +896,10 @@ function renderInventoryData() {
                 style: 'width:100%;height:300px;display:block;border-radius:14px;background:#f6f6f8;margin-bottom:14px;'
             });
         }
-        document.getElementById('saveImgBtn').href = item.img;
+        const saveBtn = document.getElementById('saveImgBtn');
+        saveBtn.href = item.img;
+        // 🥤 เครื่องดื่ม Cafe: Save เป็นภาพแก้ว 3D ความละเอียดสูง (พื้นหลังโปร่งใส) แทนรูปแบน
+        saveBtn.onclick = isCafeDrinkItem(item) && window.blm48CupSnapshot ? (e) => { e.preventDefault(); saveCup3D(item, saveBtn); } : null;
         document.getElementById('previewName').textContent = item.name;
 
         const viewPhotoBookBtn = document.getElementById('viewPhotoBookBtn');

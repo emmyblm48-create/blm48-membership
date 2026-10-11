@@ -454,8 +454,10 @@
     let lastRy = null, lastV = 0, wob = 0, wobV = 0;
     return {
       scene,
-      step(rx, ry, dt) {
+      // calm = ไม่คำนวณน้ำกระฉอก (รูปโชว์/ภาพนิ่งใช้โมเดลร่วมกันหลายมุม ไม่ใช่การหมุนจริง)
+      step(rx, ry, dt, calm) {
         cupG.rotation.set(-rx * D, ry * D, 0, 'XYZ');
+        if (calm) { lastRy = null; lastV = 0; wob = 0; wobV = 0; }
         // ความเร่งของการหมุน → น้ำกระฉอก แล้วค่อยๆ นิ่ง
         const v = lastRy == null ? 0 : (ry - lastRy) / dt;
         const acc = lastRy == null ? 0 : (v - lastV) / dt;
@@ -580,12 +582,38 @@
       cam.lookAt(0, 0, 0);
       cam.updateProjectionMatrix();
       it.ry += dt * 26;
-      it.model.step(-10, it.ry, dt);
+      it.model.step(-10, it.ry, dt, true);
       r.render(it.model.scene, cam);
       it.ctx.clearRect(0, 0, w, h);
       it.ctx.drawImage(r.domElement, 0, 0);
     }
   }
+  // 📸 ภาพนิ่งความละเอียดสูงของแก้ว 3D (มุมเฉียงสวยๆ พื้นหลังโปร่งใส) สำหรับปุ่ม Save → Promise<Blob PNG> หรือ null
+  window.blm48CupSnapshot = async function (imageUrl, opts) {
+    if (!webglOk()) return null;
+    try {
+      await thumbSetup();
+      const model = await thumbModel(imageUrl);
+      if (!model) return null;
+      const T = TH.T, r = TH.renderer, cam = TH.camera;
+      const w = (opts && opts.width) || 1200, h = (opts && opts.height) || 1500;
+      r.setSize(w, h, false);
+      cam.aspect = w / h;
+      cam.position.set(0, 0, (1.12 / 2) / Math.tan(12 * Math.PI / 180));
+      cam.lookAt(0, 0, 0);
+      cam.updateProjectionMatrix();
+      model.step(-12, (opts && opts.angle != null) ? opts.angle : 28, 0.016, true);
+      r.render(model.scene, cam);
+      // คัดลอกทันทีหลังวาด (บัฟเฟอร์ WebGL จะถูกล้างเมื่อจบเฟรม)
+      const out = document.createElement('canvas'); out.width = w; out.height = h;
+      out.getContext('2d').drawImage(r.domElement, 0, 0);
+      return await new Promise(res => out.toBlob(res, 'image/png'));
+    } catch (err) {
+      console.warn('cup snapshot:', err);
+      return null;
+    }
+  };
+
   window.blm48CupThumb = async function (img, imageUrl, opts) {
     if (!img || !webglOk() || !window.IntersectionObserver) return false;
     try {

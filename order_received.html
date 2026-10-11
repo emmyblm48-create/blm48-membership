@@ -134,6 +134,11 @@
     return [...map.values()];
   }
 
+  // 🥤 เครื่องดื่ม BLM48 Cafe = แก้ว 3D จริง (ยกเว้นไอเทมพื้นหลัง "BG")
+  function isCafeDrink(r) {
+    return r.kind === 'item' && r.collectionId === 'coll_cafe' && !/\bBG\b/i.test(r.label || '');
+  }
+
   function thumb(r) {
     if (r.kind === 'cookie') return '<div class="received-thumb is-icon is-cookie"><i class="fas fa-cookie-bite"></i></div>';
     if (r.kind === 'ge') return '<div class="received-thumb is-icon is-gem"><i class="fas fa-gem"></i></div>';
@@ -181,12 +186,21 @@
         </div>
       </div>`).join('');
 
+    // 🥤 เครื่องดื่ม BLM48 Cafe: รูปในรายการเป็นแก้ว 3D หมุนช้าๆ (ไม่รองรับก็เป็นรูปเดิม)
+    if (window.blm48CupThumb) {
+      box.querySelectorAll('.received-item.can-view').forEach(el => {
+        const r = rewards[Number(el.dataset.i)];
+        if (!isCafeDrink(r)) return;
+        const img = el.querySelector('img.received-thumb');
+        if (img) blm48CupThumb(img, r.image, { style: 'display:block;' });
+      });
+    }
+
     // แตะของที่ได้ (ไอเทม/การ์ด) เพื่อหมุนดูแบบ 3D
     box.querySelectorAll('.received-item.can-view').forEach(el => el.addEventListener('click', () => {
       const r = rewards[Number(el.dataset.i)];
       blm48Open3DViewer({ image: r.image, label: r.label, isSSR: r.isSSR, collection: r.collection, collectionId: r.collectionId,
-        // 🥤 เครื่องดื่ม BLM48 Cafe = แก้ว 3D จริง (ยกเว้นไอเทมพื้นหลัง "BG")
-        cup: r.collectionId === 'coll_cafe' && !/\bBG\b/i.test(r.label || '') });
+        cup: isCafeDrink(r) });
     }));
 
     if (packs.some(p => p.cards.length)) {
