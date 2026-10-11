@@ -53,8 +53,9 @@
         overflow: hidden; box-shadow: 0 24px 50px rgba(0,0,0,0.45); }
       .v3d-back img { width: 42%; border-radius: 22%; pointer-events: none; }
       /* ด้านหลังเป็นรูปจริงของสินค้า: Coaster ทรงแปดเหลี่ยม/วงกลม (พื้นใส) ใช้เงาตามรูปทรง, Photocard เต็มใบ */
-      .v3d-back.is-art { background: none; box-shadow: none; overflow: visible; border-radius: 0; }
-      .v3d-back.is-art img { width: 100%; height: 100%; object-fit: contain; border-radius: 0; -webkit-touch-callout: none;
+      /* จัดวางแบบเดียวกับด้านหน้าทุกอย่าง (ไม่ใช้ flex) ให้ขนาดเท่าด้านหน้าพอดีทุกเบราว์เซอร์ */
+      .v3d-back.is-art { display: block; background: none; box-shadow: none; overflow: visible; border-radius: 0; }
+      .v3d-back.is-art img { display: block; width: 100%; height: 100%; object-fit: contain; border-radius: 0; -webkit-touch-callout: none;
         filter: drop-shadow(0 22px 26px rgba(0,0,0,0.5)); }
       .v3d-back.is-art.is-card { overflow: hidden; border-radius: 14px; box-shadow: 0 24px 50px rgba(0,0,0,0.45); }
       .v3d-back.is-art.is-card img { object-fit: cover; filter: none; }
