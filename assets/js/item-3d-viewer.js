@@ -4,6 +4,7 @@
   const BACK_LOGO = 'https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s300';
 
   // 🖼️ ด้านหลังของสินค้าตามรูปทรงในแต่ละคอลเลกชัน (ไม่อยู่ในรายการ = ด้านหลังสีเหลือง + โลโก้เดิม)
+  const CAFE_BG = 'https://lh3.googleusercontent.com/d/1MLtVYBkoWNrkqWr2AJqYtAfy6q7q2jJO=s1600'; // ฉากร้าน BLM48 Cafe (ไอเทม Cafe BG V.1)
   const BG_OCTAGON   = 'https://lh3.googleusercontent.com/d/1FfSfvrqEYzpYerms1NQtRyU8XkXnxi7K=s1000';
   const BG_CIRCLE    = 'https://lh3.googleusercontent.com/d/1cD2O5kLlkbAqQ31S88t1YWzlmoUGMnHs=s1000';
   const BG_PHOTOCARD = 'https://lh3.googleusercontent.com/d/1LRRKV6c7W-bV-_0x5Uhd4CKUkxVNJ4u2=s1000';
@@ -36,6 +37,15 @@
         background: radial-gradient(circle at 50% 40%, #f0454b 0%, #c8151d 55%, #8f0c12 100%); font-family: 'Quicksand', 'Kanit', sans-serif; color: #fff;
         touch-action: none; user-select: none; -webkit-user-select: none; opacity: 0; transition: opacity 0.25s; }
       .v3d-overlay.show { opacity: 1; }
+      /* 🥤 เครื่องดื่ม BLM48 Cafe: ฉากหลังเป็นร้านคาเฟ่ (เบลอนิด + ไล่มืดบน/ล่างให้ตัวหนังสืออ่านง่าย) */
+      .v3d-overlay.is-cafe { background: #e9dcd6; isolation: isolate; }
+      .v3d-overlay.is-cafe::before { content: ''; position: absolute; inset: -12px; z-index: -2;
+        background: url("${CAFE_BG}") center 42% / cover no-repeat; filter: blur(2.5px) saturate(1.05); }
+      .v3d-overlay.is-cafe::after { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+        background: linear-gradient(to bottom, rgba(40,20,20,0.45) 0%, rgba(40,20,20,0.05) 22%, rgba(40,20,20,0) 55%, rgba(40,20,20,0.55) 100%); }
+      .v3d-overlay.is-cafe .v3d-title, .v3d-overlay.is-cafe .v3d-hint { text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
+      .v3d-overlay.is-cafe .v3d-hint { color: rgba(255,255,255,0.9); }
+      .v3d-overlay.is-cafe .v3d-close, .v3d-overlay.is-cafe .v3d-btn { background: rgba(30,15,15,0.42); border-color: rgba(255,255,255,0.35); }
       .v3d-close { position: absolute; top: calc(14px + env(safe-area-inset-top)); right: 14px; width: 40px; height: 40px; border-radius: 50%;
         border: none; background: rgba(255,255,255,0.12); color: #fff; font-size: 18px; cursor: pointer; }
       .v3d-title { position: absolute; top: calc(22px + env(safe-area-inset-top)); left: 16px; right: 64px; font-size: 15px; font-weight: 600;
@@ -739,8 +749,9 @@
     el.className = 'v3d-cup-gl';
     el.style.cssText = `position:absolute;left:${(cw - W) / 2}px;top:${(ch - H) / 2}px;width:${W}px;height:${H}px;pointer-events:none;`;
 
-    const envRT = studioEnv(T, renderer);
-    const model = createCupModel(T, px, { texSize: 2048, aniso: renderer.capabilities.getMaxAnisotropy() });
+    // ฉากร้านคาเฟ่ไม่ใช่สีแดง → ใช้แสงสะท้อนสีกลาง ไม่งั้นแก้วติดสีแดง
+    const envRT = studioEnv(T, renderer, true);
+    const model = createCupModel(T, px, { texSize: 2048, aniso: renderer.capabilities.getMaxAnisotropy(), shadow: '40,20,10' });
     model.scene.environment = envRT.texture;
     const camera = new T.PerspectiveCamera(26, W / H, 0.05, 20);
     camera.position.set(0, 0, (1.25 / 2) / Math.tan(13 * D));
@@ -920,6 +931,7 @@
     img.onload = () => { if (!cup && img.naturalWidth && img.naturalHeight) card.style.aspectRatio = img.naturalWidth + ' / ' + img.naturalHeight; };
     img.src = opts.image || '';
     if (cupMode) {
+      o.classList.add('is-cafe');
       card.classList.add('is-cup');
       o.querySelector('.v3d-hint').textContent = 'Drag to rotate · Double-tap to spin';
       o.querySelector('[data-act="flip"]').innerHTML = '<i class="fa-solid fa-rotate"></i> Spin';
