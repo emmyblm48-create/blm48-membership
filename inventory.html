@@ -25,6 +25,7 @@
     <script src="assets/js/supabase-client.js"></script>
     <script src="assets/js/common.js"></script>
     <script src="assets/js/item-3d-viewer.js"></script>
+    <script src="assets/js/photobook-3d.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
 
     <style>
@@ -884,6 +885,8 @@ function renderInventoryData() {
     // 🔍 หมุนดูไอเทมแบบ 3D (ตัวดูเดียวกับหน้า Success! หลัง Redeem) ซ้อนบนหน้าต่างพรีวิว ปิดแล้วกลับมาที่พรีวิวเดิม
     function openPreview3D() {
         if (!currentPreviewItem) return;
+        // 📖 โฟโต้บุ๊ค = หนังสือ 3D เปิดอ่านได้
+        if (currentPreviewItem.fileUrl) { openPhotobook3D(currentPreviewItem); return; }
         blm48Open3DViewer({ image: currentPreviewItem.img, label: currentPreviewItem.name, isSSR: isSsrByName(currentPreviewItem.name), collection: currentPreviewItem.subCollection });
     }
 
@@ -976,8 +979,17 @@ function renderInventoryData() {
 
     function openEpubReaderFromPreview() {
         if (!currentPreviewItem || !currentPreviewItem.fileUrl) return;
+        openPhotobook3D(currentPreviewItem);
+    }
+
+    // เปิดเป็นหนังสือ 3D (ซ้อนบนหน้าต่างพรีวิว ปิดแล้วกลับมาที่พรีวิวเดิม) ถ้าโหลดตัว 3D ไม่ได้ค่อยใช้ตัวอ่านแบบเดิม
+    function openPhotobook3D(item) {
+        if (window.blm48OpenPhotobook3D) {
+            blm48OpenPhotobook3D({ title: item.name, cover: item.img, folder: item.fileUrl });
+            return;
+        }
         closePreview();
-        openEpubReader(currentPreviewItem.fileUrl, currentPreviewItem.name);
+        openEpubReader(item.fileUrl, item.name);
     }
 
     function showFlipbookError(viewerEl) {
