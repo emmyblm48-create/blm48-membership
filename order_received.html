@@ -123,8 +123,8 @@
           : r.collectionId === 'coll_cafe' ? 'Cafe' : (l.kind === 'preorder' ? 'Pre-order item' : 'Item');
         entry = { kind: 'item', label: r.label, image: r.imageUrl, type, isSSR: !!r.isSSR, qty: 0,
                   note: 'Saved to your Inventory.', collectionId: r.collectionId,
-                  // ของ Pre-order ตอนนี้มีชุดเดียว (Concert 2026) -> ใช้พื้นหลัง 3D แบบ Photocard
-                  collection: l.kind === 'preorder' ? 'Concert 2026 - This Letter Says "Marry Me"' : '' };
+                  // ชื่อคอลเลกชันจริงจากเซิร์ฟเวอร์ (เช่น การ์ดคอนเสิร์ตจาก Lucky Box) ใช้เลือกพื้นหลัง 3D
+                  collection: r.collection || '' };
         entry.add = 1;
       }
       const existing = map.get(key) || entry;
