@@ -122,7 +122,9 @@
         const type = r.itemType === 'Coaster' ? 'Merchandise'
           : r.collectionId === 'coll_cafe' ? 'Cafe' : (l.kind === 'preorder' ? 'Pre-order item' : 'Item');
         entry = { kind: 'item', label: r.label, image: r.imageUrl, type, isSSR: !!r.isSSR, qty: 0,
-                  note: 'Saved to your Inventory.' };
+                  note: 'Saved to your Inventory.', collectionId: r.collectionId,
+                  // ของ Pre-order ตอนนี้มีชุดเดียว (Concert 2026) -> ใช้พื้นหลัง 3D แบบ Photocard
+                  collection: l.kind === 'preorder' ? 'Concert 2026 - This Letter Says "Marry Me"' : '' };
         entry.add = 1;
       }
       const existing = map.get(key) || entry;
@@ -182,7 +184,7 @@
     // แตะของที่ได้ (ไอเทม/การ์ด) เพื่อหมุนดูแบบ 3D
     box.querySelectorAll('.received-item.can-view').forEach(el => el.addEventListener('click', () => {
       const r = rewards[Number(el.dataset.i)];
-      blm48Open3DViewer({ image: r.image, label: r.label, isSSR: r.isSSR });
+      blm48Open3DViewer({ image: r.image, label: r.label, isSSR: r.isSSR, collection: r.collection, collectionId: r.collectionId });
     }));
 
     if (packs.some(p => p.cards.length)) {

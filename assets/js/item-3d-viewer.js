@@ -1,7 +1,31 @@
 // 🔍 ดูสินค้าแบบ 3D: ลากหมุนการ์ด/สินค้าได้รอบทิศ + แสงโฮโลแกรมตามมุม · แตะสองครั้ง = พลิกดูด้านหลัง
-// ใช้: blm48Open3DViewer({ image, label, isSSR })
+// ใช้: blm48Open3DViewer({ image, label, isSSR, collection?, collectionId? })
 (function () {
   const BACK_LOGO = 'https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s300';
+
+  // 🖼️ พื้นหลังตามรูปทรงของสินค้าในแต่ละคอลเลกชัน (ไม่อยู่ในรายการ = พื้นแดงเดิม)
+  const BG_OCTAGON   = 'https://lh3.googleusercontent.com/d/1FfSfvrqEYzpYerms1NQtRyU8XkXnxi7K=s1000';
+  const BG_CIRCLE    = 'https://lh3.googleusercontent.com/d/1cD2O5kLlkbAqQ31S88t1YWzlmoUGMnHs=s1000';
+  const BG_PHOTOCARD = 'https://lh3.googleusercontent.com/d/1LRRKV6c7W-bV-_0x5Uhd4CKUkxVNJ4u2=s1000';
+  const COLLECTION_BG = {
+    'BLM48 Limited Coaster "BLM48 5th Generation"': BG_OCTAGON,
+    'BLM48 Limited Coaster "Sustainable"': BG_OCTAGON,
+    'BLM48 Limited Coaster "BINGO!"': BG_CIRCLE,
+    'BLM48 Limited Coaster "New Ship"': BG_CIRCLE,
+    'Concert 2026 - This Letter Says "Marry Me"': BG_PHOTOCARD,
+    'BLM48 Tanabata 2026': BG_PHOTOCARD,
+    'BLM48 Kami 7 in Bloom': BG_PHOTOCARD
+  };
+  // หน้า Success! ใช้ collection_id ของรางวัล
+  const COLLECTION_ID_BG = {
+    gacha_gen5: BG_OCTAGON, gacha_single10: BG_OCTAGON,
+    gacha_single9: BG_CIRCLE, gacha_5thGenNewShip: BG_CIRCLE,
+    votemajor_tanabata2026: BG_PHOTOCARD
+  };
+  function bgFor(opts) {
+    const name = String(opts.collection || '').trim();
+    return COLLECTION_BG[name] || COLLECTION_ID_BG[opts.collectionId] || '';
+  }
 
   function injectStyles() {
     if (document.getElementById('blm48-3d-style')) return;
@@ -12,6 +36,10 @@
         background: radial-gradient(circle at 50% 40%, #f0454b 0%, #c8151d 55%, #8f0c12 100%); font-family: 'Quicksand', 'Kanit', sans-serif; color: #fff;
         touch-action: none; user-select: none; -webkit-user-select: none; opacity: 0; transition: opacity 0.25s; }
       .v3d-overlay.show { opacity: 1; }
+      .v3d-overlay.has-bg { background-color: #8f0c12; background-size: cover; background-position: center; background-repeat: no-repeat; }
+      .v3d-overlay.has-bg .v3d-title, .v3d-overlay.has-bg .v3d-hint { text-shadow: 0 1px 4px rgba(0,0,0,0.55); }
+      .v3d-overlay.has-bg .v3d-hint { color: rgba(255,255,255,0.85); }
+      .v3d-overlay.has-bg .v3d-close, .v3d-overlay.has-bg .v3d-btn { background: rgba(0,0,0,0.28); }
       .v3d-close { position: absolute; top: calc(14px + env(safe-area-inset-top)); right: 14px; width: 40px; height: 40px; border-radius: 50%;
         border: none; background: rgba(255,255,255,0.12); color: #fff; font-size: 18px; cursor: pointer; }
       .v3d-title { position: absolute; top: calc(22px + env(safe-area-inset-top)); left: 16px; right: 64px; font-size: 15px; font-weight: 600;
@@ -40,6 +68,8 @@
     injectStyles();
     const o = document.createElement('div');
     o.className = 'v3d-overlay';
+    const bg = bgFor(opts);
+    if (bg) { o.classList.add('has-bg'); o.style.backgroundImage = `url("${bg}")`; }
     o.innerHTML = `
       <div class="v3d-title"></div>
       <button type="button" class="v3d-close" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>

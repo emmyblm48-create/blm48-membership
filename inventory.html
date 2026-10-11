@@ -884,7 +884,7 @@ function renderInventoryData() {
     // 🔍 หมุนดูไอเทมแบบ 3D (ตัวดูเดียวกับหน้า Success! หลัง Redeem) ซ้อนบนหน้าต่างพรีวิว ปิดแล้วกลับมาที่พรีวิวเดิม
     function openPreview3D() {
         if (!currentPreviewItem) return;
-        blm48Open3DViewer({ image: currentPreviewItem.img, label: currentPreviewItem.name, isSSR: isSsrByName(currentPreviewItem.name) });
+        blm48Open3DViewer({ image: currentPreviewItem.img, label: currentPreviewItem.name, isSSR: isSsrByName(currentPreviewItem.name), collection: currentPreviewItem.subCollection });
     }
 
     function closePreview() {
