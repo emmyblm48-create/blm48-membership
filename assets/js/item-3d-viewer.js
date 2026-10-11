@@ -432,6 +432,12 @@
 
   // โมเดลแก้ว 1 ใบ (ไม่ผูกกับ renderer) ใช้ได้ทั้งหน้าดู 3D และรูปโชว์ในกระเป๋า
   // opts: { texSize, aniso, shadow: 'rgb', light: true = วางบนพื้นสว่าง (ลดแสงสะท้อน/ความขุ่นให้สีเครื่องดื่มชัด) }
+  // ความแรงของแสงสะท้อน/แสงวาว (พลาสติก ฝา น้ำแข็ง ผิวน้ำ) 1 = เต็ม · 0.3 = ลดลง 70% ตามที่ขอ
+  const GLARE = 0.3;
+  // ชั้นแสงสะท้อน: บวกแสงอย่างเดียว ไม่แตะค่าความโปร่งใส (ไม่งั้นช่องว่างในแก้วจะกลายเป็นสีดำทึบบน canvas ใส)
+  const ADD_LIGHT = { blending: 5 /* CustomBlending */, blendEquation: 100 /* AddEquation */, blendSrc: 201 /* OneFactor */, blendDst: 201,
+    blendEquationAlpha: 100, blendSrcAlpha: 200 /* ZeroFactor */, blendDstAlpha: 201 };
+
   function createCupModel(T, px, opts) {
     const lightBg = !!opts.light;
     const { d, iw, ih } = px;
@@ -474,7 +480,7 @@
     const topCol = bands[Math.min(bands.length - 1, 8)];
     const surface = new T.Mesh(surfGeo, new T.MeshPhysicalMaterial({
       color: new T.Color().setRGB(topCol[0] / 255, topCol[1] / 255, topCol[2] / 255).convertSRGBToLinear(),
-      roughness: 0.06, clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 1.1 }));
+      roughness: 0.06, clearcoat: GLARE, clearcoatRoughness: 0.02, specularIntensity: GLARE, envMapIntensity: 1.1 * GLARE }));
     surface.rotation.x = -Math.PI / 2;
     const surfHold = new T.Group(); surfHold.position.y = Y(LEVEL); cupG.add(surfHold);
     const surfTilt = new T.Group(); surfHold.add(surfTilt);
@@ -489,9 +495,9 @@
       clearcoat: 1, clearcoatRoughness: 0.05, envMapIntensity: 1.2, depthWrite: false
     });
     const iceGloss = new T.MeshPhysicalMaterial({
-      color: 0x000000, metalness: 0, roughness: 0.03, clearcoat: 1, clearcoatRoughness: 0.02,
-      normalMap: dropTex, normalScale: new T.Vector2(0.35, 0.35), envMapIntensity: 2.2,
-      transparent: true, depthWrite: false, blending: T.AdditiveBlending
+      color: 0x000000, metalness: 0, roughness: 0.03, clearcoat: GLARE, clearcoatRoughness: 0.02, specularIntensity: GLARE,
+      normalMap: dropTex, normalScale: new T.Vector2(0.35, 0.35), envMapIntensity: 2.2 * GLARE,
+      transparent: true, depthWrite: false, ...ADD_LIGHT
     });
     const inR = surfR;
     // [มุมรอบแก้ว, ระยะจากแกน (สัดส่วนของรัศมี), ความสูงเทียบผิวน้ำ, ขนาด, ลอยหรือไม่]
@@ -520,9 +526,9 @@
     const shellGeo = new T.LatheGeometry(shellPts, 128);
     const haze = (opacity) => new T.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.35, transparent: true, opacity, depthWrite: false, side: T.DoubleSide });
     const gloss = (strength) => new T.MeshPhysicalMaterial({
-      color: 0x000000, metalness: 0, roughness: 0.04, clearcoat: 1, clearcoatRoughness: 0.02, specularIntensity: 1,
-      normalMap: dropTex, normalScale: new T.Vector2(0.9, 0.9), envMapIntensity: strength,
-      transparent: true, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide
+      color: 0x000000, metalness: 0, roughness: 0.04, clearcoat: GLARE, clearcoatRoughness: 0.02, specularIntensity: GLARE,
+      normalMap: dropTex, normalScale: new T.Vector2(0.9, 0.9), envMapIntensity: strength * GLARE,
+      transparent: true, depthWrite: false, ...ADD_LIGHT, side: T.DoubleSide
     });
     cupG.add(new T.Mesh(shellGeo, haze(lightBg ? 0.02 : 0.035)));
     const shellGloss = new T.Mesh(shellGeo, gloss(lightBg ? 0.6 : 1.15)); shellGloss.renderOrder = 3; cupG.add(shellGloss);
