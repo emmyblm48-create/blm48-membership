@@ -331,7 +331,7 @@
     panel(0.9, 5.5, 3.8, 0.4, 0.8, 5, 5, 5.2);    // ไฟแถบยาว ขวา (ทำเส้นวาวแนวตั้งบนแก้ว)
     panel(5, 1.2, 0, 3.6, 0, 3, 3, 3);            // ไฟเพดาน
     panel(1.2, 4, 1.5, 0.5, -3.8, 2.6, 2.6, 2.8); // ไฟขอบด้านหลัง
-    if (neutral) panel(10, 10, 0, -3.9, 0, 1.4, 1.4, 1.45); // พื้นเทาอ่อน
+    if (neutral) panel(10, 10, 0, -3.9, 0, 0.55, 0.55, 0.58); // พื้นเทา
     else panel(10, 10, 0, -3.9, 0, 1.6, 0.18, 0.2);    // พื้นแดง
     const rt = pm.fromScene(sc, 0.03);
     pm.dispose();
@@ -358,13 +358,87 @@
     renderer.setClearColor(0x000000, 0);
   }
 
+  // สีชั้นเครื่องดื่มของแต่ละแถว (อ่านจากขอบข้างแก้วที่ไม่มีโลโก้ ซ้าย+ขวาเฉลี่ยกัน)
+  function bandColors(d, iw, ih, y0, y1) {
+    const Y0 = Math.round(y0 * ih), Y1 = Math.round(y1 * ih), out = [];
+    for (let Yp = Y0; Yp < Y1; Yp++) {
+      const yn = Yp / ih;
+      const rN = (CUP.body.rTop + (CUP.body.rBot - CUP.body.rTop) * ((yn - CUP.body.y0) / (CUP.body.y1 - CUP.body.y0))) / CUP.aspect;
+      let r = 0, g = 0, b = 0;
+      [-0.78, 0.78, -0.72, 0.72].forEach(k => {
+        const i = (Yp * iw + Math.round((CUP.cxN + rN * k) * iw)) * 4;
+        r += d[i]; g += d[i + 1]; b += d[i + 2];
+      });
+      out.push([r / 4, g / 4, b / 4]);
+    }
+    return out;
+  }
+
+  // ลายน้ำในแก้ว: ชั้นสีจากรูปจริง แต่รอยต่อระหว่างชั้นเป็นคลื่นเกลียวๆ เหมือนนมกับชาผสมกัน (ไม่มีโลโก้)
+  function liquidCanvas(bands, U) {
+    const Hh = bands.length;
+    const c = document.createElement('canvas'); c.width = U; c.height = Hh;
+    const ctx = c.getContext('2d'); const img = ctx.createImageData(U, Hh);
+    for (let v = 0; v < Hh; v++) {
+      for (let u = 0; u < U; u++) {
+        const a = u / U * Math.PI * 2;
+        const off = 7 * Math.sin(a * 3 + v * 0.045) + 4 * Math.sin(a * 7 + 1.3 + v * 0.02) + 2.5 * Math.sin(a * 13 + v * 0.11);
+        const vv = Math.max(0, Math.min(Hh - 1, Math.round(v + off * (Hh / 540))));
+        const col = bands[vv];
+        const shimmer = 1 + 0.025 * Math.sin(a * 21 + v * 0.3);
+        const i = (v * U + u) * 4;
+        img.data[i] = Math.min(255, col[0] * shimmer); img.data[i + 1] = Math.min(255, col[1] * shimmer); img.data[i + 2] = Math.min(255, col[2] * shimmer); img.data[i + 3] = 255;
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+    return c;
+  }
+
+  // โลโก้พิมพ์บนแก้ว: ดึงเฉพาะพิกเซลสีขาวที่สว่างกว่าสีชั้นเครื่องดื่มแถวเดียวกัน (พื้นโปร่งใส)
+  function logoCanvas(d, iw, ih, part, bands, U) {
+    const src = unwrapTexture(d, iw, ih, part, U);
+    const ctx = src.getContext('2d');
+    const img = ctx.getImageData(0, 0, src.width, src.height);
+    const lum = (r, g, b) => 0.3 * r + 0.59 * g + 0.11 * b;
+    const front = SIDE_DEG * 0.95;
+    for (let v = 0; v < src.height; v++) {
+      const bd = bands[Math.min(bands.length - 1, v)], bl = lum(bd[0], bd[1], bd[2]);
+      for (let u = 0; u < src.width; u++) {
+        const i = (v * src.width + u) * 4;
+        const th = Math.abs(((u + 0.5) / src.width) * 360 - 180);
+        const L = lum(img.data[i], img.data[i + 1], img.data[i + 2]);
+        let a = th > front ? 0 : Math.max(0, Math.min(1, (L - bl - 22) / 55));
+        if (img.data[i] < 170) a = 0; // ลายรถสีเข้มไม่ใช่สีพิมพ์ขาว
+        img.data[i + 3] = Math.round(a * 255);
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+    return src;
+  }
+
+  // ก้อนน้ำแข็งขอบมน (กล่องที่ดันมุมให้โค้ง)
+  function roundedCube(T, size, radius) {
+    const g = new T.BoxGeometry(size, size, size, 6, 6, 6);
+    const p = g.attributes.position, v = new T.Vector3(), inner = size / 2 - radius;
+    for (let i = 0; i < p.count; i++) {
+      v.fromBufferAttribute(p, i);
+      const c = new T.Vector3(Math.max(-inner, Math.min(inner, v.x)), Math.max(-inner, Math.min(inner, v.y)), Math.max(-inner, Math.min(inner, v.z)));
+      v.sub(c).normalize().multiplyScalar(radius).add(c);
+      p.setXYZ(i, v.x, v.y, v.z);
+    }
+    g.computeVertexNormals();
+    return g;
+  }
+
   // โมเดลแก้ว 1 ใบ (ไม่ผูกกับ renderer) ใช้ได้ทั้งหน้าดู 3D และรูปโชว์ในกระเป๋า
-  // opts: { texSize, aniso, shadow: 'rgb' }
+  // opts: { texSize, aniso, shadow: 'rgb', light: true = วางบนพื้นสว่าง (ลดแสงสะท้อน/ความขุ่นให้สีเครื่องดื่มชัด) }
   function createCupModel(T, px, opts) {
+    const lightBg = !!opts.light;
     const { d, iw, ih } = px;
     const D = Math.PI / 180;
     const Y = yn => 0.5 - yn; // พิกัดรูป (บนลงล่าง) → three (ล่างขึ้นบน), สูง 1 หน่วย = สูงรูป
     const rAt = (part, yn) => part.rTop + (part.rBot - part.rTop) * ((yn - part.y0) / (part.y1 - part.y0));
+    const U = opts.texSize || 2048;
     const tex = (canvas, srgb) => {
       const t = new T.CanvasTexture(canvas);
       if (srgb) t.encoding = T.sRGBEncoding;
@@ -379,48 +453,95 @@
     const cupG = new T.Group();
     scene.add(cupG);
 
-    // ---------- น้ำในแก้ว (ลายชั้นเครื่องดื่ม + โลโก้ จากรูปจริง) ----------
-    const LIQ = { y0: 0.378, y1: 0.918 };
-    const liqPart = { y0: LIQ.y0, y1: LIQ.y1, rTop: rAt(CUP.body, LIQ.y0), rBot: rAt(CUP.body, LIQ.y1) };
-    const liqTex = tex(unwrapTexture(d, iw, ih, liqPart, opts.texSize || 2048), true);
-    liqTex.wrapS = T.RepeatWrapping; liqTex.offset.x = 0.5;
+    // ---------- น้ำในแก้ว ----------
+    const ART = { y0: 0.378, y1: 0.918 };   // แถวในรูปที่เป็นชั้นเครื่องดื่ม
+    const LEVEL = 0.405;                     // ระดับผิวน้ำ (ต่ำกว่าฝานิดหน่อย มีที่ให้น้ำแข็งลอย)
+    const bands = bandColors(d, iw, ih, ART.y0, ART.y1);
+    const liqTex = tex(liquidCanvas(bands, Math.min(U, 1024)), true);
+    liqTex.wrapS = T.RepeatWrapping;
     const liqPts = [];
-    for (let k = 0; k <= 24; k++) { const yn = LIQ.y1 - (LIQ.y1 - LIQ.y0) * k / 24; liqPts.push(new T.Vector2(rAt(CUP.body, yn) * 0.955, Y(yn))); }
+    for (let k = 0; k <= 24; k++) { const yn = ART.y1 - (ART.y1 - LEVEL) * k / 24; liqPts.push(new T.Vector2(rAt(CUP.body, yn) * 0.955, Y(yn))); }
     cupG.add(new T.Mesh(new T.LatheGeometry(liqPts, 128),
-      new T.MeshStandardMaterial({ map: liqTex, roughness: 0.55, metalness: 0, envMapIntensity: 0.55 })));
-    const liqBottom = new T.Mesh(new T.CircleGeometry(rAt(CUP.body, LIQ.y1) * 0.955, 64), new T.MeshStandardMaterial({ color: new T.Color(pixelAt(d, iw, ih, 0.527, 0.9)), roughness: 0.6 }));
-    liqBottom.rotation.x = Math.PI / 2; liqBottom.position.y = Y(LIQ.y1); cupG.add(liqBottom);
+      new T.MeshStandardMaterial({ map: liqTex, roughness: 0.35, metalness: 0, envMapIntensity: lightBg ? 0.3 : 0.6 })));
+    const liqBottom = new T.Mesh(new T.CircleGeometry(rAt(CUP.body, ART.y1) * 0.955, 64),
+      new T.MeshStandardMaterial({ color: new T.Color().setRGB(...bands[bands.length - 1].map(x => x / 255)).convertSRGBToLinear(), roughness: 0.6 }));
+    liqBottom.rotation.x = Math.PI / 2; liqBottom.position.y = Y(ART.y1); cupG.add(liqBottom);
 
-    // ผิวน้ำด้านบน: เงาเปียก + ระลอกคลื่น + เอียงตามการหมุน (ทรงตัวเหมือนน้ำจริง)
-    const rippleTex = tex(rippleCanvas(), false);
-    rippleTex.wrapS = rippleTex.wrapT = T.RepeatWrapping; rippleTex.repeat.set(2, 2);
-    const surfHold = new T.Group(); surfHold.position.y = Y(LIQ.y0) - 0.002; cupG.add(surfHold);
-    const surfTilt = new T.Group(); surfHold.add(surfTilt);
-    const surface = new T.Mesh(new T.CircleGeometry(liqPart.rTop * 0.95, 96),
-      new T.MeshPhysicalMaterial({ color: new T.Color(pixelAt(d, iw, ih, 0.40, 0.385)), roughness: 0.08, clearcoat: 1, clearcoatRoughness: 0.03,
-        normalMap: rippleTex, normalScale: new T.Vector2(0.35, 0.35) }));
+    // ผิวน้ำเป็นคลื่นจริง (ขยับจุดทุกเฟรม) + เงาเปียกสะท้อนแสง
+    const surfR = rAt(CUP.body, LEVEL) * 0.955;
+    const surfGeo = new T.RingGeometry(0.0005, surfR, 72, 14);
+    const surfBase = Float32Array.from(surfGeo.attributes.position.array);
+    const topCol = bands[Math.min(bands.length - 1, 8)];
+    const surface = new T.Mesh(surfGeo, new T.MeshPhysicalMaterial({
+      color: new T.Color().setRGB(topCol[0] / 255, topCol[1] / 255, topCol[2] / 255).convertSRGBToLinear(),
+      roughness: 0.06, clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 1.1 }));
     surface.rotation.x = -Math.PI / 2;
+    const surfHold = new T.Group(); surfHold.position.y = Y(LEVEL); cupG.add(surfHold);
+    const surfTilt = new T.Group(); surfHold.add(surfTilt);
     surfTilt.add(surface);
 
-    // ---------- ตัวแก้วพลาสติกใส + หยดน้ำเกาะ ----------
+    // ---------- น้ำแข็ง ----------
+    const dropTex = tex(dropletCanvas(), false);
+    dropTex.wrapS = dropTex.wrapT = T.RepeatWrapping; dropTex.repeat.set(3, 1.6);
+    // น้ำแข็ง: เนื้อใสอมฟ้า (โปร่งแสง เห็นน้ำด้านหลัง) + ชั้นประกายสะท้อนแสงที่ผิว
+    const iceMat = new T.MeshPhysicalMaterial({
+      color: 0xeef7ff, metalness: 0, roughness: 0.12, transparent: true, opacity: 0.58,
+      clearcoat: 1, clearcoatRoughness: 0.05, envMapIntensity: 1.2, depthWrite: false
+    });
+    const iceGloss = new T.MeshPhysicalMaterial({
+      color: 0x000000, metalness: 0, roughness: 0.03, clearcoat: 1, clearcoatRoughness: 0.02,
+      normalMap: dropTex, normalScale: new T.Vector2(0.35, 0.35), envMapIntensity: 2.2,
+      transparent: true, depthWrite: false, blending: T.AdditiveBlending
+    });
+    const inR = surfR;
+    // [มุมรอบแก้ว, ระยะจากแกน (สัดส่วนของรัศมี), ความสูงเทียบผิวน้ำ, ขนาด, ลอยหรือไม่]
+    const ICE = [
+      [-40, 0.42, 0.012, 0.074, true], [95, 0.36, 0.016, 0.07, true], [200, 0.40, 0.010, 0.078, true], [-150, 0.20, 0.018, 0.066, true],
+      [-20, 0.80, -0.075, 0.078, false], [55, 0.80, -0.13, 0.074, false], [-75, 0.80, -0.19, 0.07, false], [160, 0.80, -0.09, 0.076, false], [250, 0.80, -0.16, 0.072, false]
+    ];
+    const ices = ICE.map(([deg, rr, dy, size, floats], k) => {
+      const geo = roundedCube(T, size, size * 0.22);
+      const m = new T.Mesh(geo, iceMat);
+      m.renderOrder = 1;
+      const shine = new T.Mesh(geo, iceGloss); shine.renderOrder = 1; m.add(shine);
+      const a = deg * D, yn = LEVEL - dy;
+      // ก้อนที่จมอยู่แนบผนัง: ดันให้ผิวด้านนอกโผล่พ้นน้ำมาชิดพลาสติก
+      const rad = floats ? inR * rr : rAt(CUP.body, Math.min(ART.y1 - 0.05, yn)) * 0.955 - size * 0.32;
+      m.position.set(Math.sin(a) * rad, Y(yn), Math.cos(a) * rad);
+      m.rotation.set(0.4 + k * 0.7, a + k * 0.5, 0.25 * k);
+      cupG.add(m);
+      return { m, floats, base: m.position.clone(), rot: m.rotation.clone(), ph: k * 1.7 };
+    });
+
+    // ---------- ตัวแก้วพลาสติกใส: ชั้นขุ่นบางๆ + ชั้นสะท้อนแสง (บวกแสง) มองทะลุเห็นน้ำแข็งได้ ----------
     const by = CUP.body.y1 + 0.004, rb = CUP.body.rBot;
     const shellPts = [new T.Vector2(0.0001, Y(by)), new T.Vector2(rb - 0.014, Y(by)), new T.Vector2(rb - 0.004, Y(by - 0.004)), new T.Vector2(rb, Y(by - 0.014))];
     for (let k = 1; k <= 30; k++) { const yn = (by - 0.014) - ((by - 0.014) - CUP.body.y0) * k / 30; shellPts.push(new T.Vector2(rAt(CUP.body, yn) + 0.002, Y(yn))); }
-    const dropTex = tex(dropletCanvas(), false);
-    dropTex.wrapS = dropTex.wrapT = T.RepeatWrapping; dropTex.repeat.set(3, 1.6);
-    cupG.add(new T.Mesh(new T.LatheGeometry(shellPts, 128), new T.MeshPhysicalMaterial({
-      color: 0xffffff, metalness: 0, roughness: 0.05, transmission: 1, thickness: 0.015, ior: 1.46,
-      clearcoat: 1, clearcoatRoughness: 0.03, normalMap: dropTex, normalScale: new T.Vector2(0.9, 0.9),
-      specularIntensity: 1, envMapIntensity: 1.3, transparent: true
-    })));
+    const shellGeo = new T.LatheGeometry(shellPts, 128);
+    const haze = (opacity) => new T.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.35, transparent: true, opacity, depthWrite: false, side: T.DoubleSide });
+    const gloss = (strength) => new T.MeshPhysicalMaterial({
+      color: 0x000000, metalness: 0, roughness: 0.04, clearcoat: 1, clearcoatRoughness: 0.02, specularIntensity: 1,
+      normalMap: dropTex, normalScale: new T.Vector2(0.9, 0.9), envMapIntensity: strength,
+      transparent: true, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide
+    });
+    cupG.add(new T.Mesh(shellGeo, haze(lightBg ? 0.02 : 0.035)));
+    const shellGloss = new T.Mesh(shellGeo, gloss(lightBg ? 0.6 : 1.15)); shellGloss.renderOrder = 3; cupG.add(shellGloss);
 
-    // ---------- ฝาโดมใส ----------
+    // โลโก้พิมพ์สีขาวบนแก้ว (ด้านหน้า)
+    const logoPart = { y0: ART.y0, y1: ART.y1, rTop: rAt(CUP.body, ART.y0), rBot: rAt(CUP.body, ART.y1) };
+    const logoTex = tex(logoCanvas(d, iw, ih, logoPart, bands, U), true);
+    logoTex.wrapS = T.RepeatWrapping; logoTex.offset.x = 0.5;
+    const logoPts = [];
+    for (let k = 0; k <= 16; k++) { const yn = ART.y1 - (ART.y1 - ART.y0) * k / 16; logoPts.push(new T.Vector2(rAt(CUP.body, yn) + 0.0035, Y(yn))); }
+    const logo = new T.Mesh(new T.LatheGeometry(logoPts, 128), new T.MeshStandardMaterial({ map: logoTex, transparent: true, roughness: 0.5, depthWrite: false }));
+    logo.renderOrder = 2; cupG.add(logo);
+
+    // ---------- ฝาโดมใส (ขุ่นกว่าแก้วนิดหน่อย) ----------
     const lidPts = [[0.1944, 0.36], [0.1962, 0.346], [0.1905, 0.336], [0.171, 0.322], [0.1655, 0.302], [0.162, 0.276], [0.153, 0.263], [0.118, 0.2565], [0.06, 0.2545], [0.0001, 0.254]]
       .map(([r, yn]) => new T.Vector2(r, Y(yn)));
-    cupG.add(new T.Mesh(new T.LatheGeometry(lidPts, 128), new T.MeshPhysicalMaterial({
-      color: 0xf6f8fb, metalness: 0, roughness: 0.22, transmission: 0.25, opacity: 0.94, thickness: 0.01, ior: 1.45,
-      clearcoat: 0.9, clearcoatRoughness: 0.05, side: T.DoubleSide, transparent: true
-    })));
+    const lidGeo = new T.LatheGeometry(lidPts, 128);
+    const lidHaze = new T.Mesh(lidGeo, haze(lightBg ? 0.16 : 0.32)); lidHaze.renderOrder = 4; cupG.add(lidHaze);
+    const lidGloss = new T.Mesh(lidGeo, gloss(lightBg ? 0.55 : 1.0)); lidGloss.renderOrder = 5; cupG.add(lidGloss);
 
     // จุกแดง
     const plug = new T.Mesh(new T.CylinderGeometry(CUP.plug.r, CUP.plug.r * 1.08, CUP.plug.h, 32),
@@ -450,26 +571,60 @@
     shadow.rotation.x = -Math.PI / 2; shadow.position.y = Y(by) - 0.002;
     cupG.add(shadow);
 
-    // ---------- น้ำกระเพื่อม (สปริง) ----------
-    let lastRy = null, lastV = 0, wob = 0, wobV = 0;
+    // ---------- คลื่น + น้ำกระฉอก ----------
+    const floaters = ices.filter(i => i.floats);
+    const pos = surfGeo.attributes.position;
+    let lastRy = null, lastV = 0, wob = 0, wobV = 0, agit = 0, time = 0;
+    function waves(t) {
+      const amp = 0.0016 + agit * 0.011;
+      for (let i = 0; i < pos.count; i++) {
+        const x = surfBase[i * 3], y = surfBase[i * 3 + 1];
+        let h = amp * (Math.sin(x * 38 + t * 2.1) * 0.6 + Math.sin((x * 0.5 + y * 0.86) * 52 - t * 2.7) * 0.4 + Math.sin((y - x * 0.3) * 71 + t * 3.4) * 0.25);
+        // วงคลื่นเล็กๆ รอบก้อนน้ำแข็งที่ลอยอยู่
+        for (const f of floaters) {
+          const dd = Math.hypot(x - f.sx, y - f.sy);
+          h += 0.0011 * Math.sin(dd * 140 - t * 5 + f.ph) * Math.exp(-dd * 22);
+        }
+        // ขอบผิวน้ำเกาะผนังแก้วโค้งขึ้นนิดหน่อย (แรงตึงผิว)
+        const rr = Math.hypot(x, y) / surfR;
+        h += Math.pow(Math.max(0, rr - 0.86) / 0.14, 2) * 0.0025;
+        pos.setZ(i, h);
+      }
+      pos.needsUpdate = true;
+      surfGeo.computeVertexNormals();
+    }
+
     return {
       scene,
       // calm = ไม่คำนวณน้ำกระฉอก (รูปโชว์/ภาพนิ่งใช้โมเดลร่วมกันหลายมุม ไม่ใช่การหมุนจริง)
       step(rx, ry, dt, calm) {
         cupG.rotation.set(-rx * D, ry * D, 0, 'XYZ');
-        if (calm) { lastRy = null; lastV = 0; wob = 0; wobV = 0; }
-        // ความเร่งของการหมุน → น้ำกระฉอก แล้วค่อยๆ นิ่ง
-        const v = lastRy == null ? 0 : (ry - lastRy) / dt;
-        const acc = lastRy == null ? 0 : (v - lastV) / dt;
-        lastV = v; lastRy = ry;
-        wobV += (-120 * wob - 5.5 * wobV - acc * 0.0009) * dt;
-        wob += wobV * dt;
-        wob = Math.max(-0.22, Math.min(0.22, wob));
+        time += dt;
+        if (calm) { lastRy = null; lastV = 0; wob = 0; wobV = 0; agit = 0; }
+        else {
+          // ความเร่งของการหมุน → น้ำกระฉอก + คลื่นแรงขึ้น แล้วค่อยๆ นิ่ง
+          const v = lastRy == null ? 0 : (ry - lastRy) / dt;
+          const acc = lastRy == null ? 0 : (v - lastV) / dt;
+          lastV = v; lastRy = ry;
+          wobV += (-120 * wob - 5.5 * wobV - acc * 0.0009) * dt;
+          wob += wobV * dt;
+          wob = Math.max(-0.22, Math.min(0.22, wob));
+          agit = Math.min(1, agit * Math.exp(-dt * 1.6) + Math.abs(acc) * 0.00004 * dt + Math.abs(v) * 0.00012 * dt);
+        }
         // ผิวน้ำพยายามอยู่ระนาบ (ชดเชยการเอียงแก้วครึ่งหนึ่ง) + เอียงตามแรงกระฉอก
         surfHold.rotation.y = -ry * D;
         surfTilt.rotation.set(rx * D * 0.45, 0, wob);
-        rippleTex.offset.x = (rippleTex.offset.x + dt * 0.015) % 1;
-        rippleTex.offset.y = (rippleTex.offset.y + dt * 0.009) % 1;
+        // ตำแหน่งน้ำแข็งในกรอบของผิวน้ำ (ผิวน้ำหมุนสวนกับแก้วเพื่อทรงระนาบ)
+        const ca = Math.cos(ry * D), sa = Math.sin(ry * D);
+        for (const f of floaters) { f.sx = f.base.x * ca + f.base.z * sa; f.sy = -(-f.base.x * sa + f.base.z * ca); }
+        waves(time);
+        // น้ำแข็งที่ลอยอยู่โยกขึ้นลงตามคลื่น
+        for (const f of floaters) {
+          const bob = Math.sin(time * 1.9 + f.ph) * (0.0025 + agit * 0.006);
+          f.m.position.y = f.base.y + bob;
+          f.m.rotation.x = f.rot.x + Math.sin(time * 1.3 + f.ph) * (0.05 + agit * 0.2) + wob * 0.6;
+          f.m.rotation.z = f.rot.z + Math.cos(time * 1.1 + f.ph) * (0.05 + agit * 0.2);
+        }
       },
       dispose() {
         scene.traverse(o => {
@@ -552,7 +707,7 @@
     if (!TH.models.has(url)) {
       TH.models.set(url, loadCupPixels(url).then(px => {
         if (!px) return null;
-        const m = createCupModel(TH.T, px, { texSize: 1024, aniso: TH.renderer.capabilities.getMaxAnisotropy(), shadow: '0,0,0' });
+        const m = createCupModel(TH.T, px, { texSize: 1024, aniso: TH.renderer.capabilities.getMaxAnisotropy(), shadow: '0,0,0', light: true });
         m.scene.environment = TH.env.texture;
         return m;
       }).catch(() => null));
@@ -583,12 +738,13 @@
       cam.updateProjectionMatrix();
       it.ry += dt * 26;
       it.model.step(-10, it.ry, dt, true);
+      r.setClearColor(it.bg, 1);
       r.render(it.model.scene, cam);
       it.ctx.clearRect(0, 0, w, h);
       it.ctx.drawImage(r.domElement, 0, 0);
     }
   }
-  // 📸 ภาพนิ่งความละเอียดสูงของแก้ว 3D (มุมเฉียงสวยๆ พื้นหลังโปร่งใส) สำหรับปุ่ม Save → Promise<Blob PNG> หรือ null
+  // 📸 ภาพนิ่งความละเอียดสูงของแก้ว 3D (มุมเฉียงสวยๆ พื้นสตูดิโอสีเทาอ่อน) สำหรับปุ่ม Save → Promise<Blob PNG> หรือ null
   window.blm48CupSnapshot = async function (imageUrl, opts) {
     if (!webglOk()) return null;
     try {
@@ -603,6 +759,7 @@
       cam.lookAt(0, 0, 0);
       cam.updateProjectionMatrix();
       model.step(-12, (opts && opts.angle != null) ? opts.angle : 28, 0.016, true);
+      r.setClearColor(new T.Color((opts && opts.background) || '#f4f4f7'), 1);
       r.render(model.scene, cam);
       // คัดลอกทันทีหลังวาด (บัฟเฟอร์ WebGL จะถูกล้างเมื่อจบเฟรม)
       const out = document.createElement('canvas'); out.width = w; out.height = h;
@@ -630,7 +787,10 @@
       img.style.display = 'none';
       img.parentNode.insertBefore(canvas, img);
       // แต่ละใบเริ่มมุมต่างกันนิดหน่อย ไม่หมุนพร้อมกันเป๊ะ
-      const it = { canvas, ctx: canvas.getContext('2d'), model, ry: -30 + TH.items.length * 47, visible: true };
+      // วาดบนสีพื้นของการ์ดเลย (ชั้นแสงสะท้อนของพลาสติกต้องมีพื้นให้ผสม ไม่งั้นบนพื้นขาวจะดูซีดจาง)
+      const bgOf = el => { const c = el && getComputedStyle(el).backgroundColor; return c && !/^rgba\(.*,\s*0\)$|transparent/.test(c) ? c : null; };
+      const bg = new TH.T.Color().setStyle(bgOf(canvas) || bgOf(canvas.parentElement) || '#f6f6f8');
+      const it = { canvas, ctx: canvas.getContext('2d'), model, bg, ry: -30 + TH.items.length * 47, visible: true };
       TH.items.push(it);
       TH.io.observe(canvas);
       if (!TH.raf) TH.raf = requestAnimationFrame(thumbTick);
