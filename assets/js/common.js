@@ -772,6 +772,14 @@ function saveUserSession(userData) {
 // 🛒 ตะกร้า Shop: เก็บในเครื่อง (localStorage) แยกตาม username
 // แต่ละบรรทัด = { kind: 'cookie'|'cafe'|'gacha'|'preorder', refId, variant, name, label, image, unitPrice, quantity }
 // ราคาในตะกร้าเป็นแค่ตัวแสดงผล ตอน Place Order เซิร์ฟเวอร์ (shop_checkout) คิดราคาจริงเองทั้งหมด
+// เครื่องดื่ม BLM48 Cafe ในตะกร้า/คำสั่งซื้อ ใช้ภาพโปรโมทหน้าร้าน (ไม่ใช่รูปแก้ว) — แก้ตรงนี้ที่เดียว ของที่อยู่ในตะกร้าอยู่แล้วก็เปลี่ยนตาม
+const BLM48_CAFE_CART_IMAGES = {
+  cafe_matcha_01: 'https://lh3.googleusercontent.com/d/1M9JtYBOwdqADFZtXTKhKq45WRE9GBziE=s1000',
+  cafe_pinkmilk_01: 'https://lh3.googleusercontent.com/d/1wFYHde-eBVjzwocJyvreJM2XZeTjsDc8=s1000',
+  cafe_cocoa_01: 'https://lh3.googleusercontent.com/d/1ILJYZnane2OGreL8weF_4qfObmk1dy3_=s1000',
+  cafe_thaimirukutea_01: 'https://lh3.googleusercontent.com/d/1I-EBFnkTdtPRFgkEsN9mOF72gAmlxtuT=s1000'
+};
+
 const blm48Cart = {
   _key() {
     const u = getUsername();
@@ -781,7 +789,9 @@ const blm48Cart = {
     try {
       const key = this._key();
       const lines = key ? JSON.parse(localStorage.getItem(key) || '[]') : [];
-      return Array.isArray(lines) ? lines : [];
+      if (!Array.isArray(lines)) return [];
+      lines.forEach(l => { if (l && l.kind === 'cafe' && BLM48_CAFE_CART_IMAGES[l.refId]) l.image = BLM48_CAFE_CART_IMAGES[l.refId]; });
+      return lines;
     } catch (e) { return []; }
   },
   save(lines) {

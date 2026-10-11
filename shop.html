@@ -1757,7 +1757,7 @@ function addCafeToCart(itemId, price, itemName, itemImg) {
     if (!userData) return;
     blm48Cart.add({
         kind: 'cafe', refId: itemId, variant: 1,
-        name: itemName, label: 'BLM48 Cafe', image: itemImg, unitPrice: price
+        name: itemName, label: 'BLM48 Cafe', image: BLM48_CAFE_CART_IMAGES[itemId] || itemImg, unitPrice: price
     }, 1);
     showCartToast(`${itemName} added to cart`);
 }
