@@ -461,23 +461,29 @@
 
     // ---------- น้ำในแก้ว ----------
     const ART = { y0: 0.378, y1: 0.918 };   // แถวในรูปที่เป็นชั้นเครื่องดื่ม
-    const LEVEL = 0.405;                     // ระดับผิวน้ำ (ต่ำกว่าฝานิดหน่อย มีที่ให้น้ำแข็งลอย)
+    // น้ำห่างผนังแก้วเล็กน้อย = ที่ของก้อนน้ำแข็งที่แนบผนัง (เหมือนแก้วน้ำแข็งจริง)
+    const LIQ_R = 0.94;
+    const LEVEL = 0.368;                     // ระดับผิวน้ำ: เต็มแก้ว เกือบถึงขอบฝา
     const bands = bandColors(d, iw, ih, ART.y0, ART.y1);
     const liqTex = tex(liquidCanvas(bands, Math.min(U, 1024)), true);
     liqTex.wrapS = T.RepeatWrapping;
     const liqPts = [];
-    for (let k = 0; k <= 24; k++) { const yn = ART.y1 - (ART.y1 - LEVEL) * k / 24; liqPts.push(new T.Vector2(rAt(CUP.body, yn) * 0.955, Y(yn))); }
+    for (let k = 0; k <= 24; k++) { const yn = ART.y1 - (ART.y1 - LEVEL) * k / 24; liqPts.push(new T.Vector2(rAt(CUP.body, yn) * LIQ_R, Y(yn))); }
     cupG.add(new T.Mesh(new T.LatheGeometry(liqPts, 128),
       new T.MeshStandardMaterial({ map: liqTex, roughness: 0.35, metalness: 0, envMapIntensity: lightBg ? 0.3 : 0.6 })));
-    const liqBottom = new T.Mesh(new T.CircleGeometry(rAt(CUP.body, ART.y1) * 0.955, 64),
+    const liqBottom = new T.Mesh(new T.CircleGeometry(rAt(CUP.body, ART.y1) * LIQ_R, 64),
       new T.MeshStandardMaterial({ color: new T.Color().setRGB(...bands[bands.length - 1].map(x => x / 255)).convertSRGBToLinear(), roughness: 0.6 }));
     liqBottom.rotation.x = Math.PI / 2; liqBottom.position.y = Y(ART.y1); cupG.add(liqBottom);
 
     // ผิวน้ำเป็นคลื่นจริง (ขยับจุดทุกเฟรม) + เงาเปียกสะท้อนแสง
-    const surfR = rAt(CUP.body, LEVEL) * 0.955;
+    const surfR = rAt(CUP.body, LEVEL) * LIQ_R;
     const surfGeo = new T.RingGeometry(0.0005, surfR, 72, 14);
     const surfBase = Float32Array.from(surfGeo.attributes.position.array);
-    const topCol = bands[Math.min(bands.length - 1, 8)];
+    // สีผิวน้ำ: สีหลักของเครื่องดื่ม (ช่วงกลางแก้ว) ผสมสีชั้นบน มองจากด้านบนจะเห็นเป็นน้ำจริง ไม่ขาวโล่ง
+    const mid = bands.slice(Math.floor(bands.length * 0.35), Math.floor(bands.length * 0.85));
+    const avg = [0, 1, 2].map(i => mid.reduce((t, c) => t + c[i], 0) / Math.max(1, mid.length));
+    const top = bands[Math.min(bands.length - 1, 6)];
+    const topCol = [0, 1, 2].map(i => avg[i] * 0.65 + top[i] * 0.35);
     const surface = new T.Mesh(surfGeo, new T.MeshPhysicalMaterial({
       color: new T.Color().setRGB(topCol[0] / 255, topCol[1] / 255, topCol[2] / 255).convertSRGBToLinear(),
       roughness: 0.06, clearcoat: GLARE, clearcoatRoughness: 0.02, specularIntensity: GLARE, envMapIntensity: 1.1 * GLARE }));
@@ -500,23 +506,59 @@
       transparent: true, depthWrite: false, ...ADD_LIGHT
     });
     const inR = surfR;
-    // [มุมรอบแก้ว, ระยะจากแกน (สัดส่วนของรัศมี), ความสูงเทียบผิวน้ำ, ขนาด, ลอยหรือไม่]
-    const ICE = [
-      [-40, 0.42, 0.012, 0.074, true], [95, 0.36, 0.016, 0.07, true], [200, 0.40, 0.010, 0.078, true], [-150, 0.20, 0.018, 0.066, true],
-      [-20, 0.80, -0.075, 0.078, false], [55, 0.80, -0.13, 0.074, false], [-75, 0.80, -0.19, 0.07, false], [160, 0.80, -0.09, 0.076, false], [250, 0.80, -0.16, 0.072, false]
-    ];
-    const ices = ICE.map(([deg, rr, dy, size, floats], k) => {
-      const geo = roundedCube(T, size, size * 0.22);
-      const m = new T.Mesh(geo, iceMat);
+    // ก้อนน้ำแข็ง 1 แบบ (ขนาด 1 หน่วย) แล้วย่อ/ขยายต่อก้อน
+    const cubeGeo = roundedCube(T, 1, 0.22);
+    let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+
+    // 1) น้ำแข็งแน่นเต็มแก้ว: เรียงแนบผนังตั้งแต่ก้นถึงปากแก้ว (หันด้านแบนแนบพลาสติก เอียงตามความลาดของแก้ว ไม่ทะลุออกนอกแก้ว)
+    //    ใช้ InstancedMesh วาดทุกก้อนในครั้งเดียว (เบาเครื่อง)
+    const slope = Math.atan((CUP.body.rTop - CUP.body.rBot) / (CUP.body.y1 - CUP.body.y0));
+    const wall = [];
+    const ROWS = [0.395, 0.462, 0.528, 0.594, 0.66, 0.726, 0.79, 0.85];
+    ROWS.forEach((yn, ri) => {
+      const R = rAt(CUP.body, yn);
+      const s = 0.068 - ri * 0.0022 + (rnd() - 0.5) * 0.006;     // ก้อนล่างๆ เล็กลงนิดหน่อยตามแก้วที่เรียวลง
+      const n = Math.max(6, Math.floor((2 * Math.PI * R) / (s * 1.16)));
+      const off = ri * 0.37 + rnd();
+      for (let k = 0; k < n; k++) {
+        if (rnd() < 0.08) continue; // เว้นช่องบ้าง ให้เห็นสีเครื่องดื่มแทรกระหว่างก้อน (ไม่เรียงเป็นตาราง)
+        const a = (k / n) * Math.PI * 2 + off + (rnd() - 0.5) * 0.3;
+        const sz = s * (0.86 + rnd() * 0.26);
+        const spin = (rnd() - 0.5) * 0.6;
+        // ระยะกว้างสุดของหน้าก้อน (รวมมุมที่หมุน) ใช้คำนวณไม่ให้มุมทะลุผนังแก้ว
+        const half = sz / 2 * (Math.abs(Math.cos(spin)) + Math.abs(Math.sin(spin)));
+        const sag = R - Math.sqrt(Math.max(0, R * R - half * half));   // มุมก้อนแบนจะยื่นเกินผิวโค้ง ต้องหักออก
+        const face = R - 0.0006 - sag;                                   // ผิวด้านนอกของก้อน (อยู่ในพลาสติกพอดี)
+        const c = face - sz / 2;
+        wall.push({ x: Math.sin(a) * c, y: Y(yn + (rnd() - 0.5) * 0.02), z: Math.cos(a) * c, a, s: sz, spin });
+      }
+    });
+    const wallMat = iceMat.clone(); wallMat.opacity = 0.42;
+    const wallIce = new T.InstancedMesh(cubeGeo, wallMat, wall.length);
+    const wallShine = new T.InstancedMesh(cubeGeo, iceGloss, wall.length);
+    const mtx = new T.Matrix4(), q = new T.Quaternion(), e = new T.Euler(), sc3 = new T.Vector3(), p3 = new T.Vector3();
+    wall.forEach((w, i) => {
+      e.set(slope, w.a, w.spin, 'YXZ');
+      q.setFromEuler(e);
+      mtx.compose(p3.set(w.x, w.y, w.z), q, sc3.set(w.s, w.s, w.s));
+      wallIce.setMatrixAt(i, mtx); wallShine.setMatrixAt(i, mtx);
+    });
+    wallIce.renderOrder = 1; wallShine.renderOrder = 1;
+    cupG.add(wallIce); cupG.add(wallShine);
+
+    // 2) น้ำแข็งลอยเต็มผิวน้ำ (โผล่พ้นน้ำ โยกตามคลื่น) — เว้นตรงหลอด
+    const FLOAT = [[0, 0, 0.07], [30, 0.62, 0.066], [150, 0.6, 0.07], [210, 0.62, 0.064], [270, 0.6, 0.07], [330, 0.62, 0.066], [100, 0.35, 0.05]];
+    const ices = FLOAT.map(([deg, rr, size], k) => {
+      const m = new T.Mesh(cubeGeo, iceMat);
+      m.scale.setScalar(size);
       m.renderOrder = 1;
-      const shine = new T.Mesh(geo, iceGloss); shine.renderOrder = 1; m.add(shine);
-      const a = deg * D, yn = LEVEL - dy;
-      // ก้อนที่จมอยู่แนบผนัง: ดันให้ผิวด้านนอกโผล่พ้นน้ำมาชิดพลาสติก
-      const rad = floats ? inR * rr : rAt(CUP.body, Math.min(ART.y1 - 0.05, yn)) * 0.955 - size * 0.32;
-      m.position.set(Math.sin(a) * rad, Y(yn), Math.cos(a) * rad);
-      m.rotation.set(0.4 + k * 0.7, a + k * 0.5, 0.25 * k);
+      const shine = new T.Mesh(cubeGeo, iceGloss); shine.renderOrder = 1; m.add(shine);
+      const a = deg * D;
+      const rad = Math.min(inR * rr, inR - size * 0.78);
+      m.position.set(Math.sin(a) * rad, Y(LEVEL) + size * 0.16, Math.cos(a) * rad);
+      m.rotation.set((rnd() - 0.5) * 0.5, rnd() * Math.PI, (rnd() - 0.5) * 0.5);
       cupG.add(m);
-      return { m, floats, base: m.position.clone(), rot: m.rotation.clone(), ph: k * 1.7 };
+      return { m, floats: true, base: m.position.clone(), rot: m.rotation.clone(), ph: k * 1.7 };
     });
 
     // ---------- ตัวแก้วพลาสติกใส: ชั้นขุ่นบางๆ + ชั้นสะท้อนแสง (บวกแสง) มองทะลุเห็นน้ำแข็งได้ ----------
