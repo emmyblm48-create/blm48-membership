@@ -2,6 +2,7 @@
 // 🔄 [ลากจอลงเพื่อรีเฟรช] Pull-to-refresh ทุกหน้า
 // ลากจอลงตอนอยู่บนสุดของหน้า → วงกลมหมุนเลื่อนลงมาจากด้านบน → ปล่อยเมื่อเลยระยะ = รีโหลดหน้า
 // โหลดอัตโนมัติจาก common.js; หน้าที่ไม่ได้ใช้ common.js (login / ticket / chamgift) ใส่ <script> ตรงๆ
+// ไม่ทำงานในหน้าที่มี .bottom-tab-bar (เมนูหลักด้านล่าง: index / shop / fanpost / majorvote / notification / profile)
 // ไม่ทำงานเมื่อ: กำลังเปิด popup (SweetAlert / modal ที่เป็น position:fixed), กำลังพิมพ์อยู่,
 // ใช้สองนิ้ว, หรือกล่องที่เลื่อนได้ข้างใน (เช่นรายการคอมเมนต์) ยังไม่ได้เลื่อนขึ้นถึงบนสุด
 // =========================================================================
@@ -95,6 +96,7 @@
   document.addEventListener('touchstart', function (e) {
     pulling = false; engaged = false; distance = 0;
     if (refreshing || !e.touches || e.touches.length !== 1) return;
+    if (document.querySelector('.bottom-tab-bar')) return; // หน้าที่มีเมนูหลักด้านล่าง = ยกเลิกลากจอลงเพื่อรีเฟรช
     if (pageScrollTop() > 0 || isPopupOpen()) return;
     const ae = document.activeElement;
     if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.isContentEditable)) return;

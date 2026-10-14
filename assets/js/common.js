@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function initSwipeBackGesture() {
   document.head.appendChild(link);
 })();
 
-// 🔄 ลากจอลงเพื่อรีเฟรชหน้า (ทุกหน้า) — ตัวโค้ดอยู่ใน assets/js/pull-to-refresh.js
+// 🔄 ลากจอลงเพื่อรีเฟรชหน้า (ยกเว้นหน้าที่มี .bottom-tab-bar) — ตัวโค้ดอยู่ใน assets/js/pull-to-refresh.js
 (function loadPullToRefresh() {
   if (document.querySelector('script[src*="pull-to-refresh.js"]')) return;
   const s = document.createElement('script');
