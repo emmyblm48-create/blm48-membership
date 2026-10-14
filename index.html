@@ -682,7 +682,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     .horizontal-list {
       display: flex; 
       flex-wrap: nowrap; 
-      overflow-x: auto; 
+      overflow-x: auto; overflow-y: hidden; 
       scroll-behavior: smooth; 
       align-items: flex-end; 
       margin: 0 auto;
@@ -735,7 +735,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     /* สไตล์สำหรับโซนเลื่อนแคมเปญ */
     .campaign-scroller {
       display: flex;
-      overflow-x: auto;
+      overflow-x: auto; overflow-y: hidden;
       gap: 14px;
       padding: 5px 5px 15px 5px;
       scroll-snap-type: x mandatory;
@@ -1482,7 +1482,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
   /* ตั้งค่าการเลื่อนซ้าย-ขวา */
   .mv-scroller {
     display: flex;
-    overflow-x: auto;
+    overflow-x: auto; overflow-y: hidden;
     gap: 16px;
     padding-bottom: 10px;
     scroll-snap-type: x mandatory;
@@ -2185,7 +2185,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
 
 <div class="shop-banner-slider-wrapper" style="position: relative; margin: 14px -12px; border-radius: 0; overflow: hidden;"><!-- เต็มขอบจอซ้าย-ขวา (หักล้าง padding 12px ของ .main-content-container) -->
     
-    <div id="autoBannerContainer" style="display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; background-color: #ffeef2; -ms-overflow-style: none; cursor: grab;">
+    <div id="autoBannerContainer" style="display: flex; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scrollbar-width: none; background-color: #ffeef2; -ms-overflow-style: none; cursor: grab;">
         
         <a href="shop" class="auto-banner-item" style="flex: 0 0 100%; min-width: 100%; scroll-snap-align: start; text-decoration: none; display: block;">
             <img src="https://lh3.googleusercontent.com/d/1vP3dLFNLlaECTHi6DgxlM_Wk5Jtz-PZO=s1000" alt="BLM48 Shop Banner" style="width: 100%; height: auto; display: block; object-fit: cover;">
