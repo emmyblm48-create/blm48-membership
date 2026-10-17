@@ -95,22 +95,8 @@
       icons: { 'fa-crown': 'fa-heart', 'fa-star': 'fa-envelope', 'fa-wand-magic-sparkles': 'fa-gift' }
     },
     {
-      id: 'mothersday', name: 'วันแม่',
-      window: y => [dayNum(y, 8, 6), dayNum(y, 8, 12)],
-      barColor: '#1e5aa8',
-      rise: ['🤍', '💙', '🌼', '🤍', '💙'],
-      icons: { 'fa-crown': 'fa-hand-holding-heart', 'fa-star': 'fa-seedling' }
-    },
-    {
-      id: 'fathersday', name: 'วันพ่อ',
-      window: y => [dayNum(y, 12, 1), dayNum(y, 12, 5)],
-      barColor: '#b8860b',
-      rise: ['💛', '🌼', '💛', '🌼', '💛'],
-      icons: { 'fa-crown': 'fa-hand-holding-heart', 'fa-star': 'fa-seedling' }
-    },
-    {
       id: 'christmas', name: 'คริสต์มาส',
-      window: y => [dayNum(y, 12, 6), dayNum(y, 12, 25)],
+      window: y => [dayNum(y, 12, 1), dayNum(y, 12, 25)],
       barColor: '#14532d',
       fall: ['❄️', '❄', '❄️', '❄'],
       rise: ['🎄', '🎁', '⛄', '🎁', '🎄'],
