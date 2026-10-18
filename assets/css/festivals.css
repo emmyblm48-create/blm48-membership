@@ -201,6 +201,21 @@ html.theme-festival .top-navbar .nav-brand::after {
 html.theme-festival .top-navbar .shop-nav-icon {
   color: var(--fx-bar-icon);
 }
+/* หน้าอื่นที่ใช้ .top-navbar (h1 / .nav-title + ปุ่มย้อนกลับ/ไอคอน) — ตัวอักษรเดิมสีเข้ม
+   มองไม่เห็นบนแถบสีเข้มของเทศกาล เลยเปลี่ยนเป็นสีอ่อนของแถบ */
+html.theme-festival .top-navbar > :is(h1, h2, .nav-title) {
+  color: var(--fx-bar-text) !important;
+}
+html.theme-festival .top-navbar > :is(a, button) {
+  color: var(--fx-bar-icon) !important;
+}
+html.theme-festival .top-navbar > :is(a, button) > i {
+  color: inherit !important;
+}
+/* ปุ่มย้อนกลับที่มีวงกลมพื้นชมพูอ่อน -> วงกลมโปร่งบนแถบเข้ม */
+html.theme-festival .top-navbar > .nav-back-btn {
+  background: rgba(255, 255, 255, 0.12) !important;
+}
 html.theme-festival .cart-badge {
   background: var(--fx-primary);
 }
@@ -301,8 +316,12 @@ html.theme-festival .glass-scroll::-webkit-scrollbar-thumb {
 html.theme-festival .week-label {
   color: var(--fx-accent);
 }
-html.theme-festival .days-row::before {
+/* เส้นเชื่อมทีละช่วง (glassmorphism.css): ถึงวันแล้ว = เส้นลายสีเทศกาล, ยังไม่ถึง = เส้นเทาทึบ */
+html.theme-festival .day-item + .day-item::before {
   background: repeating-linear-gradient(90deg, var(--fx-primary) 0 8px, var(--fx-accent) 8px 16px);
+}
+html.theme-festival .day-item + .day-item.upcoming::before {
+  background: #d4d4d4;
 }
 html.theme-festival .day-circle.checked {
   background: var(--fx-primary);

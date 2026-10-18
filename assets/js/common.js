@@ -1214,7 +1214,7 @@ function buildSpecialFansDaysHtml() {
       content = '<i class="fas fa-cookie-bite"></i>';
     }
     daysHtml += `
-      <div class="day-item">
+      <div class="day-item ${day <= today ? 'reached' : 'upcoming'}">
         <div class="day-circle ${statusClass}">${content}</div>
         <span class="day-date">${day} ${MONTHS[month]}</span>
       </div>

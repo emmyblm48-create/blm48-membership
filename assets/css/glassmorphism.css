@@ -502,25 +502,32 @@ body.glass-mesh-bg.force-white-bg {
     width: 100%;
     position: relative;
   }
-  .days-row::before {
-  content: '';
-  position: absolute;
-  top: 19px; 
-  left: 7.14%;           /* 👈 เส้นจะเริ่มจากกึ่งกลางวงกลมวงแรกเป๊ะๆ ทุกหน้าจอ */
-  right: 7.14%;          /* 👈 เส้นจะไปจบที่กึ่งกลางวงกลมวงสุดท้ายเป๊ะๆ ทุกหน้าจอ */
-  height: 3px;           /* ความหนาของเส้นเชื่อม */
-  background: #ffb3c1; 
-  z-index: 0;         
-  }
-
   .day-item {
   display: flex;
   flex-direction: column;
   align-items: center;
   flex: 1;               /* 👈 เฉลี่ยให้ทุกวันกว้างเท่ากัน 7 ช่อง */
   position: relative;
-  z-index: 1;
   }
+
+  /* เส้นเชื่อมทีละช่วง: จากขอบวงกลมวันก่อนหน้า -> ขอบวงกลมวันนี้
+     ถึงวันนั้นแล้ว = เส้นชมพู, ยังไม่ถึง = เส้นตรงสีเทาทึบ */
+  .day-item + .day-item::before {
+  content: '';
+  position: absolute;
+  top: 18px;
+  left: calc(-50% + 19px);
+  width: calc(100% - 38px);
+  height: 3px;           /* ความหนาของเส้นเชื่อม */
+  border-radius: 2px;
+  background: #ffb3c1;
+  z-index: 0;
+  }
+  .day-item + .day-item.upcoming::before {
+  background: #d4d4d4;
+  }
+
+  .day-circle { position: relative; z-index: 1; }
 
   /* 🌟 2. เพิ่มคลาสสำหรับปรับแต่งตัวหนังสือวันที่ */
   .day-date {
