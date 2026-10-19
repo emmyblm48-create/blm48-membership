@@ -529,9 +529,12 @@ function blm48CommentHtml(cmt, postId, isReply, replies, opts) {
     <div class="cmt-row">
       <img class="cmt-avatar" src="${escapeAttr(img)}"${profileLinkAttr(cmt.username)} alt="">
       <div class="cmt-body">
-        <div class="cmt-head"><b class="cmt-name"${profileLinkAttr(cmt.username)}>${escapeHtml(cmt.name)}</b>${badge}<span class="cmt-time">${commentTimeShort(cmt.timestamp)}</span></div>
-        <div class="cmt-text" id="cmt-text-${cid}">${blm48FormatCommentText(cmt.text)}</div>
+        <div class="cmt-bubble">
+          <div class="cmt-head"><b class="cmt-name"${profileLinkAttr(cmt.username)}>${escapeHtml(cmt.name)}</b>${badge}</div>
+          <div class="cmt-text" id="cmt-text-${cid}">${blm48FormatCommentText(cmt.text)}</div>
+        </div>
         <div class="cmt-actions">
+          <span class="cmt-time">${commentTimeShort(cmt.timestamp)}</span>
           ${canReply ? `<button type="button" onclick="blm48StartReply('${escapeAttr(postId)}', '${cid}')">Reply</button>` : ''}
           ${isOwn ? `<button type="button" onclick="startEditComment('${cid}')">Edit</button>` : ''}
         </div>
