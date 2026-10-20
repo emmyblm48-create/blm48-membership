@@ -387,19 +387,19 @@ html.theme-festival .bg-decorations .decor-item:nth-child(even) {
 }
 
 /* แท่งการ์ดอันดับ (index.html .member-card): ใช้สีประจำวงเสมอ ไม่เปลี่ยนตามธีม (ตามคำขอ)
-   BLM48 เหลือง / NPT48 ฟ้า = สีเดียวกับปกติ (rgba ทับพื้นขาว) แต่ทำเป็นสีทึบตอนมีธีม
-   เพื่อให้ไอคอนตกแต่งของธีมด้านหลังแท่งไม่โผล่ทะลุมาทับชื่อ/คะแนน */
+   BLM48 เหลือง / NPT48 ฟ้า = สีเดียวกับปกติ (rgba ทับพื้นขาว) แต่ตอนมีธีมทำให้เกือบทึบ (โปร่ง ~25%)
+   ให้เห็นไอคอนตกแต่งของธีมด้านหลังแท่งจางๆ แต่ไม่ชัดจนรบกวนชื่อ/คะแนน */
 html.theme-festival .member-card.rank-1,
 html.theme-festival .member-card.rank-2,
 html.theme-festival .member-card.rank-3,
 html.theme-festival .member-card.rank-other {
-  background: #fff4c9 !important; /* = rgba(254, 228, 121, 0.4) บนพื้นขาว */
+  background: rgba(255, 244, 201, 0.75) !important; /* สี = rgba(254, 228, 121, 0.4) บนพื้นขาว, โปร่ง 25% */
 }
 html.theme-festival .member-card.group-npt48.rank-1,
 html.theme-festival .member-card.group-npt48.rank-2,
 html.theme-festival .member-card.group-npt48.rank-3,
 html.theme-festival .member-card.group-npt48.rank-other {
-  background: #cbedfe !important; /* = rgba(106, 203, 252, 0.35) บนพื้นขาว */
+  background: rgba(203, 237, 254, 0.75) !important; /* สี = rgba(106, 203, 252, 0.35) บนพื้นขาว, โปร่ง 25% */
 }
 /* คะแนนใต้ชื่อใช้ var(--primary-pink) ซึ่งธีมเปลี่ยนเป็นสีหลักของธีม -> ล็อกกลับเป็นสีชมพูเดิม */
 html.theme-festival .member-card .cookie-text {
