@@ -70,8 +70,29 @@
       padding-top: 50px;    /* ระยะดันจากด้านบน (ปรับเพิ่ม/ลดตามความสูงของ Navbar เดิม) */
       padding-bottom: 100px; /* ระยะเผื่อด้านล่างเพื่อไม่ให้ Tab-bar บังโพสต์สุดท้ายงับ 🎀 */
     }
-    /* 🌼 หน้า Home: พื้นหลังด้านบน (หลังป้าย Champ) เป็นเหลืองทึบสีเดียวกับ navbar แทนไล่สีของ glass-mesh-bg ที่ทำให้สีไม่ตรงกัน */
-    body.glass-mesh-bg { background: #fff2bd; } /* วันปกติ = พื้นเหลือง โชว์เหนือโค้งหลังป้าย Champ (ใต้โค้งขาวจาก .champ-banner-wrap); ช่วงเทศกาล festivals.css ทับเป็นพื้นธีม */
+    /* 🌙 หน้า Home สไตล์ iAM48: พื้นหน้าเป็นขาว + "โค้งด้านบน" เป็นชั้นพื้นหลังที่ติดอยู่กับจอ (position: fixed)
+       - สูงถึงประมาณครึ่งล่างของป้าย Champ ตอนอยู่บนสุด
+       - ตอนดึงจอลง (iOS เด้ง) เนื้อหา+ป้ายเลื่อนลง แต่โค้งอยู่ที่เดิม เลยเห็นโค้งเต็มๆ
+       - ตอนเลื่อนลง กล่องเนื้อหาสีขาวทึบเลื่อนขึ้นมาบังโค้งเอง
+       วาดที่ body::before ชั้นเดียว (โค้งหลัก + แถบอ่อนใต้โค้ง) — ไม่ใช้ ::after เพราะจะวาดทับของตกแต่งธีม (#fx-deco)
+       สีโค้ง (--home-curve-fill): วันปกติเหลือง, ธีมเทศกาลใช้ไล่สีของเทศกาล, ธีม Sustainable ใช้รูปท้องฟ้า */
+    body.glass-mesh-bg,
+    html.theme-festival body.glass-mesh-bg:not(#_) { background: #ffffff !important; } /* :not(#_) ให้ชนะพื้นธีมของ festivals.css */
+    body.glass-mesh-bg {
+      --home-curve-fill: linear-gradient(#fff2bd, #fff2bd);
+      --home-curve-band: #fff8dc;
+    }
+    html.theme-festival body.glass-mesh-bg {
+      --home-curve-fill:
+        radial-gradient(circle at 86% 30%, var(--fx-orb) 0 30px, var(--fx-orb-glow) 32px, transparent 100px) left top / 100% 262px no-repeat,
+        linear-gradient(180deg, var(--fx-bg-2) 0%, var(--fx-bg-3) 100%) left top / 100% 262px no-repeat; /* ขนาดตายตัว 262px = ไล่สีเท่ากันทั้งในโค้งและใน navbar */
+      --home-curve-band: var(--fx-pale);
+    }
+    /* 🌸 ธีมซิงเกิล Sustainable: โค้งเป็นรูปท้องฟ้ายามเย็น (ส่วนบนของรูปทุ่งดอกไม้) */
+    html.theme-sustainable body.glass-mesh-bg {
+      --home-curve-fill: url("assets/images/theme-sustainable-home.webp") center top / 100% auto no-repeat; /* กว้างเต็มจอเสมอ = ตำแหน่งรูปตรงกันทั้งในโค้งและใน navbar */
+      --home-curve-band: #fbeef5;
+    }
     body::before {
       content: "";
       position: fixed;
@@ -90,7 +111,19 @@
       background-size: 150px 150px;
       background-repeat: repeat;
     }
-    
+    /* 🌙 โค้งด้านบนหน้า Home (ดูคำอธิบายที่ body.glass-mesh-bg ด้านบน)
+       ขอบจอสูงประมาณ 200px ตรงกลาง 235px = โค้งตื้นๆ; แถบอ่อนหนาอีก ~27px ใต้โค้ง
+       ชั้นบน: ในวงรีโค้งหลักโปร่งใส นอกวงรี = สีแถบอ่อน / ชั้นล่าง: สีหรือรูปของโค้ง / clip-path ตัดตามวงรีแถบอ่อน
+       ⚠️ ขนาดวงรีใน radial-gradient ห้ามใช้ calc() — เบราว์เซอร์ไม่รองรับแล้วทิ้ง background ทั้งก้อน */
+    body.glass-mesh-bg::before {
+      height: 262px;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 95% 235px at 50% 0, transparent 99.5%, var(--home-curve-band) 100%),
+        var(--home-curve-fill);
+      clip-path: ellipse(95% 262px at 50% 0);
+    }
+
     .bg-video-layer {
   position: fixed;   /* ตรึงวิดีโอให้อยู่กับที่เวลาเลื่อนหน้าจอ */
   top: 0;
@@ -315,29 +348,34 @@ body {
   justify-content: space-between;
   padding: 15px 20px; 
 
-  /* 🤍 เลื่อนลงแล้ว = พื้นขาวล้วน (ไม่ใช้กระจกฝ้า ตามคำขอ) */
-  background: #ffffff !important;
+  /* 🌤️ เลื่อนลงแล้ว = พื้นเดียวกับส่วนหัว (สไตล์ iAM48): ใช้ --home-curve-fill ชุดเดียวกับโค้งด้านบน
+     ทั้งคู่ติดขอบบนจอ เลยต่อกันเนียนเหมือนตัดส่วนหัวมาเป็นแถบ (วันปกติเหลือง / เทศกาลไล่สี / Sustainable รูปท้องฟ้า) */
+  background: var(--home-curve-fill, #ffffff) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   border-bottom: none !important;
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06) !important;
-  transition: background-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: none !important;
 }
-/* 🔝 อยู่บนสุดของหน้า (ยังไม่เลื่อน) = navbar ใส ให้เห็นโค้งเหลืองหลังป้าย Champ
+/* 🔝 อยู่บนสุดของหน้า (ยังไม่เลื่อน) = navbar ใส มองทะลุเห็นโค้งด้านบน
    - JS ใต้ <nav> ใส่ .is-scrolled เมื่อเลื่อนลง
-   - ช่วงธีมเทศกาลก็ใสเหมือนกัน แต่ตัวอักษร/ไอคอนเทศกาลสีอ่อน จะจมบนโค้งเหลือง เลยบังคับเป็นสีเข้มตอนใส
-     (เลื่อนลงแล้วช่วงเทศกาลกลับเป็นแถบสีเทศกาล + ตัวอักษรสีอ่อนตาม festivals.css)
    - selector ยาวเพื่อชนะ html.theme-festival .navbar ... ของ festivals.css */
+html body .navbar:not(.is-scrolled),
+html body .navbar.is-scrolled {
+  box-shadow: none !important;
+  border-bottom: none !important;
+}
 html body .navbar:not(.is-scrolled) {
   background: transparent !important;
-  box-shadow: none !important;
-  border-bottom-color: transparent !important;
 }
-html.theme-festival body .navbar:not(.is-scrolled) :is(.logo-text, .brand) {
+html body .navbar.is-scrolled {
+  background: var(--home-curve-fill, #ffffff) !important;
+}
+/* ช่วงธีมเทศกาล: พื้นแถบเป็นสีอ่อนตลอดแล้ว (ไม่ใช่แถบสีเข้มของเทศกาล) ตัวอักษร/ไอคอนเลยต้องเป็นสีเข้มตลอด */
+html.theme-festival body .navbar :is(.logo-text, .brand) {
   color: #252525 !important;
   text-shadow: none !important;
 }
-html.theme-festival body .navbar:not(.is-scrolled) .nav-icon {
+html.theme-festival body .navbar .nav-icon {
   color: #000000 !important;
 }
 
@@ -2057,40 +2095,6 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
       box-shadow: none;
       }
 
-    /* 🌙 โค้งด้านบนสไตล์ iAM48 "ด้านหลัง" ป้าย Champ: เหนือโค้ง = โปร่งใส (เห็นพื้นหลัง/ธีมเทศกาลของ body)
-       ใต้โค้ง = พื้นขาว (มีแถบขาวโปร่งนุ่มๆ ตรงขอบโค้ง) - โค้งตัดผ่านครึ่งล่างของป้าย ผูกกับความสูงป้ายผ่าน .champ-banner-wrap */
-    .champ-banner-wrap {
-      position: relative;
-      display: flow-root;           /* กัน margin 15px ของป้ายทะลุออกนอก wrap */
-      isolation: isolate;
-    }
-    .champ-banner-wrap::before {
-      content: "";
-      position: absolute;
-      top: -50px;                   /* ขึ้นไปถึงขอบบนจอ (หักล้าง padding-top 50px ของ body) */
-      left: 0;
-      right: 0;
-      bottom: 38%;                  /* โค้งจบประมาณครึ่งล่างของป้าย */
-      z-index: 0;
-      pointer-events: none;
-      background:
-        radial-gradient(ellipse 75% 100% at 50% 0, transparent 99%, #ffffff 100%),                                 /* นอกโค้ง = ขาวทึบ */
-        radial-gradient(ellipse 75% calc(100% - 14px) at 50% 0, transparent 99%, rgba(255, 255, 255, 0.6) 100%); /* แถบขาวโปร่งตรงขอบโค้ง */
-    }
-    /* ส่วนล่างของ wrap ใต้กล่องโค้ง (38% ล่าง) = ขาวทึบ ต่อกับ .main-content-container */
-    .champ-banner-wrap::after {
-      content: "";
-      position: absolute;
-      top: calc(62% - 1px);         /* ทับรอยต่อ 1px กันเส้นแลบ */
-      left: 0;
-      right: 0;
-      bottom: 0;
-      z-index: 0;
-      pointer-events: none;
-      background: #ffffff;
-    }
-    .champ-banner-wrap .champ-banner { z-index: 1; }
-
     /* 🖥️ ตามคำขอผู้ใช้: บนจอคอม/iPad ให้โพสใน Latest Top Posts แสดงผลความกว้างเท่ากับหน้า
        member.html (ที่คุม #posts-container ไว้ด้วย .profile-body { max-width: 720px }) แทนที่
        จะยืดกว้างเต็มจอเหมือนเดิม - คุมเฉพาะโซนโพส ไม่กระทบ Campaign/Trending Video/ส่วนอื่น */
@@ -2156,7 +2160,6 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
   })();
 </script>
   
-<div class="champ-banner-wrap">
 <div class="champ-banner" onclick="window.location.href='specialthanks?index=0'">
       <div class="champ-info">
         <div class="champ-badge"><i class="fas fa-crown"></i> Champ of the Month</div>
@@ -2167,7 +2170,6 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
       <div class="champ-img-container">
         <img src="https://lh3.googleusercontent.com/d/1rebp2F8vyP0nyvsEOFD9Nw2mPcRtVqtG=s1000" id="home-champ-img" class="champ-img" alt="Champ">
       </div>
-</div>
 </div>
 
 <div class="main-content-container">

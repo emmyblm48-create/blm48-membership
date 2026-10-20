@@ -6,12 +6,18 @@
 // festivals.css). Outside every window nothing happens, so the pages fall
 // back to the normal theme without touching them again.
 //
-// ดูตัวอย่างธีมไหนก็ได้ทุกเวลา: เปิดหน้าใดก็ได้พร้อม ?festival=<id>
+// ⚠️ ตั้งแต่ 2026-10-20 ทำงานเฉพาะหน้า Home (index) — หน้าอื่นไม่ใส่ธีมแล้ว
+//
+// ดูตัวอย่างธีมไหนก็ได้ทุกเวลา: เปิดหน้า Home พร้อม ?festival=<id>
 //   เช่น index?festival=songkran  (จำไว้จนปิดแท็บ)
 //   ?festival=none = ปิดธีมทั้งหมด, ?festival=auto = กลับไปใช้ตามวันที่จริง
 // =========================================================================
 
 (function festivalTheme() {
+  // ธีมเทศกาลใช้เฉพาะหน้า Home (index) เท่านั้น — หน้าอื่นกลับเป็นหน้าตาปกติแบบก่อนมีธีม (ตามคำขอ 2026-10-20)
+  // ไฟล์นี้ยังโหลดอยู่ทุกหน้าเหมือนเดิม แต่หยุดตรงนี้ทันทีถ้าไม่ใช่หน้า Home
+  if (!/^\/(index(\.html)?)?$/.test(window.location.pathname)) return;
+
   // ---------------------------------------------------------------------
   // วันที่ของเทศกาลตามปฏิทินจันทรคติ (เปลี่ยนทุกปี) — เดือน-วัน ตามเวลาไทย
   // ---------------------------------------------------------------------
@@ -53,6 +59,23 @@
   //   icons: สลับไอคอนพื้นหลังหลังการ์ดอันดับหน้าแรก (index.html #bg-decorations)
   // ---------------------------------------------------------------------
   const FESTIVALS = [
+    {
+      // ธีมซิงเกิล BLM48 10th Single "Sustainable" (ชมพูพาสเทล กลีบดอกไม้ ไข่มุก)
+      // ยังไม่กำหนดช่วงวัน -> ดูได้ผ่าน ?festival=sustainable เท่านั้น
+      // พอได้วันแล้วแก้เป็น y => [dayNum(y, เดือน, วัน), dayNum(y, เดือน, วัน)] (อยู่บนสุด = ชนะเทศกาลอื่นถ้าช่วงทับกัน)
+      id: 'sustainable', name: 'BLM48 10th Single Sustainable',
+      window: y => null,
+      barColor: '#e98aae',
+      sparkles: true, // ไม่ใช้อิโมจิ และไม่มีของร่วงจากด้านบน (ตามคำขอ) -> มีแค่ประกายไข่มุก ไม่มี fall/rise
+      // ไอคอนพื้นหลังหลังการ์ดอันดับ = ภาพวาด SVG หลายสีตามโปสเตอร์ (แทนไอคอน Font Awesome สีเดียว)
+      decorSvgs: {
+        'fa-crown': 'cosmos',                  // ดอกคอสมอสชมพู
+        'fa-heart': 'ribbon',                  // โบว์ริบบิ้น
+        'fa-star': 'butterfly',                // ผีเสื้อลาเวนเดอร์
+        'fa-music': 'pearl',                   // ไข่มุก
+        'fa-wand-magic-sparkles': 'lavender'   // ช่อลาเวนเดอร์
+      }
+    },
     {
       id: 'childrensday', name: 'วันเด็ก',
       window: y => { const s = secondSaturdayOfJanuary(y); return [s - 3, s]; },
@@ -191,6 +214,15 @@
       });
     }
 
+    // ธีมซิงเกิล Sustainable: ประกายไข่มุกวิบวับอยู่กับที่ (ไม่มีของร่วงจากด้านบน ตามคำขอ)
+    if (festival.sparkles) {
+      [[12, 14, 3.2, 0], [78, 9, 4.1, 1.4], [30, 33, 3.6, 2.2], [88, 40, 4.4, 0.6],
+       [8, 58, 3.9, 1.9], [62, 22, 4.6, 3.1], [46, 70, 3.4, 0.9], [92, 78, 4.2, 2.6]].forEach(function (s) {
+        html += '<div class="fx-sparkle" style="left:' + s[0] + '%;top:' + s[1] + '%;animation-duration:'
+          + s[2] + 's;animation-delay:' + s[3] + 's"></div>';
+      });
+    }
+
     // ของที่ร่วงลงมา (หิมะ หยดน้ำ หัวใจ พลุกระดาษ) — ตำแหน่ง/ความเร็ว/ดีเลย์ต่างกันให้ดูเป็นธรรมชาติ
     (festival.fall || []).forEach(function (icon, i) {
       html += '<div class="fx-fall" style="left:' + (12 + i * 24) + '%;animation-duration:' + (14 + (i % 3) * 5)
@@ -211,7 +243,46 @@
   }
 
   // ไอคอนพื้นหลังหลังการ์ดอันดับ (index.html #bg-decorations) → ไอคอนของเทศกาล
+  // ภาพวาดไอคอนพื้นหลังแบบหลายสี (ใช้กับ festival.decorSvgs) — viewBox 24x24
+  const DECOR_SVGS = {
+    cosmos: '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="#f59fbf" stroke="#fff" stroke-width=".6">'
+      + [0, 45, 90, 135, 180, 225, 270, 315].map(function (a) {
+        return '<ellipse cx="12" cy="6.2" rx="2.9" ry="5" transform="rotate(' + a + ' 12 12)"/>';
+      }).join('')
+      + '</g><circle cx="12" cy="12" r="2.7" fill="#ffd56b" stroke="#f2b84b" stroke-width=".6"/></svg>',
+    ribbon: '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">'
+      + '<path fill="#e8749f" d="M11 12l-3.2 8.5 2.2-1 1.4 1.6L12.4 12zM13 12l3.2 8.5-2.2-1-1.4 1.6L11.6 12z"/>'
+      + '<path fill="#f590b6" d="M12 11.5C9.5 7 3.5 5.5 3.5 9.2c0 3 2 5 4.5 4.6 1.8-.3 3.2-1.2 4-2.3zM12 11.5c2.5-4.5 8.5-6 8.5-2.3 0 3-2 5-4.5 4.6-1.8-.3-3.2-1.2-4-2.3z"/>'
+      + '<circle cx="12" cy="11.6" r="2" fill="#e05f92"/></svg>',
+    butterfly: '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">'
+      + '<g fill="#bba8f0" stroke="#9c86de" stroke-width=".5"><path d="M11.5 11C10 6 5.5 2.5 3 4.5S2.5 11.5 7 12.6c-3 1-4 4-2 5.3s5.3-1 6.5-5.3z"/>'
+      + '<path d="M12.5 11C14 6 18.5 2.5 21 4.5S21.5 11.5 17 12.6c3 1 4 4 2 5.3s-5.3-1-6.5-5.3z"/></g>'
+      + '<rect x="11.3" y="7" width="1.4" height="11" rx=".7" fill="#7d6bb3"/>'
+      + '<path d="M11.6 7.4L9.8 4.2M12.4 7.4l1.8-3.2" stroke="#7d6bb3" stroke-width=".7" stroke-linecap="round" fill="none"/></svg>',
+    pearl: '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="fxPearl" cx=".38" cy=".34" r=".7">'
+      + '<stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#f6e3ef"/><stop offset="1" stop-color="#d9c4ec"/></radialGradient></defs>'
+      + '<circle cx="12" cy="12" r="7.5" fill="url(#fxPearl)" stroke="#e7cfe3" stroke-width=".6"/>'
+      + '<ellipse cx="9.6" cy="9.2" rx="2" ry="1.3" fill="#fff" opacity=".9" transform="rotate(-30 9.6 9.2)"/></svg>',
+    lavender: '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">'
+      + '<path d="M12 22.5V7" stroke="#8fb58a" stroke-width="1.4" stroke-linecap="round"/><g fill="#a48ad6">'
+      + [[12, 3.6, 0], [10.6, 6.4, -25], [13.4, 6.4, 25], [10.6, 9.4, -25], [13.4, 9.4, 25], [10.8, 12.4, -25], [13.2, 12.4, 25]].map(function (b) {
+        return '<ellipse cx="' + b[0] + '" cy="' + b[1] + '" rx="1.4" ry="2" transform="rotate(' + b[2] + ' ' + b[0] + ' ' + b[1] + ')"/>';
+      }).join('')
+      + '</g></svg>'
+  };
+
   function swapDecorIcons() {
+    // แบบภาพวาด SVG: ถอดคลาส Font Awesome ออก แล้วใส่ภาพแทน (คลาส dX-Y ตำแหน่ง/องศาเดิมยังอยู่)
+    const svgs = festival.decorSvgs || {};
+    document.querySelectorAll('.bg-decorations .decor-item').forEach(function (icon) {
+      Object.keys(svgs).forEach(function (from) {
+        if (!icon.classList.contains(from) || !DECOR_SVGS[svgs[from]]) return;
+        icon.classList.remove('fa-solid', from);
+        icon.classList.add('fx-decor-svg');
+        icon.innerHTML = DECOR_SVGS[svgs[from]];
+      });
+    });
+
     const swaps = festival.icons || {};
     document.querySelectorAll('.bg-decorations .decor-item').forEach(function (icon) {
       Object.keys(swaps).forEach(function (from) {
