@@ -299,8 +299,10 @@ html.theme-festival #tab-profile-img {
 }
 
 /* 🌸 Sustainable: แถบเมนูล่างเป็นภาพทิวทัศน์ (สไตล์ iAM48) แทนแถบกระจก — คลื่นฟ้าลาเวนเดอร์ / คลื่นขาว /
-   ทุ่งหญ้าเขียวพาสเทลมีดอกไม้จุดเล็กๆ; ไอคอน (หรือรูปไอคอนของ Champ) ลอยอยู่บนเนินเหมือนเดิม */
-html.theme-sustainable .bottom-tab-bar::before {
+   ทุ่งหญ้าเขียวพาสเทลมีดอกไม้จุดเล็กๆ; ไอคอน (หรือรูปไอคอนของ Champ) ลอยอยู่บนเนินเหมือนเดิม
+   ใช้กับทุกหน้าที่มีแถบเมนูล่าง: หน้า Home ผ่าน .theme-sustainable, หน้าอื่นผ่าน .theme-tabbar-sustainable (festivals.js ใส่ให้) */
+html.theme-sustainable .bottom-tab-bar::before,
+html.theme-tabbar-sustainable .bottom-tab-bar::before {
   top: 14px !important;
   border: none !important;
   border-radius: 0 !important;
@@ -312,18 +314,23 @@ html.theme-sustainable .bottom-tab-bar::before {
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 96' preserveAspectRatio='none'%3E%3Cpath d='M0 26C40 12 82 16 122 32C172 50 212 42 252 26C302 8 352 12 400 28V96H0Z' fill='%23d9cff0'/%3E%3Cpath d='M0 42C50 30 100 37 150 51C200 63 262 50 312 39C352 31 382 36 400 42V96H0Z' fill='%23fdf5f8'/%3E%3Cpath d='M0 58C60 44 122 50 182 63C232 73 292 60 342 53C372 49 392 52 400 55V96H0Z' fill='%23e1eac9'/%3E%3C/svg%3E") left top / 100% 96px no-repeat,
     linear-gradient(#e1eac9, #e1eac9) left 0 top 80px / 100% 100% no-repeat !important; /* ต่อทุ่งหญ้าลงไปถึงขอบจอ (safe area) โดยไม่ทาสีเหนือคลื่น */
 }
-html.theme-sustainable .tab-item {
+/* สีใส่ตรงๆ (ไม่ใช้ --fx-*) เพราะหน้าอื่นไม่มีพาเลตต์ธีม มีแค่คลาส .theme-tabbar-sustainable */
+html.theme-sustainable .tab-item,
+html.theme-tabbar-sustainable .tab-item {
   color: #a27b98; /* ม่วงหม่นอ่านง่ายบนทุ่งหญ้า/คลื่นขาว */
 }
-html.theme-sustainable .tab-item.active {
-  color: var(--fx-primary);
+html.theme-sustainable .tab-item.active,
+html.theme-tabbar-sustainable .tab-item.active {
+  color: #e8749f;
 }
-html.theme-sustainable .tab-item.active i {
-  filter: drop-shadow(0 2px 6px rgba(var(--fx-primary-rgb), 0.45));
+html.theme-sustainable .tab-item.active i,
+html.theme-tabbar-sustainable .tab-item.active i {
+  filter: drop-shadow(0 2px 6px rgba(232, 116, 159, 0.45));
 }
-html.theme-sustainable #tab-profile-img {
+html.theme-sustainable #tab-profile-img,
+html.theme-tabbar-sustainable #tab-profile-img {
   border-color: #ffffff !important;
-  box-shadow: 0 2px 8px rgba(var(--fx-ink-rgb), 0.18);
+  box-shadow: 0 2px 8px rgba(140, 58, 98, 0.18);
 }
 
 /* Shared components from glassmorphism.css */

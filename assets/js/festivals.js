@@ -7,6 +7,7 @@
 // back to the normal theme without touching them again.
 //
 // ⚠️ ตั้งแต่ 2026-10-20 ทำงานเฉพาะหน้า Home (index) — หน้าอื่นไม่ใส่ธีมแล้ว
+//    (ยกเว้นธีมที่มี tabBarEverywhere: หน้าอื่นได้แถบเมนูล่างของธีมอย่างเดียว)
 //
 // ดูตัวอย่างธีมไหนก็ได้ทุกเวลา: เปิดหน้า Home พร้อม ?festival=<id>
 //   เช่น index?festival=songkran  (จำไว้จนปิดแท็บ)
@@ -15,8 +16,8 @@
 
 (function festivalTheme() {
   // ธีมเทศกาลใช้เฉพาะหน้า Home (index) เท่านั้น — หน้าอื่นกลับเป็นหน้าตาปกติแบบก่อนมีธีม (ตามคำขอ 2026-10-20)
-  // ไฟล์นี้ยังโหลดอยู่ทุกหน้าเหมือนเดิม แต่หยุดตรงนี้ทันทีถ้าไม่ใช่หน้า Home
-  if (!/^\/(index(\.html)?)?$/.test(window.location.pathname)) return;
+  // ยกเว้นธีมที่ตั้ง tabBarEverywhere: หน้าอื่นได้แค่แถบเมนูล่างของธีม (html.theme-tabbar-<id>) อย่างเดียว
+  const IS_HOME = /^\/(index(\.html)?)?$/.test(window.location.pathname);
 
   // ---------------------------------------------------------------------
   // วันที่ของเทศกาลตามปฏิทินจันทรคติ (เปลี่ยนทุกปี) — เดือน-วัน ตามเวลาไทย
@@ -66,6 +67,7 @@
       id: 'sustainable', name: 'BLM48 10th Single Sustainable',
       window: y => [dayNum(2026, 10, 20), dayNum(2099, 12, 31)],
       barColor: '#e98aae',
+      tabBarEverywhere: true, // แถบเมนูล่างแบบทิวทัศน์ใช้กับทุกหน้าที่มีแถบเมนูล่าง (fanpost/majorvote/notification/profile)
       sparkles: true, // ไม่ใช้อิโมจิ และไม่มีของร่วงจากด้านบน (ตามคำขอ) -> มีแค่ประกายไข่มุก ไม่มี fall/rise
       // ไอคอนพื้นหลังหลังการ์ดอันดับ = ภาพวาด SVG หลายสีตามโปสเตอร์ (แทนไอคอน Font Awesome สีเดียว)
       decorSvgs: {
@@ -173,6 +175,10 @@
   const festival = preview === 'none' ? null
     : (preview && FESTIVALS.find(f => f.id === preview)) || festivalForToday();
   if (!festival) return;
+  if (!IS_HOME) {
+    if (festival.tabBarEverywhere) document.documentElement.classList.add('theme-tabbar-' + festival.id);
+    return;
+  }
 
   // ใส่คลาสทันทีตั้งแต่ใน <head> กันหน้ากระพริบเป็นธีมเดิมก่อนเปลี่ยน
   document.documentElement.classList.add('theme-festival', 'theme-' + festival.id);
