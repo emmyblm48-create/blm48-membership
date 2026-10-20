@@ -267,6 +267,26 @@
     }
 
     /* 👑 ป้าย "Kami-Oshi Days" ใต้ชื่อ - โชว์เฉพาะตอนดูเมมเบอร์ที่เป็นคามิโอชิของเราเอง */
+    /* 👑 ป๊อปอัปยืนยันเปลี่ยนคามิโอชิ: รูปคนเดิม → รูปคนใหม่ */
+    .swal2-popup.ks-popup { width: min(340px, calc(100vw - 32px)); padding: 22px 16px 18px; border-radius: 18px; background: #fff !important; border: none !important; }
+    .ks-popup .swal2-html-container { margin: 0; padding: 0; overflow: visible; }
+    .ks-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 4px; }
+    .ks-side { flex: 0 0 41%; display: flex; flex-direction: column; align-items: center; }
+    .ks-side img { width: 92px; height: 92px; border-radius: 50%; object-fit: cover; border: 4px solid; background: #f2f2f2; }
+    .ks-pill { margin-top: -14px; position: relative; width: 100%; padding: 5px 8px; border-radius: 16px; color: #fff; font-size: 11.5px; line-height: 1.35; font-weight: 500; }
+    .ks-old img { border-color: #b9bcc0; }
+    .ks-old .ks-pill { background: linear-gradient(90deg, #5f6368, #767a80); }
+    .ks-new img { border-color: var(--blmem-pink); }
+    .ks-new .ks-pill { background: var(--blmem-pink); }
+    .ks-arrow { flex: 1; display: flex; align-items: center; justify-content: center; gap: 2px; height: 92px; color: #111; }
+    .ks-arrow span { width: 4px; height: 12px; background: currentColor; transform: skewX(-30deg); }
+    .ks-arrow i { font-size: 18px; margin-left: 2px; }
+    .ks-text { margin-top: 16px; font-size: 15px; font-weight: 500; color: #111; line-height: 1.4; }
+    .ks-actions { width: 100%; gap: 12px; margin: 18px 0 0; flex-wrap: nowrap; }
+    .swal2-popup.ks-popup .ks-btn { flex: 1; height: 42px; margin: 0; border-radius: 21px; font: 500 15px 'Quicksand','Kanit',sans-serif; cursor: pointer; box-shadow: none !important; }
+    .swal2-popup.ks-popup .ks-btn.ks-cancel { background: #fff !important; color: #111 !important; border: 1.5px solid #111 !important; }
+    .swal2-popup.ks-popup .ks-btn.ks-confirm { background: #fbd96b !important; color: #111 !important; border: none !important; }
+
     .kami-days-badge {
       display: none;
       align-items: center;
@@ -1241,10 +1261,14 @@ function renderMemberStatsAndFans() {
         }
       }
 
-      const finalConfirm = await Swal.fire({
-        title: subTitle, text: confirmText, icon: 'question', showCancelButton: true,
-        confirmButtonColor: 'var(--blmem-pink)', cancelButtonColor: '#aaa', confirmButtonText: 'ตกลง', cancelButtonText: 'ยกเลิก'
-      });
+      // 👑 เปลี่ยนคามิโอชิจากคนเดิม → คนใหม่: ใช้ป๊อปอัปแบบรูปคู่ + ลูกศร (แบบ iAM)
+      const isKamiSwitch = type === 'kami' && action === "setKamioshi" && !!user.kamioshi;
+      const finalConfirm = isKamiSwitch
+        ? await confirmKamiSwitch(user.kamioshi, memberName, user.kamioshiDays || 1)
+        : await Swal.fire({
+            title: subTitle, text: confirmText, icon: 'question', showCancelButton: true,
+            confirmButtonColor: 'var(--blmem-pink)', cancelButtonColor: '#aaa', confirmButtonText: 'ตกลง', cancelButtonText: 'ยกเลิก'
+          });
 
       if (!finalConfirm.isConfirmed) return;
 
@@ -1315,6 +1339,35 @@ function renderMemberStatsAndFans() {
         updateButtonStyles();
         Swal.fire('ผิดพลาด', 'การเชื่อมต่อขัดข้อง ระบบได้คืนค่าเดิมแล้วค่ะ', 'error'); 
       }
+    }
+
+    async function confirmKamiSwitch(oldName, newName, oldDays) {
+      const esc = s => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      const newImg = getImg(document.getElementById('mb-avatar-circle')?.getAttribute('src'));
+      let oldImg = 'assets/images/default-profile.png';
+      try {
+        const s = await blm48GetMemberStats(oldName);
+        if (s && s.profile_img) oldImg = getImg(s.profile_img);
+      } catch (e) { /* ไม่มีรูปก็ใช้รูป default */ }
+
+      return Swal.fire({
+        html: `
+          <div class="ks-row">
+            <div class="ks-side ks-old">
+              <img src="${esc(oldImg)}" alt="">
+              <div class="ks-pill">${esc(oldName.toUpperCase())}<br>Kami-Oshi ${Number(oldDays).toLocaleString()} Days</div>
+            </div>
+            <div class="ks-arrow"><span></span><span></span><span></span><span></span><i class="fas fa-arrow-right"></i></div>
+            <div class="ks-side ks-new">
+              <img src="${esc(newImg)}" alt="">
+              <div class="ks-pill">${esc(newName.toUpperCase())}<br>Kami-Oshi</div>
+            </div>
+          </div>
+          <div class="ks-text">Would you like to change Kami-Oshi<br>from ${esc(oldName.toUpperCase())} to ${esc(newName.toUpperCase())}?</div>`,
+        showCancelButton: true, reverseButtons: true, buttonsStyling: false,
+        confirmButtonText: 'Confirm', cancelButtonText: 'Cancel',
+        customClass: { popup: 'ks-popup', confirmButton: 'ks-btn ks-confirm', cancelButton: 'ks-btn ks-cancel', actions: 'ks-actions' }
+      });
     }
 
     function actionKami() { setOshi('kami'); }
