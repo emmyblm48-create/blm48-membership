@@ -71,7 +71,7 @@
       padding-bottom: 100px; /* ระยะเผื่อด้านล่างเพื่อไม่ให้ Tab-bar บังโพสต์สุดท้ายงับ 🎀 */
     }
     /* 🌼 หน้า Home: พื้นหลังด้านบน (หลังป้าย Champ) เป็นเหลืองทึบสีเดียวกับ navbar แทนไล่สีของ glass-mesh-bg ที่ทำให้สีไม่ตรงกัน */
-    body.glass-mesh-bg { background: #fff2bd; }
+    body.glass-mesh-bg { background: #ffffff; } /* พื้นขาว - สีเหลืองด้านบนมาจากโค้งหลังป้าย Champ (.champ-banner-wrap::before) */
     body::before {
       content: "";
       position: fixed;
@@ -2039,6 +2039,28 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
       box-shadow: none;
       }
 
+    /* 🌙 โค้งด้านบนสไตล์ iAM48: พื้นเหลืองด้านบนจบเป็นโค้งนูนลง "ด้านหลัง" ป้าย Champ
+       (โค้งตัดผ่านครึ่งล่างของป้าย ใต้โค้งเป็นพื้นขาว) - ผูกกับความสูงป้ายผ่าน .champ-banner-wrap */
+    .champ-banner-wrap {
+      position: relative;
+      display: flow-root;           /* กัน margin 15px ของป้ายทะลุออกนอก wrap */
+      isolation: isolate;
+    }
+    .champ-banner-wrap::before {
+      content: "";
+      position: absolute;
+      top: -50px;                   /* ขึ้นไปถึงขอบบนจอ (หักล้าง padding-top 50px ของ body) */
+      left: 0;
+      right: 0;
+      bottom: 38%;                  /* โค้งจบประมาณครึ่งล่างของป้าย */
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 75% 100% at 50% 0, #fff2bd 99%, transparent 100%) top / 100% calc(100% - 14px) no-repeat,
+        radial-gradient(ellipse 75% 100% at 50% 0, #fff8dc 99%, transparent 100%); /* แถบเหลืองอ่อนนุ่มๆ ใต้โค้ง */
+    }
+    .champ-banner-wrap .champ-banner { z-index: 1; }
+
     /* 🖥️ ตามคำขอผู้ใช้: บนจอคอม/iPad ให้โพสใน Latest Top Posts แสดงผลความกว้างเท่ากับหน้า
        member.html (ที่คุม #posts-container ไว้ด้วย .profile-body { max-width: 720px }) แทนที่
        จะยืดกว้างเต็มจอเหมือนเดิม - คุมเฉพาะโซนโพส ไม่กระทบ Campaign/Trending Video/ส่วนอื่น */
@@ -2095,6 +2117,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     </div>
 </nav>
   
+<div class="champ-banner-wrap">
 <div class="champ-banner" onclick="window.location.href='specialthanks?index=0'">
       <div class="champ-info">
         <div class="champ-badge"><i class="fas fa-crown"></i> Champ of the Month</div>
@@ -2106,7 +2129,8 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
         <img src="https://lh3.googleusercontent.com/d/1rebp2F8vyP0nyvsEOFD9Nw2mPcRtVqtG=s1000" id="home-champ-img" class="champ-img" alt="Champ">
       </div>
 </div>
-  
+</div>
+
 <div class="main-content-container">
 <!-- 🌟 Special Fans Day: หัวข้อ + ไทม์ไลน์ 7 วัน เหนือ Member Ranking -> กดแล้วไปหน้าอันดับแนวตั้ง specialfansday.html -->
 <div class="section-title" onclick="window.location.href='specialfansday'" style="margin-top: 0; cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding-right: 0; user-select: none;">
