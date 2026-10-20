@@ -315,12 +315,21 @@ body {
   justify-content: space-between;
   padding: 15px 20px; 
 
-  /* 🌼 สีพื้นเหลืองทึบโทนเดียวกับพื้นหลังหน้า (ไม่ใช้กระจกฝ้าแล้ว ตามคำขอ) */
-  background: #fff2bd !important;
+  /* 🤍 เลื่อนลงแล้ว = พื้นขาวล้วน (ไม่ใช้กระจกฝ้า ตามคำขอ) */
+  background: #ffffff !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   border-bottom: none !important;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06) !important;
+  transition: background-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+}
+/* 🔝 อยู่บนสุดของหน้า (ยังไม่เลื่อน) = navbar ใส ให้เห็นโค้งเหลืองหลังป้าย Champ
+   - JS ใต้ <nav> ใส่ .is-scrolled เมื่อเลื่อนลง
+   - ช่วงธีมเทศกาลไม่ใส: แถบใช้สีเทศกาลตลอด เพราะตัวอักษรเทศกาลสีอ่อน จะจมหายบนโค้งเหลือง */
+html:not(.theme-festival) body .navbar:not(.is-scrolled) {
+  background: transparent !important;
   box-shadow: none !important;
+  border-bottom-color: transparent !important;
 }
 
     /* 🎀 แก้ชื่อแบรนด์ให้เป็นสีเทาเข้มเกือบดำตามธีม */
@@ -2116,6 +2125,15 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     <i class="fas fa-search"></i> </a>
     </div>
 </nav>
+<script>
+  // 🔝 navbar ใสตอนอยู่บนสุด -> พื้นขาวเมื่อเลื่อนลง (CSS: .navbar.is-scrolled)
+  (function () {
+    var nav = document.querySelector('.navbar');
+    function syncNav() { nav.classList.toggle('is-scrolled', (window.scrollY || document.documentElement.scrollTop) > 8); }
+    window.addEventListener('scroll', syncNav, { passive: true });
+    syncNav();
+  })();
+</script>
   
 <div class="champ-banner-wrap">
 <div class="champ-banner" onclick="window.location.href='specialthanks?index=0'">
