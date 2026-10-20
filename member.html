@@ -279,6 +279,8 @@
     .ks-old .ks-pill { background: linear-gradient(90deg, #5f6368, #767a80); }
     .ks-new img { border-color: var(--blmem-pink); }
     .ks-new .ks-pill { background: var(--blmem-pink); }
+    .ks-remove { flex-basis: 52%; }
+    .ks-remove .ks-pill { font-size: 13px; }
     .ks-arrow { flex: 1; display: flex; align-items: center; justify-content: center; gap: 2px; height: 92px; color: #111; }
     .ks-arrow span { width: 4px; height: 12px; background: currentColor; transform: skewX(-30deg); }
     .ks-arrow i { font-size: 18px; margin-left: 2px; }
@@ -1264,12 +1266,12 @@ function renderMemberStatsAndFans() {
 
       // 👑 ตั้ง/เปลี่ยนคามิโอชิ: ป๊อปอัปแบบรูป (แบบ iAM) — มีคนเดิมเป็นรูปคู่ + ลูกศร, ตั้งครั้งแรกเป็นรูปเดียว
       const isKamiSet = type === 'kami' && action === "setKamioshi";
+      const isKamiRemove = type === 'kami' && action === "removeOshi";
       const finalConfirm = isKamiSet
         ? await confirmKamiSwitch(user.kamioshi, memberName, user.kamioshiDays || 1)
-        : await Swal.fire({
-            title: subTitle, text: confirmText, icon: 'question', showCancelButton: true,
-            confirmButtonColor: 'var(--blmem-pink)', cancelButtonColor: '#aaa', confirmButtonText: 'ตกลง', cancelButtonText: 'ยกเลิก'
-          });
+        : isKamiRemove
+        ? await confirmKamiRemove(memberName, user.kamioshiDays || 1)
+        : { isConfirmed: true }; // Oshi ธรรมดา: กดแล้วทำเลย ไม่ต้องถามยืนยัน
 
       if (!finalConfirm.isConfirmed) return;
 
@@ -1372,6 +1374,26 @@ function renderMemberStatsAndFans() {
           <div class="ks-text">Would you like to change Kami-Oshi<br>from ${esc(oldName.toUpperCase())} to ${esc(newName.toUpperCase())}?</div>`;
       }
 
+      return Swal.fire({
+        html,
+        showCancelButton: true, reverseButtons: true, buttonsStyling: false,
+        confirmButtonText: 'Confirm', cancelButtonText: 'Cancel',
+        customClass: { popup: 'ks-popup', confirmButton: 'ks-btn ks-confirm', cancelButton: 'ks-btn ks-cancel', actions: 'ks-actions' }
+      });
+    }
+
+    // 💔 ยกเลิกคามิโอชิ: ป๊อปอัปรูปเดียว (แบบ iAM) — ป้ายเทาบอกชื่อ + จำนวนวัน
+    function confirmKamiRemove(name, days) {
+      const esc = s => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      const img = getImg(document.getElementById('mb-avatar-circle')?.getAttribute('src'));
+      const html = `
+        <div class="ks-row ks-single">
+          <div class="ks-side ks-old ks-remove">
+            <img src="${esc(img)}" alt="">
+            <div class="ks-pill">${esc(name.toUpperCase())}<br>Kami-Oshi ${Number(days).toLocaleString()} Days</div>
+          </div>
+        </div>
+        <div class="ks-text">Cancel Kami-Oshi ${esc(name.toUpperCase())}</div>`;
       return Swal.fire({
         html,
         showCancelButton: true, reverseButtons: true, buttonsStyling: false,
