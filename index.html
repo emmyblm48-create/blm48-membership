@@ -93,6 +93,11 @@
       --home-curve-fill: url("assets/images/theme-sustainable-home.webp") center top / 100% auto no-repeat; /* กว้างเต็มจอเสมอ = ตำแหน่งรูปตรงกันทั้งในโค้งและใน navbar */
       --home-curve-band: #fbeef5;
     }
+    /* 🌹 ธีม Magic Hour: โค้งเป็นรูปห้องโถงโกธิกพระจันทร์สีเลือด (ส่วนบนของรูป) + แถบแดงเข้มใต้โค้ง */
+    html.theme-magichour body.glass-mesh-bg {
+      --home-curve-fill: #12070a url("assets/images/theme-magichour-home.webp") center top / 100% auto no-repeat;
+      --home-curve-band: #4a0b14;
+    }
     body::before {
       content: "";
       position: fixed;
@@ -377,6 +382,12 @@ html.theme-festival body .navbar :is(.logo-text, .brand) {
 }
 html.theme-festival body .navbar .nav-icon {
   color: #000000 !important;
+}
+/* 🌹 ธีม Magic Hour: ส่วนหัวเป็นรูปโทนมืด -> ตัวอักษร/ไอคอนบน navbar เป็นสีขาว (ต้องอยู่หลังกฎสีเข้มด้านบน) */
+html.theme-magichour body .navbar :is(.logo-text, .brand),
+html.theme-magichour body .navbar .nav-icon {
+  color: #ffffff !important;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45) !important;
 }
 
     /* 🎀 แก้ชื่อแบรนด์ให้เป็นสีเทาเข้มเกือบดำตามธีม */

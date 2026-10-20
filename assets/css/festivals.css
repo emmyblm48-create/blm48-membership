@@ -38,6 +38,19 @@ html.theme-sustainable {
   --fx-decor-1: #f59fbf; --fx-decor-2: #c9b6ef;
   --fx-logo: ""; --fx-heading: ""; --fx-shop-heading: ""; /* ไม่ใช้อิโมจิ (ตามคำขอ) */
 }
+/* 🌹 Magic Hour — ดำ-แดง ห้องโถงโกธิก พระจันทร์สีเลือด เทียน กลีบกุหลาบ (ไม่ใช้อิโมจิ) */
+html.theme-magichour {
+  --fx-primary: #c1121f; --fx-primary-rgb: 193, 18, 31; --fx-primary-soft: #e5383b;
+  --fx-accent: #6b0f1a; --fx-accent-rgb: 107, 15, 26; --fx-candy: #d4a24c;
+  --fx-pale: #fdecee; --fx-pale-border: #f3cdd2; --fx-pale-hover: #fadadd;
+  --fx-bar-1: #120709; --fx-bar-2: #2a0a10; --fx-bar-text: #ffd6da; --fx-bar-icon: #f3b8bf;
+  --fx-tabbar: rgba(18, 7, 9, 0.9); --fx-tab-muted: #c9a0a6; --fx-tab-text: #a8848a;
+  --fx-ink: #3d0a12; --fx-ink-rgb: 61, 10, 18; --fx-score: #a4161a; --fx-price: #b5172a;
+  --fx-bg-1: #1a0a0d; --fx-bg-2: #2a0a10; --fx-bg-3: #12070a; --fx-bg-base: #ffffff;
+  --fx-orb: rgba(255, 90, 100, 0.55); --fx-orb-glow: rgba(193, 18, 31, 0.3);
+  --fx-decor-1: #c1121f; --fx-decor-2: #d4a24c;
+  --fx-logo: ""; --fx-heading: ""; --fx-shop-heading: "";
+}
 html.theme-halloween {
   --fx-primary: #ff7518; --fx-primary-rgb: 255, 117, 24; --fx-primary-soft: #ffa65c;
   --fx-accent: #6b3fa0; --fx-accent-rgb: 107, 63, 160; --fx-candy: #ffb627;
@@ -333,6 +346,80 @@ html.theme-tabbar-sustainable #tab-profile-img {
   box-shadow: 0 2px 8px rgba(140, 58, 98, 0.18);
 }
 
+/* 🌹 Magic Hour: แถบเมนูล่างเป็นทิวทัศน์กลางคืน (คลื่นแดงเลือดหมู / คลื่นแดงเข้ม / พื้นดำ มีกลีบกุหลาบจุดเล็กๆ)
+   ใช้กับทุกหน้าที่มีแถบเมนูล่าง: หน้า Home ผ่าน .theme-magichour, หน้าอื่นผ่าน .theme-tabbar-magichour */
+html.theme-magichour .bottom-tab-bar::before,
+html.theme-tabbar-magichour .bottom-tab-bar::before {
+  top: 14px !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='26' viewBox='0 0 120 26'%3E%3Cg fill='%23c1121f'%3E%3Cellipse cx='10' cy='16' rx='2.4' ry='1.5' transform='rotate(-25 10 16)'/%3E%3Cellipse cx='52' cy='20' rx='2' ry='1.3' transform='rotate(30 52 20)' fill='%23e5383b'/%3E%3Cellipse cx='96' cy='12' rx='2.4' ry='1.5' transform='rotate(-10 96 12)' fill='%238b0f1e'/%3E%3C/g%3E%3Ccircle cx='32' cy='9' r='1' fill='%23d4a24c'/%3E%3Ccircle cx='75' cy='19' r='1.2' fill='%23d4a24c'/%3E%3Ccircle cx='112' cy='22' r='.9' fill='%23ffd6da'/%3E%3C/svg%3E") left bottom / 120px 26px repeat-x,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 96' preserveAspectRatio='none'%3E%3Cpath d='M0 26C40 12 82 16 122 32C172 50 212 42 252 26C302 8 352 12 400 28V96H0Z' fill='%236b0f1a'/%3E%3Cpath d='M0 42C50 30 100 37 150 51C200 63 262 50 312 39C352 31 382 36 400 42V96H0Z' fill='%232a0a10'/%3E%3Cpath d='M0 58C60 44 122 50 182 63C232 73 292 60 342 53C372 49 392 52 400 55V96H0Z' fill='%23120709'/%3E%3C/svg%3E") left top / 100% 96px no-repeat,
+    linear-gradient(#120709, #120709) left 0 top 80px / 100% 100% no-repeat !important;
+}
+html.theme-magichour .tab-item,
+html.theme-tabbar-magichour .tab-item {
+  color: #c4848f; /* ชมพูหม่น อ่านได้ทั้งบนพื้นแดงเข้ม/ดำ และตอนไอคอนลอยอยู่เหนือพื้นขาว */
+}
+html.theme-magichour .tab-item.active,
+html.theme-tabbar-magichour .tab-item.active {
+  color: #ff4d5e;
+}
+html.theme-magichour .tab-item.active i,
+html.theme-tabbar-magichour .tab-item.active i {
+  filter: drop-shadow(0 2px 8px rgba(255, 60, 75, 0.6));
+}
+html.theme-magichour #tab-profile-img,
+html.theme-tabbar-magichour #tab-profile-img {
+  border-color: #c1121f !important;
+  box-shadow: 0 2px 10px rgba(193, 18, 31, 0.45);
+}
+/* ✨ ฝุ่นเวทสีทอง (แทนประกายสีขาว) */
+html.theme-magichour #fx-deco .fx-sparkle {
+  background: radial-gradient(circle, #fff3c4 0 30%, rgba(255, 207, 107, 0.65) 55%, transparent 72%);
+  box-shadow: 0 0 8px 2px rgba(255, 214, 120, 0.75), 0 0 16px 5px rgba(212, 162, 76, 0.35);
+}
+/* 🕯️ เทียนลอยกลางอากาศ (festivals.js buildFloatingCandles) — ลอยหน้าป้าย Champ แต่อยู่ใต้ navbar, ไม่รับการแตะ */
+#fx-candles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+#fx-candles .fx-fcandle {
+  position: absolute;
+  opacity: 0.92;
+  filter: drop-shadow(0 0 6px rgba(255, 200, 100, 0.65));
+  animation: fx-candle-float ease-in-out infinite alternate;
+}
+#fx-candles .fx-fcandle svg {
+  display: block;
+  width: 100%;
+}
+#fx-candles .fx-fcandle svg path:nth-of-type(1) {
+  transform-origin: 12px 7px;
+  animation: fx-flame-flicker 0.9s ease-in-out infinite alternate;
+}
+@keyframes fx-candle-float {
+  from { transform: translateY(0) rotate(-2deg); }
+  to   { transform: translateY(-9px) rotate(2deg); }
+}
+@keyframes fx-flame-flicker {
+  from { transform: scale(1, 1); }
+  to   { transform: scale(0.88, 1.12); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #fx-candles .fx-fcandle,
+  #fx-candles .fx-fcandle svg path { animation: none; }
+}
+
 /* Shared components from glassmorphism.css */
 html.theme-festival .swal2-popup,
 html.theme-festival .swal2-toast {
@@ -444,6 +531,25 @@ html.theme-sustainable .member-card.group-npt48.rank-other {
   box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.85), 0 4px 12px rgba(164, 138, 214, 0.14) !important;
 }
 html.theme-sustainable .member-card .name-text {
+  color: var(--fx-ink);
+}
+
+/* 🌹 Magic Hour: แท่งอันดับไล่สีทึบ แดงกุหลาบ (BLM48) / เทาควันเงิน (NPT48) ขอบขาวเรือง */
+html.theme-magichour .member-card.rank-1,
+html.theme-magichour .member-card.rank-2,
+html.theme-magichour .member-card.rank-3,
+html.theme-magichour .member-card.rank-other {
+  background: linear-gradient(180deg, #f2b0b7 0%, #f9dade 45%, #fff4f5 100%) !important;
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.85), 0 4px 12px rgba(193, 18, 31, 0.14) !important;
+}
+html.theme-magichour .member-card.group-npt48.rank-1,
+html.theme-magichour .member-card.group-npt48.rank-2,
+html.theme-magichour .member-card.group-npt48.rank-3,
+html.theme-magichour .member-card.group-npt48.rank-other {
+  background: linear-gradient(180deg, #d3cbd0 0%, #e8e3e6 45%, #f8f6f7 100%) !important;
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.85), 0 4px 12px rgba(61, 10, 18, 0.12) !important;
+}
+html.theme-magichour .member-card .name-text {
   color: var(--fx-ink);
 }
 

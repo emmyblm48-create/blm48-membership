@@ -61,11 +61,29 @@
   // ---------------------------------------------------------------------
   const FESTIVALS = [
     {
+      // ธีม "Magic Hour" ดำ-แดง (ห้องโถงโกธิก พระจันทร์สีเลือด เทียน กลีบกุหลาบ)
+      // เริ่ม 1 พ.ย. 2026 เวลา 00:00 (เวลาเครื่องผู้ใช้) ยังไม่กำหนดวันจบ -> ปลายไว้ไกลๆ จนกว่าจะได้วันจบจริง
+      // อยู่บนสุด = ชนะทุกธีมถ้าช่วงทับกัน (ลอยกระทง คริสต์มาส ปีใหม่ จะไม่ขึ้นระหว่างนี้)
+      id: 'magichour', name: 'Magic Hour',
+      window: y => [dayNum(2026, 11, 1), dayNum(2099, 12, 31)],
+      barColor: '#120709',
+      tabBarEverywhere: true, // แถบเมนูล่างของธีมใช้กับทุกหน้าที่มีแถบเมนูล่าง
+      sparkles: true,         // ฝุ่นเวทสีทองวิบวับอยู่กับที่ ไม่มีของร่วง/อิโมจิ
+      floatingCandles: true,  // เทียนลอยกลางอากาศขยับขึ้นลงช้าๆ เหนือป้าย Champ (บรรยากาศห้องโถงโรงเรียนเวทมนตร์)
+      // กลิ่นอายโลกเวทมนตร์ (ของทั่วไปในโลกพ่อมด — ไม่ใช้โลโก้/ชื่อ/ตราบ้านของ Harry Potter เพราะติดลิขสิทธิ์)
+      decorSvgs: {
+        'fa-crown': 'wand',                    // ไม้กายสิทธิ์มีประกาย
+        'fa-heart': 'potion',                  // ขวดยาวิเศษสีแดง
+        'fa-star': 'candle',                   // เทียน
+        'fa-music': 'spellbook',               // ตำราเวท
+        'fa-wand-magic-sparkles': 'owl'        // นกฮูก
+      }
+    },
+    {
       // ธีมซิงเกิล BLM48 10th Single "Sustainable" (ชมพูพาสเทล กลีบดอกไม้ ไข่มุก)
-      // เปิดใช้ตั้งแต่ 20 ต.ค. 2026 (ตามคำขอ) ยังไม่กำหนดวันจบ -> ใส่ปลายไว้ไกลๆ จนกว่าจะได้วันจบจริง
-      // อยู่บนสุด = ชนะเทศกาลอื่นทั้งหมดถ้าช่วงทับกัน (ฮาโลวีน ลอยกระทง คริสต์มาส ปีใหม่ จะไม่ขึ้นระหว่างนี้)
+      // เปิดใช้ 20-31 ต.ค. 2026 (1 พ.ย. 00:00 เปลี่ยนเป็นธีม Magic Hour ตามคำขอ)
       id: 'sustainable', name: 'BLM48 10th Single Sustainable',
-      window: y => [dayNum(2026, 10, 20), dayNum(2099, 12, 31)],
+      window: y => [dayNum(2026, 10, 20), dayNum(2026, 10, 31)],
       barColor: '#e98aae',
       tabBarEverywhere: true, // แถบเมนูล่างแบบทิวทัศน์ใช้กับทุกหน้าที่มีแถบเมนูล่าง (fanpost/majorvote/notification/profile)
       sparkles: true, // ไม่ใช้อิโมจิ และไม่มีของร่วงจากด้านบน (ตามคำขอ) -> มีแค่ประกายไข่มุก ไม่มี fall/rise
@@ -220,7 +238,7 @@
       });
     }
 
-    // ธีมซิงเกิล Sustainable: ประกายไข่มุกวิบวับอยู่กับที่ (ไม่มีของร่วงจากด้านบน ตามคำขอ)
+    // ประกายวิบวับอยู่กับที่ (ไม่มีของร่วงจากด้านบน ตามคำขอ) — Sustainable = ไข่มุก, Magic Hour = ฝุ่นเวททอง
     if (festival.sparkles) {
       [[12, 14, 3.2, 0], [78, 9, 4.1, 1.4], [30, 33, 3.6, 2.2], [88, 40, 4.4, 0.6],
        [8, 58, 3.9, 1.9], [62, 22, 4.6, 3.1], [46, 70, 3.4, 0.9], [92, 78, 4.2, 2.6]].forEach(function (s) {
@@ -274,7 +292,41 @@
       + [[12, 3.6, 0], [10.6, 6.4, -25], [13.4, 6.4, 25], [10.6, 9.4, -25], [13.4, 9.4, 25], [10.8, 12.4, -25], [13.2, 12.4, 25]].map(function (b) {
         return '<ellipse cx="' + b[0] + '" cy="' + b[1] + '" rx="1.4" ry="2" transform="rotate(' + b[2] + ' ' + b[0] + ' ' + b[1] + ')"/>';
       }).join('')
-      + '</g></svg>'
+      + '</g></svg>',
+    // ---- ธีม Magic Hour (ดำ-แดง) ----
+    candle: '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">'
+      + '<ellipse cx="12" cy="5.4" rx="3.2" ry="4" fill="#ffcf6b" opacity=".35"/>'
+      + '<path d="M12 2.2c1.4 1.8 1.9 3 1.9 4a1.9 1.9 0 0 1-3.8 0c0-1 .5-2.2 1.9-4z" fill="#ffb627"/>'
+      + '<path d="M12 4.4c.6.9.8 1.5.8 2a.8.8 0 0 1-1.6 0c0-.5.2-1.1.8-2z" fill="#fff3c4"/>'
+      + '<rect x="9.6" y="9" width="4.8" height="11" rx="1" fill="#f4e9e1"/><path d="M9.6 10.2c1.2.8 2.2-.4 3.2.4.6.5 1.2.2 1.6-.2V9H9.6z" fill="#e6d6cb"/>'
+      + '<rect x="7.5" y="19.6" width="9" height="2.2" rx="1.1" fill="#a07d3c"/></svg>',
+    wand: '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">'
+      + '<path d="M4 20.5L15.5 9" stroke="#3b2414" stroke-width="2.2" stroke-linecap="round"/>'
+      + '<path d="M4 20.5l3.2-3.2" stroke="#6b4423" stroke-width="2.6" stroke-linecap="round"/>'
+      + '<path d="M15.5 9l1.2-1.2" stroke="#d4a24c" stroke-width="2" stroke-linecap="round"/>'
+      + '<path d="M19 2.5l.7 2.3 2.3.7-2.3.7-.7 2.3-.7-2.3-2.3-.7 2.3-.7z" fill="#ffd56b"/>'
+      + '<circle cx="21" cy="9.5" r=".9" fill="#ffe7a8"/><circle cx="13.5" cy="3.5" r=".7" fill="#ffe7a8"/></svg>',
+    potion: '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">'
+      + '<rect x="9.6" y="2.5" width="4.8" height="2.6" rx=".8" fill="#8a5a2b"/>'
+      + '<path d="M10.2 5h3.6v3.4c3 1 5 3.6 5 6.7a6.8 6.8 0 0 1-13.6 0c0-3.1 2-5.7 5-6.7z" fill="#e9e4f2" opacity=".9"/>'
+      + '<path d="M5.6 14.4h12.8a6.6 6.6 0 0 1-6.4 7.3 6.6 6.6 0 0 1-6.4-7.3z" fill="#c1121f"/>'
+      + '<circle cx="10" cy="17" r="1" fill="#ff8a8f"/><circle cx="13.6" cy="18.6" r=".7" fill="#ff8a8f"/>'
+      + '<path d="M8.4 10.6c-.8.8-1.2 1.8-1.3 2.8" stroke="#fff" stroke-width=".9" fill="none" stroke-linecap="round" opacity=".8"/></svg>',
+    spellbook: '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">'
+      + '<path d="M4 5.2C6.8 4 9.6 4.2 12 5.8v14c-2.4-1.6-5.2-1.8-8-.6z" fill="#7a0a12"/>'
+      + '<path d="M20 5.2C17.2 4 14.4 4.2 12 5.8v14c2.4-1.6 5.2-1.8 8-.6z" fill="#a4161a"/>'
+      + '<path d="M5.4 6.4c2-.7 4-.5 5.6.5v11.2c-1.6-.9-3.6-1.1-5.6-.5z" fill="#f4e9d8"/>'
+      + '<path d="M18.6 6.4c-2-.7-4-.5-5.6.5v11.2c1.6-.9 3.6-1.1 5.6-.5z" fill="#efe2cc"/>'
+      + '<path d="M15.8 9.2l.5 1.4 1.4.5-1.4.5-.5 1.4-.5-1.4-1.4-.5 1.4-.5z" fill="#d4a24c"/>'
+      + '<path d="M6.8 9.4h3M6.8 11.4h3M6.8 13.4h2.2" stroke="#b9a07a" stroke-width=".7" stroke-linecap="round"/></svg>',
+    owl: '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">'
+      + '<path d="M6 7.5L7.2 3.5 9.6 6M18 7.5l-1.2-4L14.4 6" fill="#6b4a33"/>'
+      + '<ellipse cx="12" cy="13" rx="7" ry="8.4" fill="#8a6446"/>'
+      + '<ellipse cx="12" cy="15.6" rx="4.2" ry="5" fill="#d9c2a3"/>'
+      + '<circle cx="9.1" cy="10.2" r="2.7" fill="#f4e9d8"/><circle cx="14.9" cy="10.2" r="2.7" fill="#f4e9d8"/>'
+      + '<circle cx="9.1" cy="10.3" r="1.4" fill="#d4a24c"/><circle cx="14.9" cy="10.3" r="1.4" fill="#d4a24c"/>'
+      + '<circle cx="9.1" cy="10.3" r=".7" fill="#1a0a0d"/><circle cx="14.9" cy="10.3" r=".7" fill="#1a0a0d"/>'
+      + '<path d="M12 11.6l-1 1.6h2z" fill="#d4a24c"/></svg>'
   };
 
   function swapDecorIcons() {
@@ -297,10 +349,29 @@
     });
   }
 
+  // เทียนลอยกลางอากาศ (festival.floatingCandles): อยู่ช่วงบนของหน้า Home ลอยหน้าป้าย Champ ขยับขึ้นลงช้าๆ
+  // ใช้ position: absolute (เลื่อนหายไปพร้อมหน้า) ไม่ใช่ fixed เลยไม่ลอยทับโพสต์ตอนเลื่อนลง; ไม่รับการแตะ
+  function buildFloatingCandles() {
+    if (!festival.floatingCandles || document.getElementById('fx-candles') || !document.body) return;
+    const wrap = document.createElement('div');
+    wrap.id = 'fx-candles';
+    wrap.setAttribute('aria-hidden', 'true');
+    wrap.innerHTML = [
+      // [ซ้าย %, บน px, ขนาด px, ระยะเวลาลอย s, ดีเลย์ s]
+      [2, 62, 30, 4.6, 0], [17, 50, 22, 5.4, 1.2], [36, 60, 19, 4.9, 2.1], [56, 48, 21, 5.8, 0.6],
+      [75, 56, 25, 5.1, 1.7], [90, 66, 30, 4.4, 2.6], [0, 168, 20, 5.6, 0.9], [94, 160, 20, 5.2, 2.3]
+    ].map(function (c) {
+      return '<div class="fx-fcandle" style="left:' + c[0] + '%;top:' + c[1] + 'px;width:' + c[2]
+        + 'px;animation-duration:' + c[3] + 's;animation-delay:-' + c[4] + 's">' + DECOR_SVGS.candle + '</div>';
+    }).join('');
+    document.body.appendChild(wrap);
+  }
+
   function init() {
     setThemeColor();
     buildDecorations();
     swapDecorIcons();
+    buildFloatingCandles();
   }
 
   if (document.readyState === 'loading') {
