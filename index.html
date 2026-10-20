@@ -325,11 +325,20 @@ body {
 }
 /* 🔝 อยู่บนสุดของหน้า (ยังไม่เลื่อน) = navbar ใส ให้เห็นโค้งเหลืองหลังป้าย Champ
    - JS ใต้ <nav> ใส่ .is-scrolled เมื่อเลื่อนลง
-   - ช่วงธีมเทศกาลไม่ใส: แถบใช้สีเทศกาลตลอด เพราะตัวอักษรเทศกาลสีอ่อน จะจมหายบนโค้งเหลือง */
-html:not(.theme-festival) body .navbar:not(.is-scrolled) {
+   - ช่วงธีมเทศกาลก็ใสเหมือนกัน แต่ตัวอักษร/ไอคอนเทศกาลสีอ่อน จะจมบนโค้งเหลือง เลยบังคับเป็นสีเข้มตอนใส
+     (เลื่อนลงแล้วช่วงเทศกาลกลับเป็นแถบสีเทศกาล + ตัวอักษรสีอ่อนตาม festivals.css)
+   - selector ยาวเพื่อชนะ html.theme-festival .navbar ... ของ festivals.css */
+html body .navbar:not(.is-scrolled) {
   background: transparent !important;
   box-shadow: none !important;
   border-bottom-color: transparent !important;
+}
+html.theme-festival body .navbar:not(.is-scrolled) :is(.logo-text, .brand) {
+  color: #252525 !important;
+  text-shadow: none !important;
+}
+html.theme-festival body .navbar:not(.is-scrolled) .nav-icon {
+  color: #000000 !important;
 }
 
     /* 🎀 แก้ชื่อแบรนด์ให้เป็นสีเทาเข้มเกือบดำตามธีม */
