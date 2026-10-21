@@ -3029,9 +3029,9 @@ async function fetchActiveCampaigns() {
         </div>`;
       return;
     }
-    // เรียงตามวัน-เวลาที่เปิด Campaign: เปิดล่าสุดอยู่ซ้ายสุด (เฉพาะหน้า Home - หน้า campaign มีตัวเลือกเรียงของตัวเอง)
-    const byNewest = [...memberCampaigns].sort((a, b) => (Date.parse(b.startedAt) || 0) - (Date.parse(a.startedAt) || 0));
-    scrollerContainer.innerHTML = byNewest.map(c => renderMemberCampaignCard(c)).join('');
+    // เรียงตามวัน-เวลาที่เปิด Campaign: เปิดก่อนอยู่ซ้ายสุด -> เปิดล่าสุดอยู่ขวาสุด (เฉพาะหน้า Home - หน้า campaign มีตัวเลือกเรียงของตัวเอง)
+    const byOldest = [...memberCampaigns].sort((a, b) => (Date.parse(a.startedAt) || 0) - (Date.parse(b.startedAt) || 0));
+    scrollerContainer.innerHTML = byOldest.map(c => renderMemberCampaignCard(c)).join('');
   } catch (error) {
     console.error("Fetch Campaigns Network Error:", error);
     scrollerContainer.innerHTML = `<div style="color:#999; padding:10px; font-size:13px;">ไม่สามารถเชื่อมต่อระบบแคมเปญได้</div>`;
