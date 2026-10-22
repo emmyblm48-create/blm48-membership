@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8">
+        <script src="assets/js/back-nav.js"></script>
+<title>BLM48 Membership | Theme Application</title>
+    <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s32">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s180">
+    <meta name="apple-mobile-web-app-title" content="BLM48">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/glassmorphism.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/supabase-client.js"></script>
+    <script src="assets/js/common.js"></script>
+    <script src="assets/js/bday-splash.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Quicksand', 'Kanit', sans-serif; margin: 0; min-height: 100vh; color: #444; background: #fff; }
+        .top-navigation-bar { display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 100; }
+        .page-wrapper { max-width: 760px; margin: 0 auto; padding: 14px 12px 100px; }
+        #access-denied { display: none; text-align: center; padding: 80px 20px; color: #999; }
+        #page-content { display: none; }
+        .empty-state, .loading-state { text-align: center; color: #999; font-size: 13px; padding: 40px 20px; }
+
+        /* หัวหน้า: รูป + ชื่อ + วันเกิด */
+        .m-hero { display: flex; align-items: center; gap: 14px; padding: 6px 0 14px; border-bottom: 1px solid #f0f0f0; }
+        .m-hero img { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 3px solid #ffde5b; background: #f4f4f4; flex-shrink: 0; }
+        .m-hero-name { font-weight: 700; font-size: 19px; color: #222; }
+        .m-hero-name .champ { font-size: 11px; font-weight: 700; background: #fff3c4; color: #b07d00; padding: 2px 8px; border-radius: 20px; margin-left: 6px; vertical-align: 3px; }
+        .m-hero-sub { font-size: 13px; color: #767676; margin-top: 4px; }
+
+        .sec-title { font-weight: 700; font-size: 15px; color: #333; margin: 20px 0 4px; display: flex; align-items: center; gap: 8px; }
+        .sec-note { font-size: 12px; color: #767676; line-height: 1.6; margin-bottom: 8px; }
+
+        /* ช่องรูป 1 ช่อง */
+        .slot { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-top: 1px dashed #f0f0f0; }
+        .thumb { width: 76px; height: 76px; border-radius: 10px; background: #f6f6f6; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #ccc; font-size: 22px; border: 1px solid #eee; overflow: hidden; }
+        .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        /* ไอคอนปุ่มมักเป็น PNG พื้นใสสีขาว -> พื้นเข้มให้มองเห็น */
+        .thumb.icon { background-color: #2b2b2b; }
+        .thumb.icon img { object-fit: contain; padding: 12%; }
+        .slot-body { flex: 1; min-width: 0; }
+        .slot-label { font-weight: 600; font-size: 13.5px; color: #333; }
+        .slot-state { font-size: 12px; color: #767676; margin: 2px 0 8px; line-height: 1.5; }
+        .slot-state.warn { color: #b06a00; }
+        .btns { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn { border: none; border-radius: 20px; padding: 7px 14px; font-family: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; }
+        .btn-up { background: #ffc107; color: #222; }
+        .btn-del { background: #fff; color: #d64545; border: 1px solid #f3c6c6; }
+        .btn-del.confirm { background: #d64545; color: #fff; border-color: #d64545; }
+        .btn:disabled { opacity: .5; cursor: default; }
+
+        /* ปุ่ม Champ: 4 ช่องแสดงไอคอนปัจจุบัน + ตัวสร้างไอคอนจากรูปเมมเบอร์ 1 รูป */
+        .nav-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 6px 0 12px; }
+        .nav-tile { text-align: center; }
+        .nav-tile .nav-img { width: 100%; aspect-ratio: 1; border-radius: 12px; background: #2b2b2b; display: flex; align-items: center; justify-content: center; color: #666; font-size: 20px; overflow: hidden; }
+        .nav-tile .nav-img img, .nav-tile canvas { width: 100%; height: 100%; display: block; object-fit: contain; }
+        .nav-tile .nav-label { font-size: 11.5px; font-weight: 600; color: #444; margin-top: 5px; }
+        .nav-tile .btn-del { margin-top: 5px; padding: 4px 10px; font-size: 11px; }
+        .nav-draft { border: 1px solid #ffe08a; background: #fffcf0; border-radius: 12px; padding: 12px; margin-top: 10px; }
+        .nav-draft .draft-title { font-weight: 700; font-size: 13.5px; color: #333; margin-bottom: 8px; }
+        .range-row { display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: #555; margin-top: 8px; }
+        .range-row span { width: 92px; flex-shrink: 0; }
+        .range-row input { flex: 1; accent-color: #ffc107; }
+
+        .preview-wrap { margin-top: 6px; }
+        .preview-label { font-size: 12px; color: #767676; margin-bottom: 6px; }
+        .banner-preview { width: 100%; aspect-ratio: 3 / 1; background: #f6f6f6; }
+        .toast-msg { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: #222; color: #fff; padding: 10px 18px; border-radius: 20px; font-size: 13px; z-index: 300; display: none; max-width: 90vw; }
+    </style>
+    <link rel="stylesheet" href="assets/css/admin-theme.css">
+</head>
+<body>
+
+<div class="top-navigation-bar">
+    <button type="button" class="back-circle-btn" onclick="blm48Back('admin_theme')" aria-label="Back"><i class="fa-solid fa-chevron-left"></i></button>
+    <div class="top-bar-title" id="page-title">Theme Application</div>
+</div>
+
+<div class="page-wrapper">
+    <div id="access-denied"><i class="fa-solid fa-lock"></i><br>หน้านี้สำหรับ Role Admin เท่านั้นค่ะ</div>
+    <div id="page-content">
+        <div id="member-view"><div class="loading-state"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div></div>
+    </div>
+</div>
+<input type="file" id="file-input" accept="image/*" style="display:none">
+<input type="file" id="nav-file-input" accept="image/*" style="display:none">
+<div class="toast-msg" id="toast"></div>
+
+<script>
+  let user = null;
+  let member = null;
+  let champName = '';
+  const memberId = new URLSearchParams(location.search).get('id') || '';
+
+  // ช่องรูปปุ่ม Champ: key ตรงกับ admin_set_member_image / ชื่อปุ่มตามแถบเมนูล่างของแอป
+  // template = กรอบลายของปุ่มนั้น (PNG พื้นใส 1000x1000) วางทับรูปเมมเบอร์ -> ได้ไอคอนปุ่มแถบล่าง
+  const NAV_SLOTS = [
+    ['navHome', 'Home', 'fa-house', 'assets/img/champ-nav/home.png'],
+    ['navKami', 'Fan Post', 'fa-star', 'assets/img/champ-nav/fanpost.png'],
+    ['navCart', 'Major Vote', 'fa-crown', 'assets/img/champ-nav/majorvote.png'],
+    ['navNoti', 'Notification', 'fa-bell', 'assets/img/champ-nav/notification.png']
+  ];
+  const NAV_SIZE = 600; // ขนาดไอคอนที่สร้าง (แสดงบนแถบล่างแค่ ~30px ไม่ต้องใหญ่)
+  const MONTHS = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.style.display = 'block';
+    clearTimeout(t._h); t._h = setTimeout(() => { t.style.display = 'none'; }, 2600);
+  }
+
+  function bdayText(md) {
+    const m = String(md || '').match(/^(\d{2})-(\d{2})$/);
+    return m ? `${parseInt(m[2], 10)} ${MONTHS[parseInt(m[1], 10) - 1]}` : 'ไม่มีวันเกิดในระบบ';
+  }
+
+  function slotHtml(field, label, opts) {
+    opts = opts || {};
+    const url = member[field] || '';
+    const state = url ? (opts.stateFilled || 'มีรูปแล้ว') : (opts.stateEmpty || 'ยังไม่มีรูป');
+    return `
+      <div class="slot" data-field="${field}">
+        <div class="thumb ${opts.icon ? 'icon' : ''}">${url ? `<img src="${escapeHtml(url)}" alt="" referrerpolicy="no-referrer" draggable="false">` : `<i class="fa-solid ${opts.fa || 'fa-image'}"></i>`}</div>
+        <div class="slot-body">
+          <div class="slot-label">${label}</div>
+          <div class="slot-state" data-state>${state}</div>
+          <div class="btns">
+            <button class="btn btn-up" onclick="pickFile('${field}')"><i class="fa-solid fa-upload"></i> ${url ? 'เปลี่ยนรูป' : 'อัปโหลดรูป'}</button>
+            ${url ? `<button class="btn btn-del" onclick="askClear(this,'${field}')"><i class="fa-solid fa-trash"></i> ลบ</button>` : ''}
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function render() {
+    const navCount = NAV_SLOTS.filter(([k]) => member[k]).length;
+    const isChamp = champName && member.name.toLowerCase() === champName.toLowerCase();
+    document.getElementById('page-title').textContent = member.name;
+    document.title = `BLM48 Membership | Theme Application · ${member.name}`;
+    document.getElementById('member-view').innerHTML = `
+      <div class="m-hero">
+        <img src="${escapeHtml(member.profileImg || '')}" alt="" onerror="this.style.visibility='hidden'">
+        <div>
+          <div class="m-hero-name">${escapeHtml(member.name)}${isChamp ? '<span class="champ"><i class="fa-solid fa-crown"></i> Champ ตอนนี้</span>' : ''}</div>
+          <div class="m-hero-sub"><i class="fa-solid fa-cake-candles"></i> วันเกิด ${bdayText(member.birthday)}${member.graduated ? ' · Graduated' : ''}</div>
+        </div>
+      </div>
+
+      <div class="sec-title"><i class="fa-solid fa-cake-candles" style="color:#d6336c"></i> รูปวันเกิด</div>
+      <div class="sec-note">รูปเมมเบอร์ธรรมดา (แนวตั้ง/จัตุรัส) ใช้ทำทั้ง Splash และ Banner · ถ้าเป็นรูป Splash สำเร็จรูปแบบเต็มจอ ระบบจะโชว์รูปนั้นตามเดิม</div>
+      ${slotHtml('splashBd', 'รูปเมมเบอร์วันเกิด', { stateEmpty: 'ยังไม่มีรูป - วันเกิดจะไม่มี Splash/Banner' })}
+      ${slotHtml('bannerBd', 'รูปสำหรับ Banner (ไม่บังคับ)', { stateEmpty: 'ว่าง = ใช้รูปเมมเบอร์วันเกิดด้านบนทำ Banner', fa: 'fa-panorama' })}
+      <div class="preview-wrap" data-preview>
+        <div class="preview-label">ตัวอย่าง Banner วันเกิดบนหน้า Home</div>
+        <div class="banner-preview" data-banner-preview></div>
+      </div>
+
+      <div class="sec-title"><i class="fa-solid fa-crown" style="color:#f59f00"></i> รูปปุ่มเมนูตอนเป็น Champ (${navCount}/4)</div>
+      <div class="sec-note">อัปโหลดรูปเมมเบอร์ 1 รูป (แนะนำ PNG ไดคัทพื้นใส) ระบบจะวางรูปไว้ด้านหลังกรอบปุ่มทั้ง 4 แบบให้เอง · ใช้ตอน ${escapeHtml(member.name)} ได้ Champ of the Month</div>
+      <div class="nav-grid">
+        ${NAV_SLOTS.map(([k, label, fa]) => `
+          <div class="nav-tile" data-field="${k}">
+            <div class="nav-img">${member[k] ? `<img src="${escapeHtml(member[k])}" alt="" referrerpolicy="no-referrer" draggable="false">` : `<i class="fa-solid ${fa}"></i>`}</div>
+            <div class="nav-label">${label}</div>
+            ${member[k] ? `<button class="btn btn-del" onclick="askClear(this,'${k}')"><i class="fa-solid fa-trash"></i> ลบ</button>` : ''}
+          </div>`).join('')}
+      </div>
+      <div class="btns"><button class="btn btn-up" onclick="pickNavPhoto()"><i class="fa-solid fa-wand-magic-sparkles"></i> ${navCount ? 'สร้างปุ่มใหม่จากรูปเมมเบอร์' : 'อัปโหลดรูปเมมเบอร์เพื่อสร้างปุ่ม'}</button></div>
+      <div id="nav-draft"></div>`;
+    renderPreview();
+  }
+
+  // ตัวอย่าง Banner + เตือนถ้ารูปวันเกิดเป็น Splash สำเร็จรูปแบบเดิม
+  async function renderPreview() {
+    const wrap = document.querySelector('[data-preview]');
+    const box = document.querySelector('[data-banner-preview]');
+    if (!wrap || !box) return;
+    const photo = member.bannerBd || member.splashBd;
+    if (!photo) { wrap.style.display = 'none'; return; }
+    wrap.style.display = 'block';
+    box.innerHTML = '';
+    const ok = window.BLM48BirthdaySplash && await window.BLM48BirthdaySplash.renderBanner(box, { name: member.name, photo, birthday: member.birthday });
+    if (!ok) {
+      if (member.bannerBd) box.innerHTML = `<img src="${escapeHtml(member.bannerBd)}" alt="" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;display:block">`;
+      else wrap.style.display = 'none';
+      const st = document.querySelector('.slot[data-field="splashBd"] [data-state]');
+      if (st && member.splashBd) { st.textContent = 'เป็นรูป Splash สำเร็จรูปแบบเดิม (โชว์ตามเดิม ไม่ได้สร้างแอนิเมชัน)'; st.classList.add('warn'); }
+    }
+  }
+
+  // ===== อัปโหลด =====
+  let pendingField = null;
+  function pickFile(field) {
+    pendingField = field;
+    const inp = document.getElementById('file-input');
+    inp.value = '';
+    inp.click();
+  }
+
+  // รูปใหญ่ (ไม่ใช่ PNG/GIF ที่อาจมีพื้นใส) ย่อด้านยาวสุดเหลือ 1600px ก่อนอัปโหลด
+  function shrinkPhoto(file) {
+    return new Promise(resolve => {
+      if (!/jpe?g|webp|heic/i.test(file.type) || file.size < 900 * 1024) return resolve(file);
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight));
+        if (scale >= 1) return resolve(file);
+        const c = document.createElement('canvas');
+        c.width = Math.round(img.naturalWidth * scale); c.height = Math.round(img.naturalHeight * scale);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        c.toBlob(b => resolve(b || file), 'image/jpeg', 0.9);
+      };
+      img.onerror = () => resolve(file);
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
+  document.getElementById('file-input').addEventListener('change', async (e) => {
+    const file = e.target.files && e.target.files[0];
+    const field = pendingField;
+    if (!file || !field) return;
+    if (!file.type.startsWith('image/')) { toast('กรุณาเลือกไฟล์รูปภาพ'); return; }
+    if (file.size > 10 * 1024 * 1024) { toast('ไฟล์ใหญ่เกิน 10MB'); return; }
+    const slot = document.querySelector(`.slot[data-field="${field}"]`);
+    if (slot) { slot.querySelectorAll('button').forEach(b => b.disabled = true); slot.querySelector('[data-state]').textContent = 'กำลังอัปโหลด...'; }
+    try {
+      const isPhoto = field === 'splashBd' || field === 'bannerBd';
+      const blob = isPhoto ? await shrinkPhoto(file) : file;
+      const url = await blm48UploadImageToBucket('app-assets', `member-${member.memberId}-${field}`, blob);
+      await saveField(field, url, 'บันทึกรูปแล้ว');
+    } catch (err) {
+      console.error('upload error', err);
+      toast('อัปโหลดไม่สำเร็จ ลองใหม่อีกครั้ง');
+      render();
+    }
+  });
+
+  async function saveField(field, url, okMsg) {
+    const res = await blm48AdminSetMemberImage(user.username, member.memberId, field, url);
+    if (!res || res.status !== 'success') { toast((res && res.message) || 'บันทึกไม่สำเร็จ'); render(); return; }
+    member[field] = res.url || '';
+    toast(okMsg);
+    render();
+  }
+
+  // ลบ: กดครั้งแรกเปลี่ยนปุ่มเป็น "ยืนยันลบ" (ไม่ใช้ป๊อปอัป) กดซ้ำภายใน 4 วินาทีถึงลบจริง
+  function askClear(btn, field) {
+    if (btn.classList.contains('confirm')) {
+      btn.disabled = true;
+      saveField(field, null, 'ลบรูปแล้ว');
+      return;
+    }
+    btn.classList.add('confirm');
+    btn.innerHTML = '<i class="fa-solid fa-trash"></i> ยืนยันลบ';
+    setTimeout(() => {
+      if (!btn.isConnected || btn.disabled) return;
+      btn.classList.remove('confirm');
+      btn.innerHTML = '<i class="fa-solid fa-trash"></i> ลบ';
+    }, 4000);
+  }
+
+  // ===== สร้างไอคอนปุ่ม Champ: รูปเมมเบอร์ด้านหลัง + กรอบ template ด้านหน้า =====
+  const navTemplates = {};
+  function loadImg(src) {
+    return new Promise((resolve, reject) => { const i = new Image(); i.onload = () => resolve(i); i.onerror = reject; i.src = src; });
+  }
+  let navDraft = null; // { photo: Image, zoom, posX, posY }
+
+  function pickNavPhoto() {
+    const inp = document.getElementById('nav-file-input');
+    inp.value = '';
+    inp.click();
+  }
+
+  // วาดรูปเมมเบอร์แบบเต็มช่อง (cover) ซูม/เลื่อนได้ แล้ววาดกรอบทับ
+  function composeNav(ctx, photo, tpl, d) {
+    const S = NAV_SIZE;
+    ctx.clearRect(0, 0, S, S);
+    const scale = Math.max(S / photo.naturalWidth, S / photo.naturalHeight) * (d.zoom / 100);
+    const w = photo.naturalWidth * scale, h = photo.naturalHeight * scale;
+    ctx.drawImage(photo, (S - w) * (d.posX / 100), (S - h) * (d.posY / 100), w, h);
+    if (tpl) ctx.drawImage(tpl, 0, 0, S, S);
+  }
+
+  function drawDraft() {
+    if (!navDraft) return;
+    NAV_SLOTS.forEach(([k, , , src]) => {
+      const c = document.querySelector(`#nav-draft canvas[data-field="${k}"]`);
+      if (c) composeNav(c.getContext('2d'), navDraft.photo, navTemplates[src], navDraft);
+    });
+  }
+
+  function renderDraft() {
+    const box = document.getElementById('nav-draft');
+    if (!box) return;
+    if (!navDraft) { box.innerHTML = ''; return; }
+    box.innerHTML = `
+      <div class="nav-draft">
+        <div class="draft-title">ตัวอย่างปุ่มใหม่ (ยังไม่บันทึก)</div>
+        <div class="nav-grid">
+          ${NAV_SLOTS.map(([k, label]) => `<div class="nav-tile"><div class="nav-img"><canvas data-field="${k}" width="${NAV_SIZE}" height="${NAV_SIZE}"></canvas></div><div class="nav-label">${label}</div></div>`).join('')}
+        </div>
+        <div class="range-row"><span>ขนาดรูป</span><input type="range" min="100" max="220" value="${navDraft.zoom}" oninput="navDraft.zoom=+this.value;drawDraft()"></div>
+        <div class="range-row"><span>เลื่อนซ้าย-ขวา</span><input type="range" min="0" max="100" value="${navDraft.posX}" oninput="navDraft.posX=+this.value;drawDraft()"></div>
+        <div class="range-row"><span>เลื่อนขึ้น-ลง</span><input type="range" min="0" max="100" value="${navDraft.posY}" oninput="navDraft.posY=+this.value;drawDraft()"></div>
+        <div class="btns" style="margin-top:12px">
+          <button class="btn btn-up" id="nav-save-btn" onclick="saveNavDraft()"><i class="fa-solid fa-check"></i> บันทึกทั้ง 4 ปุ่ม</button>
+          <button class="btn btn-del" onclick="navDraft=null;renderDraft()">ยกเลิก</button>
+        </div>
+      </div>`;
+    drawDraft();
+    box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  document.getElementById('nav-file-input').addEventListener('change', async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toast('กรุณาเลือกไฟล์รูปภาพ'); return; }
+    try {
+      const [photo] = await Promise.all([
+        loadImg(URL.createObjectURL(file)),
+        ...NAV_SLOTS.map(([, , , src]) => navTemplates[src] ? null : loadImg(src).then(i => { navTemplates[src] = i; }))
+      ]);
+      // รูปแนวตั้งชิดบน (เห็นหน้า), รูปอื่นกึ่งกลาง
+      navDraft = { photo, zoom: 100, posX: 50, posY: photo.naturalHeight > photo.naturalWidth ? 0 : 50 };
+      renderDraft();
+    } catch (err) {
+      console.error(err);
+      toast('เปิดรูปไม่ได้ ลองไฟล์อื่น');
+    }
+  });
+
+  async function saveNavDraft() {
+    if (!navDraft) return;
+    const btn = document.getElementById('nav-save-btn');
+    btn.disabled = true;
+    const c = document.createElement('canvas');
+    c.width = c.height = NAV_SIZE;
+    const ctx = c.getContext('2d');
+    try {
+      for (let i = 0; i < NAV_SLOTS.length; i++) {
+        const [k, label, , src] = NAV_SLOTS[i];
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึก ${label} (${i + 1}/4)`;
+        composeNav(ctx, navDraft.photo, navTemplates[src], navDraft);
+        const blob = await new Promise(r => c.toBlob(r, 'image/png'));
+        const url = await blm48UploadImageToBucket('app-assets', `member-${member.memberId}-${k}`, blob);
+        const res = await blm48AdminSetMemberImage(user.username, member.memberId, k, url);
+        if (!res || res.status !== 'success') throw new Error((res && res.message) || 'บันทึกไม่สำเร็จ');
+        member[k] = res.url || url;
+      }
+      navDraft = null;
+      toast('บันทึกปุ่มทั้ง 4 แล้ว');
+    } catch (err) {
+      console.error('nav save error', err);
+      toast(err.message || 'บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง');
+    }
+    render();
+  }
+
+  async function load() {
+    const res = await blm48AdminListMemberImages(user.username);
+    const box = document.getElementById('member-view');
+    if (!res || res.status !== 'success') { box.innerHTML = `<div class="empty-state">${escapeHtml((res && res.message) || 'โหลดไม่สำเร็จ')}</div>`; return; }
+    champName = res.champName || '';
+    member = (res.members || []).find(m => m.memberId === memberId) || null;
+    if (!member) { box.innerHTML = '<div class="empty-state">ไม่พบเมมเบอร์</div>'; return; }
+    render();
+  }
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    user = getUserSession();
+    if (!user) { window.location.href = 'login'; return; }
+    if (!(user.is_admin === true || (user.role && ['admin','ceo'].includes(user.role.toLowerCase())))) {
+      document.getElementById('access-denied').style.display = 'block';
+      return;
+    }
+    document.getElementById('page-content').style.display = 'block';
+    load();
+  });
+</script>
+</body>
+</html>
