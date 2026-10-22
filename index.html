@@ -3015,13 +3015,30 @@ async function fetchActiveCampaigns() {
     // 🏆 ส่วน Campaign หน้า Home แสดงเฉพาะ Champ of the Month Campaign (เมมเบอร์เปิดเองจากหน้า profile)
     // Campaign เป็นแค่แรงกระตุ้นบน Champ of the Month เดิม ไม่ยุ่งกับ Splash / Banner / Theme (ระบบ Champ + วันเกิดเดิมจัดการเอง)
     // แคมเปญโหวต (ตาราง campaign / Major Vote) ไม่แสดงที่นี่แล้ว
-    const memberCampaigns = await campaignFetchWithRetry(() => blm48GetActiveMemberCampaigns());
-    if (!Array.isArray(memberCampaigns)) {
+    const activeCampaigns = await campaignFetchWithRetry(() => blm48GetActiveMemberCampaigns());
+    if (!Array.isArray(activeCampaigns)) {
       // รีเฟรชไม่สำเร็จชั่วคราว (เซิร์ฟเวอร์ช้า) -> ถ้ามีการ์ดแสดงอยู่แล้ว คงไว้ ไม่ล้างเป็น error
       if (scrollerContainer.querySelector('.mc-card')) return;
       scrollerContainer.innerHTML = `<div style="color:#999; padding:10px; font-size:13px;">โหลด Campaign ไม่สำเร็จ ลองใหม่อีกครั้ง</div>`;
       return;
     }
+    // Campaign ที่จบไปแล้ว (เดือนก่อนๆ) ยังโชว์ต่อพร้อมตราหัวใจ TIER X SUCCESS / CAMPAIGN SUCCESS! แต่ไม่เกิน 10 อัน
+    // ยอดของ Campaign ที่จบแล้วถูกล็อกไว้ ไม่เปลี่ยน -> โหลดครั้งเดียวพอ ไม่ต้องโหลดซ้ำทุกครั้งที่ Ranking ขยับ
+    if (!Array.isArray(window.__endedCampaignsCache)) {
+      const ended = await campaignFetchWithRetry(() => blm48GetEndedMemberCampaigns());
+      if (Array.isArray(ended)) window.__endedCampaignsCache = ended;
+    }
+    const byId = new Map();
+    [...activeCampaigns, ...(window.__endedCampaignsCache || [])].forEach(c => byId.set(c.id, c));
+    // เรียง: เดือนล่าสุดก่อน -> ในเดือนเดียวกัน คนเปิดก่อนอยู่ซ้ายสุด ไปจนถึงคนเปิดล่าสุด
+    // (เฉพาะหน้า Home - หน้า campaign มีตัวเลือกเรียงของตัวเอง)
+    const homeOrder = (a, b) => String(b.yearMonth || '').localeCompare(String(a.yearMonth || ''))
+      || (Date.parse(a.startedAt) || 0) - (Date.parse(b.startedAt) || 0);
+    const all = [...byId.values()].sort(homeOrder);
+    const memberCampaigns = [
+      ...all.filter(c => !isCampaignEnded(c)),
+      ...all.filter(c => isCampaignEnded(c)).slice(0, 10)
+    ].sort(homeOrder);
     if (memberCampaigns.length === 0) {
       scrollerContainer.innerHTML = `
         <div style="text-align: center; width: 100%; color: #999; padding: 20px; font-size: 14px;">
@@ -3029,9 +3046,7 @@ async function fetchActiveCampaigns() {
         </div>`;
       return;
     }
-    // เรียงตามวัน-เวลาที่เปิด Campaign: เปิดก่อนอยู่ซ้ายสุด -> เปิดล่าสุดอยู่ขวาสุด (เฉพาะหน้า Home - หน้า campaign มีตัวเลือกเรียงของตัวเอง)
-    const byOldest = [...memberCampaigns].sort((a, b) => (Date.parse(a.startedAt) || 0) - (Date.parse(b.startedAt) || 0));
-    scrollerContainer.innerHTML = byOldest.map(c => renderMemberCampaignCard(c)).join('');
+    scrollerContainer.innerHTML = memberCampaigns.map(c => renderMemberCampaignCard(c)).join('');
   } catch (error) {
     console.error("Fetch Campaigns Network Error:", error);
     scrollerContainer.innerHTML = `<div style="color:#999; padding:10px; font-size:13px;">ไม่สามารถเชื่อมต่อระบบแคมเปญได้</div>`;
