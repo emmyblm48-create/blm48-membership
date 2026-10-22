@@ -53,7 +53,7 @@
     '.bs-root .bs-t1{top:27px;font-size:24px;font-weight:700;letter-spacing:.02em}' +
     // ชื่อเมมเบอร์: ฟอนต์ Comfortaa (ผู้ใช้เลือกเอง 2026-10-23) สีตามโทนรองของรูป - ข้อยกเว้นของกฎ Quicksand/Kanit เฉพาะชื่อบน Splash
     ".bs-root .bs-t2{top:57px;font-family:'Comfortaa','Kanit',sans-serif;font-weight:700;color:var(--bs-name);letter-spacing:.06em}" +
-    '.bs-root .bs-cake{position:absolute;left:27px;top:106px;width:24px;height:24px;border-radius:50%;border:1.5px solid #fff;background:var(--bs-cake);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;box-sizing:border-box}' +
+    '.bs-root .bs-cake{position:absolute;left:27px;top:106px;width:24px;height:24px;border-radius:50%;border:1.5px solid #fff;background:url(assets/img/bday-splash/cake.webp) 50% 50% / 25.8px 56.1px no-repeat,var(--bs-cake);box-sizing:border-box}' +
     ".bs-root .bs-pill{position:absolute;left:107.9px;top:403.8px;width:108px;height:14px;border-radius:999px;background:var(--bs-pill);color:#fff;font-family:'Quicksand','Kanit',sans-serif;font-size:9.5px;font-weight:600;line-height:14px;text-align:center;overflow:hidden;letter-spacing:.02em}" +
     '@keyframes bVeil{0%{opacity:1}6%{opacity:0}93%{opacity:0}100%{opacity:1}}' +
     '@keyframes bCard{0%,4%{opacity:0;transform:translateY(64px) scale(.9) rotate(-3deg);animation-timing-function:cubic-bezier(.34,1.4,.64,1)}20%{opacity:1;transform:translateY(0) scale(1) rotate(0deg);animation-timing-function:ease-in-out}48%{opacity:1;transform:translateY(-5px) scale(1) rotate(0deg);animation-timing-function:ease-in-out}70%{opacity:1;transform:translateY(0) scale(1) rotate(0deg);animation-timing-function:ease-in-out}88%{opacity:1;transform:translateY(-5px) scale(1) rotate(0deg);animation-timing-function:ease-in-out}100%{opacity:1;transform:translateY(0) scale(1) rotate(0deg)}}' +
@@ -272,7 +272,8 @@
               '<div class="ba b-sweepA" style="position:absolute;top:-10%;left:0;width:90px;height:120%;background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.45) 50%,rgba(255,255,255,0) 100%)"></div>' +
             '</div>' +
           '</div>' +
-          '<div class="bs-cake" aria-hidden="true"><i class="fas fa-cake-candles"></i></div>' +
+          // ไอคอนเค้กเป็นรูป (ไอคอน Font Awesome รุ่นที่แอปใช้ไม่มี fa-cake-candles) - cake.webp พื้นใส 921x2000 เค้กอยู่กลางภาพ สูง 428px -> ย่อให้สูง ~12px
+          '<div class="bs-cake" aria-hidden="true"></div>' +
           '<div class="ba b-t1 bs-t1">HAPPY BIRTHDAY</div>' +
           '<div class="ba b-t2 bs-t2" style="font-size:' + nameFontSize(o.name) + 'px">' + esc(o.name) + '</div>' +
           (dateText ? '<div class="bs-pill">' + esc(dateText) +
