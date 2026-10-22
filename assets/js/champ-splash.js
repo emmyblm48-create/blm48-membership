@@ -3,7 +3,7 @@
    พื้นผ้าลายสก็อตชมพู + กรอบรูปตั๋วขอบทอง + มงกุฎ + สติกเกอร์ "Champ Of The Month" + กลีบซากุระร่วง
    รูปเมมเบอร์ = รูปโปรไฟล์ล่าสุดจาก BLM48 Official Website (blm48.vercel.app)
    ซึ่งดึงจาก Apps Script ตัวเดียวกับหน้า Profile ของเว็บ -> แคชไว้ใน localStorage แล้วรีเฟรชเงียบๆ ทุกครั้งที่เปิดแอป
-   ชื่อบนสติกเกอร์ = "<ชื่อ Champ> BLM48" (ทับชื่อที่ฝังมาในรูปสติกเกอร์ต้นฉบับ)
+   ชื่อบนสติกเกอร์ = "<ชื่อ Champ> BLM48" เขียนเป็นตัวหนังสือบนเมฆของโลโก้ (โลโก้ไม่มีชื่อเมมเบอร์ในรูป)
    ใช้ใน index.html ผ่าน applyThemeAndToggleSplash -> BLM48ChampSplash.render(container, champName)
    ========================================================================== */
 (function () {
@@ -49,7 +49,6 @@
     '.cs-root .c-fall.f4{animation-duration:10s;animation-delay:-1.5s}' +
     '.cs-root .c-fall.f5{animation-duration:8.5s;animation-delay:-7s}' +
     '.cs-root .c-fall.f6{animation-duration:9s;animation-delay:-4.2s}' +
-    '.cs-root .cs-name-patch{position:absolute;border-radius:50%;background:#DDEEFC;filter:blur(3px)}' +
     ".cs-root .cs-name{position:absolute;left:0;right:0;text-align:center;font-family:'Quicksand','Kanit',sans-serif;font-weight:700;color:#2F74DB;white-space:nowrap;letter-spacing:.02em}" +
     '@keyframes cVeil{0%{opacity:1}8%{opacity:0}92%{opacity:0}100%{opacity:1}}' +
     '@keyframes cBg{0%{transform:scale(1.08)}22%,100%{transform:scale(1)}}' +
@@ -133,6 +132,7 @@
     return new Promise(function (resolve) {
       if (!src) return resolve(false);
       var img = new Image();
+      img.referrerPolicy = 'no-referrer'; // รูป Google Drive (lh3) โดนตีกลับ 429 บางครั้งถ้าส่ง referrer ไป
       img.onload = function () { resolve(true); };
       img.onerror = function () { resolve(false); };
       img.src = src;
@@ -160,7 +160,7 @@
         // รูปเมมเบอร์ในกรอบตั๋วขอบทอง + แสงวิ่ง
         '<div class="ca c-photo" style="position:absolute;left:29.8px;top:171.4px;width:323.8px;height:451.7px">' +
           '<div class="c-shine" style="position:absolute;inset:0;overflow:hidden;background:#fff">' +
-            '<img src="' + esc(photo) + '" alt="' + esc(name) + ' BLM48 — Champ of the Month" draggable="false" style="width:100%;height:100%;object-fit:cover;object-position:50% 30%;display:block">' +
+            '<img src="' + esc(photo) + '" alt="' + esc(name) + ' BLM48 — Champ of the Month" draggable="false" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;object-position:50% 30%;display:block">' +
             '<div class="ca c-band" style="position:absolute;top:-10%;left:0;width:90px;height:120%;background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.55) 50%,rgba(255,255,255,0) 100%)"></div>' +
           '</div>' +
           '<svg viewBox="0 0 ' + FW + ' ' + FH + '" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%" aria-hidden="true">' +
@@ -172,10 +172,10 @@
         '<img class="ca c-line ck1" src="' + IMG + 'line-bottom.png" alt="" style="position:absolute;left:88.3px;top:776.8px;width:213.3px;height:18px;display:block">' +
         '<img class="ca c-crown" src="' + IMG + 'crown.png" alt="" style="position:absolute;left:140.9px;top:39px;width:108.1px;height:65px;display:block">' +
         '<svg class="ca c-glint" viewBox="0 0 24 24" style="position:absolute;left:186px;top:24px;width:18px;height:18px" aria-hidden="true"><path fill="#FFF6D6" d="' + STAR + '"/></svg>' +
-        // สติกเกอร์ชื่อ: ปะเมฆทับชื่อเดิมในรูป แล้วเขียนชื่อ Champ ปัจจุบันลงไปแทน
+        // สติกเกอร์โลโก้ (ไม่มีชื่อเมมเบอร์ในรูป) + เขียนชื่อ Champ ปัจจุบันบนเมฆด้านล่าง
+        // title.webp เป็นภาพเต็มอาร์ตบอร์ด 921x2000 (= 390x847) พื้นใส -> เลื่อนให้โลโก้ตรงกรอบสติกเกอร์พอดี
         '<div class="ca c-title" style="position:absolute;left:19.5px;top:538.9px;width:344.2px;height:201.2px">' +
-          '<img src="' + IMG + 'title.webp" alt="" style="width:100%;height:100%;display:block">' +
-          '<div class="cs-name-patch" style="left:118px;top:170px;width:112px;height:28px"></div>' +
+          '<img src="' + IMG + 'title.webp" alt="" style="position:absolute;left:-19.5px;top:-538.9px;width:' + W + 'px;height:' + H + 'px;max-width:none;display:block;pointer-events:none">' +
           '<div class="cs-name" style="top:' + (nameSize > 15 ? 171 : 174) + 'px;font-size:' + nameSize + 'px">' + esc(label) + '</div>' +
         '</div>' +
         '<div class="ca c-fx" style="position:absolute;inset:0;pointer-events:none" aria-hidden="true">' + twinkles + '</div>' +

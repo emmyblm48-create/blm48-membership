@@ -2062,6 +2062,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     <div id="champ-splash-stage" style="display: none; position: absolute; inset: 0;"></div>
 </div>
 <script src="assets/js/champ-splash.js"></script>
+<script src="assets/js/bday-splash.js"></script>
 
 <!-- 3. Navbar (ปรับปรุงปุ่ม) -->
 <nav class="navbar">
@@ -2534,7 +2535,7 @@ function applyThemeAndToggleSplash(themeData, toggleKey) {
   // 🔁 วนโชว์ Splash ทีละอันต่อการเปิดแอป: Champ -> วันเกิดคนที่ 1 -> วันเกิดคนที่ 2 -> ...
   const splashCandidates = [];
   if (champ.splash) splashCandidates.push({ type: 'champ', src: champ.splash });
-  birthdays.forEach(b => { if (b.splash) splashCandidates.push({ type: 'birthday', src: b.splash }); });
+  birthdays.forEach(b => { if (b.splash) splashCandidates.push({ type: 'birthday', src: b.splash, name: b.name, birthday: b.birthday }); });
 
   let chosen = null;
   if (splashCandidates.length > 0) {
@@ -2551,9 +2552,19 @@ function applyThemeAndToggleSplash(themeData, toggleKey) {
     const champStage = document.getElementById('champ-splash-stage');
     // 🏆 Champ of the Month ใช้ดีไซน์แอนิเมชันใหม่ (assets/js/champ-splash.js) + รูปโปรไฟล์ล่าสุดจากเว็บ Official
     // ถ้าดึงรูปไม่ได้ ค่อยถอยไปใช้รูป Splash เดิมของ Champ / วันเกิดยังเป็นรูปเต็มจอแบบเดิม
-    const useChampDesign = chosen.type === 'champ' && champStage && window.BLM48ChampSplash;
-    window.__champSplashActive = !!useChampDesign;
-    if (useChampDesign) window.BLM48ChampSplash.refreshOfficialPhotos(); // อุ่นแคชรูประหว่างหน้า Loading
+    // 🎂 วันเกิดใช้ดีไซน์การ์ดแอนิเมชัน (assets/js/bday-splash.js) จากรูปเมมเบอร์ใน splash_bd_url
+    // ถ้าช่องนั้นยังเป็น Splash สำเร็จรูปแบบเดิม (รูปสูงเต็มจอ) render จะคืน false แล้วโชว์รูปเดิมแทน
+    let renderAnimated = null, animatedBg = '';
+    if (chosen.type === 'champ' && window.BLM48ChampSplash) {
+      window.BLM48ChampSplash.refreshOfficialPhotos(); // อุ่นแคชรูประหว่างหน้า Loading
+      renderAnimated = () => window.BLM48ChampSplash.render(champStage, champ.name);
+      animatedBg = '#FFEEF3';
+    } else if (chosen.type === 'birthday' && window.BLM48BirthdaySplash) {
+      renderAnimated = () => window.BLM48BirthdaySplash.render(champStage, { name: chosen.name, photo: chosen.src, birthday: chosen.birthday });
+      animatedBg = '#DCE3DD';
+    }
+    const useChampDesign = !!(renderAnimated && champStage);
+    window.__champSplashActive = useChampDesign;
 
     const closeSplashAfter = (ms) => setTimeout(() => {
       splashScreen.style.opacity = "0";
@@ -2565,10 +2576,10 @@ function applyThemeAndToggleSplash(themeData, toggleKey) {
        setTimeout(() => splashScreen.style.opacity = "1", 10);
        if (useChampDesign) {
          mainSplash.style.visibility = 'hidden';
-         splashScreen.style.background = '#FFEEF3';
+         splashScreen.style.background = animatedBg;
          // วาดตอนหน้า Loading เฟดออก แอนิเมชันจะได้เริ่มจากต้นต่อหน้าผู้ใช้ (เล่นครบถึงชื่อเด้งก่อนปิด)
          whenAppLoadingDone(async () => {
-           const ok = await window.BLM48ChampSplash.render(champStage, champ.name);
+           const ok = await renderAnimated();
            if (ok) {
              champStage.style.display = 'block';
              closeSplashAfter(6000);
