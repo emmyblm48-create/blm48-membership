@@ -142,18 +142,21 @@
   function hueDist(a, b) { var d = Math.abs(a - b) % 360; return d > 180 ? 360 - d : d; }
 
   function buildPalette(data) {
-    var BINS = 24, score = [], sx = [], sy = [], ss = [];
-    for (var i = 0; i < BINS; i++) { score[i] = 0; sx[i] = 0; sy[i] = 0; ss[i] = 0; }
+    var BINS = 24, score = [], sx = [], sy = [], ss = [], sl = [], sumL = 0, nPx = 0;
+    for (var i = 0; i < BINS; i++) { score[i] = 0; sx[i] = 0; sy[i] = 0; ss[i] = 0; sl[i] = 0; }
     for (var k = 0; k < data.length; k += 4) {
       if (data[k + 3] < 200) continue;
       var p = rgbToHsl(data[k], data[k + 1], data[k + 2]);
+      sumL += p[2]; nPx++; // ความสว่างเฉลี่ยทั้งรูป (รวมเทา/ขาว/ดำ) ใช้ตัดสินว่ารูปโทนเข้มหรือโทนอ่อน
       if (p[1] < 0.1 || p[2] < 0.1 || p[2] > 0.95) continue; // ข้ามเทา/ขาว/ดำ
-      var w = p[1] * (1 - Math.abs(p[2] - 0.55) * 1.4);
+      // ยกกำลังสองความสด: สีสดจริง (ผ้าม่าน/ฉาก) ชนะสีผิวที่สีคล้ายกันแต่จางกว่า
+      var w = p[1] * p[1] * (1 - Math.abs(p[2] - 0.5));
       if (w <= 0) continue;
       var b = Math.floor(p[0] / (360 / BINS)) % BINS;
       score[b] += w;
       sx[b] += Math.cos(p[0] * Math.PI / 180) * w; sy[b] += Math.sin(p[0] * Math.PI / 180) * w;
       ss[b] += p[1] * w;
+      sl[b] += p[2] * w;
     }
     // รวมช่องข้างเคียงให้กลุ่มสีที่ใกล้กันชนะรวมกัน
     function groupScore(i) { return score[(i + BINS - 1) % BINS] + score[i] + score[(i + 1) % BINS]; }
@@ -166,7 +169,11 @@
     for (i = 0; i < BINS; i++) if (groupScore(i) > bestScore) { bestScore = groupScore(i); best = i; }
     if (best < 0 || bestScore < 1) return null; // รูปขาวดำ/สีจางมาก -> ใช้สีตั้งต้น
     var hp = groupHue(best);
-    var sp = ss[best] / (score[best] || 1);
+    // ความสด/ความสว่างของโทนหลักคิดจากช่องที่แรงที่สุดในกลุ่ม (ช่องข้างเคียงมักมีสีผิวที่จางกว่าปนอยู่)
+    var peak = best;
+    [-1, 1].forEach(function (o) { var j = (best + o + BINS) % BINS; if (score[j] > score[peak]) peak = j; });
+    var sp = ss[peak] / (score[peak] || 1);
+    var lp = sl[peak] / (score[peak] || 1);
     var second = -1, secondScore = 0;
     for (i = 0; i < BINS; i++) {
       var hi = groupHue(i);
@@ -174,21 +181,34 @@
     }
     // ไม่มีสีรองชัดๆ -> ใช้ชมพูอ่อนแบบดีไซน์ (ถ้าโทนหลักเป็นชมพูอยู่แล้วใช้ฟ้าแทน)
     var hs = (second >= 0 && secondScore >= bestScore * 0.12) ? groupHue(second) : (hueDist(hp, 340) < 40 ? 200 : 340);
-    var cardS = clamp(sp * 0.4, 0.08, 0.3);
+    // รูปโทนเข้ม (สว่างเฉลี่ยต่ำ) -> ใช้สีเข้ม/สดตามรูป, รูปโทนอ่อน -> พาสเทลแบบดีไซน์ต้นฉบับ
+    // depth 0 = โทนอ่อนเต็มที่ ... 1 = โทนเข้มเต็มที่ (ไล่ระดับกลางๆ ได้) ตัวหนังสือสีขาวอ่านออกทั้งสองแบบ
+    // ตัดสินจากสีหลักของรูป (ไม่ใช่ความสว่างเฉลี่ยทั้งรูป - รูปที่มีผิว/เสื้อขาวเยอะจะดูสว่างเสมอ):
+    // สีหลักยิ่งเข้ม (lp ต่ำ) และยิ่งสด (sp สูง) -> depth ยิ่งสูง, รูปทั้งรูปมืดก็ดันให้เข้มขึ้นอีก
+    var avgL = nPx ? sumL / nPx : 0.6;
+    var depth = Math.max(
+      clamp((0.62 - lp) / 0.25, 0, 1) * clamp((sp - 0.2) / 0.3, 0, 1),
+      clamp((0.62 - avgL) / 0.3, 0, 1)
+    );
+    var mix = function (a, b) { return a + (b - a) * depth; };
+    var bgHue2 = depth > 0.5 ? hp : hs; // โทนเข้มให้พื้นล่างเป็นสีเดียวกับโทนหลัก (ไม่เอาสีรองมาไล่จนดูหม่น)
+    // ใช้ความสดตามรูปได้เต็มที่ (รูปสีจางก็ยังพาสเทลเหมือนเดิมเพราะ sp ต่ำ)
+    var cardS = mix(clamp(sp * 0.75, 0.08, 0.6), clamp(sp * 1.1, 0.4, 0.85));
+    var cardL = mix(0.48, clamp(lp * 0.85, 0.2, 0.4));
     return {
-      bg1: hsl(hp, clamp(sp * 0.6, 0.2, 0.45), 0.82),
-      bg2: hsl(hp, 0.14, 0.88),
-      bg3: hsl(hs, 0.3, 0.9),
-      bg4: hsl(hs, 0.55, 0.91),
-      card: hsl(hp, cardS, 0.48), // มืดพอให้ตัวหนังสือขาวอ่านออก
-      pill: hsl(hs, 0.5, 0.78),
+      bg1: hsl(hp, mix(clamp(sp * 0.9, 0.2, 0.7), clamp(sp * 1.2, 0.45, 0.85)), mix(0.82, clamp(lp * 0.95, 0.2, 0.42))),
+      bg2: hsl(hp, mix(0.14, 0.6), mix(0.88, 0.3)),
+      bg3: hsl(bgHue2 + (depth > 0.5 ? 8 : 0), mix(0.3, 0.65), mix(0.9, 0.24)),
+      bg4: hsl(bgHue2 - (depth > 0.5 ? 8 : 0), mix(0.55, 0.7), mix(0.91, 0.17)),
+      card: hsl(hp, cardS, cardL), // มืดพอให้ตัวหนังสือขาวอ่านออก
+      pill: hsl(hs, 0.5, mix(0.78, 0.72)),
       name: hsl(hs, 0.7, 0.9),
-      cake: hsl(hp, cardS, 0.3, 0.45),
-      glow: hsl(hs, 0.8, 0.88, 0.85),
-      c1: hsl(hp, 0.42, 0.72),
+      cake: hsl(hp, cardS, mix(0.3, 0.18), 0.45),
+      glow: hsl(hs, 0.8, mix(0.88, 0.6), mix(0.85, 0.5)),
+      c1: hsl(hp, mix(0.42, 0.8), mix(0.72, 0.62)),
       c2: hsl(hs, 0.7, 0.82),
       c3: hsl(45, 0.8, 0.8),
-      c4: hsl(hp, 0.14, 0.6)
+      c4: hsl(hp, mix(0.14, 0.5), mix(0.6, 0.45))
     };
   }
 
