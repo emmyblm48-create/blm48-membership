@@ -50,11 +50,11 @@
     '.bs-root .bs-photo{position:absolute;left:6px;right:6.9px;top:85.7px;bottom:5px;border-radius:2px 2px 17px 17px;overflow:hidden;background:#C9CCBE}' +
     '.bs-root .bs-photo img{width:100%;height:100%;object-fit:cover;object-position:50% 25%;display:block}' +
     ".bs-root .bs-t1,.bs-root .bs-t2{position:absolute;left:0;width:325px;text-align:center;color:#fff;white-space:nowrap;font-family:'Quicksand','Kanit',sans-serif;line-height:1}" +
-    '.bs-root .bs-t1{top:27px;font-size:24px;font-weight:700;letter-spacing:.02em}' +
+    ".bs-root .bs-t1{top:27px;font-family:'Avenir Next','Avenir','Nunito Sans','Kanit',sans-serif;font-size:24px;font-weight:700;letter-spacing:.02em}" +
     // ชื่อเมมเบอร์: ฟอนต์ Comfortaa (ผู้ใช้เลือกเอง 2026-10-23) สีตามโทนรองของรูป - ข้อยกเว้นของกฎ Quicksand/Kanit เฉพาะชื่อบน Splash
     ".bs-root .bs-t2{top:57px;font-family:'Comfortaa','Kanit',sans-serif;font-weight:700;color:var(--bs-name);letter-spacing:.06em}" +
     '.bs-root .bs-cake{position:absolute;left:27px;top:106px;width:24px;height:24px;border-radius:50%;border:1.5px solid #fff;background:url(assets/img/bday-splash/cake.webp) 50% 50% / 25.8px 56.1px no-repeat,var(--bs-cake);box-sizing:border-box}' +
-    ".bs-root .bs-pill{position:absolute;left:107.9px;top:403.8px;width:108px;height:14px;border-radius:999px;background:var(--bs-pill);color:#fff;font-family:'Quicksand','Kanit',sans-serif;font-size:9.5px;font-weight:600;line-height:14px;text-align:center;overflow:hidden;letter-spacing:.02em}" +
+    ".bs-root .bs-pill{position:absolute;left:107.9px;top:403.8px;width:108px;height:14px;border-radius:999px;background:var(--bs-pill);color:#fff;font-family:'Avenir Next','Avenir','Nunito Sans','Kanit',sans-serif;font-size:9.5px;font-weight:600;line-height:14px;text-align:center;overflow:hidden;letter-spacing:.02em}" +
     '@keyframes bVeil{0%{opacity:1}6%{opacity:0}93%{opacity:0}100%{opacity:1}}' +
     '@keyframes bCard{0%,4%{opacity:0;transform:translateY(64px) scale(.9) rotate(-3deg);animation-timing-function:cubic-bezier(.34,1.4,.64,1)}20%{opacity:1;transform:translateY(0) scale(1) rotate(0deg);animation-timing-function:ease-in-out}48%{opacity:1;transform:translateY(-5px) scale(1) rotate(0deg);animation-timing-function:ease-in-out}70%{opacity:1;transform:translateY(0) scale(1) rotate(0deg);animation-timing-function:ease-in-out}88%{opacity:1;transform:translateY(-5px) scale(1) rotate(0deg);animation-timing-function:ease-in-out}100%{opacity:1;transform:translateY(0) scale(1) rotate(0deg)}}' +
     '@keyframes bT1{0%,18%{opacity:0;clip-path:inset(0 100% 0 0);transform:translateY(8px);animation-timing-function:cubic-bezier(.16,1,.3,1)}19%{opacity:1}29%,100%{opacity:1;clip-path:inset(0 0 0 0);transform:translateY(0)}}' +
@@ -77,7 +77,8 @@
       var ln = document.createElement('link');
       ln.id = 'bday-splash-font';
       ln.rel = 'stylesheet';
-      ln.href = 'https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&display=swap';
+      // Avenir Next มีเฉพาะเครื่อง Apple (ไม่มีเว็บฟอนต์) -> เครื่องอื่นใช้ Nunito Sans ซึ่งหน้าตาใกล้เคียงแทน
+      ln.href = 'https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Nunito+Sans:wght@500;700&display=swap';
       (document.head || document.documentElement).appendChild(ln);
     }
     var st = document.createElement('style');
@@ -297,7 +298,7 @@
   function fontReady() {
     if (!document.fonts || !document.fonts.load) return Promise.resolve();
     return Promise.race([
-      document.fonts.load("700 30px Comfortaa").catch(function () {}),
+      Promise.all([document.fonts.load("700 30px Comfortaa"), document.fonts.load("700 24px \"Nunito Sans\"")]).catch(function () {}),
       new Promise(function (r) { setTimeout(r, 1500); })
     ]);
   }
@@ -327,6 +328,87 @@
     });
   }
 
-  window.BLM48BirthdaySplash = { render: render, formatBirthday: formatBirthday, extractPalette: extractPalette };
+  // ===== 🎂 Banner วันเกิดบนหน้า Home (สัดส่วน 3:1 เท่าแบนเนอร์อื่น) =====
+  // ดีไซน์ 1668x556: แถบซ้าย + โลโก้ BLM48 มุมล่าง | รูปเมมเบอร์เต็มสูง | วันที่ / HAPPY BIRTHDAY / ชื่อ + ไอคอนเค้กมุมขวาบน
+  // ขนาดทุกอย่างเป็นหน่วย cqw (1cqw = 1% ความกว้างแบนเนอร์) จะได้ย่อขยายตามจอโดยไม่ต้องคำนวณเอง
+  // สีพื้นใช้ชุดสีเดียวกับ Splash ที่ดึงจากรูปเมมเบอร์
+  var BANNER_CSS = '' +
+    '.bb-root{position:relative;width:100%;aspect-ratio:3/1;container-type:inline-size;overflow:hidden;' +
+      'background:linear-gradient(180deg,var(--bs-bg1) 0%,var(--bs-bg3) 60%,var(--bs-bg4) 100%);' +
+      '--bs-bg1:#E3D3D6;--bs-bg3:#EFD3DD;--bs-bg4:#F5CDDC;--bs-cake:rgba(255,255,255,.08)}' +
+    // ลายพื้นหลัง: จุดขาวจางๆ 2 ชั้นเหลื่อมกัน (ลายพอลกาดอท) + ประกายดาวกระพริบในฝั่งตัวหนังสือ
+    '.bb-root .bb-pattern{position:absolute;inset:0;pointer-events:none;opacity:.55;' +
+      'background-image:radial-gradient(circle,rgba(255,255,255,.75) 0 .32cqw,transparent .36cqw),radial-gradient(circle,rgba(255,255,255,.45) 0 .2cqw,transparent .24cqw);' +
+      'background-size:3.6cqw 3.6cqw,3.6cqw 3.6cqw;background-position:0 0,1.8cqw 1.8cqw}' +
+    '.bb-root .bb-tw{position:absolute;pointer-events:none;animation:bTw 2.2s ease-in-out infinite;transform-origin:50% 50%}' +
+    '.bb-root .bb-tw.t2{animation-duration:2.8s;animation-delay:-.9s}.bb-root .bb-tw.t3{animation-duration:1.9s;animation-delay:-1.4s}' +
+    '@keyframes bTw{0%,100%{transform:scale(.25) rotate(0deg);opacity:.2}50%{transform:scale(1) rotate(45deg);opacity:1}}' +
+    // รูปเมมเบอร์ + เรืองแสงขาวด้านซ้าย/ขวาของรูป
+    '.bb-root .bb-glow{position:absolute;top:0;bottom:0;width:4.2cqw;pointer-events:none}' +
+    '.bb-root .bb-glow.l{left:1.5cqw;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.85))}' +
+    '.bb-root .bb-glow.r{left:41.55cqw;background:linear-gradient(90deg,rgba(255,255,255,.85),rgba(255,255,255,0))}' +
+    '.bb-root .bb-photo{position:absolute;left:5.7cqw;top:0;width:35.85cqw;height:100%;object-fit:cover;object-position:50% 20%;display:block;box-shadow:0 0 2.4cqw .4cqw rgba(255,255,255,.9)}' +
+    // โลโก้วง BLM48 (ไฟล์จากผู้ใช้ 1333x1867 สัดส่วนเท่ากล่องมุมซ้ายล่างของดีไซน์)
+    '.bb-root .bb-logo{position:absolute;left:0;bottom:0;width:5.7cqw;height:7.85cqw;background:#ffde5b url(assets/img/bday-splash/blm48-logo.png) 50% 50% / cover no-repeat}' +
+    ".bb-root .bb-text{position:absolute;left:41.55cqw;right:0;top:0;bottom:0;text-align:center;color:#fff;font-family:'Quicksand','Kanit',sans-serif;text-shadow:0 .1cqw .5cqw rgba(0,0,0,.08)}" +
+    ".bb-root .bb-date{position:absolute;left:0;right:0;top:7.4cqw;font-family:'Avenir Next','Avenir','Nunito Sans','Kanit',sans-serif;font-size:2.3cqw;font-weight:500;letter-spacing:.04em;line-height:1}" +
+    '.bb-root .bb-date i{display:inline-block;width:1.3cqw;height:1.3cqw;border-radius:50%;background:#fff;margin-right:2.2cqw;vertical-align:.15cqw}' +
+    ".bb-root .bb-hbd{position:absolute;left:0;right:0;top:12cqw;font-family:'Avenir Next','Avenir','Nunito Sans','Kanit',sans-serif;font-size:4.3cqw;font-weight:700;letter-spacing:.02em;line-height:1}" +
+    ".bb-root .bb-name{position:absolute;left:0;right:0;top:17.6cqw;font-family:'Comfortaa','Kanit',sans-serif;font-weight:700;line-height:1;white-space:nowrap;letter-spacing:.04em}" +
+    '.bb-root .bb-cake{position:absolute;right:2.75cqw;top:2.1cqw;width:5.2cqw;height:5.2cqw;border-radius:50%;border:.15cqw solid #fff;box-sizing:border-box;' +
+      'background:url(assets/img/bday-splash/cake.webp) 50% 50% / 6.2cqw 13.5cqw no-repeat,var(--bs-cake)}';
+
+  // ความกว้างที่ชื่อใช้ได้ ~52cqw / Comfortaa กว้างราว 0.68em ต่อตัวอักษร
+  function bannerNameSize(name) {
+    var n = Math.max(1, String(name || '').length);
+    return Math.min(7.8, 52 / (n * 0.68));
+  }
+
+  function injectBannerCss() {
+    injectCss(); // ฟอนต์ Comfortaa
+    if (document.getElementById('bday-banner-css')) return;
+    var st = document.createElement('style');
+    st.id = 'bday-banner-css';
+    st.textContent = BANNER_CSS;
+    (document.head || document.documentElement).appendChild(st);
+  }
+
+  // รูปกว้างเกิน 2 เท่าของความสูง = Banner สำเร็จรูปแบบเดิม (ไม่ใช่รูปเมมเบอร์)
+  function isLegacyBanner(size) {
+    return size && size.h > 0 && size.w / size.h > 2;
+  }
+
+  // opts: { name, photo, birthday } - คืน Promise<boolean>: false = รูปใช้ไม่ได้ / เป็นรูปสำเร็จรูปแบบเดิม
+  function renderBanner(container, opts) {
+    injectBannerCss();
+    opts = opts || {};
+    return Promise.all([loadPhoto(opts.photo), extractPalette(opts.photo), fontReady()]).then(function (res) {
+      var size = res[0], palette = res[1];
+      if (!size || isLegacyBanner(size) || isLegacyFullSplash(size)) return false;
+      var date = formatBirthday(opts.birthday).toUpperCase().replace(' ', ' - ');
+      var root = document.createElement('div');
+      root.className = 'bb-root';
+      if (palette) ['bg1', 'bg3', 'bg4', 'cake'].forEach(function (k) { root.style.setProperty('--bs-' + k, palette[k]); });
+      root.innerHTML =
+        '<div class="bb-pattern" aria-hidden="true"></div>' +
+        [[46, 14, 1.6, ''], [90, 74, 1.9, 't2'], [56, 80, 1.3, 't3'], [97, 46, 1.2, ''], [44, 66, 1.1, 't2']].map(function (t) {
+          return '<svg class="bb-tw ' + t[3] + '" viewBox="0 0 24 24" aria-hidden="true" style="left:' + t[0] + 'cqw;top:' + t[1] + '%;width:' + t[2] + 'cqw;height:' + t[2] + 'cqw"><path fill="#fff" d="' + STAR + '"/></svg>';
+        }).join('') +
+        '<div class="bb-glow l" aria-hidden="true"></div><div class="bb-glow r" aria-hidden="true"></div>' +
+        '<img class="bb-photo" src="' + esc(opts.photo) + '" alt="Happy Birthday ' + esc(opts.name) + '" draggable="false" referrerpolicy="no-referrer">' +
+        '<div class="bb-logo" aria-hidden="true"></div>' +
+        '<div class="bb-text">' +
+          (date ? '<div class="bb-date"><i></i>' + esc(date) + '</div>' : '') +
+          '<div class="bb-hbd">HAPPY BIRTHDAY</div>' +
+          '<div class="bb-name" style="font-size:' + bannerNameSize(opts.name).toFixed(2) + 'cqw">' + esc(opts.name) + '</div>' +
+        '</div>' +
+        '<div class="bb-cake" aria-hidden="true"></div>';
+      container.innerHTML = '';
+      container.appendChild(root);
+      return true;
+    });
+  }
+
+  window.BLM48BirthdaySplash = { render: render, renderBanner: renderBanner, formatBirthday: formatBirthday, extractPalette: extractPalette };
   injectCss(); // โหลดฟอนต์/สไตล์ไว้ตั้งแต่หน้า Loading
 })();

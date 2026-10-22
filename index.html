@@ -2600,19 +2600,22 @@ function applyThemeAndToggleSplash(themeData, toggleKey) {
   }
 
   // 🎂 📌 ส่วน HBD Banner
-  const birthdayBanners = birthdays.filter(b => b.banner && b.banner !== "");
+  // banner_bd_url เป็น Banner สำเร็จรูป (รูปกว้าง 3:1) -> โชว์รูปนั้นตามเดิม
+  // ไม่ใช่ (เป็นรูปเมมเบอร์ หรือว่าง) -> ระบบสร้าง Banner ให้เองจากรูปเมมเบอร์ (banner_bd_url ก่อน ไม่มีค่อยใช้รูปเดียวกับ Splash)
+  // ดู BLM48BirthdaySplash.renderBanner ใน assets/js/bday-splash.js
+  const birthdayBanners = birthdays.filter(b => (b.banner && b.banner !== "") || (b.splash && b.splash !== ""));
   if (birthdayBanners.length > 0) {
     const bannerContainer = document.getElementById("autoBannerContainer");
 
     if (bannerContainer && !bannerContainer.querySelector(".hbd-banner-item")) {
-        // แทรกทุกคนไว้หน้าสุด เรียงตามไทม์ไลน์ (วันเกิดวันนี้ก่อน แล้วค่อยพรุ่งนี้)
-        const hbdBannerHTML = birthdayBanners.map(b => `
-            <a href="#" class="auto-banner-item hbd-banner-item" style="flex: 0 0 100%; min-width: 100%; scroll-snap-align: start; text-decoration: none; display: block;">
-                <img src="${b.banner}" alt="Happy Birthday ${b.name || ''}" style="width: 100%; height: auto; display: block; object-fit: cover;">
-            </a>
+        // แทรกทุกคนไว้หน้าสุด เรียงตามไทม์ไลน์ (วันเกิดวันนี้ก่อน แล้วค่อยพรุ่งนี้) - กรอบ 3:1 จองที่ไว้ก่อน แล้วค่อยเติมเนื้อหา
+        const hbdBannerHTML = birthdayBanners.map(() => `
+            <a href="#" class="auto-banner-item hbd-banner-item" style="flex: 0 0 100%; min-width: 100%; scroll-snap-align: start; text-decoration: none; display: block; aspect-ratio: 3 / 1;"></a>
         `).join('');
 
         bannerContainer.insertAdjacentHTML('afterbegin', hbdBannerHTML);
+        const slots = bannerContainer.querySelectorAll('.hbd-banner-item');
+        birthdayBanners.forEach((b, i) => fillBirthdayBanner(slots[i], b));
     }
     // 🚀 เรียกใช้ระบบสไลด์ตัวใหม่ หลังจากแทรกรูปวันเกิดเสร็จ!
     initBannerFeatures();
@@ -2622,6 +2625,24 @@ function applyThemeAndToggleSplash(themeData, toggleKey) {
   }
   
   applyIconsOnly(champ);
+}
+
+// 🎂 เติม Banner วันเกิด 1 ช่อง: ลองสร้างจากรูปเมมเบอร์ก่อน ถ้าเป็นรูป Banner สำเร็จรูปก็โชว์รูปนั้น
+// ใช้ไม่ได้ทั้งคู่ (เช่นมีแค่ Splash เต็มจอแบบเดิม) -> เอาช่องออกแล้วนับสไลด์ใหม่
+async function fillBirthdayBanner(slot, b) {
+  if (!slot) return;
+  const legacyImg = (src) => {
+    slot.style.aspectRatio = '';
+    slot.innerHTML = `<img src="${src}" alt="Happy Birthday ${b.name || ''}" style="width: 100%; height: auto; display: block; object-fit: cover;">`;
+  };
+  const gen = window.BLM48BirthdaySplash && window.BLM48BirthdaySplash.renderBanner;
+  // มี banner_bd_url -> ใช้ช่องนั้นอย่างเดียว (รูปเมมเบอร์ = สร้างให้, รูป Banner สำเร็จ = โชว์ตามเดิม)
+  // ไม่มี -> สร้างจากรูปเดียวกับ Splash
+  const src = b.banner || b.splash;
+  if (gen && await gen(slot, { name: b.name, photo: src, birthday: b.birthday })) return;
+  if (b.banner) { legacyImg(b.banner); return; }
+  slot.remove();
+  initBannerFeatures();
 }
 
 // =========================================================
