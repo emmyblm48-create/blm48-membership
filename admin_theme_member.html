@@ -63,6 +63,11 @@
         .nav-tile .nav-img img, .nav-tile canvas { width: 100%; height: 100%; display: block; object-fit: contain; }
         .nav-tile .nav-label { font-size: 11.5px; font-weight: 600; color: #444; margin-top: 5px; }
         .nav-tile .btn-del { margin-top: 5px; padding: 4px 10px; font-size: 11px; }
+        .btn-mini { display: block; margin: 5px auto 0; padding: 4px 10px; font-size: 11px; background: #fff3c4; color: #7a5a00; }
+        .nav-tile .nav-sub { font-size: 10.5px; color: #767676; margin-top: 1px; }
+        .nav-draft .nav-img { cursor: pointer; outline: 3px solid transparent; outline-offset: 1px; }
+        .nav-draft .nav-img.active { outline-color: #ffc107; }
+        .adjust-title { font-size: 12.5px; color: #555; margin-top: 4px; }
         .nav-draft { border: 1px solid #ffe08a; background: #fffcf0; border-radius: 12px; padding: 12px; margin-top: 10px; }
         .nav-draft .draft-title { font-weight: 700; font-size: 13.5px; color: #333; margin-bottom: 8px; }
         .range-row { display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: #555; margin-top: 8px; }
@@ -163,16 +168,17 @@
       </div>
 
       <div class="sec-title"><i class="fa-solid fa-crown" style="color:#f59f00"></i> รูปปุ่มเมนูตอนเป็น Champ (${navCount}/4)</div>
-      <div class="sec-note">อัปโหลดรูปเมมเบอร์ 1 รูป (แนะนำ PNG ไดคัทพื้นใส) ระบบจะวางรูปไว้ด้านหลังกรอบปุ่มทั้ง 4 แบบให้เอง · ใช้ตอน ${escapeHtml(member.name)} ได้ Champ of the Month</div>
+      <div class="sec-note">อัปโหลดรูปเมมเบอร์แยกแต่ละปุ่ม หรือใช้รูปเดียวทั้ง 4 ปุ่มก็ได้ (แนะนำ PNG ไดคัทพื้นใส) ระบบจะวางรูปไว้ด้านหลังกรอบของปุ่มนั้นให้เอง · ใช้ตอน ${escapeHtml(member.name)} ได้ Champ of the Month</div>
       <div class="nav-grid">
         ${NAV_SLOTS.map(([k, label, fa]) => `
           <div class="nav-tile" data-field="${k}">
             <div class="nav-img">${member[k] ? `<img src="${escapeHtml(member[k])}" alt="" referrerpolicy="no-referrer" draggable="false">` : `<i class="fa-solid ${fa}"></i>`}</div>
             <div class="nav-label">${label}</div>
+            <button class="btn btn-mini" onclick="pickNavPhoto('${k}')">${member[k] ? 'เปลี่ยนรูป' : 'อัปโหลด'}</button>
             ${member[k] ? `<button class="btn btn-del" onclick="askClear(this,'${k}')"><i class="fa-solid fa-trash"></i> ลบ</button>` : ''}
           </div>`).join('')}
       </div>
-      <div class="btns"><button class="btn btn-up" onclick="pickNavPhoto()"><i class="fa-solid fa-wand-magic-sparkles"></i> ${navCount ? 'สร้างปุ่มใหม่จากรูปเมมเบอร์' : 'อัปโหลดรูปเมมเบอร์เพื่อสร้างปุ่ม'}</button></div>
+      <div class="btns"><button class="btn btn-up" onclick="pickNavPhoto('*')"><i class="fa-solid fa-wand-magic-sparkles"></i> ใช้รูปเดียวกันทั้ง 4 ปุ่ม</button></div>
       <div id="nav-draft"></div>`;
     renderPreview();
   }
@@ -267,22 +273,27 @@
   }
 
   // ===== สร้างไอคอนปุ่ม Champ: รูปเมมเบอร์ด้านหลัง + กรอบ template ด้านหน้า =====
+  // แต่ละปุ่มใช้รูปแยกกันได้ (หรือเลือก "ใช้รูปเดียวทั้ง 4 ปุ่ม") ปรับขนาด/ตำแหน่งแยกต่อปุ่ม
+  // บันทึกเฉพาะปุ่มที่เลือกรูปใหม่ ปุ่มที่ไม่ได้แตะยังใช้ไอคอนเดิม
   const navTemplates = {};
   function loadImg(src) {
     return new Promise((resolve, reject) => { const i = new Image(); i.onload = () => resolve(i); i.onerror = reject; i.src = src; });
   }
-  let navDraft = null; // { photo: Image, zoom, posX, posY }
+  let navDraft = null;     // { active: 'navHome', slots: { navHome: { photo, zoom, posX, posY } | null, ... } }
+  let navPickTarget = null; // key ของปุ่มที่กำลังเลือกรูป หรือ '*' = ทั้ง 4 ปุ่ม
 
-  function pickNavPhoto() {
+  function pickNavPhoto(target) {
+    navPickTarget = target;
     const inp = document.getElementById('nav-file-input');
     inp.value = '';
     inp.click();
   }
 
   // วาดรูปเมมเบอร์แบบเต็มช่อง (cover) ซูม/เลื่อนได้ แล้ววาดกรอบทับ
-  function composeNav(ctx, photo, tpl, d) {
+  function composeNav(ctx, tpl, d) {
     const S = NAV_SIZE;
     ctx.clearRect(0, 0, S, S);
+    const photo = d.photo;
     const scale = Math.max(S / photo.naturalWidth, S / photo.naturalHeight) * (d.zoom / 100);
     const w = photo.naturalWidth * scale, h = photo.naturalHeight * scale;
     ctx.drawImage(photo, (S - w) * (d.posX / 100), (S - h) * (d.posY / 100), w, h);
@@ -293,44 +304,78 @@
     if (!navDraft) return;
     NAV_SLOTS.forEach(([k, , , src]) => {
       const c = document.querySelector(`#nav-draft canvas[data-field="${k}"]`);
-      if (c) composeNav(c.getContext('2d'), navDraft.photo, navTemplates[src], navDraft);
+      if (c && navDraft.slots[k]) composeNav(c.getContext('2d'), navTemplates[src], navDraft.slots[k]);
     });
+  }
+
+  function setActiveSlot(k) {
+    if (!navDraft || !navDraft.slots[k]) return;
+    navDraft.active = k;
+    renderDraft();
+  }
+
+  function adjustActive(prop, val) {
+    const d = navDraft && navDraft.slots[navDraft.active];
+    if (!d) return;
+    d[prop] = +val;
+    drawDraft();
   }
 
   function renderDraft() {
     const box = document.getElementById('nav-draft');
     if (!box) return;
     if (!navDraft) { box.innerHTML = ''; return; }
+    const act = navDraft.slots[navDraft.active];
+    const actLabel = (NAV_SLOTS.find(([k]) => k === navDraft.active) || [])[1] || '';
+    const newCount = NAV_SLOTS.filter(([k]) => navDraft.slots[k]).length;
     box.innerHTML = `
       <div class="nav-draft">
-        <div class="draft-title">ตัวอย่างปุ่มใหม่ (ยังไม่บันทึก)</div>
+        <div class="draft-title">ตัวอย่างปุ่มใหม่ (ยังไม่บันทึก) · แตะปุ่มเพื่อเลือกปรับ</div>
         <div class="nav-grid">
-          ${NAV_SLOTS.map(([k, label]) => `<div class="nav-tile"><div class="nav-img"><canvas data-field="${k}" width="${NAV_SIZE}" height="${NAV_SIZE}"></canvas></div><div class="nav-label">${label}</div></div>`).join('')}
+          ${NAV_SLOTS.map(([k, label, fa]) => {
+            const d = navDraft.slots[k];
+            const inner = d
+              ? `<canvas data-field="${k}" width="${NAV_SIZE}" height="${NAV_SIZE}"></canvas>`
+              : (member[k] ? `<img src="${escapeHtml(member[k])}" alt="" referrerpolicy="no-referrer" draggable="false" style="opacity:.45">` : `<i class="fa-solid ${fa}"></i>`);
+            return `<div class="nav-tile">
+              <div class="nav-img ${d && navDraft.active === k ? 'active' : ''}" onclick="setActiveSlot('${k}')">${inner}</div>
+              <div class="nav-label">${label}</div>
+              <div class="nav-sub">${d ? 'รูปใหม่' : (member[k] ? 'ใช้ของเดิม' : 'ว่าง')}</div>
+              <button class="btn btn-mini" onclick="pickNavPhoto('${k}')">${d ? 'เปลี่ยนรูป' : 'เลือกรูป'}</button>
+            </div>`;
+          }).join('')}
         </div>
-        <div class="range-row"><span>ขนาดรูป</span><input type="range" min="100" max="220" value="${navDraft.zoom}" oninput="navDraft.zoom=+this.value;drawDraft()"></div>
-        <div class="range-row"><span>เลื่อนซ้าย-ขวา</span><input type="range" min="0" max="100" value="${navDraft.posX}" oninput="navDraft.posX=+this.value;drawDraft()"></div>
-        <div class="range-row"><span>เลื่อนขึ้น-ลง</span><input type="range" min="0" max="100" value="${navDraft.posY}" oninput="navDraft.posY=+this.value;drawDraft()"></div>
+        ${act ? `
+          <div class="adjust-title">ปรับรูปของปุ่ม: <b>${actLabel}</b></div>
+          <div class="range-row"><span>ขนาดรูป</span><input type="range" min="100" max="220" value="${act.zoom}" oninput="adjustActive('zoom', this.value)"></div>
+          <div class="range-row"><span>เลื่อนซ้าย-ขวา</span><input type="range" min="0" max="100" value="${act.posX}" oninput="adjustActive('posX', this.value)"></div>
+          <div class="range-row"><span>เลื่อนขึ้น-ลง</span><input type="range" min="0" max="100" value="${act.posY}" oninput="adjustActive('posY', this.value)"></div>` : ''}
         <div class="btns" style="margin-top:12px">
-          <button class="btn btn-up" id="nav-save-btn" onclick="saveNavDraft()"><i class="fa-solid fa-check"></i> บันทึกทั้ง 4 ปุ่ม</button>
+          <button class="btn btn-up" id="nav-save-btn" onclick="saveNavDraft()" ${newCount ? '' : 'disabled'}><i class="fa-solid fa-check"></i> บันทึก ${newCount} ปุ่ม</button>
           <button class="btn btn-del" onclick="navDraft=null;renderDraft()">ยกเลิก</button>
         </div>
       </div>`;
     drawDraft();
-    box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   document.getElementById('nav-file-input').addEventListener('change', async (e) => {
     const file = e.target.files && e.target.files[0];
-    if (!file) return;
+    const target = navPickTarget;
+    if (!file || !target) return;
     if (!file.type.startsWith('image/')) { toast('กรุณาเลือกไฟล์รูปภาพ'); return; }
     try {
       const [photo] = await Promise.all([
         loadImg(URL.createObjectURL(file)),
         ...NAV_SLOTS.map(([, , , src]) => navTemplates[src] ? null : loadImg(src).then(i => { navTemplates[src] = i; }))
       ]);
-      // รูปแนวตั้งชิดบน (เห็นหน้า), รูปอื่นกึ่งกลาง
-      navDraft = { photo, zoom: 100, posX: 50, posY: photo.naturalHeight > photo.naturalWidth ? 0 : 50 };
+      // รูปแนวตั้งชิดบน (เห็นหน้า), รูปอื่นกึ่งกลาง - แต่ละปุ่มเก็บค่าปรับแยกกัน
+      const fresh = () => ({ photo, zoom: 100, posX: 50, posY: photo.naturalHeight > photo.naturalWidth ? 0 : 50 });
+      if (!navDraft) navDraft = { active: null, slots: { navHome: null, navKami: null, navCart: null, navNoti: null } };
+      if (target === '*') NAV_SLOTS.forEach(([k]) => { navDraft.slots[k] = fresh(); });
+      else navDraft.slots[target] = fresh();
+      navDraft.active = target === '*' ? NAV_SLOTS[0][0] : target;
       renderDraft();
+      document.getElementById('nav-draft').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     } catch (err) {
       console.error(err);
       toast('เปิดรูปไม่ได้ ลองไฟล์อื่น');
@@ -339,29 +384,33 @@
 
   async function saveNavDraft() {
     if (!navDraft) return;
+    const todo = NAV_SLOTS.filter(([k]) => navDraft.slots[k]);
+    if (!todo.length) return;
     const btn = document.getElementById('nav-save-btn');
     btn.disabled = true;
     const c = document.createElement('canvas');
     c.width = c.height = NAV_SIZE;
     const ctx = c.getContext('2d');
     try {
-      for (let i = 0; i < NAV_SLOTS.length; i++) {
-        const [k, label, , src] = NAV_SLOTS[i];
-        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึก ${label} (${i + 1}/4)`;
-        composeNav(ctx, navDraft.photo, navTemplates[src], navDraft);
+      for (let i = 0; i < todo.length; i++) {
+        const [k, label, , src] = todo[i];
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึก ${label} (${i + 1}/${todo.length})`;
+        composeNav(ctx, navTemplates[src], navDraft.slots[k]);
         const blob = await new Promise(r => c.toBlob(r, 'image/png'));
         const url = await blm48UploadImageToBucket('app-assets', `member-${member.memberId}-${k}`, blob);
         const res = await blm48AdminSetMemberImage(user.username, member.memberId, k, url);
         if (!res || res.status !== 'success') throw new Error((res && res.message) || 'บันทึกไม่สำเร็จ');
         member[k] = res.url || url;
+        navDraft.slots[k] = null; // บันทึกแล้ว ถ้าปุ่มถัดไปพลาด กดบันทึกซ้ำจะไม่อัปโหลดอันนี้ซ้ำ
       }
       navDraft = null;
-      toast('บันทึกปุ่มทั้ง 4 แล้ว');
+      toast(`บันทึกปุ่มแล้ว ${todo.length} ปุ่ม`);
     } catch (err) {
       console.error('nav save error', err);
       toast(err.message || 'บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง');
     }
     render();
+    if (navDraft) renderDraft();
   }
 
   async function load() {
