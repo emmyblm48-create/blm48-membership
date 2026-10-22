@@ -54,10 +54,10 @@
     <div id="access-denied"><i class="fa-solid fa-lock"></i><br>หน้านี้สำหรับ Role Admin เท่านั้นค่ะ</div>
     <div id="page-content">
         <div class="legend">
-            <b>รูปวันเกิด</b> = ใส่รูปเมมเบอร์ธรรมดา ระบบจะสร้าง Splash + Banner วันเกิดพร้อมสีที่เข้ากับรูปให้เอง (ขึ้นก่อนวันเกิด 3 วัน → หมดวันเกิด)<br>
-            <b>รูปปุ่ม Champ</b> = ไอคอนแถบเมนูล่าง 4 ปุ่ม ที่จะใช้ตอนเมมเบอร์คนนั้นได้ Champ of the Month (ช่องว่าง = ใช้ไอคอนปกติ)
+            <b>Birthday Photo</b> = ใส่รูปเมมเบอร์ธรรมดา ระบบจะสร้าง Splash + Banner วันเกิดพร้อมสีที่เข้ากับรูปให้เอง (ขึ้นก่อนวันเกิด 3 วัน → หมดวันเกิด)<br>
+            <b>Champ Menu Buttons</b> = ไอคอนแถบเมนูล่าง 4 ปุ่ม ที่จะใช้ตอนเมมเบอร์คนนั้นได้ Champ of the Month (ช่องว่าง = ใช้ไอคอนปกติ)
         </div>
-        <input id="search" class="search" type="search" placeholder="ค้นหาชื่อเมมเบอร์..." oninput="renderList()">
+        <input id="search" class="search" type="search" placeholder="Search member..." oninput="renderList()">
         <div id="member-list"><div class="loading-state"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div></div>
     </div>
 </div>
@@ -69,11 +69,11 @@
 
   // ช่องรูปปุ่ม Champ (ต้องตรงกับ admin_theme_member.html)
   const NAV_KEYS = ['navHome', 'navKami', 'navCart', 'navNoti'];
-  const MONTHS = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   function bdayText(md) {
     const m = String(md || '').match(/^(\d{2})-(\d{2})$/);
-    return m ? `${parseInt(m[2], 10)} ${MONTHS[parseInt(m[1], 10) - 1]}` : 'ไม่มีวันเกิด';
+    return m ? `${parseInt(m[2], 10)} ${MONTHS[parseInt(m[1], 10) - 1]}` : 'No birthday';
   }
 
   // อีกกี่วันถึงวันเกิด (เวลาไทย) - ใช้เรียงคนที่ใกล้วันเกิดขึ้นก่อน
@@ -102,11 +102,11 @@
         <a class="m-row" href="admin_theme_member?id=${encodeURIComponent(m.memberId)}">
           <img src="${escapeHtml(m.profileImg || '')}" alt="" onerror="this.style.visibility='hidden'">
           <div class="m-info">
-            <div class="m-name">${escapeHtml(m.name)}${isChamp ? '<span class="champ"><i class="fa-solid fa-crown"></i> Champ ตอนนี้</span>' : ''}${m.graduated ? '<span class="grad">Graduated</span>' : ''}</div>
+            <div class="m-name">${escapeHtml(m.name)}${isChamp ? '<span class="champ"><i class="fa-solid fa-crown"></i> Current Champ</span>' : ''}${m.graduated ? '<span class="grad">Graduated</span>' : ''}</div>
             <div class="m-sub">
-              <span><i class="fa-solid fa-cake-candles"></i> ${bdayText(m.birthday)}${dleft <= 3 ? ' · <b style="color:#d6336c">ช่วงวันเกิด</b>' : (dleft < 9999 ? ` · อีก ${dleft} วัน` : '')}</span>
-              <span class="${m.splashBd ? 'ok' : 'no'}"><i class="fa-solid ${m.splashBd ? 'fa-circle-check' : 'fa-circle'}"></i> รูปวันเกิด</span>
-              <span class="${navCount ? 'ok' : 'no'}"><i class="fa-solid fa-crown"></i> ปุ่ม ${navCount}/4</span>
+              <span><i class="fa-solid fa-cake-candles"></i> ${bdayText(m.birthday)}${dleft <= 3 ? ' · <b style="color:#d6336c">Birthday now</b>' : (dleft < 9999 ? ` · in ${dleft} day${dleft === 1 ? '' : 's'}` : '')}</span>
+              <span class="${m.splashBd ? 'ok' : 'no'}"><i class="fa-solid ${m.splashBd ? 'fa-circle-check' : 'fa-circle'}"></i> Birthday Photo</span>
+              <span class="${navCount ? 'ok' : 'no'}"><i class="fa-solid fa-crown"></i> Buttons ${navCount}/4</span>
             </div>
           </div>
           <i class="fa-solid fa-chevron-right m-arrow"></i>

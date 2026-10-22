@@ -113,7 +113,7 @@
     ['navNoti', 'Notification', 'fa-bell', 'assets/img/champ-nav/notification.png']
   ];
   const NAV_SIZE = 600; // ขนาดไอคอนที่สร้าง (แสดงบนแถบล่างแค่ ~30px ไม่ต้องใหญ่)
-  const MONTHS = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+  const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
   function toast(msg) {
     const t = document.getElementById('toast');
@@ -123,13 +123,13 @@
 
   function bdayText(md) {
     const m = String(md || '').match(/^(\d{2})-(\d{2})$/);
-    return m ? `${parseInt(m[2], 10)} ${MONTHS[parseInt(m[1], 10) - 1]}` : 'ไม่มีวันเกิดในระบบ';
+    return m ? `${parseInt(m[2], 10)} ${MONTHS[parseInt(m[1], 10) - 1]}` : 'not set';
   }
 
   function slotHtml(field, label, opts) {
     opts = opts || {};
     const url = member[field] || '';
-    const state = url ? (opts.stateFilled || 'มีรูปแล้ว') : (opts.stateEmpty || 'ยังไม่มีรูป');
+    const state = url ? (opts.stateFilled || 'Uploaded') : (opts.stateEmpty || 'No photo yet');
     return `
       <div class="slot" data-field="${field}">
         <div class="thumb ${opts.icon ? 'icon' : ''}">${url ? `<img src="${escapeHtml(url)}" alt="" referrerpolicy="no-referrer" draggable="false">` : `<i class="fa-solid ${opts.fa || 'fa-image'}"></i>`}</div>
@@ -137,8 +137,8 @@
           <div class="slot-label">${label}</div>
           <div class="slot-state" data-state>${state}</div>
           <div class="btns">
-            <button class="btn btn-up" onclick="pickFile('${field}')"><i class="fa-solid fa-upload"></i> ${url ? 'เปลี่ยนรูป' : 'อัปโหลดรูป'}</button>
-            ${url ? `<button class="btn btn-del" onclick="askClear(this,'${field}')"><i class="fa-solid fa-trash"></i> ลบ</button>` : ''}
+            <button class="btn btn-up" onclick="pickFile('${field}')"><i class="fa-solid fa-upload"></i> ${url ? 'Change' : 'Upload'}</button>
+            ${url ? `<button class="btn btn-del" onclick="askClear(this,'${field}')"><i class="fa-solid fa-trash"></i> Delete</button>` : ''}
           </div>
         </div>
       </div>`;
@@ -153,32 +153,32 @@
       <div class="m-hero">
         <img src="${escapeHtml(member.profileImg || '')}" alt="" onerror="this.style.visibility='hidden'">
         <div>
-          <div class="m-hero-name">${escapeHtml(member.name)}${isChamp ? '<span class="champ"><i class="fa-solid fa-crown"></i> Champ ตอนนี้</span>' : ''}</div>
-          <div class="m-hero-sub"><i class="fa-solid fa-cake-candles"></i> วันเกิด ${bdayText(member.birthday)}${member.graduated ? ' · Graduated' : ''}</div>
+          <div class="m-hero-name">${escapeHtml(member.name)}${isChamp ? '<span class="champ"><i class="fa-solid fa-crown"></i> Current Champ</span>' : ''}</div>
+          <div class="m-hero-sub"><i class="fa-solid fa-cake-candles"></i> Birthday ${bdayText(member.birthday)}${member.graduated ? ' · Graduated' : ''}</div>
         </div>
       </div>
 
-      <div class="sec-title"><i class="fa-solid fa-cake-candles" style="color:#d6336c"></i> รูปวันเกิด</div>
+      <div class="sec-title"><i class="fa-solid fa-cake-candles" style="color:#d6336c"></i> Birthday Photo</div>
       <div class="sec-note">รูปเมมเบอร์ธรรมดา (แนวตั้ง/จัตุรัส) ใช้ทำทั้ง Splash และ Banner · ถ้าเป็นรูป Splash สำเร็จรูปแบบเต็มจอ ระบบจะโชว์รูปนั้นตามเดิม</div>
-      ${slotHtml('splashBd', 'รูปเมมเบอร์วันเกิด', { stateEmpty: 'ยังไม่มีรูป - วันเกิดจะไม่มี Splash/Banner' })}
-      ${slotHtml('bannerBd', 'รูปสำหรับ Banner (ไม่บังคับ)', { stateEmpty: 'ว่าง = ใช้รูปเมมเบอร์วันเกิดด้านบนทำ Banner', fa: 'fa-panorama' })}
+      ${slotHtml('splashBd', 'Member Photo', { stateEmpty: 'No photo yet - no birthday Splash/Banner' })}
+      ${slotHtml('bannerBd', 'Banner Photo (optional)', { stateEmpty: 'Empty = Banner uses the Member Photo above', fa: 'fa-panorama' })}
       <div class="preview-wrap" data-preview>
-        <div class="preview-label">ตัวอย่าง Banner วันเกิดบนหน้า Home</div>
+        <div class="preview-label">Home Banner Preview</div>
         <div class="banner-preview" data-banner-preview></div>
       </div>
 
-      <div class="sec-title"><i class="fa-solid fa-crown" style="color:#f59f00"></i> รูปปุ่มเมนูตอนเป็น Champ (${navCount}/4)</div>
+      <div class="sec-title"><i class="fa-solid fa-crown" style="color:#f59f00"></i> Champ Menu Buttons (${navCount}/4)</div>
       <div class="sec-note">อัปโหลดรูปเมมเบอร์แยกแต่ละปุ่ม หรือใช้รูปเดียวทั้ง 4 ปุ่มก็ได้ (แนะนำ PNG ไดคัทพื้นใส) ระบบจะวางรูปไว้ด้านหลังกรอบของปุ่มนั้นให้เอง · ใช้ตอน ${escapeHtml(member.name)} ได้ Champ of the Month</div>
       <div class="nav-grid">
         ${NAV_SLOTS.map(([k, label, fa]) => `
           <div class="nav-tile" data-field="${k}">
             <div class="nav-img">${member[k] ? `<img src="${escapeHtml(member[k])}" alt="" referrerpolicy="no-referrer" draggable="false">` : `<i class="fa-solid ${fa}"></i>`}</div>
             <div class="nav-label">${label}</div>
-            <button class="btn btn-mini" onclick="pickNavPhoto('${k}')">${member[k] ? 'เปลี่ยนรูป' : 'อัปโหลด'}</button>
-            ${member[k] ? `<button class="btn btn-del" onclick="askClear(this,'${k}')"><i class="fa-solid fa-trash"></i> ลบ</button>` : ''}
+            <button class="btn btn-mini" onclick="pickNavPhoto('${k}')">${member[k] ? 'Change' : 'Upload'}</button>
+            ${member[k] ? `<button class="btn btn-del" onclick="askClear(this,'${k}')"><i class="fa-solid fa-trash"></i> Delete</button>` : ''}
           </div>`).join('')}
       </div>
-      <div class="btns"><button class="btn btn-up" onclick="pickNavPhoto('*')"><i class="fa-solid fa-wand-magic-sparkles"></i> ใช้รูปเดียวกันทั้ง 4 ปุ่ม</button></div>
+      <div class="btns"><button class="btn btn-up" onclick="pickNavPhoto('*')"><i class="fa-solid fa-wand-magic-sparkles"></i> Use one photo for all 4</button></div>
       <div id="nav-draft"></div>`;
     renderPreview();
   }
@@ -235,7 +235,7 @@
     if (!file.type.startsWith('image/')) { toast('กรุณาเลือกไฟล์รูปภาพ'); return; }
     if (file.size > 10 * 1024 * 1024) { toast('ไฟล์ใหญ่เกิน 10MB'); return; }
     const slot = document.querySelector(`.slot[data-field="${field}"]`);
-    if (slot) { slot.querySelectorAll('button').forEach(b => b.disabled = true); slot.querySelector('[data-state]').textContent = 'กำลังอัปโหลด...'; }
+    if (slot) { slot.querySelectorAll('button').forEach(b => b.disabled = true); slot.querySelector('[data-state]').textContent = 'Uploading...'; }
     try {
       const isPhoto = field === 'splashBd' || field === 'bannerBd';
       const blob = isPhoto ? await shrinkPhoto(file) : file;
@@ -264,11 +264,11 @@
       return;
     }
     btn.classList.add('confirm');
-    btn.innerHTML = '<i class="fa-solid fa-trash"></i> ยืนยันลบ';
+    btn.innerHTML = '<i class="fa-solid fa-trash"></i> Confirm delete';
     setTimeout(() => {
       if (!btn.isConnected || btn.disabled) return;
       btn.classList.remove('confirm');
-      btn.innerHTML = '<i class="fa-solid fa-trash"></i> ลบ';
+      btn.innerHTML = '<i class="fa-solid fa-trash"></i> Delete';
     }, 4000);
   }
 
@@ -330,7 +330,7 @@
     const newCount = NAV_SLOTS.filter(([k]) => navDraft.slots[k]).length;
     box.innerHTML = `
       <div class="nav-draft">
-        <div class="draft-title">ตัวอย่างปุ่มใหม่ (ยังไม่บันทึก) · แตะปุ่มเพื่อเลือกปรับ</div>
+        <div class="draft-title">New Button Preview (not saved yet) · tap a button to adjust it</div>
         <div class="nav-grid">
           ${NAV_SLOTS.map(([k, label, fa]) => {
             const d = navDraft.slots[k];
@@ -340,19 +340,19 @@
             return `<div class="nav-tile">
               <div class="nav-img ${d && navDraft.active === k ? 'active' : ''}" onclick="setActiveSlot('${k}')">${inner}</div>
               <div class="nav-label">${label}</div>
-              <div class="nav-sub">${d ? 'รูปใหม่' : (member[k] ? 'ใช้ของเดิม' : 'ว่าง')}</div>
-              <button class="btn btn-mini" onclick="pickNavPhoto('${k}')">${d ? 'เปลี่ยนรูป' : 'เลือกรูป'}</button>
+              <div class="nav-sub">${d ? 'New' : (member[k] ? 'Current' : 'Empty')}</div>
+              <button class="btn btn-mini" onclick="pickNavPhoto('${k}')">${d ? 'Change' : 'Choose'}</button>
             </div>`;
           }).join('')}
         </div>
         ${act ? `
-          <div class="adjust-title">ปรับรูปของปุ่ม: <b>${actLabel}</b></div>
-          <div class="range-row"><span>ขนาดรูป</span><input type="range" min="100" max="220" value="${act.zoom}" oninput="adjustActive('zoom', this.value)"></div>
-          <div class="range-row"><span>เลื่อนซ้าย-ขวา</span><input type="range" min="0" max="100" value="${act.posX}" oninput="adjustActive('posX', this.value)"></div>
-          <div class="range-row"><span>เลื่อนขึ้น-ลง</span><input type="range" min="0" max="100" value="${act.posY}" oninput="adjustActive('posY', this.value)"></div>` : ''}
+          <div class="adjust-title">Adjusting: <b>${actLabel}</b></div>
+          <div class="range-row"><span>Size</span><input type="range" min="100" max="220" value="${act.zoom}" oninput="adjustActive('zoom', this.value)"></div>
+          <div class="range-row"><span>Left - Right</span><input type="range" min="0" max="100" value="${act.posX}" oninput="adjustActive('posX', this.value)"></div>
+          <div class="range-row"><span>Up - Down</span><input type="range" min="0" max="100" value="${act.posY}" oninput="adjustActive('posY', this.value)"></div>` : ''}
         <div class="btns" style="margin-top:12px">
-          <button class="btn btn-up" id="nav-save-btn" onclick="saveNavDraft()" ${newCount ? '' : 'disabled'}><i class="fa-solid fa-check"></i> บันทึก ${newCount} ปุ่ม</button>
-          <button class="btn btn-del" onclick="navDraft=null;renderDraft()">ยกเลิก</button>
+          <button class="btn btn-up" id="nav-save-btn" onclick="saveNavDraft()" ${newCount ? '' : 'disabled'}><i class="fa-solid fa-check"></i> Save ${newCount} button${newCount === 1 ? '' : 's'}</button>
+          <button class="btn btn-del" onclick="navDraft=null;renderDraft()">Cancel</button>
         </div>
       </div>`;
     drawDraft();
@@ -394,7 +394,7 @@
     try {
       for (let i = 0; i < todo.length; i++) {
         const [k, label, , src] = todo[i];
-        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึก ${label} (${i + 1}/${todo.length})`;
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving ${label} (${i + 1}/${todo.length})`;
         composeNav(ctx, navTemplates[src], navDraft.slots[k]);
         const blob = await new Promise(r => c.toBlob(r, 'image/png'));
         const url = await blm48UploadImageToBucket('app-assets', `member-${member.memberId}-${k}`, blob);
