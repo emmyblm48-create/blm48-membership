@@ -87,7 +87,7 @@
         /* ปรับขนาด/ตำแหน่งรูป: แท็บ Splash | Banner + แถบเลื่อน 3 อัน */
         .adjust-panel { border: 1px solid #ffe08a; background: #fffcf0; border-radius: 12px; padding: 12px; margin: 0 0 14px; max-width: 440px; }
         .adj-tabs { display: inline-flex; background: #f4f4f4; border-radius: 20px; padding: 3px; margin-top: 6px; }
-        .adj-tab { border: none; background: transparent; border-radius: 20px; padding: 6px 16px; font-family: inherit; font-size: 12.5px; font-weight: 700; color: #767676; cursor: pointer; }
+        .adj-tab { border: none; background: transparent; border-radius: 20px; padding: 6px 16px; white-space: nowrap; font-family: inherit; font-size: 12.5px; font-weight: 700; color: #767676; cursor: pointer; }
         .adj-tab.active { background: #ffc107; color: #222; }
         .range-row b { width: 42px; text-align: right; font-size: 12px; color: #444; flex-shrink: 0; }
         .banner-preview { position: relative; width: 100%; aspect-ratio: 3 / 1; background: #f6f6f6; overflow: hidden; }
@@ -224,8 +224,8 @@
       </div>
       <!-- ตัวปรับรูปวันเกิดวางระหว่าง Splash (บน) กับ Banner (ล่าง) จะได้เห็นผลข้างๆ ตอนเลื่อน -->
       <div class="adjust-panel">
-        <div class="slot-label">Birthday Photo Size &amp; Position</div>
-        <div class="slot-state">แยก Splash (ด้านบน) กับ Banner (ด้านล่าง) · เลื่อนแล้วรูปขยับทันที</div>
+        <div class="slot-label">Photo Size &amp; Position</div>
+        <div class="slot-state">ตั้งค่าแยกกัน: Birthday Splash + Champ Splash (จอด้านบน) และ Banner (ด้านล่าง) · เลื่อนแล้วรูปขยับทันที</div>
         <div id="adjust-box"></div>
       </div>
       <div class="preview-wrap">
@@ -289,26 +289,27 @@
     renderFontPicker();
   }
 
-  // ===== ขนาด/ตำแหน่งรูปวันเกิด: แยก Splash / Banner, เลื่อนแถบแล้วรูปใน Preview ขยับทันที, กด Save ถึงบันทึก =====
-  // ค่าตั้งต้นตรงกับดีไซน์เดิม (object-position 50% 25% บน Splash, 50% 20% บน Banner)
-  const ADJ_DEFAULT = { splash: { zoom: 100, x: 50, y: 25 }, banner: { zoom: 100, x: 50, y: 20 } };
-  const ADJ_LABEL = { splash: 'Splash', banner: 'Banner' };
-  let adjDraft = null;   // null = ยังไม่ได้แก้ / { splash, banner }
+  // ===== ขนาด/ตำแหน่งรูป: Splash วันเกิด / Banner วันเกิด / Splash Champ แยกกัน, เลื่อนแถบแล้วรูปใน Preview ขยับทันที, กด Save ถึงบันทึก =====
+  // ค่าตั้งต้นตรงกับดีไซน์เดิม (object-position 50% 25% Splash วันเกิด, 50% 20% Banner, 50% 30% Splash Champ) - เก็บรวมใน members.bday_photo_adjust
+  const ADJ_DEFAULT = { splash: { zoom: 100, x: 50, y: 25 }, banner: { zoom: 100, x: 50, y: 20 }, champ: { zoom: 100, x: 50, y: 30 } };
+  const ADJ_KEYS = ['splash', 'banner', 'champ'];
+  const ADJ_LABEL = { splash: 'Birthday Splash', banner: 'Banner', champ: 'Champ Splash' };
+  const ADJ_TAB = { splash: 'Birthday', banner: 'Banner', champ: 'Champ' }; // ชื่อสั้นบนแท็บ (มือถือแท็บเต็มไม่พอ)
+  let adjDraft = null;   // null = ยังไม่ได้แก้ / { splash, banner, champ }
   let adjTab = 'splash';
 
   const savedAdjust = (k) => Object.assign({}, ADJ_DEFAULT[k], (member.bdayAdjust && member.bdayAdjust[k]) || {});
   const currentAdjust = (k) => (adjDraft ? adjDraft[k] : savedAdjust(k));
   const sameAdj = (a, b) => a.zoom === b.zoom && a.x === b.x && a.y === b.y;
-  const adjChanged = () => !!adjDraft && ['splash', 'banner'].some(k => !sameAdj(adjDraft[k], savedAdjust(k)));
+  const adjChanged = () => !!adjDraft && ADJ_KEYS.some(k => !sameAdj(adjDraft[k], savedAdjust(k)));
 
   function renderAdjust() {
     const box = document.getElementById('adjust-box');
     if (!box) return;
-    if (!member.splashBd && !member.bannerBd) { box.innerHTML = '<div class="slot-state">อัปโหลดรูปวันเกิดก่อน</div>'; return; }
     const a = currentAdjust(adjTab);
     box.innerHTML = `
       <div class="adj-tabs">
-        ${['splash', 'banner'].map(k => `<button type="button" class="adj-tab ${k === adjTab ? 'active' : ''}" onclick="setAdjTab('${k}')">${ADJ_LABEL[k]}</button>`).join('')}
+        ${ADJ_KEYS.map(k => `<button type="button" class="adj-tab ${k === adjTab ? 'active' : ''}" onclick="setAdjTab('${k}')">${ADJ_TAB[k]}</button>`).join('')}
       </div>
       <div class="range-row"><span>Size</span><input type="range" min="100" max="300" value="${a.zoom}" oninput="adjustPhoto('zoom', this.value)"><b data-adj-val="zoom">${a.zoom}%</b></div>
       <div class="range-row"><span>Left - Right</span><input type="range" min="0" max="100" value="${a.x}" oninput="adjustPhoto('x', this.value)"><b data-adj-val="x">${a.x}</b></div>
@@ -331,12 +332,17 @@
 
   // แก้ค่า + ขยับรูปใน Preview ตรงๆ (ไม่วาดใหม่ทั้งจอ แอนิเมชันจะได้ไม่เริ่มใหม่ทุกครั้งที่เลื่อน)
   function applyAdjustLive(k) {
+    if (k === 'champ') {
+      // photoStyle ของ Champ คืน style ทั้งหมดของรูป (ขนาด/object-fit ด้วย)
+      document.querySelectorAll('[data-champ-preview] .c-shine img').forEach(img => { img.style.cssText = window.BLM48ChampSplash.photoStyle(currentAdjust(k)); });
+      return;
+    }
     const sel = k === 'splash' ? '[data-bday-preview] .bs-photo img' : '[data-banner-preview] .bb-photo img';
     document.querySelectorAll(sel).forEach(img => { img.style.cssText = window.BLM48BirthdaySplash.photoStyle(currentAdjust(k)); });
   }
 
   function adjustPhoto(prop, val) {
-    if (!adjDraft) adjDraft = { splash: savedAdjust('splash'), banner: savedAdjust('banner') };
+    if (!adjDraft) adjDraft = { splash: savedAdjust('splash'), banner: savedAdjust('banner'), champ: savedAdjust('champ') };
     adjDraft[adjTab][prop] = +val;
     const lbl = document.querySelector(`[data-adj-val="${prop}"]`);
     if (lbl) lbl.textContent = prop === 'zoom' ? `${val}%` : val;
@@ -345,7 +351,7 @@
   }
 
   function resetAdjust() {
-    if (!adjDraft) adjDraft = { splash: savedAdjust('splash'), banner: savedAdjust('banner') };
+    if (!adjDraft) adjDraft = { splash: savedAdjust('splash'), banner: savedAdjust('banner'), champ: savedAdjust('champ') };
     adjDraft[adjTab] = Object.assign({}, ADJ_DEFAULT[adjTab]);
     renderAdjust();
     applyAdjustLive(adjTab);
@@ -354,8 +360,7 @@
   function cancelAdjust() {
     adjDraft = null;
     renderAdjust();
-    applyAdjustLive('splash');
-    applyAdjustLive('banner');
+    ADJ_KEYS.forEach(applyAdjustLive);
   }
 
   async function saveAdjust() {
@@ -363,7 +368,7 @@
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...'; }
     // ค่าที่เท่าค่าตั้งต้น ส่ง null = ใช้ดีไซน์เดิม
     const payload = {};
-    ['splash', 'banner'].forEach(k => { payload[k] = sameAdj(adjDraft[k], ADJ_DEFAULT[k]) ? null : adjDraft[k]; });
+    ADJ_KEYS.forEach(k => { payload[k] = sameAdj(adjDraft[k], ADJ_DEFAULT[k]) ? null : adjDraft[k]; });
     const res = await blm48AdminSetMemberBdayAdjust(user.username, member.memberId, payload);
     if (!res || res.status !== 'success') { toast((res && res.message) || 'บันทึกไม่สำเร็จ'); renderAdjust(); return; }
     member.bdayAdjust = res.adjust || null;
@@ -380,7 +385,7 @@
     if (!box || !window.BLM48ChampSplash) return;
     // หน้า Home รอรูปเว็บ Official แค่ 2.5 วิ - หน้านี้ไม่รีบ รอดึงให้เสร็จก่อนจะได้เห็นตัวอย่างจริง
     if (!member.splashChamp) await window.BLM48ChampSplash.refreshOfficialPhotos();
-    const ok = await window.BLM48ChampSplash.render(box, member.name, member.splashChamp || '');
+    const ok = await window.BLM48ChampSplash.render(box, member.name, member.splashChamp || '', currentAdjust('champ'));
     if (!ok && box.isConnected) box.innerHTML = emptyPreview('No photo yet');
   }
 

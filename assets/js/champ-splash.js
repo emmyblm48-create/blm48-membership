@@ -139,7 +139,20 @@
     });
   }
 
-  function markup(name, photo) {
+  // ปรับขนาด/ตำแหน่งรูปในกรอบ (หน้า Theme Application -> members.bday_photo_adjust.champ)
+  // adjust = { zoom: 100-300, x: 0-100, y: 0-100 } / ไม่มี = ตามดีไซน์ (50% 30%) - คืน style ทั้งหมดของรูป
+  function clampNum(v, lo, hi, def) {
+    v = Number(v);
+    return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : def;
+  }
+  function photoStyle(adj) {
+    var a = adj && typeof adj === 'object' ? adj : {};
+    var z = clampNum(a.zoom, 100, 300, 100), x = clampNum(a.x, 0, 100, 50), y = clampNum(a.y, 0, 100, 30);
+    return 'width:100%;height:100%;object-fit:cover;display:block;object-position:' + x + '% ' + y + '%;transform-origin:' + x + '% ' + y + '%;' +
+      (z !== 100 ? 'transform:scale(' + (z / 100) + ');' : '');
+  }
+
+  function markup(name, photo, adjust) {
     var petals = [[36, 14, 18, '#F7A6C6', ''], [112, 18, 23, '#FFC6DB', 'f2'], [196, 12, 16, '#F48FB8', 'f3'],
                   [262, 16, 21, '#FFD1E2', 'f4'], [324, 13, 17, '#F7A6C6', 'f5'], [352, 17, 22, '#FFC6DB', 'f6']]
       .map(function (p) {
@@ -160,7 +173,7 @@
         // รูปเมมเบอร์ในกรอบตั๋วขอบทอง + แสงวิ่ง
         '<div class="ca c-photo" style="position:absolute;left:29.8px;top:171.4px;width:323.8px;height:451.7px">' +
           '<div class="c-shine" style="position:absolute;inset:0;overflow:hidden;background:#fff">' +
-            '<img src="' + esc(photo) + '" alt="' + esc(name) + ' BLM48 — Champ of the Month" draggable="false" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;object-position:50% 30%;display:block">' +
+            '<img src="' + esc(photo) + '" alt="' + esc(name) + ' BLM48 — Champ of the Month" draggable="false" referrerpolicy="no-referrer" style="' + photoStyle(adjust) + '">' +
             '<div class="ca c-band" style="position:absolute;top:-10%;left:0;width:90px;height:120%;background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.55) 50%,rgba(255,255,255,0) 100%)"></div>' +
           '</div>' +
           '<svg viewBox="0 0 ' + FW + ' ' + FH + '" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%" aria-hidden="true">' +
@@ -194,7 +207,8 @@
   // วาด Splash ลงใน container ทันที (เริ่มแอนิเมชันใหม่ทุกครั้ง) - คืน Promise<boolean> ว่าวาดได้ไหม
   // customPhoto = รูปที่แอดมินอัปโหลดในหน้า Theme Application (members.splash_champ_url) ใช้ก่อน
   // ไม่มี/โหลดไม่ได้ -> ใช้รูปโปรไฟล์จากเว็บ Official / หาไม่ได้อีก คืน false ให้หน้า Home ใช้รูป Splash เดิมแทน
-  function render(container, champName, customPhoto) {
+  // adjust = ขนาด/ตำแหน่งรูปที่แอดมินตั้งไว้ (ดู photoStyle)
+  function render(container, champName, customPhoto, adjust) {
     injectCss();
     var pick = (customPhoto ? preload(customPhoto) : Promise.resolve(false)).then(function (ok) {
       if (ok) return customPhoto;
@@ -209,7 +223,7 @@
         var root = document.createElement('div');
         root.className = 'cs-root';
         root.style.setProperty('--cd', '7s');
-        root.innerHTML = markup(champName, photo);
+        root.innerHTML = markup(champName, photo, adjust);
         container.appendChild(root);
         fit(root);
         if (!window.__champSplashFitBound) {
@@ -223,5 +237,5 @@
     });
   }
 
-  window.BLM48ChampSplash = { render: render, refreshOfficialPhotos: refreshOfficialPhotos, getChampPhoto: getChampPhoto };
+  window.BLM48ChampSplash = { render: render, refreshOfficialPhotos: refreshOfficialPhotos, getChampPhoto: getChampPhoto, photoStyle: photoStyle };
 })();
