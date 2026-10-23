@@ -108,6 +108,10 @@ function blm48AdminSetMemberImage(adminUsername, memberId, field, url) {
 function blm48AdminSetMemberBdayFont(adminUsername, memberId, font) {
   return blm48Rpc('admin_set_member_bday_font', { p_admin_username: adminUsername, p_member_id: memberId, p_font: font || null });
 }
+// ขนาด/ตำแหน่งรูปเมมเบอร์บน Splash/Banner วันเกิด: { splash: {zoom,x,y} | null, banner: {...} | null }
+function blm48AdminSetMemberBdayAdjust(adminUsername, memberId, adjust) {
+  return blm48Rpc('admin_set_member_bday_adjust', { p_admin_username: adminUsername, p_member_id: memberId, p_adjust: adjust || {} });
+}
 function blm48AdminDeleteTheaterEvent(adminUsername, eventId) {
   return blm48Rpc('admin_delete_theater_event', { p_admin_username: adminUsername, p_event_id: eventId });
 }

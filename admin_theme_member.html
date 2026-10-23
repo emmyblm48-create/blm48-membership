@@ -84,6 +84,12 @@
         .font-chip.active { border-color: #ffc107; background: #fffcf0; }
         .font-chip .fc-sample { font-size: 20px; line-height: 1.25; color: #222; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .font-chip .fc-name { font-size: 11px; color: #767676; }
+        /* ปรับขนาด/ตำแหน่งรูป: แท็บ Splash | Banner + แถบเลื่อน 3 อัน */
+        .adjust-panel { border: 1px solid #ffe08a; background: #fffcf0; border-radius: 12px; padding: 12px; margin: 0 0 14px; max-width: 440px; }
+        .adj-tabs { display: inline-flex; background: #f4f4f4; border-radius: 20px; padding: 3px; margin-top: 6px; }
+        .adj-tab { border: none; background: transparent; border-radius: 20px; padding: 6px 16px; font-family: inherit; font-size: 12.5px; font-weight: 700; color: #767676; cursor: pointer; }
+        .adj-tab.active { background: #ffc107; color: #222; }
+        .range-row b { width: 42px; text-align: right; font-size: 12px; color: #444; flex-shrink: 0; }
         .banner-preview { position: relative; width: 100%; aspect-ratio: 3 / 1; background: #f6f6f6; overflow: hidden; }
         /* ส่วน Preview ด้านล่าง: Splash วันเกิด + Splash Champ เป็นจอมือถือ (อาร์ตบอร์ด 390x847) วางคู่กัน */
         .pv-phones { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; max-width: 440px; margin: 6px 0 14px; }
@@ -216,6 +222,12 @@
           ${member.splashChamp ? '' : '<div class="preview-label" style="margin-top:4px">Using Official Website photo</div>'}
         </div>
       </div>
+      <!-- ตัวปรับรูปวันเกิดวางระหว่าง Splash (บน) กับ Banner (ล่าง) จะได้เห็นผลข้างๆ ตอนเลื่อน -->
+      <div class="adjust-panel">
+        <div class="slot-label">Birthday Photo Size &amp; Position</div>
+        <div class="slot-state">แยก Splash (ด้านบน) กับ Banner (ด้านล่าง) · เลื่อนแล้วรูปขยับทันที</div>
+        <div id="adjust-box"></div>
+      </div>
       <div class="preview-wrap">
         <div class="preview-label">Home Banner (Birthday)</div>
         <div class="banner-preview" data-banner-preview><div class="cp-empty"><i class="fa-solid fa-spinner fa-spin"></i></div></div>
@@ -228,6 +240,7 @@
         </div>
       </div>`;
     renderFontPicker();
+    renderAdjust();
     renderBdayPreview();
     renderBannerPreview();
     renderChampPreview();
@@ -276,6 +289,89 @@
     renderFontPicker();
   }
 
+  // ===== ขนาด/ตำแหน่งรูปวันเกิด: แยก Splash / Banner, เลื่อนแถบแล้วรูปใน Preview ขยับทันที, กด Save ถึงบันทึก =====
+  // ค่าตั้งต้นตรงกับดีไซน์เดิม (object-position 50% 25% บน Splash, 50% 20% บน Banner)
+  const ADJ_DEFAULT = { splash: { zoom: 100, x: 50, y: 25 }, banner: { zoom: 100, x: 50, y: 20 } };
+  const ADJ_LABEL = { splash: 'Splash', banner: 'Banner' };
+  let adjDraft = null;   // null = ยังไม่ได้แก้ / { splash, banner }
+  let adjTab = 'splash';
+
+  const savedAdjust = (k) => Object.assign({}, ADJ_DEFAULT[k], (member.bdayAdjust && member.bdayAdjust[k]) || {});
+  const currentAdjust = (k) => (adjDraft ? adjDraft[k] : savedAdjust(k));
+  const sameAdj = (a, b) => a.zoom === b.zoom && a.x === b.x && a.y === b.y;
+  const adjChanged = () => !!adjDraft && ['splash', 'banner'].some(k => !sameAdj(adjDraft[k], savedAdjust(k)));
+
+  function renderAdjust() {
+    const box = document.getElementById('adjust-box');
+    if (!box) return;
+    if (!member.splashBd && !member.bannerBd) { box.innerHTML = '<div class="slot-state">อัปโหลดรูปวันเกิดก่อน</div>'; return; }
+    const a = currentAdjust(adjTab);
+    box.innerHTML = `
+      <div class="adj-tabs">
+        ${['splash', 'banner'].map(k => `<button type="button" class="adj-tab ${k === adjTab ? 'active' : ''}" onclick="setAdjTab('${k}')">${ADJ_LABEL[k]}</button>`).join('')}
+      </div>
+      <div class="range-row"><span>Size</span><input type="range" min="100" max="300" value="${a.zoom}" oninput="adjustPhoto('zoom', this.value)"><b data-adj-val="zoom">${a.zoom}%</b></div>
+      <div class="range-row"><span>Left - Right</span><input type="range" min="0" max="100" value="${a.x}" oninput="adjustPhoto('x', this.value)"><b data-adj-val="x">${a.x}</b></div>
+      <div class="range-row"><span>Up - Down</span><input type="range" min="0" max="100" value="${a.y}" oninput="adjustPhoto('y', this.value)"><b data-adj-val="y">${a.y}</b></div>
+      <div class="btns" id="adj-actions" style="margin-top:12px"></div>`;
+    renderAdjActions();
+  }
+
+  // แถวปุ่มวาดแยก -> ระหว่างลากแถบเลื่อน ปุ่ม Save โผล่/หายได้โดยแถบไม่หลุดมือ
+  function renderAdjActions() {
+    const row = document.getElementById('adj-actions');
+    if (!row) return;
+    row.innerHTML = (adjChanged()
+      ? `<button class="btn btn-up" id="adj-save-btn" onclick="saveAdjust()"><i class="fa-solid fa-check"></i> Save position</button>
+         <button class="btn btn-del" onclick="cancelAdjust()">Cancel</button>`
+      : '') + `<button class="btn btn-mini" style="margin:0" onclick="resetAdjust()">Reset ${ADJ_LABEL[adjTab]}</button>`;
+  }
+
+  function setAdjTab(k) { adjTab = k; renderAdjust(); }
+
+  // แก้ค่า + ขยับรูปใน Preview ตรงๆ (ไม่วาดใหม่ทั้งจอ แอนิเมชันจะได้ไม่เริ่มใหม่ทุกครั้งที่เลื่อน)
+  function applyAdjustLive(k) {
+    const sel = k === 'splash' ? '[data-bday-preview] .bs-photo img' : '[data-banner-preview] .bb-photo img';
+    document.querySelectorAll(sel).forEach(img => { img.style.cssText = window.BLM48BirthdaySplash.photoStyle(currentAdjust(k)); });
+  }
+
+  function adjustPhoto(prop, val) {
+    if (!adjDraft) adjDraft = { splash: savedAdjust('splash'), banner: savedAdjust('banner') };
+    adjDraft[adjTab][prop] = +val;
+    const lbl = document.querySelector(`[data-adj-val="${prop}"]`);
+    if (lbl) lbl.textContent = prop === 'zoom' ? `${val}%` : val;
+    applyAdjustLive(adjTab);
+    if (!!document.getElementById('adj-save-btn') !== adjChanged()) renderAdjActions();
+  }
+
+  function resetAdjust() {
+    if (!adjDraft) adjDraft = { splash: savedAdjust('splash'), banner: savedAdjust('banner') };
+    adjDraft[adjTab] = Object.assign({}, ADJ_DEFAULT[adjTab]);
+    renderAdjust();
+    applyAdjustLive(adjTab);
+  }
+
+  function cancelAdjust() {
+    adjDraft = null;
+    renderAdjust();
+    applyAdjustLive('splash');
+    applyAdjustLive('banner');
+  }
+
+  async function saveAdjust() {
+    const btn = document.getElementById('adj-save-btn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...'; }
+    // ค่าที่เท่าค่าตั้งต้น ส่ง null = ใช้ดีไซน์เดิม
+    const payload = {};
+    ['splash', 'banner'].forEach(k => { payload[k] = sameAdj(adjDraft[k], ADJ_DEFAULT[k]) ? null : adjDraft[k]; });
+    const res = await blm48AdminSetMemberBdayAdjust(user.username, member.memberId, payload);
+    if (!res || res.status !== 'success') { toast((res && res.message) || 'บันทึกไม่สำเร็จ'); renderAdjust(); return; }
+    member.bdayAdjust = res.adjust || null;
+    adjDraft = null;
+    toast('บันทึกตำแหน่งรูปแล้ว');
+    renderAdjust();
+  }
+
   const emptyPreview = (msg) => `<div class="cp-empty">${msg}</div>`;
 
   // ตัวอย่าง Splash Champ of the Month: รูปที่อัปโหลดก่อน ไม่มีใช้รูปเว็บ Official (เหมือนหน้า Home)
@@ -306,7 +402,7 @@
     const box = document.querySelector('[data-bday-preview]');
     if (!box) return;
     if (!member.splashBd) { box.innerHTML = emptyPreview('No birthday photo'); return; }
-    const ok = window.BLM48BirthdaySplash && await drawLayer(box, l => window.BLM48BirthdaySplash.render(l, { name: member.name, photo: member.splashBd, birthday: member.birthday, font: currentFont() }));
+    const ok = window.BLM48BirthdaySplash && await drawLayer(box, l => window.BLM48BirthdaySplash.render(l, { name: member.name, photo: member.splashBd, birthday: member.birthday, font: currentFont(), adjust: currentAdjust('splash') }));
     if (ok !== false) return;
     box.innerHTML = `<img src="${escapeHtml(member.splashBd)}" alt="" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;display:block">`;
     const st = document.querySelector('.slot[data-field="splashBd"] [data-state]');
@@ -319,7 +415,7 @@
     if (!box) return;
     const photo = member.bannerBd || member.splashBd;
     if (!photo) { box.innerHTML = emptyPreview('No birthday photo'); return; }
-    const ok = window.BLM48BirthdaySplash && await drawLayer(box, l => window.BLM48BirthdaySplash.renderBanner(l, { name: member.name, photo, birthday: member.birthday, font: currentFont() }));
+    const ok = window.BLM48BirthdaySplash && await drawLayer(box, l => window.BLM48BirthdaySplash.renderBanner(l, { name: member.name, photo, birthday: member.birthday, font: currentFont(), adjust: currentAdjust('banner') }));
     if (ok !== false) return;
     box.innerHTML = member.bannerBd
       ? `<img src="${escapeHtml(member.bannerBd)}" alt="" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;display:block">`

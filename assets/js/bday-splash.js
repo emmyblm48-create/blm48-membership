@@ -278,6 +278,19 @@
     return f ? "font-family:'" + f.name + "','Kanit',sans-serif;font-weight:" + f.weight + ';letter-spacing:.02em;' : '';
   }
 
+  // ===== ปรับขนาด/ตำแหน่งรูปเมมเบอร์ (หน้า Theme Application -> members.bday_photo_adjust) =====
+  // adjust = { zoom: 100-300 (%), x: 0-100 (ซ้าย-ขวา), y: 0-100 (บน-ล่าง) } / ไม่มี = ตามดีไซน์เดิม
+  // รูปเต็มกรอบแบบ cover เลื่อนด้วย object-position แล้วซูมเข้าหาจุดเดียวกัน -> ซูมแล้วเลื่อนได้ทั้งสองแกน
+  function clampNum(v, lo, hi, def) {
+    v = Number(v);
+    return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : def;
+  }
+  function photoStyle(adj) {
+    if (!adj || typeof adj !== 'object') return '';
+    var z = clampNum(adj.zoom, 100, 300, 100), x = clampNum(adj.x, 0, 100, 50), y = clampNum(adj.y, 0, 100, 50);
+    return 'object-position:' + x + '% ' + y + '%;transform-origin:' + x + '% ' + y + '%;' + (z !== 100 ? 'transform:scale(' + (z / 100) + ');' : '');
+  }
+
   // ฟอนต์แต่ละแบบกว้างไม่เท่ากัน -> วัดความกว้างจริงด้วย canvas (ไม่ต้องรอหน้าโชว์) แล้วย่อให้ไม่เกิน max
   // คืนขนาดตัวอักษร (หน่วยเดียวกับ base/max: px บน Splash, cqw บน Banner)
   var measureCtx = null;
@@ -337,7 +350,7 @@
         // การ์ด
         '<div class="ba b-card" style="position:absolute;left:33.1px;top:180.2px;width:325px;height:452.7px">' +
           '<div class="bs-card">' +
-            '<div class="bs-photo"><img src="' + esc(o.photo) + '" alt="' + esc(o.name) + ' — Happy Birthday" draggable="false" referrerpolicy="no-referrer"></div>' +
+            '<div class="bs-photo"><img src="' + esc(o.photo) + '" alt="' + esc(o.name) + ' — Happy Birthday" draggable="false" referrerpolicy="no-referrer" style="' + photoStyle(o.adjust) + '"></div>' +
             '<div style="position:absolute;inset:0;overflow:hidden" aria-hidden="true">' +
               '<div class="ba b-sweepA" style="position:absolute;top:-10%;left:0;width:90px;height:120%;background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.45) 50%,rgba(255,255,255,0) 100%)"></div>' +
             '</div>' +
@@ -389,7 +402,7 @@
       var root = document.createElement('div');
       root.className = 'bs-root';
       applyPalette(root, palette); // สีพื้นหลัง/การ์ด/ชื่อ/ป้ายวันที่/คอนเฟตติ ตามรูปเมมเบอร์
-      root.innerHTML = markup({ name: opts.name, photo: opts.photo, birthday: opts.birthday, f: f });
+      root.innerHTML = markup({ name: opts.name, photo: opts.photo, birthday: opts.birthday, f: f, adjust: opts.adjust });
       container.appendChild(root);
       fit(root);
       if (!window.__bdaySplashFitBound) {
@@ -421,7 +434,9 @@
     '.bb-root .bb-glow{position:absolute;top:0;bottom:0;width:4.2cqw;pointer-events:none}' +
     '.bb-root .bb-glow.l{left:1.5cqw;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.85))}' +
     '.bb-root .bb-glow.r{left:41.55cqw;background:linear-gradient(90deg,rgba(255,255,255,.85),rgba(255,255,255,0))}' +
-    '.bb-root .bb-photo{position:absolute;left:5.7cqw;top:0;width:35.85cqw;height:100%;object-fit:cover;object-position:50% 20%;display:block;box-shadow:0 0 2.4cqw .4cqw rgba(255,255,255,.9)}' +
+    // กรอบรูป (ซ่อนส่วนที่ล้นตอนซูม) + รูปเต็มกรอบ
+    '.bb-root .bb-photo{position:absolute;left:5.7cqw;top:0;width:35.85cqw;height:100%;overflow:hidden;box-shadow:0 0 2.4cqw .4cqw rgba(255,255,255,.9)}' +
+    '.bb-root .bb-photo img{width:100%;height:100%;object-fit:cover;object-position:50% 20%;display:block}' +
     // โลโก้วง BLM48 (ไฟล์จากผู้ใช้ 1333x1867 สัดส่วนเท่ากล่องมุมซ้ายล่างของดีไซน์)
     '.bb-root .bb-logo{position:absolute;left:0;bottom:0;width:5.7cqw;height:7.85cqw;background:#ffde5b url(assets/img/bday-splash/blm48-logo.png) 50% 50% / cover no-repeat}' +
     ".bb-root .bb-text{position:absolute;left:41.55cqw;right:0;top:0;bottom:0;text-align:center;color:#fff;font-family:'Quicksand','Kanit',sans-serif;text-shadow:0 .1cqw .5cqw rgba(0,0,0,.08)}" +
@@ -470,7 +485,7 @@
           return '<svg class="bb-tw ' + t[3] + '" viewBox="0 0 24 24" aria-hidden="true" style="left:' + t[0] + 'cqw;top:' + t[1] + '%;width:' + t[2] + 'cqw;height:' + t[2] + 'cqw"><path fill="#fff" d="' + STAR + '"/></svg>';
         }).join('') +
         '<div class="bb-glow l" aria-hidden="true"></div><div class="bb-glow r" aria-hidden="true"></div>' +
-        '<img class="bb-photo" src="' + esc(opts.photo) + '" alt="Happy Birthday ' + esc(opts.name) + '" draggable="false" referrerpolicy="no-referrer">' +
+        '<div class="bb-photo"><img src="' + esc(opts.photo) + '" alt="Happy Birthday ' + esc(opts.name) + '" draggable="false" referrerpolicy="no-referrer" style="' + photoStyle(opts.adjust) + '"></div>' +
         '<div class="bb-logo" aria-hidden="true"></div>' +
         '<div class="bb-text">' +
           (date ? '<div class="bb-date"><i></i>' + esc(date) + '</div>' : '') +
@@ -484,6 +499,6 @@
     });
   }
 
-  window.BLM48BirthdaySplash = { render: render, renderBanner: renderBanner, formatBirthday: formatBirthday, extractPalette: extractPalette, FONTS: FONTS, loadFont: loadFont };
+  window.BLM48BirthdaySplash = { render: render, renderBanner: renderBanner, formatBirthday: formatBirthday, extractPalette: extractPalette, FONTS: FONTS, loadFont: loadFont, photoStyle: photoStyle };
   injectCss(); // โหลดฟอนต์/สไตล์ไว้ตั้งแต่หน้า Loading
 })();
