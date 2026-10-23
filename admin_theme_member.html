@@ -77,10 +77,22 @@
 
         .preview-wrap { margin-top: 6px; }
         .preview-label { font-size: 12px; color: #767676; margin-bottom: 6px; }
-        .banner-preview { width: 100%; aspect-ratio: 3 / 1; background: #f6f6f6; }
-        /* ตัวอย่าง Splash Champ ขนาดจอมือถือ (อาร์ตบอร์ด 390x847) */
-        .champ-preview { position: relative; width: 200px; max-width: 60%; aspect-ratio: 390 / 847; background: #FFEEF3; border-radius: 14px; overflow: hidden; border: 1px solid #f3d6e0; }
-        .champ-preview .cp-empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 12px; font-size: 12px; color: #767676; }
+        .preview-wrap + .preview-wrap { margin-top: 14px; }
+        /* ตัวเลือกฟอนต์วันเกิด: ปุ่มละ 1 ฟอนต์ โชว์ชื่อเมมเบอร์ด้วยฟอนต์นั้น */
+        .font-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; margin-top: 8px; }
+        .font-chip { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 6px 8px; border: 1.5px solid #eee; border-radius: 12px; background: #fff; cursor: pointer; font-family: inherit; min-width: 0; }
+        .font-chip.active { border-color: #ffc107; background: #fffcf0; }
+        .font-chip .fc-sample { font-size: 20px; line-height: 1.25; color: #222; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .font-chip .fc-name { font-size: 11px; color: #767676; }
+        .banner-preview { position: relative; width: 100%; aspect-ratio: 3 / 1; background: #f6f6f6; overflow: hidden; }
+        /* ส่วน Preview ด้านล่าง: Splash วันเกิด + Splash Champ เป็นจอมือถือ (อาร์ตบอร์ด 390x847) วางคู่กัน */
+        .pv-phones { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; max-width: 440px; margin: 6px 0 14px; }
+        .phone-preview { position: relative; width: 100%; aspect-ratio: 390 / 847; background: #f6f6f6; border-radius: 14px; overflow: hidden; border: 1px solid #eee; }
+        .navbar-preview { display: flex; justify-content: space-around; align-items: center; background: #fff; border: 1px solid #eee; border-radius: 14px; padding: 8px 6px; max-width: 440px; }
+        .navbar-preview .nb-item { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10.5px; color: #555; }
+        .navbar-preview .nb-item img { width: 34px; height: 34px; object-fit: contain; display: block; }
+        .navbar-preview .nb-item i { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #767676; }
+        .cp-empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 12px; font-size: 12px; color: #767676; }
         .toast-msg { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: #222; color: #fff; padding: 10px 18px; border-radius: 20px; font-size: 13px; z-index: 300; display: none; max-width: 90vw; }
     </style>
     <link rel="stylesheet" href="assets/css/admin-theme.css">
@@ -166,18 +178,16 @@
       <div class="sec-note">รูปเมมเบอร์ธรรมดา (แนวตั้ง/จัตุรัส) ใช้ทำทั้ง Splash และ Banner · ถ้าเป็นรูป Splash สำเร็จรูปแบบเต็มจอ ระบบจะโชว์รูปนั้นตามเดิม</div>
       ${slotHtml('splashBd', 'Member Photo', { stateEmpty: 'No photo yet - no birthday Splash/Banner' })}
       ${slotHtml('bannerBd', 'Banner Photo (optional)', { stateEmpty: 'Empty = Banner uses the Member Photo above', fa: 'fa-panorama' })}
-      <div class="preview-wrap" data-preview>
-        <div class="preview-label">Home Banner Preview</div>
-        <div class="banner-preview" data-banner-preview></div>
+      <div class="slot" style="display:block">
+        <div class="slot-label">Font</div>
+        <div class="slot-state">ฟอนต์ของชื่อเล่นเมมเบอร์ บน Splash + Banner วันเกิด · กดเลือกแล้วดูตัวอย่างใน Preview ด้านล่าง</div>
+        <div class="font-grid" id="font-grid"></div>
+        <div class="btns" id="font-actions" style="margin-top:10px"></div>
       </div>
 
       <div class="sec-title"><i class="fa-solid fa-trophy" style="color:#f06595"></i> Champ of the Month Splash</div>
       <div class="sec-note">รูปเมมเบอร์ที่จะโชว์ในกรอบของ Splash Champ of the Month (แนะนำรูปแนวตั้ง) · ถ้าไม่อัปโหลด ระบบใช้รูปโปรไฟล์ล่าสุดจาก BLM48 Official Website แทน · ใช้ตอน ${escapeHtml(member.name)} ได้ Champ of the Month</div>
       ${slotHtml('splashChamp', 'Splash Photo', { stateEmpty: 'Empty = uses the BLM48 Official Website profile photo', fa: 'fa-mobile-screen' })}
-      <div class="preview-wrap">
-        <div class="preview-label">Splash Preview${member.splashChamp ? '' : ' (Official Website photo)'}</div>
-        <div class="champ-preview" data-champ-preview><div class="cp-empty"><i class="fa-solid fa-spinner fa-spin"></i></div></div>
-      </div>
 
       <div class="sec-title"><i class="fa-solid fa-crown" style="color:#f59f00"></i> Champ Menu Buttons (${navCount}/4)</div>
       <div class="sec-note">อัปโหลดรูปเมมเบอร์แยกแต่ละปุ่ม หรือใช้รูปเดียวทั้ง 4 ปุ่มก็ได้ (แนะนำ PNG ไดคัทพื้นใส) ระบบจะวางรูปไว้ด้านหลังกรอบของปุ่มนั้นให้เอง · ใช้ตอน ${escapeHtml(member.name)} ได้ Champ of the Month</div>
@@ -191,10 +201,82 @@
           </div>`).join('')}
       </div>
       <div class="btns"><button class="btn btn-up" onclick="pickNavPhoto('*')"><i class="fa-solid fa-wand-magic-sparkles"></i> Use one photo for all 4</button></div>
-      <div id="nav-draft"></div>`;
-    renderPreview();
+      <div id="nav-draft"></div>
+
+      <div class="sec-title"><i class="fa-solid fa-eye" style="color:#4c6ef5"></i> Preview</div>
+      <div class="sec-note">ตัวอย่างทุกจอที่ผู้ใช้จะเห็นในแอป จากรูปที่บันทึกไว้ตอนนี้</div>
+      <div class="pv-phones">
+        <div>
+          <div class="preview-label">Birthday Splash</div>
+          <div class="phone-preview" data-bday-preview><div class="cp-empty"><i class="fa-solid fa-spinner fa-spin"></i></div></div>
+        </div>
+        <div>
+          <div class="preview-label">Champ Splash</div>
+          <div class="phone-preview" data-champ-preview><div class="cp-empty"><i class="fa-solid fa-spinner fa-spin"></i></div></div>
+          ${member.splashChamp ? '' : '<div class="preview-label" style="margin-top:4px">Using Official Website photo</div>'}
+        </div>
+      </div>
+      <div class="preview-wrap">
+        <div class="preview-label">Home Banner (Birthday)</div>
+        <div class="banner-preview" data-banner-preview><div class="cp-empty"><i class="fa-solid fa-spinner fa-spin"></i></div></div>
+      </div>
+      <div class="preview-wrap">
+        <div class="preview-label">Champ Menu Bar</div>
+        <div class="navbar-preview">
+          ${NAV_SLOTS.map(([k, label, fa]) => `
+            <div class="nb-item">${member[k] ? `<img src="${escapeHtml(member[k])}" alt="" referrerpolicy="no-referrer" draggable="false">` : `<i class="fa-solid ${fa}"></i>`}<span>${label}</span></div>`).join('')}
+        </div>
+      </div>`;
+    renderFontPicker();
+    renderBdayPreview();
+    renderBannerPreview();
     renderChampPreview();
   }
+
+  // ===== ฟอนต์วันเกิด: กดเลือก = ดูตัวอย่าง (ยังไม่บันทึก) -> กด Save ถึงบันทึก =====
+  let fontDraft;  // undefined = ยังไม่ได้เลือกใหม่ / null = ฟอนต์ตั้งต้น / ชื่อฟอนต์
+  const currentFont = () => (fontDraft !== undefined ? fontDraft : (member.bdayFont || null));
+
+  function renderFontPicker() {
+    const grid = document.getElementById('font-grid');
+    if (!grid || !window.BLM48BirthdaySplash) return;
+    const fonts = window.BLM48BirthdaySplash.FONTS || [];
+    fonts.forEach(f => window.BLM48BirthdaySplash.loadFont(f));
+    const cur = currentFont();
+    const sample = escapeHtml(String(member.name).split(' ')[0]); // ชื่อแรกพอ ปุ่มเล็ก
+    grid.innerHTML = [{ name: null, label: 'Default', family: "'Comfortaa','Kanit',sans-serif", weight: 700 }]
+      .concat(fonts.map(f => ({ name: f.name, label: f.name, family: `'${f.name}','Kanit',sans-serif`, weight: f.weight })))
+      .map(o => `
+        <button type="button" class="font-chip ${o.name === cur ? 'active' : ''}" onclick='pickFont(${JSON.stringify(o.name)})'>
+          <span class="fc-sample" style="font-family:${o.family};font-weight:${o.weight}">${sample}</span>
+          <span class="fc-name">${o.label}${o.name === (member.bdayFont || null) ? ' · saved' : ''}</span>
+        </button>`).join('');
+    const changed = cur !== (member.bdayFont || null);
+    document.getElementById('font-actions').innerHTML = changed
+      ? `<button class="btn btn-up" id="font-save-btn" onclick="saveFont()"><i class="fa-solid fa-check"></i> Save font</button>
+         <button class="btn btn-del" onclick="pickFont(undefined)">Cancel</button>`
+      : '';
+  }
+
+  function pickFont(name) {
+    fontDraft = name === (member.bdayFont || null) ? undefined : name;
+    renderFontPicker();
+    renderBdayPreview();
+    renderBannerPreview();
+  }
+
+  async function saveFont() {
+    const btn = document.getElementById('font-save-btn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...'; }
+    const res = await blm48AdminSetMemberBdayFont(user.username, member.memberId, currentFont());
+    if (!res || res.status !== 'success') { toast((res && res.message) || 'บันทึกไม่สำเร็จ'); renderFontPicker(); return; }
+    member.bdayFont = res.font || null;
+    fontDraft = undefined;
+    toast('บันทึกฟอนต์แล้ว');
+    renderFontPicker();
+  }
+
+  const emptyPreview = (msg) => `<div class="cp-empty">${msg}</div>`;
 
   // ตัวอย่าง Splash Champ of the Month: รูปที่อัปโหลดก่อน ไม่มีใช้รูปเว็บ Official (เหมือนหน้า Home)
   async function renderChampPreview() {
@@ -203,25 +285,45 @@
     // หน้า Home รอรูปเว็บ Official แค่ 2.5 วิ - หน้านี้ไม่รีบ รอดึงให้เสร็จก่อนจะได้เห็นตัวอย่างจริง
     if (!member.splashChamp) await window.BLM48ChampSplash.refreshOfficialPhotos();
     const ok = await window.BLM48ChampSplash.render(box, member.name, member.splashChamp || '');
-    if (!ok && box.isConnected) box.innerHTML = '<div class="cp-empty">ยังไม่มีรูปให้โชว์ - อัปโหลดรูปด้านบน</div>';
+    if (!ok && box.isConnected) box.innerHTML = emptyPreview('No photo yet');
   }
 
-  // ตัวอย่าง Banner + เตือนถ้ารูปวันเกิดเป็น Splash สำเร็จรูปแบบเดิม
-  async function renderPreview() {
-    const wrap = document.querySelector('[data-preview]');
+  // ตัวอย่าง Splash วันเกิด - ถ้าเป็นรูป Splash สำเร็จรูปแบบเดิม โชว์รูปนั้นเต็มจอ (เหมือนหน้า Home) + เตือนที่ช่องรูป
+  // กดเปลี่ยนฟอนต์รัวๆ ตัวอย่างอันเก่าอาจวาดเสร็จทีหลัง -> วาดแต่ละรอบลงชั้นใหม่ เก็บไว้แค่รอบล่าสุด
+  async function drawLayer(box, draw) {
+    const seq = box._seq = (box._seq || 0) + 1;
+    const layer = document.createElement('div');
+    layer.style.cssText = 'position:absolute;inset:0';
+    box.appendChild(layer);
+    const ok = await draw(layer);
+    if (seq !== box._seq || !box.isConnected) { layer.remove(); return null; }
+    if (ok) [...box.children].forEach(c => { if (c !== layer) c.remove(); });
+    else layer.remove();
+    return ok;
+  }
+
+  async function renderBdayPreview() {
+    const box = document.querySelector('[data-bday-preview]');
+    if (!box) return;
+    if (!member.splashBd) { box.innerHTML = emptyPreview('No birthday photo'); return; }
+    const ok = window.BLM48BirthdaySplash && await drawLayer(box, l => window.BLM48BirthdaySplash.render(l, { name: member.name, photo: member.splashBd, birthday: member.birthday, font: currentFont() }));
+    if (ok !== false) return;
+    box.innerHTML = `<img src="${escapeHtml(member.splashBd)}" alt="" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;display:block">`;
+    const st = document.querySelector('.slot[data-field="splashBd"] [data-state]');
+    if (st) { st.textContent = 'เป็นรูป Splash สำเร็จรูปแบบเดิม (โชว์ตามเดิม ไม่ได้สร้างแอนิเมชัน)'; st.classList.add('warn'); }
+  }
+
+  // ตัวอย่าง Banner วันเกิดบนหน้า Home
+  async function renderBannerPreview() {
     const box = document.querySelector('[data-banner-preview]');
-    if (!wrap || !box) return;
+    if (!box) return;
     const photo = member.bannerBd || member.splashBd;
-    if (!photo) { wrap.style.display = 'none'; return; }
-    wrap.style.display = 'block';
-    box.innerHTML = '';
-    const ok = window.BLM48BirthdaySplash && await window.BLM48BirthdaySplash.renderBanner(box, { name: member.name, photo, birthday: member.birthday });
-    if (!ok) {
-      if (member.bannerBd) box.innerHTML = `<img src="${escapeHtml(member.bannerBd)}" alt="" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;display:block">`;
-      else wrap.style.display = 'none';
-      const st = document.querySelector('.slot[data-field="splashBd"] [data-state]');
-      if (st && member.splashBd) { st.textContent = 'เป็นรูป Splash สำเร็จรูปแบบเดิม (โชว์ตามเดิม ไม่ได้สร้างแอนิเมชัน)'; st.classList.add('warn'); }
-    }
+    if (!photo) { box.innerHTML = emptyPreview('No birthday photo'); return; }
+    const ok = window.BLM48BirthdaySplash && await drawLayer(box, l => window.BLM48BirthdaySplash.renderBanner(l, { name: member.name, photo, birthday: member.birthday, font: currentFont() }));
+    if (ok !== false) return;
+    box.innerHTML = member.bannerBd
+      ? `<img src="${escapeHtml(member.bannerBd)}" alt="" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;display:block">`
+      : emptyPreview('Legacy splash photo - no banner (upload a Banner Photo)');
   }
 
   // ===== อัปโหลด =====

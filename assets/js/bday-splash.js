@@ -242,6 +242,55 @@
     return size && size.w > 0 && size.h / size.w > LEGACY_RATIO;
   }
 
+  // ===== ฟอนต์ที่แอดมินเลือกได้ (หน้า Theme Application -> members.bday_font) =====
+  // ใช้กับชื่อเล่นเมมเบอร์เท่านั้น (Splash + Banner) - "HAPPY BIRTHDAY" ใช้ฟอนต์ของดีไซน์เสมอ
+  // ไม่เลือก (null) = Comfortaa ตามดีไซน์
+  var FONTS = [
+    { name: 'Fredoka', css: 'Fredoka:wght@600', weight: 600 },
+    { name: 'Baloo 2', css: 'Baloo+2:wght@700', weight: 700 },
+    { name: 'Quicksand', css: 'Quicksand:wght@700', weight: 700 },
+    { name: 'Playfair Display', css: 'Playfair+Display:wght@700', weight: 700 },
+    { name: 'Lobster', css: 'Lobster', weight: 400 },
+    { name: 'Pacifico', css: 'Pacifico', weight: 400 },
+    { name: 'Dancing Script', css: 'Dancing+Script:wght@700', weight: 700 },
+    { name: 'Caveat', css: 'Caveat:wght@700', weight: 700 },
+    { name: 'Great Vibes', css: 'Great+Vibes', weight: 400 }
+  ];
+
+  // คืนข้อมูลฟอนต์ที่อยู่ในลิสต์เท่านั้น (ชื่ออื่น/ว่าง -> null = ฟอนต์ตั้งต้น)
+  function findFont(name) {
+    for (var i = 0; i < FONTS.length; i++) if (FONTS[i].name === name) return FONTS[i];
+    return null;
+  }
+
+  function loadFont(f) {
+    if (!f) return;
+    var id = 'bday-font-' + f.name.replace(/\s+/g, '-');
+    if (document.getElementById(id)) return;
+    var ln = document.createElement('link');
+    ln.id = id;
+    ln.rel = 'stylesheet';
+    ln.href = 'https://fonts.googleapis.com/css2?family=' + f.css + '&display=swap';
+    (document.head || document.documentElement).appendChild(ln);
+  }
+
+  function fontStyle(f) {
+    return f ? "font-family:'" + f.name + "','Kanit',sans-serif;font-weight:" + f.weight + ';letter-spacing:.02em;' : '';
+  }
+
+  // ฟอนต์แต่ละแบบกว้างไม่เท่ากัน -> วัดความกว้างจริงด้วย canvas (ไม่ต้องรอหน้าโชว์) แล้วย่อให้ไม่เกิน max
+  // คืนขนาดตัวอักษร (หน่วยเดียวกับ base/max: px บน Splash, cqw บน Banner)
+  var measureCtx = null;
+  function fitSize(f, text, base, max) {
+    if (!f || !text) return base;
+    try {
+      measureCtx = measureCtx || document.createElement('canvas').getContext('2d');
+      measureCtx.font = f.weight + ' 100px "' + f.name + '", Kanit, sans-serif';
+      var w100 = measureCtx.measureText(text).width + text.length * 2; // + letter-spacing .02em
+      return w100 > 0 ? Math.min(base, max * 100 / w100) : base;
+    } catch (e) { return base; }
+  }
+
   // ชื่อยาว -> ลดขนาดตัวอักษรให้อยู่ในความกว้างของหัวการ์ด (~262px) ตามดีไซน์
   function nameFontSize(name) {
     var n = String(name || '').length;
@@ -296,7 +345,7 @@
           // ไอคอนเค้กเป็นรูป (ไอคอน Font Awesome รุ่นที่แอปใช้ไม่มี fa-cake-candles) - cake.webp พื้นใส 921x2000 เค้กอยู่กลางภาพ สูง 428px -> ย่อให้สูง ~12px
           '<div class="bs-cake" aria-hidden="true"></div>' +
           '<div class="ba b-t1 bs-t1">HAPPY BIRTHDAY</div>' +
-          '<div class="ba b-t2 bs-t2" style="font-size:' + nameFontSize(o.name) + 'px">' + esc(o.name) + '</div>' +
+          '<div class="ba b-t2 bs-t2" style="' + fontStyle(o.f) + 'font-size:' + (o.f ? fitSize(o.f, String(o.name || ''), 34, 280).toFixed(1) : nameFontSize(o.name)) + 'px">' + esc(o.name) + '</div>' +
           (dateText ? '<div class="bs-pill">' + esc(dateText) +
             '<div class="ba b-sweepC" aria-hidden="true" style="position:absolute;top:-50%;left:0;width:26px;height:200%;background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.8) 50%,rgba(255,255,255,0) 100%)"></div></div>' : '') +
         '</div>' +
@@ -315,27 +364,32 @@
   }
 
   // รอฟอนต์ชื่อ (Comfortaa) โหลดก่อนวาด ไม่งั้นชื่อจะกระพริบเป็นฟอนต์สำรอง - รอไม่เกิน 1.5 วินาที
-  function fontReady() {
+  // f = ฟอนต์ที่แอดมินเลือก (ถ้ามี) ต้องโหลดเสร็จก่อนวัดความกว้างชื่อ
+  function fontReady(f) {
     if (!document.fonts || !document.fonts.load) return Promise.resolve();
+    loadFont(f);
+    var loads = [document.fonts.load("700 30px Comfortaa"), document.fonts.load("700 24px \"Nunito Sans\"")];
+    if (f) loads.push(document.fonts.load(f.weight + ' 30px "' + f.name + '"'));
     return Promise.race([
-      Promise.all([document.fonts.load("700 30px Comfortaa"), document.fonts.load("700 24px \"Nunito Sans\"")]).catch(function () {}),
+      Promise.all(loads).catch(function () {}),
       new Promise(function (r) { setTimeout(r, 1500); })
     ]);
   }
 
-  // opts: { name, photo (ลิงก์จาก splash_bd_url), birthday ("MM-DD") }
+  // opts: { name, photo (ลิงก์จาก splash_bd_url), birthday ("MM-DD"), font (ชื่อจาก FONTS / ว่าง = ตั้งต้น) }
   // คืน Promise<boolean>: false = รูปโหลดไม่ได้ หรือเป็น Splash สำเร็จรูปแบบเดิม -> ให้หน้า Home โชว์รูปเต็มจอตามเดิม
   function render(container, opts) {
     injectCss();
     opts = opts || {};
-    return Promise.all([loadPhoto(opts.photo), extractPalette(opts.photo), fontReady()]).then(function (res) {
+    var f = findFont(opts.font);
+    return Promise.all([loadPhoto(opts.photo), extractPalette(opts.photo), fontReady(f)]).then(function (res) {
       var size = res[0], palette = res[1];
       if (!size || isLegacyFullSplash(size)) return false;
       container.innerHTML = '';
       var root = document.createElement('div');
       root.className = 'bs-root';
       applyPalette(root, palette); // สีพื้นหลัง/การ์ด/ชื่อ/ป้ายวันที่/คอนเฟตติ ตามรูปเมมเบอร์
-      root.innerHTML = markup(opts);
+      root.innerHTML = markup({ name: opts.name, photo: opts.photo, birthday: opts.birthday, f: f });
       container.appendChild(root);
       fit(root);
       if (!window.__bdaySplashFitBound) {
@@ -402,7 +456,8 @@
   function renderBanner(container, opts) {
     injectBannerCss();
     opts = opts || {};
-    return Promise.all([loadPhoto(opts.photo), extractPalette(opts.photo), fontReady()]).then(function (res) {
+    var f = findFont(opts.font);
+    return Promise.all([loadPhoto(opts.photo), extractPalette(opts.photo), fontReady(f)]).then(function (res) {
       var size = res[0], palette = res[1];
       if (!size || isLegacyBanner(size) || isLegacyFullSplash(size)) return false;
       var date = formatBirthday(opts.birthday).toUpperCase().replace(' ', ' - ');
@@ -420,7 +475,7 @@
         '<div class="bb-text">' +
           (date ? '<div class="bb-date"><i></i>' + esc(date) + '</div>' : '') +
           '<div class="bb-hbd">HAPPY BIRTHDAY</div>' +
-          '<div class="bb-name" style="font-size:' + bannerNameSize(opts.name).toFixed(2) + 'cqw">' + esc(opts.name) + '</div>' +
+          '<div class="bb-name" style="' + fontStyle(f) + 'font-size:' + (f ? fitSize(f, String(opts.name || ''), 7.8, 52) : bannerNameSize(opts.name)).toFixed(2) + 'cqw">' + esc(opts.name) + '</div>' +
         '</div>' +
         '<div class="bb-cake" aria-hidden="true"></div>';
       container.innerHTML = '';
@@ -429,6 +484,6 @@
     });
   }
 
-  window.BLM48BirthdaySplash = { render: render, renderBanner: renderBanner, formatBirthday: formatBirthday, extractPalette: extractPalette };
+  window.BLM48BirthdaySplash = { render: render, renderBanner: renderBanner, formatBirthday: formatBirthday, extractPalette: extractPalette, FONTS: FONTS, loadFont: loadFont };
   injectCss(); // โหลดฟอนต์/สไตล์ไว้ตั้งแต่หน้า Loading
 })();

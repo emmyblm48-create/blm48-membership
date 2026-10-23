@@ -100,9 +100,13 @@ function blm48AdminCancelTheaterEvent(adminUsername, eventId, reason) {
 function blm48AdminListMemberImages(adminUsername) {
   return blm48Rpc('admin_list_member_images', { p_admin_username: adminUsername });
 }
-// field: splashBd | bannerBd | navHome | navKami | navCart | navNoti — url ว่าง/null = ลบรูป
+// field: splashBd | bannerBd | splashChamp | navHome | navKami | navCart | navNoti — url ว่าง/null = ลบรูป
 function blm48AdminSetMemberImage(adminUsername, memberId, field, url) {
   return blm48Rpc('admin_set_member_image', { p_admin_username: adminUsername, p_member_id: memberId, p_field: field, p_url: url || null });
+}
+// ฟอนต์ตัวหนังสือ Splash/Banner วันเกิด (ชื่อจาก BLM48BirthdaySplash.FONTS) — ว่าง/null = ฟอนต์ตั้งต้นของดีไซน์
+function blm48AdminSetMemberBdayFont(adminUsername, memberId, font) {
+  return blm48Rpc('admin_set_member_bday_font', { p_admin_username: adminUsername, p_member_id: memberId, p_font: font || null });
 }
 function blm48AdminDeleteTheaterEvent(adminUsername, eventId) {
   return blm48Rpc('admin_delete_theater_event', { p_admin_username: adminUsername, p_event_id: eventId });
