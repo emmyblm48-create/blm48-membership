@@ -19,14 +19,15 @@
     <script src="assets/js/supabase-client.js"></script>
     <script src="assets/js/common.js"></script>
     <script src="assets/js/bday-splash.js"></script>
+    <script src="assets/js/champ-splash.js"></script>
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Quicksand', 'Kanit', sans-serif; margin: 0; min-height: 100vh; color: #444; background: #fff; }
         .top-navigation-bar { display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 100; }
         .page-wrapper { max-width: 760px; margin: 0 auto; padding: 14px 12px 100px; }
-        #access-denied { display: none; text-align: center; padding: 80px 20px; color: #999; }
+        #access-denied { display: none; text-align: center; padding: 80px 20px; color: #767676; }
         #page-content { display: none; }
-        .empty-state, .loading-state { text-align: center; color: #999; font-size: 13px; padding: 40px 20px; }
+        .empty-state, .loading-state { text-align: center; color: #767676; font-size: 13px; padding: 40px 20px; }
 
         /* หัวหน้า: รูป + ชื่อ + วันเกิด */
         .m-hero { display: flex; align-items: center; gap: 14px; padding: 6px 0 14px; border-bottom: 1px solid #f0f0f0; }
@@ -77,6 +78,9 @@
         .preview-wrap { margin-top: 6px; }
         .preview-label { font-size: 12px; color: #767676; margin-bottom: 6px; }
         .banner-preview { width: 100%; aspect-ratio: 3 / 1; background: #f6f6f6; }
+        /* ตัวอย่าง Splash Champ ขนาดจอมือถือ (อาร์ตบอร์ด 390x847) */
+        .champ-preview { position: relative; width: 200px; max-width: 60%; aspect-ratio: 390 / 847; background: #FFEEF3; border-radius: 14px; overflow: hidden; border: 1px solid #f3d6e0; }
+        .champ-preview .cp-empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 12px; font-size: 12px; color: #767676; }
         .toast-msg { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: #222; color: #fff; padding: 10px 18px; border-radius: 20px; font-size: 13px; z-index: 300; display: none; max-width: 90vw; }
     </style>
     <link rel="stylesheet" href="assets/css/admin-theme.css">
@@ -167,6 +171,14 @@
         <div class="banner-preview" data-banner-preview></div>
       </div>
 
+      <div class="sec-title"><i class="fa-solid fa-trophy" style="color:#f06595"></i> Champ of the Month Splash</div>
+      <div class="sec-note">รูปเมมเบอร์ที่จะโชว์ในกรอบของ Splash Champ of the Month (แนะนำรูปแนวตั้ง) · ถ้าไม่อัปโหลด ระบบใช้รูปโปรไฟล์ล่าสุดจาก BLM48 Official Website แทน · ใช้ตอน ${escapeHtml(member.name)} ได้ Champ of the Month</div>
+      ${slotHtml('splashChamp', 'Splash Photo', { stateEmpty: 'Empty = uses the BLM48 Official Website profile photo', fa: 'fa-mobile-screen' })}
+      <div class="preview-wrap">
+        <div class="preview-label">Splash Preview${member.splashChamp ? '' : ' (Official Website photo)'}</div>
+        <div class="champ-preview" data-champ-preview><div class="cp-empty"><i class="fa-solid fa-spinner fa-spin"></i></div></div>
+      </div>
+
       <div class="sec-title"><i class="fa-solid fa-crown" style="color:#f59f00"></i> Champ Menu Buttons (${navCount}/4)</div>
       <div class="sec-note">อัปโหลดรูปเมมเบอร์แยกแต่ละปุ่ม หรือใช้รูปเดียวทั้ง 4 ปุ่มก็ได้ (แนะนำ PNG ไดคัทพื้นใส) ระบบจะวางรูปไว้ด้านหลังกรอบของปุ่มนั้นให้เอง · ใช้ตอน ${escapeHtml(member.name)} ได้ Champ of the Month</div>
       <div class="nav-grid">
@@ -181,6 +193,17 @@
       <div class="btns"><button class="btn btn-up" onclick="pickNavPhoto('*')"><i class="fa-solid fa-wand-magic-sparkles"></i> Use one photo for all 4</button></div>
       <div id="nav-draft"></div>`;
     renderPreview();
+    renderChampPreview();
+  }
+
+  // ตัวอย่าง Splash Champ of the Month: รูปที่อัปโหลดก่อน ไม่มีใช้รูปเว็บ Official (เหมือนหน้า Home)
+  async function renderChampPreview() {
+    const box = document.querySelector('[data-champ-preview]');
+    if (!box || !window.BLM48ChampSplash) return;
+    // หน้า Home รอรูปเว็บ Official แค่ 2.5 วิ - หน้านี้ไม่รีบ รอดึงให้เสร็จก่อนจะได้เห็นตัวอย่างจริง
+    if (!member.splashChamp) await window.BLM48ChampSplash.refreshOfficialPhotos();
+    const ok = await window.BLM48ChampSplash.render(box, member.name, member.splashChamp || '');
+    if (!ok && box.isConnected) box.innerHTML = '<div class="cp-empty">ยังไม่มีรูปให้โชว์ - อัปโหลดรูปด้านบน</div>';
   }
 
   // ตัวอย่าง Banner + เตือนถ้ารูปวันเกิดเป็น Splash สำเร็จรูปแบบเดิม
@@ -237,7 +260,7 @@
     const slot = document.querySelector(`.slot[data-field="${field}"]`);
     if (slot) { slot.querySelectorAll('button').forEach(b => b.disabled = true); slot.querySelector('[data-state]').textContent = 'Uploading...'; }
     try {
-      const isPhoto = field === 'splashBd' || field === 'bannerBd';
+      const isPhoto = field === 'splashBd' || field === 'bannerBd' || field === 'splashChamp';
       const blob = isPhoto ? await shrinkPhoto(file) : file;
       const url = await blm48UploadImageToBucket('app-assets', `member-${member.memberId}-${field}`, blob);
       await saveField(field, url, 'บันทึกรูปแล้ว');

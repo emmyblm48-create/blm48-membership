@@ -2538,7 +2538,7 @@ function applyThemeAndToggleSplash(themeData, toggleKey) {
   // ถ้าวาดแอนิเมชันไม่ได้ (รูป Splash สำเร็จรูปแบบเดิม / ดึงรูปไม่ได้) จะโชว์รูปเต็มจอเดิม 3 วินาทีแทน
   const splashQueue = [];
   birthdays.forEach(b => { if (b.splash) splashQueue.push({ type: 'birthday', src: b.splash, name: b.name, birthday: b.birthday }); });
-  if (champ.name || champ.splash) splashQueue.push({ type: 'champ', src: champ.splash || '', name: champ.name });
+  if (champ.name || champ.splash) splashQueue.push({ type: 'champ', src: champ.splash || '', name: champ.name, photo: champ.photo || '' });
 
   const champStage = document.getElementById('champ-splash-stage');
   // ฟังก์ชันนี้ถูกเรียกซ้ำได้ (แคช -> ข้อมูลสด) - เริ่มคิว Splash แค่ครั้งเดียวต่อการเปิดหน้า
@@ -2554,7 +2554,7 @@ function applyThemeAndToggleSplash(themeData, toggleKey) {
     const showOne = async (item) => {
       let ok = false;
       if (item.type === 'champ' && window.BLM48ChampSplash) {
-        ok = await window.BLM48ChampSplash.render(champStage, item.name);
+        ok = await window.BLM48ChampSplash.render(champStage, item.name, item.photo); // รูปที่แอดมินอัปโหลด (Theme Application) ก่อน ไม่มีใช้รูปเว็บ Official
         if (ok) splashScreen.style.background = '#FFEEF3';
       } else if (item.type === 'birthday' && window.BLM48BirthdaySplash) {
         ok = await window.BLM48BirthdaySplash.render(champStage, { name: item.name, photo: item.src, birthday: item.birthday });

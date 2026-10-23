@@ -192,13 +192,19 @@
   }
 
   // วาด Splash ลงใน container ทันที (เริ่มแอนิเมชันใหม่ทุกครั้ง) - คืน Promise<boolean> ว่าวาดได้ไหม
-  // ถ้าหารูปโปรไฟล์จากเว็บ Official ไม่ได้ จะคืน false ให้หน้า Home ใช้รูป Splash เดิมแทน
-  function render(container, champName) {
+  // customPhoto = รูปที่แอดมินอัปโหลดในหน้า Theme Application (members.splash_champ_url) ใช้ก่อน
+  // ไม่มี/โหลดไม่ได้ -> ใช้รูปโปรไฟล์จากเว็บ Official / หาไม่ได้อีก คืน false ให้หน้า Home ใช้รูป Splash เดิมแทน
+  function render(container, champName, customPhoto) {
     injectCss();
-    return getChampPhoto(champName).then(function (photo) {
+    var pick = (customPhoto ? preload(customPhoto) : Promise.resolve(false)).then(function (ok) {
+      if (ok) return customPhoto;
+      return getChampPhoto(champName).then(function (p) {
+        return p ? preload(p).then(function (ok2) { return ok2 ? p : null; }) : null;
+      });
+    });
+    return pick.then(function (photo) {
       if (!photo) return false;
-      return preload(photo).then(function (ok) {
-        if (!ok) return false;
+      return Promise.resolve(true).then(function () {
         container.innerHTML = '';
         var root = document.createElement('div');
         root.className = 'cs-root';
