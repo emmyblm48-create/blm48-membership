@@ -250,9 +250,9 @@ function renderCampaignBanner(c) {
 }
 
 // รูปเมมเบอร์บน Banner: เริ่มจากรูปโปรไฟล์ในแอป แล้ว hydrateCampaignBannerPhotos เปลี่ยนเป็นรูปจากเว็บ Official
-// รูปที่บันทึกไว้กับ Campaign (bannerPhoto) มาก่อน -> Campaign ที่จบแล้วใช้รูปนี้ตลอด ไม่เปลี่ยนตามรูปใหม่บนเว็บ
+// รูปที่บันทึกไว้กับ Campaign (bannerPhoto) = ล็อกตั้งแต่เปิด Campaign -> ใช้รูปนี้ตลอด ไม่เปลี่ยนตามรูปใหม่บนเว็บ
 function campaignBannerPhoto(c, cls) {
-  const frozen = isCampaignEnded(c) && c.bannerPhoto;
+  const frozen = !!c.bannerPhoto;
   return `<img class="${cls}" data-cb-member="${escapeAttr(String(c.memberName || '').trim())}" data-cb-campaign="${escapeAttr(c.id)}" data-cb-saved="${escapeAttr(c.bannerPhoto || '')}"${frozen ? ' data-cb-done="1"' : ''} src="${escapeAttr(c.bannerPhoto || c.profileImage || 'assets/images/default-profile.png')}" alt="" referrerpolicy="no-referrer" draggable="false">`;
 }
 const CAMPAIGN_BANNER_LOGOS = 'assets/img/campaign-banner/magic-hour/logos.png';
@@ -375,7 +375,7 @@ function loadCampaignOfficialPhotoLib() {
 }
 
 // เปลี่ยนรูปเมมเบอร์เป็นรูปล่าสุดจากเว็บ Official (ระหว่างรอ/ดึงไม่ได้ = รูปที่บันทึกไว้ หรือรูปโปรไฟล์ในแอป)
-// แล้วบันทึกรูปนั้นไว้กับ Campaign: เซิร์ฟเวอร์ยอมให้อัปเดตเฉพาะตอน Campaign ยังเปิดอยู่ จบแล้วล็อกรูปสุดท้ายไว้
+// แล้วบันทึกรูปนั้นไว้กับ Campaign ครั้งเดียว (เซิร์ฟเวอร์รับเฉพาะตอนยังไม่มีรูป) -> ล็อกถาวร
 const campaignBannerPhotoSaved = {};
 function hydrateCampaignBannerPhotos() {
   const imgs = document.querySelectorAll('img[data-cb-member]:not([data-cb-done])');
