@@ -116,15 +116,17 @@
 
     document.getElementById('view').innerHTML = `
       <div class="cover">
-        <img src="${escapeAttr(c.coverImage || 'assets/images/default-profile.png')}" alt="" referrerpolicy="no-referrer" draggable="false">
-        <span class="cover-tag">${c.customCover ? 'Campaign cover' : 'No cover - showing profile photo'}</span>
+        ${renderCampaignCoverArt(c)}
+        <span class="cover-tag">${campaignBannerTheme(c) ? 'Monthly theme banner (auto)' : (c.customCover ? 'Campaign cover' : 'No cover - showing profile photo')}</span>
       </div>
       <div class="cover-actions">
         <button type="button" class="btn" id="btn-up" onclick="pickFile()"><i class="fa-solid fa-upload"></i> ${c.customCover ? 'Change cover' : 'Upload cover'}</button>
         ${c.customCover ? `<button type="button" class="btn ghost" onclick="askRemoveCover(this)"><i class="fa-solid fa-trash"></i> Remove cover</button>` : ''}
         <a class="btn ghost" href="campaign_detail?id=${encodeURIComponent(c.id)}"><i class="fa-solid fa-eye"></i> View public page</a>
       </div>
-      <div class="hint">รูปปกขนาด 2048 x 1427 px (แสดงบนการ์ด Campaign หน้า Home / Campaign / Detail)</div>
+      <div class="hint">${campaignBannerTheme(c)
+        ? 'เดือนนี้ใช้ Banner ธีมประจำเดือนอัตโนมัติ (รูปเมมเบอร์ล่าสุดจากเว็บ BLM48) รูปปกที่อัปโหลดจะไม่แสดงในเดือนนี้'
+        : 'รูปปกขนาด 2048 x 1427 px (แสดงบนการ์ด Campaign หน้า Home / Campaign / Detail)'}</div>
 
       <div class="title">${escapeHtml(campaignMemberLabel(c))} ${badge}${c.isBirthMonth ? '<span class="badge b-bday"><i class="fa-solid fa-cake-candles"></i> Birth month</span>' : ''}</div>
       <div class="meta">
