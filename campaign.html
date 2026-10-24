@@ -44,9 +44,10 @@
         .sheet-cancel { display: block; width: 100%; margin-top: 8px; border: none; background: #fff; border-radius: 14px; font-family: inherit; font-size: 20px; font-weight: 700; color: #111; padding: 17px 12px; cursor: pointer; }
         .sheet-cancel:active { background: #f0f0f0; }
         .toolbar-note { font-size: 12px; color: #767676; margin: -6px 0 12px; }
-        .filter-btn { border: 1px solid #e5e5e5; background: #fff; border-radius: 20px; font-family: inherit; font-size: 14px; font-weight: 600; color: #222; padding: 7px 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; }
-        .filter-btn.active { border-color: #fcc419; background: #fffbea; }
-        .filter-btn .count { background: #fcc419; color: #222; border-radius: 10px; font-size: 11.5px; padding: 1px 7px; }
+        .filter-btn { border: none; background: none; font-family: inherit; color: #222; padding: 4px 0; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+        .filter-btn i { font-size: 19px; }
+        .filter-count { display: none; background: #222; color: #fff; border-radius: 999px; font-size: 12.5px; font-weight: 600; padding: 3px 10px; white-space: nowrap; }
+        .filter-btn.active .filter-count { display: inline-block; }
         /* Choose Member (เต็มจอ) */
         .picker { position: fixed; inset: 0; z-index: 1100; background: #fff; display: flex; flex-direction: column; transform: translateY(100%); transition: transform .25s ease; visibility: hidden; }
         .picker.open { transform: translateY(0); visibility: visible; }
@@ -87,7 +88,7 @@
 <div class="page-wrapper">
     <div class="toolbar">
         <button type="button" class="sort-btn" onclick="openSortSheet()"><span id="sort-label">Newest</span><i class="fa-solid fa-chevron-down"></i></button>
-        <button type="button" id="filter-btn" class="filter-btn" onclick="openMemberPicker()"><i class="fa-solid fa-filter"></i><span id="filter-label">All Members</span></button>
+        <button type="button" id="filter-btn" class="filter-btn" onclick="openMemberPicker()" aria-label="Filter members"><span class="filter-count" id="filter-label"></span><i class="fa-solid fa-sliders"></i></button>
     </div>
     <div class="toolbar-note"><i class="fa-solid fa-trophy" style="color:#fcc419;"></i> Champ of the Month</div>
     <div id="campaign-list">
@@ -195,7 +196,7 @@
   function updateFilterButton() {
     const n = selectedMembers.size;
     document.getElementById('filter-btn').classList.toggle('active', n > 0);
-    document.getElementById('filter-label').innerHTML = n ? `Members <span class="count">${n}</span>` : 'All Members';
+    document.getElementById('filter-label').textContent = n ? `${n} Filters` : '';
   }
 
   async function openMemberPicker() {
