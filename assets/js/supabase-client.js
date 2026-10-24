@@ -814,6 +814,19 @@ function blm48AdminUpdateVoteEventDetails(adminUsername, collectionId, ev) {
 function blm48AdminDeleteVoteEvent(adminUsername, collectionId, pin, device) {
   return blm48Rpc('admin_delete_vote_event', { p_admin_username: adminUsername, p_collection_id: collectionId, p_pin: pin, p_device: device || null });
 }
+// จัดการรายการของขวัญ (admin_gifts.html) - giftId = null คือสร้างใหม่, ลบได้เฉพาะชิ้นที่ยังไม่เคยมีใครซื้อ/ส่ง
+function blm48AdminListGifts(adminUsername) {
+  return blm48Rpc('admin_list_gifts', { p_admin_username: adminUsername });
+}
+function blm48AdminSaveGift(adminUsername, giftId, g) {
+  return blm48Rpc('admin_save_gift', {
+    p_admin_username: adminUsername, p_gift_id: giftId || null, p_gift_name: g.giftName, p_tier: g.tier,
+    p_cost_cookies: g.costCookies, p_points: g.points, p_image_url: g.imageUrl || null, p_active: g.active !== false
+  });
+}
+function blm48AdminDeleteGift(adminUsername, giftId) {
+  return blm48Rpc('admin_delete_gift', { p_admin_username: adminUsername, p_gift_id: giftId });
+}
 function blm48AdminAddVoteCandidates(adminUsername, collectionId, candidates) {
   return blm48Rpc('admin_add_vote_candidates', { p_admin_username: adminUsername, p_collection_id: collectionId, p_candidates: candidates });
 }
