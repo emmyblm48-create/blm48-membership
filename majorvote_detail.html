@@ -26,6 +26,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="assets/js/supabase-client.js"></script>
     <script src="assets/js/common.js"></script>
+    <script src="assets/js/member-gift-stickers.js"></script>
 
     <style>
         :root {
@@ -757,6 +758,15 @@
         }));
     }
 
+    // ของขวัญประจำตัวเมมเบอร์ที่ยังไม่มีรูปจริง ใช้สติ๊กเกอร์จาก member-gift-stickers.js
+    function giftImageHtml(item, size, imgHtml) {
+        return window.blm48GiftImageHtml ? window.blm48GiftImageHtml(item.rawId, item.img, size, imgHtml) : imgHtml;
+    }
+
+    function giftGridImgSize() {
+        return window.matchMedia('(max-width: 360px)').matches ? 56 : 70;
+    }
+
     function getSelectedGiftItem() {
         return getActiveGiftItems().find(g => g.id === String(selectedGiftId)) || null;
     }
@@ -850,7 +860,7 @@
             <div class="gift-page">
                 ${page.map(item => `
                     <div class="gift-item-card ${item.id === String(selectedGiftId) ? 'selected' : ''}" data-gift-id="${escapeAttr(item.id)}" onclick="selectGiftItem('${escapeAttr(item.id)}')">
-                        <img src="${fixSecureImageUrl(item.img)}" class="gift-item-img" alt="" onerror="this.src='${BLANK_IMG}'">
+                        ${giftImageHtml(item, giftGridImgSize(), `<img src="${fixSecureImageUrl(item.img)}" class="gift-item-img" alt="" onerror="this.src='${BLANK_IMG}'">`)}
                         <div class="gift-item-name">${escapeAttr(item.name)}</div>
                         <div class="gift-item-cost">${item.owned !== null
                             ? `x${item.owned.toLocaleString()}`
@@ -975,7 +985,7 @@
         document.getElementById('gift-confirm-body').innerHTML = `
             <div class="gift-confirm-item">
                 <div class="gift-confirm-item-col">
-                    <img src="${fixSecureImageUrl(item.img)}" alt="" onerror="this.src='${BLANK_IMG}'">
+                    ${giftImageHtml(item, 96, `<img src="${fixSecureImageUrl(item.img)}" alt="" onerror="this.src='${BLANK_IMG}'">`)}
                     <div class="gift-item-name">${escapeAttr(item.name)}</div>
                     <div class="gift-item-cost">${pill}</div>
                 </div>
