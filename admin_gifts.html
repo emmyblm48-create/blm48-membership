@@ -18,7 +18,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="assets/js/supabase-client.js"></script>
     <script src="assets/js/common.js"></script>
-    <script src="assets/js/admin-pin.js"></script>
     <script src="assets/js/member-gift-stickers.js"></script>
     <script src="assets/js/admin-gift-form.js"></script>
     <style>
@@ -118,15 +117,13 @@
     render();
   }
 
-  window.addEventListener('DOMContentLoaded', async () => {
+  window.addEventListener('DOMContentLoaded', () => {
     user = getUserSession();
     if (!user) { window.location.href = 'login'; return; }
     if (!(user.is_admin === true || (user.role && user.role.toLowerCase() === 'admin'))) {
       document.getElementById('access-denied').style.display = 'block';
       return;
     }
-    // 🔒 ราคาของขวัญเกี่ยวกับ Cookie/คะแนนโหวต ต้องใส่ PIN ก่อนเหมือนหน้าจัดการกิจกรรมโหวต
-    await blm48RequireAdminPin(user, { page: 'admin_gifts', cancelUrl: 'admin' });
     document.getElementById('page-content').style.display = 'block';
     loadGifts();
   });
