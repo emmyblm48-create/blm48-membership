@@ -759,6 +759,13 @@ function blm48UserSetPin(username, pin, page, device) {
 function blm48UserVerifyPin(username, pin, page, device) {
   return blm48Rpc('user_verify_pin', { p_username: username, p_pin: pin, p_page: page, p_device: device });
 }
+// Change PIN (ต้องใส่ PIN เดิม) / Forgot PIN (ยืนยันด้วยรหัสผ่านที่ใช้ล็อกอิน; newPin = null คือเช็กรหัสผ่านอย่างเดียว)
+function blm48UserChangePin(username, oldPin, newPin, device) {
+  return blm48Rpc('user_change_pin', { p_username: username, p_old_pin: oldPin, p_new_pin: newPin, p_device: device });
+}
+function blm48UserResetPin(username, password, newPin, device) {
+  return blm48Rpc('user_reset_pin', { p_username: username, p_password: password, p_new_pin: newPin, p_device: device });
+}
 function blm48AdminListPageAccessLogs(adminUsername, page, limit) {
   return blm48Rpc('admin_list_page_access_logs', { p_admin_username: adminUsername, p_page: page || null, p_limit: limit || 200 });
 }
