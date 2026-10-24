@@ -561,6 +561,10 @@ function blm48GetMemberCampaignDetail(campaignId, username) {
 function blm48SupportMemberCampaign(username, campaignId, amount) {
   return blm48Rpc('support_member_campaign', { p_username: username, p_campaign_id: campaignId, p_amount: amount });
 }
+// บันทึกรูปเมมเบอร์ (จากเว็บ Official) ที่ใช้บน Campaign Banner: อัปเดตได้ระหว่าง Campaign เปิด จบแล้วล็อก
+function blm48SetCampaignBannerPhoto(campaignId, url) {
+  return blm48Rpc('set_campaign_banner_photo', { p_campaign_id: Number(campaignId), p_url: url });
+}
 // Admin (admin_campaigns.html / admin_campaign.html) - ทุกตัวเช็ค is_admin_or_ceo ฝั่งเซิร์ฟเวอร์
 function blm48AdminListMemberCampaigns(adminUsername) {
   return blm48Rpc('admin_list_member_campaigns', { p_admin_username: adminUsername });

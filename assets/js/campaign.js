@@ -250,8 +250,10 @@ function renderCampaignBanner(c) {
 }
 
 // รูปเมมเบอร์บน Banner: เริ่มจากรูปโปรไฟล์ในแอป แล้ว hydrateCampaignBannerPhotos เปลี่ยนเป็นรูปจากเว็บ Official
+// รูปที่บันทึกไว้กับ Campaign (bannerPhoto) มาก่อน -> Campaign ที่จบแล้วใช้รูปนี้ตลอด ไม่เปลี่ยนตามรูปใหม่บนเว็บ
 function campaignBannerPhoto(c, cls) {
-  return `<img class="${cls}" data-cb-member="${escapeAttr(String(c.memberName || '').trim())}" src="${escapeAttr(c.profileImage || 'assets/images/default-profile.png')}" alt="" referrerpolicy="no-referrer" draggable="false">`;
+  const frozen = isCampaignEnded(c) && c.bannerPhoto;
+  return `<img class="${cls}" data-cb-member="${escapeAttr(String(c.memberName || '').trim())}" data-cb-campaign="${escapeAttr(c.id)}" data-cb-saved="${escapeAttr(c.bannerPhoto || '')}"${frozen ? ' data-cb-done="1"' : ''} src="${escapeAttr(c.bannerPhoto || c.profileImage || 'assets/images/default-profile.png')}" alt="" referrerpolicy="no-referrer" draggable="false">`;
 }
 const CAMPAIGN_BANNER_LOGOS = 'assets/img/campaign-banner/magic-hour/logos.png';
 const CAMPAIGN_BANNER_SPARK = 'M0 -16 C1.5 -4 4 -1.5 16 0 C4 1.5 1.5 4 0 16 C-1.5 4 -4 1.5 -16 0 C-4 -1.5 -1.5 -4 0 -16Z';
@@ -339,7 +341,7 @@ function renderCampaignBannerMagicHour(c) {
         <div class="cb-pillrow"><div class="cb-line"></div><div class="cb-pill">${escapeHtml(pill)}</div><div class="cb-line"></div></div>
       </div>
       <div class="cb-arch">
-        <img class="cb-photo" data-cb-member="${escapeAttr(name)}" src="${escapeAttr(c.profileImage || 'assets/images/default-profile.png')}" alt="" referrerpolicy="no-referrer" draggable="false">
+        ${campaignBannerPhoto(c, 'cb-photo')}
         <div class="cb-abs cb-arch-shade"></div>
       </div>
       <div class="cb-right">
@@ -372,7 +374,9 @@ function loadCampaignOfficialPhotoLib() {
   return campaignOfficialLib;
 }
 
-// เปลี่ยนรูปในกรอบโค้งเป็นรูปล่าสุดจากเว็บ Official (ระหว่างรอ/ดึงไม่ได้ = ใช้รูปโปรไฟล์ในแอป)
+// เปลี่ยนรูปเมมเบอร์เป็นรูปล่าสุดจากเว็บ Official (ระหว่างรอ/ดึงไม่ได้ = รูปที่บันทึกไว้ หรือรูปโปรไฟล์ในแอป)
+// แล้วบันทึกรูปนั้นไว้กับ Campaign: เซิร์ฟเวอร์ยอมให้อัปเดตเฉพาะตอน Campaign ยังเปิดอยู่ จบแล้วล็อกรูปสุดท้ายไว้
+const campaignBannerPhotoSaved = {};
 function hydrateCampaignBannerPhotos() {
   const imgs = document.querySelectorAll('img[data-cb-member]:not([data-cb-done])');
   if (!imgs.length) return;
@@ -381,7 +385,13 @@ function hydrateCampaignBannerPhotos() {
     if (!lib) return;
     imgs.forEach(img => {
       lib.getChampPhoto(img.getAttribute('data-cb-member'), 6000).then(url => {
-        if (!url || img.src === url) return;
+        if (!url) return;
+        const id = img.getAttribute('data-cb-campaign');
+        if (id && url !== img.getAttribute('data-cb-saved') && campaignBannerPhotoSaved[id] !== url && typeof blm48SetCampaignBannerPhoto === 'function') {
+          campaignBannerPhotoSaved[id] = url;
+          blm48SetCampaignBannerPhoto(id, url);
+        }
+        if (img.src === url) return;
         const probe = new Image();
         probe.referrerPolicy = 'no-referrer';
         probe.onload = () => { img.src = url; };
