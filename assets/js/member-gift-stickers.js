@@ -56,8 +56,8 @@
   // ท่าเคลื่อนไหวตามไฟล์ออกแบบ เปิดเมื่อสติ๊กเกอร์ "เล่น" (อยู่ในการ์ดที่ถูกเลือก หรือมีคลาส .play)
   const PLAY = '.selected .gift-sticker, .gift-sticker.play';
   const CSS = `
-    .gift-sticker { position: relative; display: flex; align-items: center; justify-content: center; border-radius: 28%; border: 2px solid #ffffff; box-shadow: 0 3px 0 rgba(60,45,10,0.10), 0 6px 12px rgba(60,45,10,0.08); box-sizing: border-box; flex-shrink: 0; }
-    .gift-sticker svg { width: 86%; height: 86%; overflow: visible; filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 3px 3px rgba(60,45,10,0.14)); }
+    .gift-sticker { position: relative; display: flex; align-items: center; justify-content: center; border-radius: 28%; border-style: solid; border-color: #ffffff; box-sizing: border-box; flex-shrink: 0; }
+    .gift-sticker svg { width: 100%; height: 100%; overflow: visible; }
     .gift-sticker .gs-bd { transform-box: fill-box; transform-origin: 50% 100%; }
     .gift-sticker .gs-tw { transform-box: fill-box; transform-origin: 50% 50%; }
     ${sel('.gs-a-float')} { animation: gs-float 3s ease-in-out infinite; }
@@ -106,8 +106,16 @@
     if (!s) return '';
     injectCss();
     const px = Number(size) || 70;
-    return `<div class="gift-sticker${opts && opts.play ? ' play' : ''}" style="width:${px}px;height:${px}px;background:${s.bg}">`
-      + `<svg viewBox="${s.viewBox}" role="img" aria-label="${s.label}">${s.svg}</svg></div>`;
+    // ขอบขาวแบบสติ๊กเกอร์ไดคัท + เงา ตามสัดส่วนในไฟล์ออกแบบ (ขอบ 4px ต่อภาพกว้าง 176px) ไม่ใช่ค่าตายตัว
+    // ภาพใหญ่ขอบจะได้หนาเท่าแบบ ภาพเล็กก็ไม่หนาเกิน
+    const r = n => Math.round(n * 10) / 10;
+    const o = r(Math.max(1.2, px * 4 / 176));
+    const filter = `drop-shadow(${o}px 0 0 #fff) drop-shadow(-${o}px 0 0 #fff) drop-shadow(0 ${o}px 0 #fff) drop-shadow(0 -${o}px 0 #fff)`
+      + ` drop-shadow(0 ${r(o * 1.5)}px ${r(o * 1.5)}px rgba(60,45,10,0.14))`;
+    const border = r(Math.max(1.5, px * 4 / 200));
+    const shadow = `0 ${r(px * 6 / 200)}px 0 rgba(60,45,10,0.10), 0 ${r(px * 14 / 200)}px ${r(px * 26 / 200)}px rgba(60,45,10,0.08)`;
+    return `<div class="gift-sticker${opts && opts.play ? ' play' : ''}" style="width:${px}px;height:${px}px;background:${s.bg};border-width:${border}px;box-shadow:${shadow}">`
+      + `<svg viewBox="${s.viewBox}" role="img" aria-label="${s.label}" style="filter:${filter}">${s.svg}</svg></div>`;
   }
 
   // รูปของขวัญ: ใช้ image_url จริงก่อน ถ้ายังไม่มีและเป็นของขวัญที่มีสติ๊กเกอร์ (เมมเบอร์ / Special) ใช้สติ๊กเกอร์แทน
