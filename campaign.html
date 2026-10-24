@@ -61,7 +61,9 @@
         .pm-row { display: flex; align-items: center; gap: 14px; padding: 10px 0; border-bottom: 1px solid #efefef; cursor: pointer; user-select: none; }
         .pm-avatar { position: relative; width: 54px; height: 54px; flex-shrink: 0; }
         .pm-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid #ffde5b; background: #f4f4f4; display: block; }
-        .pm-kami { position: absolute; left: 50%; bottom: -4px; transform: translateX(-50%); background: #e8649a; color: #fff; font-size: 9px; font-weight: 600; padding: 1px 6px; border-radius: 8px; white-space: nowrap; }
+        /* ป้ายสีเดียวกับ .kami-days-badge (member.html) / .my-kami-days (search.html) */
+        .pm-kami { position: absolute; left: 50%; bottom: -6px; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 3px; background: linear-gradient(135deg, #ffe08a, #ffc107); color: #6b4a00; font-size: 9px; font-weight: bold; padding: 2px 7px; border-radius: 20px; letter-spacing: 0.3px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); white-space: nowrap; }
+        .pm-kami i { font-size: 8px; }
         .pm-info { flex: 1; min-width: 0; }
         .pm-name { font-weight: 700; font-size: 15px; color: #222; text-transform: uppercase; letter-spacing: .2px; }
         .pm-full { font-size: 13.5px; color: #666; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -234,7 +236,7 @@
     document.getElementById('picker-list').innerHTML = list.length ? list.map(m => {
       const key = m.name.toLowerCase();
       return `<div class="pm-row ${pickerDraft.has(key) ? 'on' : ''}" data-key="${escapeAttr(key)}" onclick="togglePickerMember(this)" role="checkbox" aria-checked="${pickerDraft.has(key)}">
-        <div class="pm-avatar"><img src="${escapeAttr(m.img || 'assets/images/default-profile.png')}" alt="" loading="lazy" style="border-color:${groupFrameColor(m.group)}" draggable="false" oncontextmenu="return false">${m.kami ? '<span class="pm-kami">Kami-Oshi</span>' : ''}</div>
+        <div class="pm-avatar"><img src="${escapeAttr(m.img || 'assets/images/default-profile.png')}" alt="" loading="lazy" style="border-color:${groupFrameColor(m.group)}" draggable="false" oncontextmenu="return false">${m.kami ? '<span class="pm-kami"><i class="fas fa-crown"></i> Kami-Oshi</span>' : ''}</div>
         <div class="pm-info"><div class="pm-name">${escapeHtml(m.name)}</div>${m.full ? `<div class="pm-full">${escapeHtml(m.full)}</div>` : ''}</div>
         <div class="pm-check"><i class="fa-solid fa-check"></i></div>
       </div>`;
