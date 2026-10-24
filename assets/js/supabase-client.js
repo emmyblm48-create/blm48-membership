@@ -810,6 +810,10 @@ function blm48AdminUpdateVoteEventDetails(adminUsername, collectionId, ev) {
     p_start_time: ev.startTime, p_end_time: ev.endTime, p_enable_gift: !!ev.enableGift
   });
 }
+// ลบกิจกรรมโหวต (ต้องใส่ PIN แอดมินซ้ำ) - ประวัติโหวต/Token ของผู้ใช้ยังเก็บไว้, ลบไม่ได้ถ้ายังมี Token รอคืน
+function blm48AdminDeleteVoteEvent(adminUsername, collectionId, pin, device) {
+  return blm48Rpc('admin_delete_vote_event', { p_admin_username: adminUsername, p_collection_id: collectionId, p_pin: pin, p_device: device || null });
+}
 function blm48AdminAddVoteCandidates(adminUsername, collectionId, candidates) {
   return blm48Rpc('admin_add_vote_candidates', { p_admin_username: adminUsername, p_collection_id: collectionId, p_candidates: candidates });
 }
