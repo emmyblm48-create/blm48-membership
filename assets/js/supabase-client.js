@@ -561,6 +561,27 @@ function blm48GetMemberCampaignDetail(campaignId, username) {
 function blm48SupportMemberCampaign(username, campaignId, amount) {
   return blm48Rpc('support_member_campaign', { p_username: username, p_campaign_id: campaignId, p_amount: amount });
 }
+// Admin (admin_campaigns.html / admin_campaign.html) - ทุกตัวเช็ค is_admin_or_ceo ฝั่งเซิร์ฟเวอร์
+function blm48AdminListMemberCampaigns(adminUsername) {
+  return blm48Rpc('admin_list_member_campaigns', { p_admin_username: adminUsername });
+}
+function blm48AdminGetMemberCampaign(adminUsername, campaignId) {
+  return blm48Rpc('admin_get_member_campaign', { p_admin_username: adminUsername, p_campaign_id: campaignId });
+}
+// url ว่าง/null = ลบรูปปก (กลับไปใช้รูปโปรไฟล์เมมเบอร์)
+function blm48AdminSetCampaignCover(adminUsername, campaignId, url) {
+  return blm48Rpc('admin_set_campaign_cover', { p_admin_username: adminUsername, p_campaign_id: campaignId, p_url: url || null });
+}
+// ซ่อนบัญชีจาก Top Supporters ทุก Campaign (คุกกี้ยังนับยอด, คืนคุกกี้ตามปกติ)
+function blm48AdminSetCampaignHiddenSupporter(adminUsername, username, hidden) {
+  return blm48Rpc('admin_set_campaign_hidden_supporter', { p_admin_username: adminUsername, p_username: username, p_hidden: !!hidden });
+}
+function blm48AdminListCampaignHiddenSupporters(adminUsername) {
+  return blm48Rpc('admin_list_campaign_hidden_supporters', { p_admin_username: adminUsername });
+}
+function blm48AdminDeleteMemberCampaign(adminUsername, campaignId) {
+  return blm48Rpc('admin_delete_member_campaign', { p_admin_username: adminUsername, p_campaign_id: campaignId });
+}
 
 // Members directory / headline count
 function blm48GetAllMembers() {
