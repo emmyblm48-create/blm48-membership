@@ -140,7 +140,7 @@ const CAMPAIGN_BANNER_NAME_LINES = { bumblebee: ['Bum', 'BleBee'] };
 const CAMPAIGN_BANNER_MONTHS = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
 const CAMPAIGN_BANNER_FONTS = {
   magichour: 'family=Cinzel:wght@500;600;700&family=Cinzel+Decorative:wght@700',
-  sakura: 'family=Playfair+Display:wght@500;600&family=Great+Vibes',
+  sakura: 'family=Playfair+Display:wght@500;600',
   ocean: 'family=Dela+Gothic+One&family=M+PLUS+Rounded+1c:wght@800'
 };
 
@@ -210,13 +210,14 @@ function campaignBannerNameSize(name, max, boxW, charW) {
   .cb-sk-left { position: absolute; left: calc(var(--u) * 30); top: calc(var(--u) * 222); width: calc(var(--u) * 340); display: flex; flex-direction: column; align-items: center; gap: calc(var(--u) * 6); text-align: center; text-shadow: 0 calc(var(--u) * 2) calc(var(--u) * 14) #C2557D; }
   .cb-sk-title { font-weight: 500; font-size: calc(var(--u) * 52); line-height: 1; letter-spacing: 0.02em; display: flex; align-items: center; gap: calc(var(--u) * 8); }
   .cb-sk-title svg { width: calc(var(--u) * 26); height: calc(var(--u) * 26); }
-  .cb-sk-script { font-family: 'Great Vibes', cursive; font-size: calc(var(--u) * 40); line-height: 1.2; margin-top: calc(var(--u) * 4); }
   .cb-sk-period { font-size: calc(var(--u) * 16); font-weight: 600; letter-spacing: 0.18em; white-space: nowrap; }
   .cb-sk-frame { position: absolute; left: calc(var(--u) * 398); top: calc(var(--u) * 40); width: calc(var(--u) * 524); height: calc(var(--u) * 582); box-sizing: border-box; padding: calc(var(--u) * 10); border-radius: calc(var(--u) * 28); background: rgba(255,255,255,0.5); box-shadow: 0 0 calc(var(--u) * 40) calc(var(--u) * 6) rgba(255,255,255,0.75); }
   .cb-root .cb-sk-frame img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; display: block; border-radius: calc(var(--u) * 20); }
   .cb-sk-right { position: absolute; left: calc(var(--u) * 960); top: 0; bottom: 0; width: calc(var(--u) * 340); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(var(--u) * 12); text-align: center; }
   .cb-sk-name { font-weight: 500; line-height: 1; letter-spacing: 0.04em; white-space: nowrap; text-shadow: 0 calc(var(--u) * 2) calc(var(--u) * 14) #C2557D; }
-  .cb-sk-pill { padding: calc(var(--u) * 7) calc(var(--u) * 26); background: #FFFFFF; border-radius: calc(var(--u) * 4); color: #B84A73; font-size: calc(var(--u) * 22); font-weight: 600; letter-spacing: 0.08em; white-space: nowrap; }
+  /* โลโก้เพลง Sustainable (BLM48 10th Single) มุมขวาบน: ไฟล์ 2000x2000 พื้นใส ตัวโลโก้อยู่ช่วง x144-1862 y772-1150 -> ครอปด้วย CSS */
+  .cb-sk-logo { position: absolute; right: calc(var(--u) * 46); top: calc(var(--u) * 36); width: calc(var(--u) * 160); aspect-ratio: 1718 / 378; overflow: hidden; filter: drop-shadow(0 0 calc(var(--u) * 1) rgba(255,255,255,0.9)) drop-shadow(0 calc(var(--u) * 1) calc(var(--u) * 2) rgba(130,25,70,0.6)); }
+  .cb-root .cb-sk-logo img { position: absolute; width: 116.41%; height: auto; left: -8.38%; top: -204.23%; max-width: none; object-fit: contain; filter: brightness(1.12) saturate(1.3) contrast(1.1); }
 
   /* ===== Ocean ===== */
   .cb-ocean { background: #8FDBFA; font-family: 'M PLUS Rounded 1c', sans-serif; font-weight: 800; color: #1B2F6B; }
@@ -270,13 +271,12 @@ function renderCampaignBannerSakura(c) {
       <div class="cb-sk-left">
         <div class="cb-sk-title">${isBday ? 'BIRTHDAY' : 'CHAMP'}</div>
         <div class="cb-sk-title">CAMPAIGN<svg viewBox="-16 -16 32 32" aria-hidden="true"><path d="${CAMPAIGN_BANNER_SPARK}" fill="#FFFFFF"/></svg></div>
-        <div class="cb-sk-script">Sustainable</div>
         <div class="cb-sk-period">${escapeHtml(d.period)}</div>
       </div>
       <div class="cb-sk-frame">${campaignBannerPhoto(c, 'cb-photo')}</div>
+      <div class="cb-sk-logo"><img src="assets/img/campaign-banner/sakura/sustainable-logo.webp" alt="BLM48 10th Single Sustainable" draggable="false"></div>
       <div class="cb-sk-right">
         <div class="cb-sk-name" style="font-size: calc(var(--u) * ${campaignBannerNameSize(name, 74, 330, 0.72)});">${escapeHtml(name)}</div>
-        <div class="cb-sk-pill">${escapeHtml(isBday ? d.birthday : 'CHAMP OF THE MONTH')}</div>
       </div>
       <img class="cb-abs${isBday ? '' : ' cb-no-cake'}" src="${CAMPAIGN_BANNER_LOGOS}" alt="" draggable="false">
     </div>`;
