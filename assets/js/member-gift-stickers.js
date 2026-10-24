@@ -63,13 +63,15 @@
   // gift_id ใน gift_catalog → สติ๊กเกอร์ (ชื่อเมมเบอร์ หรือชื่อ Special Gift)
   const GIFT_MEMBER = {
     gift_001: 'Teddy Bear', gift_002: 'Bouquet', gift_003: 'Crown',
+    gift_031: 'Arlua',
     gift_032: 'Bumblebee', gift_033: 'Chathai', gift_034: 'Chimunk', gift_035: 'Chuu',
     gift_036: 'Earn', gift_037: 'Emmy', gift_038: 'Gavin', gift_039: 'Gino',
     gift_040: 'Hana', gift_041: 'Jaiun', gift_042: 'Jayden', gift_043: 'Jih',
     gift_044: 'Khawjao', gift_045: 'Kirin', gift_046: 'Krystal', gift_047: 'Kuea',
     gift_048: 'Mashi', gift_049: 'Mayfie', gift_050: 'Mushroom', gift_051: 'Nina',
     gift_052: 'Noel', gift_053: 'Porpieow', gift_054: 'Quantum', gift_055: 'Salty',
-    gift_056: 'Sora', gift_057: 'Tine', gift_058: 'Arlua',
+    gift_056: 'Sora', gift_057: 'Tine',
+    gift_058: 'Arlua', // ID เดิมของ Arlua (ย้ายไป gift_031 แล้ว) ยังมีของค้างใน Backpack บางคน ให้รูปยังขึ้นอยู่
     gift_059: 'April', gift_060: 'Atsui', gift_061: 'Berlin', gift_062: 'Domino',
     gift_063: 'Enjean', gift_064: 'Fuyu', gift_065: 'Hippie', gift_066: 'Mafuyu',
     gift_067: 'Ming', gift_068: 'Neno', gift_069: 'Phakdee', gift_070: 'Pj',
