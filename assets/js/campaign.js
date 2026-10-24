@@ -198,7 +198,7 @@ function campaignBannerNameSize(name, max, boxW, charW) {
   .cb-arch-shade { background: linear-gradient(180deg, rgba(160,20,40,0.12) 0%, rgba(0,0,0,0) 45%, rgba(110,8,24,0.35) 100%); }
   .cb-right { position: absolute; left: calc(var(--u) * 935); top: 0; bottom: 0; width: calc(var(--u) * 370); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(var(--u) * 16); text-align: center; }
   .cb-right svg { width: calc(var(--u) * 120); height: calc(var(--u) * 14); display: block; }
-  /* ไอคอนเค้กมุมซ้ายบนอยู่ในไฟล์ logos.png -> แบบ Champ (ไม่ใช่เดือนเกิด) ตัดมุมนั้นทิ้ง (ไอคอนอยู่ช่วง 14-101px จาก 1320x662) */
+  /* ไอคอนเค้กมุมซ้ายบน = อันใน logos.png เท่านั้น (ทุกธีม) -> แบบ Champ (ไม่ใช่เดือนเกิด) ตัดมุมนั้นทิ้ง (ไอคอนอยู่ช่วง 14-101px จาก 1320x662) */
   .cb-root .cb-no-cake { clip-path: polygon(8.4% 0, 100% 0, 100% 100%, 0 100%, 0 16.7%, 8.4% 16.7%); }
   .cb-name { font-family: 'Cinzel Decorative', serif; font-weight: 700; line-height: 1.02; color: #F4EEEE; white-space: nowrap; text-shadow: 0 0 calc(var(--u) * 22) #E0283C, 0 calc(var(--u) * 2) calc(var(--u) * 6) rgba(0,0,0,0.8); }
 
@@ -207,8 +207,6 @@ function campaignBannerNameSize(name, max, boxW, charW) {
   .cb-root img.cb-sk-bg { object-fit: cover; object-position: center 30%; filter: blur(calc(var(--u) * 26)) saturate(1.1); transform: scale(1.15); }
   .cb-sk-tint { background: linear-gradient(180deg, rgba(255,226,236,0.55) 0%, rgba(250,196,216,0.5) 100%); }
   .cb-sk-glow { position: absolute; left: calc(var(--u) * 260); top: calc(var(--u) * -120); width: calc(var(--u) * 800); height: calc(var(--u) * 900); border-radius: 50%; background: radial-gradient(ellipse, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 65%); }
-  .cb-sk-cake { position: absolute; left: calc(var(--u) * 22); top: calc(var(--u) * 22); width: calc(var(--u) * 64); height: calc(var(--u) * 64); box-sizing: border-box; border-radius: 50%; border: calc(var(--u) * 1.5) solid rgba(255,255,255,0.75); display: flex; align-items: center; justify-content: center; }
-  .cb-sk-cake svg { width: calc(var(--u) * 34); height: calc(var(--u) * 34); }
   .cb-sk-left { position: absolute; left: calc(var(--u) * 30); top: calc(var(--u) * 222); width: calc(var(--u) * 340); display: flex; flex-direction: column; align-items: center; gap: calc(var(--u) * 6); text-align: center; text-shadow: 0 calc(var(--u) * 2) calc(var(--u) * 14) #C2557D; }
   .cb-sk-title { font-weight: 500; font-size: calc(var(--u) * 52); line-height: 1; letter-spacing: 0.02em; display: flex; align-items: center; gap: calc(var(--u) * 8); }
   .cb-sk-title svg { width: calc(var(--u) * 26); height: calc(var(--u) * 26); }
@@ -263,15 +261,12 @@ function renderCampaignBannerSakura(c) {
   const isBday = !!c.isBirthMonth;
   const d = campaignBannerDates(c);
   const sp = (x, y, s, o) => `<path d="${CAMPAIGN_BANNER_SPARK}" transform="translate(${x} ${y}) scale(${s})" opacity="${o}"/>`;
-  // ไอคอนเค้กเป็นของแบบนี้เอง (เดือนเกิดเท่านั้น) -> ไอคอนเค้กใน logos.png ตัดทิ้งเสมอ
-  const cake = isBday ? `<div class="cb-sk-cake" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16v8H4z"/><path d="M4 15.5c1.3 1 2.7 1 4 0s2.7-1 4 0 2.7 1 4 0 2.7-1 4 0"/><path d="M3 20h18"/><path d="M8 12V9"/><path d="M12 12V9"/><path d="M16 12V9"/><path d="M8 6.5c.6-.6.6-1.4 0-2"/><path d="M12 6.5c.6-.6.6-1.4 0-2"/><path d="M16 6.5c.6-.6.6-1.4 0-2"/></svg></div>` : '';
   return `
     <div class="cb-root cb-sakura" aria-label="${escapeAttr((isBday ? 'Birthday Campaign ' : 'Champ Campaign ') + c.memberName)}">
       ${campaignBannerPhoto(c, 'cb-abs cb-sk-bg')}
       <div class="cb-abs cb-sk-tint"></div>
       <div class="cb-sk-glow"></div>
       <svg class="cb-abs" viewBox="0 0 1320 662" aria-hidden="true"><g fill="#FFFFFF">${sp(150, 150, 0.7, 0.9)}${sp(340, 470, 0.6, 0.8)}${sp(1000, 150, 0.8, 0.9)}${sp(1250, 120, 0.55, 0.8)}${sp(980, 470, 0.6, 0.8)}<circle cx="90" cy="420" r="2" opacity="0.8"/><circle cx="270" cy="90" r="1.6" opacity="0.8"/><circle cx="1100" cy="560" r="2" opacity="0.8"/><circle cx="1180" cy="230" r="1.6" opacity="0.8"/></g></svg>
-      ${cake}
       <div class="cb-sk-left">
         <div class="cb-sk-title">${isBday ? 'BIRTHDAY' : 'CHAMP'}</div>
         <div class="cb-sk-title">CAMPAIGN<svg viewBox="-16 -16 32 32" aria-hidden="true"><path d="${CAMPAIGN_BANNER_SPARK}" fill="#FFFFFF"/></svg></div>
@@ -283,7 +278,7 @@ function renderCampaignBannerSakura(c) {
         <div class="cb-sk-name" style="font-size: calc(var(--u) * ${campaignBannerNameSize(name, 74, 330, 0.72)});">${escapeHtml(name)}</div>
         <div class="cb-sk-pill">${escapeHtml(isBday ? d.birthday : 'CHAMP OF THE MONTH')}</div>
       </div>
-      <img class="cb-abs cb-no-cake" src="${CAMPAIGN_BANNER_LOGOS}" alt="" draggable="false">
+      <img class="cb-abs${isBday ? '' : ' cb-no-cake'}" src="${CAMPAIGN_BANNER_LOGOS}" alt="" draggable="false">
     </div>`;
 }
 
