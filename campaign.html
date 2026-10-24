@@ -43,7 +43,6 @@
         .sheet-option:active { background: rgba(0,0,0,.06); }
         .sheet-cancel { display: block; width: 100%; margin-top: 8px; border: none; background: #fff; border-radius: 14px; font-family: inherit; font-size: 20px; font-weight: 700; color: #111; padding: 17px 12px; cursor: pointer; }
         .sheet-cancel:active { background: #f0f0f0; }
-        .toolbar-note { font-size: 12px; color: #767676; margin: -6px 0 12px; }
         .filter-btn { border: none; background: none; font-family: inherit; color: #222; padding: 4px 0; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
         .filter-btn i { font-size: 19px; }
         .filter-count { display: none; background: #222; color: #fff; border-radius: 999px; font-size: 12.5px; font-weight: 600; padding: 3px 10px; white-space: nowrap; }
@@ -90,7 +89,6 @@
         <button type="button" class="sort-btn" onclick="openSortSheet()"><span id="sort-label">Newest</span><i class="fa-solid fa-chevron-down"></i></button>
         <button type="button" id="filter-btn" class="filter-btn" onclick="openMemberPicker()" aria-label="Filter members"><span class="filter-count" id="filter-label"></span><i class="fa-solid fa-sliders"></i></button>
     </div>
-    <div class="toolbar-note"><i class="fa-solid fa-trophy" style="color:#fcc419;"></i> Champ of the Month</div>
     <div id="campaign-list">
         <div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i>Loading...</div>
     </div>
