@@ -774,8 +774,9 @@
     }
 
     // ของขวัญประจำตัวเมมเบอร์ที่ยังไม่มีรูปจริง ใช้สติ๊กเกอร์จาก member-gift-stickers.js
-    function giftImageHtml(item, size, imgHtml) {
-        return window.blm48GiftImageHtml ? window.blm48GiftImageHtml(item.rawId, item.img, size, imgHtml) : imgHtml;
+    // สติ๊กเกอร์ในกริดจะขยับเมื่อการ์ดถูกเลือก (.selected) / opts.play = ขยับตลอด เช่นในกล่องยืนยัน
+    function giftImageHtml(item, size, imgHtml, opts) {
+        return window.blm48GiftImageHtml ? window.blm48GiftImageHtml(item.rawId, item.img, size, imgHtml, opts) : imgHtml;
     }
 
     function giftGridImgSize() {
@@ -994,7 +995,13 @@
         selectedGiftId = giftId;
         // สลับแค่คลาส ไม่ render ใหม่ทั้งกริด จะได้ไม่เด้งกลับหน้าแรก
         document.querySelectorAll('#gift-pager .gift-item-card').forEach(card => {
-            card.classList.toggle('selected', card.dataset.giftId === String(giftId));
+            const isSelected = card.dataset.giftId === String(giftId);
+            // กดการ์ดที่เลือกอยู่แล้วซ้ำ = เล่นท่าเคลื่อนไหวใหม่ตั้งแต่ต้น
+            if (isSelected && card.classList.contains('selected')) {
+                card.classList.remove('selected');
+                void card.offsetWidth;
+            }
+            card.classList.toggle('selected', isSelected);
         });
         selectedGiftQty = Math.min(selectedGiftQty, Math.max(1, getMaxGiftQty()));
         renderQtyRow();
@@ -1093,7 +1100,7 @@
         document.getElementById('gift-confirm-body').innerHTML = `
             <div class="gift-confirm-item">
                 <div class="gift-confirm-item-col">
-                    ${giftImageHtml(item, 96, `<img src="${fixSecureImageUrl(item.img)}" alt="" onerror="this.src='${BLANK_IMG}'">`)}
+                    ${giftImageHtml(item, 96, `<img src="${fixSecureImageUrl(item.img)}" alt="" onerror="this.src='${BLANK_IMG}'">`, { play: true })}
                     <div class="gift-item-name">${escapeAttr(item.name)}</div>
                     <div class="gift-item-cost">${pill}</div>
                 </div>
