@@ -87,21 +87,14 @@
     const rec = document.getElementById('mv-rec-row');
     const list = document.getElementById('mv-list');
     rec.innerHTML = '';
+    delete rec.dataset.key;
     list.innerHTML = '';
     if (!mvs.length) {
       list.innerHTML = '<div class="empty-state">ยังไม่มี Music Video</div>';
       return;
     }
 
-    // Recommended = 5 เพลงล่าสุด, รายการด้านล่าง = ทั้งหมด
-    mvs.slice(0, 5).forEach(mv => {
-      const card = document.createElement('div');
-      card.className = 'mv-card';
-      card.innerHTML = mvCardHtml(mv, false);
-      card.onclick = () => openMv(mv);
-      rec.appendChild(card);
-    });
-
+    // รายการด้านล่าง = ทั้งหมด (ใหม่ → เก่า), Recommended = 5 คลิปยอดวิวสูงสุด (เรียงใหม่เมื่อได้ยอดวิว)
     mvs.forEach(mv => {
       const card = document.createElement('div');
       card.className = 'mv-card';
@@ -109,7 +102,37 @@
       card.onclick = () => openMv(mv);
       list.appendChild(card);
     });
-    loadMvViews();
+    renderRecommended(mvs, {});
+    loadMvViews(views => renderRecommended(mvs, views));
+  }
+
+  // Recommended video: 5 คลิปที่ยอดวิวสูงสุด (คลิปที่ยังไม่มียอดวิวไว้ท้าย ตามลำดับเดิม)
+  // วาดใหม่เฉพาะตอนที่ 5 อันดับเปลี่ยน กันการ์ดกระพริบ
+  function renderRecommended(mvs, views) {
+    const rec = document.getElementById('mv-rec-row');
+    const viewsOf = mv => {
+      const n = views[mvYoutubeId(mv.link)];
+      return n == null ? -1 : n;
+    };
+    const top = mvs
+      .map((mv, i) => ({ mv, i, n: viewsOf(mv) }))
+      .sort((a, b) => b.n - a.n || a.i - b.i)
+      .slice(0, 5)
+      .map(x => x.mv);
+    const key = top.map(mv => mv.link).join('|');
+    if (rec.dataset.key !== key) {
+      rec.dataset.key = key;
+      rec.innerHTML = '';
+      top.forEach(mv => {
+        const card = document.createElement('div');
+        card.className = 'mv-card';
+        card.innerHTML = mvCardHtml(mv, false);
+        card.onclick = () => openMv(mv);
+        rec.appendChild(card);
+      });
+      rec.scrollLeft = 0;
+    }
+    fillMvViews(views);
   }
 
   window.addEventListener('DOMContentLoaded', () => onMusicVideos(renderMusicVideos));

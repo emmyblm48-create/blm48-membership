@@ -222,10 +222,12 @@ function fillMvViews(views) {
 }
 
 // โชว์ตัวเลขจาก cache ทันที แล้วค่อยอัปเดตจากเซิร์ฟเวอร์ (ส่ง ID ของทุกการ์ดที่โชว์อยู่ไปด้วย)
-function loadMvViews() {
+// onViews(views) ถูกเรียกทุกครั้งที่ได้ตัวเลขชุดใหม่ (เช่น ใช้เรียงแถว Recommended ตามยอดวิว)
+function loadMvViews(onViews) {
   let cached = {};
   try { cached = JSON.parse(localStorage.getItem(MV_VIEWS_CACHE_KEY) || "{}") || {}; } catch (e) {}
   fillMvViews(cached);
+  if (onViews) onViews(cached);
   const ids = [...new Set([...document.querySelectorAll(".mv-views[data-mv-yt]")].map(el => el.dataset.mvYt))].sort();
   // แบ่งส่งทีละ 30 คลิป (API รับได้ไม่เกิน 60 และคลิปจากเพลย์ลิสต์มีเยอะ)
   for (let i = 0; i < ids.length; i += 30) {
@@ -236,6 +238,7 @@ function loadMvViews() {
         const views = Object.assign(cached, d.views);
         fillMvViews(views);
         try { localStorage.setItem(MV_VIEWS_CACHE_KEY, JSON.stringify(views)); } catch (e) {}
+        if (onViews) onViews(views);
       })
       .catch(() => {});
   }
