@@ -76,9 +76,9 @@
   align-items: center;
   gap: 7px;
   font-size: 13px;
-  color: #8a8a8a;
+  color: #707070;
 }
-.mv-meta i { font-size: 14px; color: #9a9a9a; }
+.mv-meta i { font-size: 14px; color: #707070; }
 
 /* ยอดวิวต่อท้ายวันที่: "4 Oct 2026 · 1.4K views" */
 .mv-views::before { content: "•"; margin: 0 6px 0 2px; color: #b5b5b5; }
