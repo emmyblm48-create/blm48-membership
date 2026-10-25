@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8">
+        <script src="assets/js/back-nav.js"></script>
+<title>BLM48 Membership | Music Video</title>
+    <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s32">
+    <meta name="theme-color" content="#ffc0cb">
+    <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s180">
+    <link rel="icon" sizes="192x192" href="https://lh3.googleusercontent.com/d/1p6lV8bD6VVjR-Ys2EnpcQH1AOsnahQSp=s192">
+    <meta name="apple-mobile-web-app-title" content="BLM48">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/glassmorphism.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/supabase-client.js"></script>
+    <script src="assets/js/common.js"></script>
+    <script src="assets/js/music-videos.js"></script>
+    <link rel="stylesheet" href="assets/css/music-video.css">
+
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Quicksand', 'Kanit', sans-serif; margin: 0; padding: 0; min-height: 100vh; color: #444; background: #ffffff; }
+        .top-navigation-bar { display: grid; grid-template-columns: 38px 1fr 38px; align-items: center; background: #fff; padding: 14px 16px; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 100; }
+        .back-circle-btn { background: none; border: none; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; color: #222; font-size: 20px; cursor: pointer; }
+        .top-bar-title { text-align: center; font-weight: 600; font-size: 18px; color: #222; }
+        .page-wrapper { max-width: 640px; margin: 0 auto; padding: 16px 0 50px; }
+        .mv-section-title { font-weight: 700; font-size: 18px; color: #222; margin: 0 12px 12px; }
+
+        /* Recommended video: แถวเลื่อนแนวนอน การ์ดเล็กลง เห็นการ์ดถัดไปโผล่ขวา */
+        .mv-rec-row { display: flex; gap: 12px; overflow-x: auto; overflow-y: hidden; padding: 0 12px 4px; scroll-snap-type: x mandatory; scroll-padding-left: 12px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+        .mv-rec-row::-webkit-scrollbar { display: none; }
+        .mv-rec-row .mv-card { width: 52vw; max-width: 260px; }
+        .mv-rec-row .mv-title { font-size: 13.5px; min-height: calc(13.5px * 1.4 * 2); }
+        .mv-rec-row .mv-ribbon { width: 28px; font-size: 8px; padding: 4px 0 9px; }
+        .mv-rec-row .mv-ribbon i { font-size: 12px; }
+        .mv-rec-row .mv-meta { font-size: 12px; }
+
+        /* รายการทั้งหมด: การ์ดเต็มความกว้าง + ปุ่ม Watch Now */
+        #mv-list { display: flex; flex-direction: column; gap: 28px; padding: 0 12px; margin-top: 30px; }
+        #mv-list .mv-card { width: 100%; max-width: none; }
+        #mv-list .mv-thumb-wrap { border-radius: 14px; }
+        #mv-list .mv-title { font-size: 16px; min-height: 0; }
+        .mv-action-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; }
+        .mv-free { display: inline-flex; align-items: center; gap: 7px; font-weight: 700; font-size: 15px; color: #222; }
+        .mv-free i { color: #ff0033; font-size: 20px; }
+        .mv-watch-btn { border: none; border-radius: 999px; background: #ffde5b; color: #222; font-family: inherit; font-size: 15px; font-weight: 600; padding: 9px 26px; cursor: pointer; white-space: nowrap; }
+        .mv-watch-btn:active { background: #f5cf3a; }
+        .empty-state { text-align: center; color: #767676; padding: 50px 20px; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="top-navigation-bar">
+    <button type="button" class="back-circle-btn" onclick="blm48Back('index')" aria-label="ย้อนกลับ"><i class="fa-solid fa-chevron-left"></i></button>
+    <div class="top-bar-title">Music Video</div>
+    <span></span>
+</div>
+
+<div class="page-wrapper">
+    <div class="mv-section-title">Recommended video</div>
+    <div class="mv-rec-row" id="mv-rec-row"></div>
+    <div id="mv-list"></div>
+</div>
+
+<script>
+  // การ์ดวิดีโอ 1 ใบ (ใช้ทั้งแถว Recommended และรายการทั้งหมด)
+  function mvCardHtml(mv, withAction) {
+    return `
+      <div class="mv-thumb-wrap">
+        <img src="${mvEsc(mv.image)}" alt="MV Cover" class="mv-thumbnail" loading="lazy">
+        ${MV_RIBBON_HTML}
+      </div>
+      <div class="mv-title">${mvEsc(mv.title.trim())}</div>
+      <div class="mv-meta"><i class="fa-regular fa-calendar"></i><span>${formatMvDate(mv.date)}</span>${mvViewsHtml(mv)}</div>
+      ${withAction ? `
+      <div class="mv-action-row">
+        <span class="mv-free"><i class="fa-brands fa-youtube"></i>Free on YouTube</span>
+        <button type="button" class="mv-watch-btn">Watch Now</button>
+      </div>` : ''}
+    `;
+  }
+
+  function renderMusicVideos() {
+    const rec = document.getElementById('mv-rec-row');
+    const list = document.getElementById('mv-list');
+    if (!blm48MVs.length) {
+      list.innerHTML = '<div class="empty-state">ยังไม่มี Music Video</div>';
+      return;
+    }
+
+    // Recommended = 5 เพลงล่าสุด, รายการด้านล่าง = ทั้งหมด
+    blm48MVs.slice(0, 5).forEach(mv => {
+      const card = document.createElement('div');
+      card.className = 'mv-card';
+      card.innerHTML = mvCardHtml(mv, false);
+      card.onclick = () => openMv(mv);
+      rec.appendChild(card);
+    });
+
+    blm48MVs.forEach(mv => {
+      const card = document.createElement('div');
+      card.className = 'mv-card';
+      card.innerHTML = mvCardHtml(mv, true);
+      card.onclick = () => openMv(mv);
+      list.appendChild(card);
+    });
+    loadMvViews();
+  }
+
+  window.addEventListener('DOMContentLoaded', renderMusicVideos);
+</script>
+</body>
+</html>
