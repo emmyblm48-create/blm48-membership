@@ -1,6 +1,7 @@
 // =========================================================================
 // 🎵 BLM48 — รายการ Music Video (ใช้ร่วมกัน: Home แถว "Music Video" + หน้า musicvideo.html)
 // รายการหลักมาจากหน้า Discography (Movie) ของ BLM48 Official Website — เพิ่ม MV ใหม่ที่ Google Sheet/เว็บนั้น
+// + ทุกคลิปในเพลย์ลิสต์/พอดแคสต์ของหน้า Discography (/api/mv-playlists)
 // blm48MVs ด้านล่างเป็นรายการสำรอง (ใช้ตอนโหลดเว็บนั้นไม่ได้) และ MV ที่มีแค่ในนี้จะถูกรวมเข้าไปด้วย
 // =========================================================================
 const blm48MVs = [
@@ -138,29 +139,58 @@ function loadDiscographyMovies() {
   return mvDiscographyPromise;
 }
 
-// รายการจาก Discography ตามลำดับเดิมของเว็บนั้น + MV ที่มีแค่ใน blm48MVs แทรกตามวันที่
-function mergeMvLists(movie) {
-  const list = movie
-    .filter(m => m && m.link && m.thumbnail)
-    .map(m => ({ title: String(m.title || ""), date: m.date, image: m.thumbnail, link: m.link }));
+// คลิปทั้งหมดในเพลย์ลิสต์/พอดแคสต์ของ Discography (/api/mv-playlists) — ไม่ได้ภายใน 15 วิ ถือว่าไม่มี
+let mvPlaylistPromise = null;
+function loadPlaylistVideos() {
+  if (mvPlaylistPromise) return mvPlaylistPromise;
+  mvPlaylistPromise = Promise.race([
+    fetch("/api/mv-playlists").then(r => (r.ok ? r.json() : null)).then(d => (d && Array.isArray(d.videos) && d.videos.length ? d.videos : null)),
+    new Promise(resolve => setTimeout(() => resolve(null), 15000))
+  ]).catch(() => null);
+  return mvPlaylistPromise;
+}
+
+// แทรก MV ที่ยังไม่มีใน list ตามวันที่ (ใหม่ → เก่า)
+function insertMvsByDate(list, mvs) {
   const ids = new Set(list.map(m => mvYoutubeId(m.link)));
-  blm48MVs.forEach(mv => {
-    if (ids.has(mvYoutubeId(mv.link))) return;
+  mvs.forEach(mv => {
+    const id = mvYoutubeId(mv.link);
+    if (ids.has(id)) return;
+    ids.add(id);
     const at = list.findIndex(m => mvTime(m) < mvTime(mv));
     list.splice(at < 0 ? list.length : at, 0, mv);
   });
   return list;
 }
 
-// เรียก cb(รายการ) ทันทีด้วยรายการล่าสุดที่จำไว้ (หรือรายการสำรอง) แล้วเรียกอีกครั้งถ้า Discography ต่างไปจากเดิม
+// รายการจาก Discography (Movie) ตามลำดับเดิมของเว็บนั้น + MV ที่มีแค่ใน blm48MVs + คลิปจากเพลย์ลิสต์ แทรกตามวันที่
+function mergeMvLists(movie, playlistVideos) {
+  const list = (movie || [])
+    .filter(m => m && m.link && m.thumbnail)
+    .map(m => ({ title: String(m.title || ""), date: m.date, image: m.thumbnail, link: m.link }));
+  insertMvsByDate(list, blm48MVs);
+  insertMvsByDate(list, (playlistVideos || []).map(v => ({ title: v.title, date: v.date, image: v.image, link: v.link })));
+  return list;
+}
+
+// ยอดวิวที่มากับคลิปจากเพลย์ลิสต์ → ใส่ cache ไว้ก่อน (loadMvViews จะอัปเดตทับให้ภายหลัง)
+function seedMvViews(playlistVideos) {
+  let cached = {};
+  try { cached = JSON.parse(localStorage.getItem(MV_VIEWS_CACHE_KEY) || "{}") || {}; } catch (e) {}
+  (playlistVideos || []).forEach(v => { if (v.views != null && cached[v.id] == null) cached[v.id] = v.views; });
+  try { localStorage.setItem(MV_VIEWS_CACHE_KEY, JSON.stringify(cached)); } catch (e) {}
+}
+
+// เรียก cb(รายการ) ทันทีด้วยรายการล่าสุดที่จำไว้ (หรือรายการสำรอง) แล้วเรียกอีกครั้งถ้ารายการใหม่ต่างไปจากเดิม
 function onMusicVideos(cb) {
   let shown = null;
   try { shown = JSON.parse(localStorage.getItem(MV_LIST_CACHE_KEY) || "null"); } catch (e) {}
   if (!Array.isArray(shown) || !shown.length) shown = blm48MVs;
   cb(shown);
-  loadDiscographyMovies().then(movie => {
-    if (!movie) return;
-    const list = mergeMvLists(movie);
+  Promise.all([loadDiscographyMovies(), loadPlaylistVideos()]).then(([movie, playlistVideos]) => {
+    if (!movie && !playlistVideos) return;
+    seedMvViews(playlistVideos);
+    const list = mergeMvLists(movie, playlistVideos);
     try { localStorage.setItem(MV_LIST_CACHE_KEY, JSON.stringify(list)); } catch (e) {}
     if (JSON.stringify(list) !== JSON.stringify(shown)) cb(list);
   });
@@ -197,14 +227,16 @@ function loadMvViews() {
   try { cached = JSON.parse(localStorage.getItem(MV_VIEWS_CACHE_KEY) || "{}") || {}; } catch (e) {}
   fillMvViews(cached);
   const ids = [...new Set([...document.querySelectorAll(".mv-views[data-mv-yt]")].map(el => el.dataset.mvYt))].sort();
-  if (!ids.length) return;
-  fetch("/api/mv-views?ids=" + encodeURIComponent(ids.join(",")))
-    .then(r => (r.ok ? r.json() : null))
-    .then(d => {
-      if (!d || !d.views) return;
-      const views = Object.assign(cached, d.views);
-      fillMvViews(views);
-      try { localStorage.setItem(MV_VIEWS_CACHE_KEY, JSON.stringify(views)); } catch (e) {}
-    })
-    .catch(() => {});
+  // แบ่งส่งทีละ 30 คลิป (API รับได้ไม่เกิน 60 และคลิปจากเพลย์ลิสต์มีเยอะ)
+  for (let i = 0; i < ids.length; i += 30) {
+    fetch("/api/mv-views?ids=" + encodeURIComponent(ids.slice(i, i + 30).join(",")))
+      .then(r => (r.ok ? r.json() : null))
+      .then(d => {
+        if (!d || !d.views) return;
+        const views = Object.assign(cached, d.views);
+        fillMvViews(views);
+        try { localStorage.setItem(MV_VIEWS_CACHE_KEY, JSON.stringify(views)); } catch (e) {}
+      })
+      .catch(() => {});
+  }
 }
