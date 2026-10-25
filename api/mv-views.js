@@ -26,7 +26,23 @@ const fromPlayer = async (id) => {
   return num((await r.json())?.videoDetails?.viewCount);
 };
 
+// YouTube Data API (ตั้ง YOUTUBE_API_KEY ใน Vercel → Settings → Environment Variables)
+// ต้องใช้ทางนี้บน Vercel เพราะ YouTube ไม่ส่งยอดวิวจากหน้าเว็บให้เซิร์ฟเวอร์ของ Vercel
+const fromApi = async (ids, key) => {
+  const views = {};
+  for (let i = 0; i < ids.length; i += 50) {
+    const r = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${ids.slice(i, i + 50).join(",")}&key=${key}`);
+    if (!r.ok) throw new Error(`YouTube API ${r.status}`);
+    for (const item of (await r.json()).items || []) views[item.id] = Number(item.statistics.viewCount) || 0;
+  }
+  return views;
+};
+
 const fromYoutube = async (ids) => {
+  const key = process.env.YOUTUBE_API_KEY;
+  if (key && ids.length) {
+    try { return await fromApi(ids, key); } catch {}
+  }
   const views = {};
   const queue = [...ids];
   const worker = async () => {
