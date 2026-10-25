@@ -45,9 +45,7 @@
         #mv-list .mv-card { width: 100%; max-width: none; }
         #mv-list .mv-thumb-wrap { border-radius: 14px; }
         #mv-list .mv-title { font-size: 16px; min-height: 0; }
-        .mv-action-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; }
-        .mv-free { display: inline-flex; align-items: center; gap: 7px; font-weight: 700; font-size: 15px; color: #222; }
-        .mv-free i { color: #ff0033; font-size: 20px; }
+        .mv-action-row { display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin-top: 12px; }
         .mv-watch-btn { border: none; border-radius: 999px; background: #ffde5b; color: #222; font-family: inherit; font-size: 15px; font-weight: 600; padding: 9px 26px; cursor: pointer; white-space: nowrap; }
         .mv-watch-btn:active { background: #f5cf3a; }
         .empty-state { text-align: center; color: #767676; padding: 50px 20px; font-size: 14px; }
@@ -79,7 +77,6 @@
       <div class="mv-meta"><i class="fa-regular fa-calendar"></i><span>${formatMvDate(mv.date)}</span>${mvViewsHtml(mv)}</div>
       ${withAction ? `
       <div class="mv-action-row">
-        <span class="mv-free"><i class="fa-brands fa-youtube"></i>Free on YouTube</span>
         <button type="button" class="mv-watch-btn">Watch Now</button>
       </div>` : ''}
     `;
