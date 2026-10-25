@@ -31,7 +31,7 @@
         .page-wrapper { max-width: 640px; margin: 0 auto; padding: 16px 0 50px; }
         .mv-section-title { font-weight: 700; font-size: 18px; color: #222; margin: 0 12px 12px; }
 
-        /* Recommended video: แถวเลื่อนแนวนอน การ์ดเล็กลง เห็นการ์ดถัดไปโผล่ขวา */
+        /* Popular video: แถวเลื่อนแนวนอน การ์ดเล็กลง เห็นการ์ดถัดไปโผล่ขวา */
         .mv-rec-row { display: flex; gap: 12px; overflow-x: auto; overflow-y: hidden; padding: 0 12px 4px; scroll-snap-type: x mandatory; scroll-padding-left: 12px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
         .mv-rec-row::-webkit-scrollbar { display: none; }
         .mv-rec-row .mv-card { width: 52vw; max-width: 260px; }
@@ -60,7 +60,7 @@
 </div>
 
 <div class="page-wrapper">
-    <div class="mv-section-title">Recommended video</div>
+    <div class="mv-section-title">Popular video</div>
     <div class="mv-rec-row" id="mv-rec-row"></div>
     <div id="mv-list"></div>
 </div>
@@ -106,7 +106,7 @@
     loadMvViews(views => renderRecommended(mvs, views));
   }
 
-  // Recommended video: 5 คลิปที่ยอดวิวสูงสุด (คลิปที่ยังไม่มียอดวิวไว้ท้าย ตามลำดับเดิม)
+  // Popular video: 5 คลิปที่ยอดวิวสูงสุด (คลิปที่ยังไม่มียอดวิวไว้ท้าย ตามลำดับเดิม)
   // วาดใหม่เฉพาะตอนที่ 5 อันดับเปลี่ยน กันการ์ดกระพริบ
   function renderRecommended(mvs, views) {
     const rec = document.getElementById('mv-rec-row');
