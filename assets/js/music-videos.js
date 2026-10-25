@@ -1,6 +1,7 @@
 // =========================================================================
 // 🎵 BLM48 — รายการ Music Video (ใช้ร่วมกัน: Home แถว "Music Video" + หน้า musicvideo.html)
-// เพิ่ม MV ใหม่: ใส่ไว้บนสุดของ blm48MVs (เรียงใหม่ → เก่า) ใส่ title / date / image / link
+// รายการหลักมาจากหน้า Discography (Movie) ของ BLM48 Official Website — เพิ่ม MV ใหม่ที่ Google Sheet/เว็บนั้น
+// blm48MVs ด้านล่างเป็นรายการสำรอง (ใช้ตอนโหลดเว็บนั้นไม่ได้) และ MV ที่มีแค่ในนี้จะถูกรวมเข้าไปด้วย
 // =========================================================================
 const blm48MVs = [
    { 
@@ -102,14 +103,71 @@ function openMv(mv) {
   if (mv && mv.link) window.open(mv.link, "_blank");
 }
 
-// ---------- ยอดวิว (จาก EmmyBLM48 Official Site ผ่าน /api/mv-views) ----------
-const MV_VIEWS_CACHE_KEY = "blm48_mv_views";
+// ---------- รายการ MV จาก Discography ของ BLM48 Official Website ----------
+const MV_DISCOGRAPHY_URL = "https://blm48.vercel.app/assets/js/sheet-data.js";
+const MV_LIST_CACHE_KEY = "blm48_mv_list";
 
 // ดึง YouTube ID จากลิงก์ (youtu.be/ID, watch?v=ID)
 function mvYoutubeId(link) {
   const m = String(link || "").match(/(?:youtu\.be\/|[?&]v=)([\w-]{11})/);
   return m ? m[1] : "";
 }
+
+function mvTime(mv) {
+  const d = new Date(mv.date);
+  return isNaN(d) ? 0 : d.getTime();
+}
+
+// โหลด sheet-data.js ของเว็บ BLM48 (ตั้ง window.BLM48_STATIC_SHEETS.Movie) — ไม่ได้ภายใน 8 วิ ถือว่าไม่มี
+let mvDiscographyPromise = null;
+function loadDiscographyMovies() {
+  if (mvDiscographyPromise) return mvDiscographyPromise;
+  mvDiscographyPromise = new Promise(resolve => {
+    const done = () => {
+      const movie = window.BLM48_STATIC_SHEETS && window.BLM48_STATIC_SHEETS.Movie;
+      resolve(Array.isArray(movie) && movie.length ? movie : null);
+    };
+    const s = document.createElement("script");
+    s.src = MV_DISCOGRAPHY_URL;
+    s.async = true;
+    s.onload = done;
+    s.onerror = () => resolve(null);
+    setTimeout(() => resolve(null), 8000);
+    document.head.appendChild(s);
+  });
+  return mvDiscographyPromise;
+}
+
+// รายการจาก Discography ตามลำดับเดิมของเว็บนั้น + MV ที่มีแค่ใน blm48MVs แทรกตามวันที่
+function mergeMvLists(movie) {
+  const list = movie
+    .filter(m => m && m.link && m.thumbnail)
+    .map(m => ({ title: String(m.title || ""), date: m.date, image: m.thumbnail, link: m.link }));
+  const ids = new Set(list.map(m => mvYoutubeId(m.link)));
+  blm48MVs.forEach(mv => {
+    if (ids.has(mvYoutubeId(mv.link))) return;
+    const at = list.findIndex(m => mvTime(m) < mvTime(mv));
+    list.splice(at < 0 ? list.length : at, 0, mv);
+  });
+  return list;
+}
+
+// เรียก cb(รายการ) ทันทีด้วยรายการล่าสุดที่จำไว้ (หรือรายการสำรอง) แล้วเรียกอีกครั้งถ้า Discography ต่างไปจากเดิม
+function onMusicVideos(cb) {
+  let shown = null;
+  try { shown = JSON.parse(localStorage.getItem(MV_LIST_CACHE_KEY) || "null"); } catch (e) {}
+  if (!Array.isArray(shown) || !shown.length) shown = blm48MVs;
+  cb(shown);
+  loadDiscographyMovies().then(movie => {
+    if (!movie) return;
+    const list = mergeMvLists(movie);
+    try { localStorage.setItem(MV_LIST_CACHE_KEY, JSON.stringify(list)); } catch (e) {}
+    if (JSON.stringify(list) !== JSON.stringify(shown)) cb(list);
+  });
+}
+
+// ---------- ยอดวิว (/api/mv-views: EmmyBLM48 Official Site + YouTube) ----------
+const MV_VIEWS_CACHE_KEY = "blm48_mv_views";
 
 // 1373 -> "1.4K views" (แบบ iAM48)
 function formatMvViews(n) {
@@ -133,18 +191,20 @@ function fillMvViews(views) {
   });
 }
 
-// โชว์ตัวเลขจาก cache ทันที แล้วค่อยอัปเดตจากเซิร์ฟเวอร์
+// โชว์ตัวเลขจาก cache ทันที แล้วค่อยอัปเดตจากเซิร์ฟเวอร์ (ส่ง ID ของทุกการ์ดที่โชว์อยู่ไปด้วย)
 function loadMvViews() {
-  try {
-    const cached = JSON.parse(localStorage.getItem(MV_VIEWS_CACHE_KEY) || "null");
-    if (cached) fillMvViews(cached);
-  } catch (e) {}
-  fetch("/api/mv-views")
+  let cached = {};
+  try { cached = JSON.parse(localStorage.getItem(MV_VIEWS_CACHE_KEY) || "{}") || {}; } catch (e) {}
+  fillMvViews(cached);
+  const ids = [...new Set([...document.querySelectorAll(".mv-views[data-mv-yt]")].map(el => el.dataset.mvYt))].sort();
+  if (!ids.length) return;
+  fetch("/api/mv-views?ids=" + encodeURIComponent(ids.join(",")))
     .then(r => (r.ok ? r.json() : null))
     .then(d => {
       if (!d || !d.views) return;
-      fillMvViews(d.views);
-      try { localStorage.setItem(MV_VIEWS_CACHE_KEY, JSON.stringify(d.views)); } catch (e) {}
+      const views = Object.assign(cached, d.views);
+      fillMvViews(views);
+      try { localStorage.setItem(MV_VIEWS_CACHE_KEY, JSON.stringify(views)); } catch (e) {}
     })
     .catch(() => {});
 }

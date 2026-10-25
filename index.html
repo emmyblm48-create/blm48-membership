@@ -2959,13 +2959,16 @@ function updateUI() {
   }
 }
   
-// 🎵 Music Video (ข้อมูล MV อยู่ใน assets/js/music-videos.js ใช้ร่วมกับหน้า musicvideo.html)
+// 🎵 Music Video (รายการมาจาก Discography ของ BLM48 Official Website ผ่าน assets/js/music-videos.js)
 function renderTrendingMVs() {
   const scroller = document.getElementById("mv-scroller");
-  if (!scroller || typeof blm48MVs === "undefined") return;
-  scroller.innerHTML = "";
+  if (!scroller || typeof onMusicVideos !== "function") return;
+  onMusicVideos(list => drawTrendingMVs(scroller, list));
+}
 
-  blm48MVs.slice(0, 8).forEach(mv => {
+function drawTrendingMVs(scroller, list) {
+  scroller.innerHTML = "";
+  list.slice(0, 8).forEach(mv => {
     const card = document.createElement("div");
     card.className = "mv-card";
     card.innerHTML = `

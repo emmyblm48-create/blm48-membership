@@ -85,16 +85,19 @@
     `;
   }
 
-  function renderMusicVideos() {
+  // รายการมาจาก Discography ของ BLM48 Official Website (onMusicVideos อาจเรียกซ้ำเมื่อได้ข้อมูลใหม่)
+  function renderMusicVideos(mvs) {
     const rec = document.getElementById('mv-rec-row');
     const list = document.getElementById('mv-list');
-    if (!blm48MVs.length) {
+    rec.innerHTML = '';
+    list.innerHTML = '';
+    if (!mvs.length) {
       list.innerHTML = '<div class="empty-state">ยังไม่มี Music Video</div>';
       return;
     }
 
     // Recommended = 5 เพลงล่าสุด, รายการด้านล่าง = ทั้งหมด
-    blm48MVs.slice(0, 5).forEach(mv => {
+    mvs.slice(0, 5).forEach(mv => {
       const card = document.createElement('div');
       card.className = 'mv-card';
       card.innerHTML = mvCardHtml(mv, false);
@@ -102,7 +105,7 @@
       rec.appendChild(card);
     });
 
-    blm48MVs.forEach(mv => {
+    mvs.forEach(mv => {
       const card = document.createElement('div');
       card.className = 'mv-card';
       card.innerHTML = mvCardHtml(mv, true);
@@ -112,7 +115,7 @@
     loadMvViews();
   }
 
-  window.addEventListener('DOMContentLoaded', renderMusicVideos);
+  window.addEventListener('DOMContentLoaded', () => onMusicVideos(renderMusicVideos));
 </script>
 </body>
 </html>
