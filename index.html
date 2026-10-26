@@ -231,6 +231,46 @@
       letter-spacing: 0.5px;
     }
 
+    /* 🔘 จุดบอกหน้าแบนเนอร์หน้า Home (กลางล่างของแบนเนอร์) */
+    #bannerCounterContainer {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 8px;
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      pointer-events: none;
+    }
+    #bannerCounterContainer .bn-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+      box-shadow: 0 0 3px rgba(0, 0, 0, 0.25);
+      transition: background 0.3s;
+    }
+    #bannerCounterContainer .bn-dot.active { background: #ffffff; }
+
+    /* ✕ ปุ่มปิด Splash */
+    #splash-close-btn {
+      position: absolute;
+      top: calc(env(safe-area-inset-top, 0px) + 14px);
+      right: 14px;
+      z-index: 2;
+      width: 44px;
+      height: 44px;
+      border: none;
+      background: transparent;
+      color: #ffffff;
+      font-size: 28px;
+      line-height: 1;
+      cursor: pointer;
+      filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.35));
+      -webkit-tap-highlight-color: transparent;
+    }
+
     /* 🔘 จุดระบุหน้า (Dots Indicator) */
     .nav-dots {
       position: absolute;
@@ -1969,6 +2009,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     <img id="main-splash" src="https://lh3.googleusercontent.com/d/1nvKkrs0bjgR8YAL8VKLDIxooRUtSekcb=s1000" style="width: 100%; height: 100%; object-fit: cover; transition: opacity 0.4s ease;">
     <!-- 🏆 Splash Champ of the Month แบบแอนิเมชัน (assets/js/champ-splash.js) วาดทับรูปด้านบน -->
     <div id="champ-splash-stage" style="display: none; position: absolute; inset: 0;"></div>
+    <button type="button" id="splash-close-btn" aria-label="ปิด" onclick="closeChampSplash()"><i class="fas fa-times"></i></button>
 </div>
 <script src="assets/js/champ-splash.js"></script>
 <script src="assets/js/bday-splash.js"></script>
@@ -2115,9 +2156,8 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
 
     </div>
     
-    <div id="bannerCounterContainer" style="position: absolute; bottom: 12px; right: 15px; z-index: 10; background: rgba(0, 0, 0, 0.45); color: #ffffff; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; font-family: sans-serif; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); letter-spacing: 0.5px;">
-        01|03
-    </div>
+    <!-- 🔘 จุดบอกหน้าแบนเนอร์ (กลางล่าง) - initBannerFeatures() สร้างจุดตามจำนวนแบนเนอร์จริง -->
+    <div id="bannerCounterContainer" aria-hidden="true"></div>
 </div>
 
     <div class="public-member-widget" style="background: linear-gradient(135deg, #fffcfd 0%, #ffeef2 100%); border: 1px solid #ffe1e7; padding: 12px 15px; border-radius: 16px; display: flex; align-items: center; justify-content: space-between; margin-top: 14px; box-shadow: 0 4px 12px rgba(255,133,162,0.03);">
@@ -2567,23 +2607,24 @@ function initBannerFeatures() {
     if (counter) counter.style.display = "none";
     return;
   } else {
-    if (counter) counter.style.display = "block";
+    if (counter) counter.style.display = totalItems > 1 ? "flex" : "none"; // แบนเนอร์เดียวไม่ต้องมีจุด
   }
 
-  // ระบบคำนวณตัวเลข (01/03)
+  // จุดบอกหน้า (กลางล่าง) - จุดขาวทึบ = แบนเนอร์ที่โชว์อยู่
   function updateCounterText() {
     if (!counter) return;
     const width = container.clientWidth;
     if (width === 0) return;
-    
+
     // นับสดทุกครั้ง เพราะแบนเนอร์ (วันเกิด / Campaign) อาจถูกแทรกเพิ่มทีหลัง
     const liveTotal = container.querySelectorAll(".auto-banner-item").length;
-    let currentIndex = Math.round(container.scrollLeft / width) + 1;
-    if (currentIndex > liveTotal) currentIndex = liveTotal;
+    let currentIndex = Math.round(container.scrollLeft / width);
+    if (currentIndex > liveTotal - 1) currentIndex = liveTotal - 1;
 
-    const currentStr = String(currentIndex).padStart(2, '0');
-    const totalStr = String(liveTotal).padStart(2, '0');
-    counter.innerText = `${currentStr}/${totalStr}`;
+    if (counter.children.length !== liveTotal) {
+      counter.innerHTML = '<span class="bn-dot"></span>'.repeat(liveTotal);
+    }
+    Array.from(counter.children).forEach((d, i) => d.classList.toggle('active', i === currentIndex));
   }
 
   // ฟังก์ชันนี้ถูกเรียกซ้ำได้หลายครั้ง (DOMContentLoaded / ธีมวันเกิด / แบนเนอร์ Campaign)
@@ -2719,50 +2760,7 @@ window.addEventListener('pageshow', function(event) {
   }
 });
   
-function initBannerCounter() {
-  const container = document.getElementById("autoBannerContainer");
-  const counter = document.getElementById("bannerCounterContainer");
-  if (!container || !counter) return;
-
-  // ค้นหาแบนเนอร์ทั้งหมดที่มีอยู่ในตอนนั้น
-  const items = container.querySelectorAll(".auto-banner-item");
-  const totalItems = items.length;
-
-  // ถ้าไม่มีรูปเลย ให้ซ่อนกล่องตัวเลขไปเลย
-  if (totalItems === 0) {
-    counter.style.display = "none";
-    return;
-  } else {
-    counter.style.display = "block";
-  }
-
-  // ฟังก์ชันคำนวณหน้าปัจจุบันจากการ Scroll
-  function updateCounterText() {
-    const width = container.clientWidth;
-    if (width === 0) return;
-    
-    // คำนวณว่าตอนนี้สไลด์อยู่ที่หน้ารูปที่เท่าไหร่
-    const currentIndex = Math.round(container.scrollLeft / width) + 1;
-    // นับสด เพราะแบนเนอร์วันเกิด / Campaign ถูกแทรกเข้ามาทีหลังตอนโหลดหน้า
-    const liveTotal = container.querySelectorAll(".auto-banner-item").length;
-
-    // แปลงเลขให้เป็นสไตล์ 01, 02 (ใส่ padStart เผื่อเลขหลักเดียว)
-    const currentStr = String(currentIndex).padStart(2, '0');
-    const totalStr = String(liveTotal).padStart(2, '0');
-    
-    counter.innerText = `${currentStr}/${totalStr}`;
-  }
-
-  // ให้ทำงานครั้งแรกทันทีที่โหลดหน้าเว็บ
-  updateCounterText();
-
-  // ดักจับเหตุการณ์ตอนผู้ใช้ปัดสไลด์ ให้เปลี่ยนเลขตาม
-  container.removeEventListener("scroll", updateCounterText); // ลบอันเก่าออกก่อนกันเบิ้ล
-  container.addEventListener("scroll", updateCounterText);
-}
-
-// 🚀 สั่งให้ทำงานตอนเปิดหน้าเว็บครั้งแรก
-document.addEventListener("DOMContentLoaded", initBannerCounter);
+// (initBannerCounter ตัวเลข 01/03 แบบเก่าถอดออกแล้ว - จุดบอกหน้าทำใน initBannerFeatures ที่เดียว)
 
 // =========================================================================
 // 👑 6. APP LIFECYCLE LISTENERS (ระบบควบคุมการโหลดหน้าจอและเซสชันเวอร์ชันเคลียร์บั๊ก)
@@ -4098,6 +4096,7 @@ function setupUserProfile(user) {
   
   function closeChampSplash() {
   const splash = document.getElementById('splash-screen');
+  window.__champSplashActive = false; // ปุ่ม ✕: หยุดคิว Splash (วันเกิด -> Champ) ที่เหลือด้วย
   if (splash) {
     splash.style.opacity = '0'; // ค่อยๆ เฟดจางลงมา
     setTimeout(() => {
