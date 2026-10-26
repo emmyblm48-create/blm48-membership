@@ -306,6 +306,17 @@ function blm48GetPostsPage(username, limit, beforeEpochMs, includePostId, author
     p_author_filter: authorFilter || null
   });
 }
+// Home "Timeline" feed: same shape as blm48GetPostsPage, but authors (array of member names,
+// any case) limits to several members at once - used by index.html's Choose Member filter.
+function blm48GetTimelinePostsPage(username, limit, beforeEpochMs, includePostId, authors) {
+  return blm48Rpc('get_timeline_posts_page', {
+    p_username: username || null,
+    p_limit: limit || 20,
+    p_before_epoch_ms: beforeEpochMs || null,
+    p_include_post_id: includePostId || null,
+    p_authors: authors && authors.length ? authors : null
+  });
+}
 function blm48CreatePost(username, content, imageUrl, audioUrl, videoUrl, postType) {
   return blm48Rpc('create_post', {
     p_username: username,

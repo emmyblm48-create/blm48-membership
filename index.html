@@ -1997,6 +1997,31 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
       }
     }
 
+/* 🔎 Timeline: ปุ่มฟิลเตอร์เมมเบอร์ + หน้า Choose Member เต็มจอ (แบบเดียวกับ campaign.html) */
+.tl-filter-btn { border: none; background: none; font-family: inherit; color: #222; padding: 4px 2px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+.tl-filter-btn svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; }
+.tl-filter-count { display: none; background: #222; color: #fff; border-radius: 999px; font-size: 12px; font-weight: 600; padding: 2px 9px; white-space: nowrap; }
+.tl-filter-btn.active .tl-filter-count { display: inline-block; }
+.picker { position: fixed; inset: 0; z-index: 3000; background: #fff; display: flex; flex-direction: column; transform: translateY(100%); transition: transform .25s ease; visibility: hidden; }
+.picker.open { transform: translateY(0); visibility: visible; }
+.picker-head { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: calc(12px + env(safe-area-inset-top)) 12px 12px; border-bottom: 1px solid #e5e5e5; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+.picker-head button { border: none; background: none; font-family: inherit; font-size: 16px; font-weight: 600; color: #222; cursor: pointer; padding: 6px 4px; justify-self: start; }
+.picker-title { font-weight: 600; font-size: 17px; color: #222; }
+.picker-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.picker-inner { max-width: 640px; margin: 0 auto; padding: 0 12px 30px; }
+.picker-search { width: 100%; border: none; border-bottom: 1px solid #e5e5e5; padding: 18px 0 14px; font-family: inherit; font-size: 16px; color: #222; outline: none; background: transparent; }
+.pm-row { display: flex; align-items: center; gap: 14px; padding: 10px 0; border-bottom: 1px solid #efefef; cursor: pointer; user-select: none; }
+.pm-avatar { position: relative; width: 54px; height: 54px; flex-shrink: 0; }
+.pm-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid #ffde5b; background: #f4f4f4; display: block; }
+.pm-kami { position: absolute; left: 50%; bottom: -6px; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 3px; background: linear-gradient(135deg, #ffe08a, #ffc107); color: #6b4a00; font-size: 9px; font-weight: bold; padding: 2px 7px; border-radius: 20px; letter-spacing: 0.3px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); white-space: nowrap; }
+.pm-kami i { font-size: 8px; }
+.pm-info { flex: 1; min-width: 0; }
+.pm-name { font-weight: 700; font-size: 15px; color: #222; text-transform: uppercase; letter-spacing: .2px; }
+.pm-full { font-size: 13.5px; color: #666; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pm-check { width: 22px; height: 22px; border: 2px solid #f5b041; border-radius: 5px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; }
+.pm-row.on .pm-check { background: #f5b041; }
+.pm-row:not(.on) .pm-check i { display: none; }
+.pm-empty { text-align: center; color: #767676; padding: 50px 20px; font-size: 14px; }
   </style>
 </head>
 <body>
@@ -2197,11 +2222,27 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     </div>
 </div>
 
-<div class="section-title"> Latest Top Posts</div>
+<div class="section-title" style="display: flex; align-items: center; justify-content: space-between; padding-right: 0;">
+  <span>Timeline</span>
+  <button type="button" id="tl-filter-btn" class="tl-filter-btn" onclick="openMemberPicker()" aria-label="Filter members"><span class="tl-filter-count" id="tl-filter-label"></span><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/><circle cx="8" cy="6" r="2.2" fill="#fff"/><circle cx="15" cy="12" r="2.2" fill="#fff"/><circle cx="10" cy="18" r="2.2" fill="#fff"/></svg></button>
+</div>
 <div class="feed-section" id="blm48-feed">
    <div id="posts-container">
        </div>
 </div>
+</div>
+<div id="member-picker" class="picker" aria-hidden="true">
+    <div class="picker-head">
+        <button type="button" onclick="applyMemberPicker()">Done</button>
+        <div class="picker-title">Choose Member</div>
+        <span></span>
+    </div>
+    <div class="picker-body">
+        <div class="picker-inner">
+            <input id="picker-search" class="picker-search" type="search" placeholder="Search Members" oninput="renderMemberPicker()" autocomplete="off">
+            <div id="picker-list"></div>
+        </div>
+    </div>
 </div>
 <i class="fas fa-pencil-alt edit-icon" id="edit-name-btn" onclick="updateDisplayName()" style="display: none;"></i>
 
@@ -3591,6 +3632,108 @@ let feedLoadingMore = false;
 let feedObserver = null;
 let feedIncludedSharedPost = false;
 
+// 🔎 Timeline ฟิลเตอร์เมมเบอร์ (Choose Member): เลือกได้หลายคน (ชื่อตัวเล็ก) ว่าง = All members
+// จำไว้ในเครื่องผู้ใช้ กรองฝั่งเซิร์ฟเวอร์ผ่าน get_timeline_posts_page (infinite scroll ยังทำงานปกติ)
+const TIMELINE_FILTER_KEY = 'bnl_timeline_member_filter';
+let timelineMembers = new Set();
+let timelineGen = 0; // เพิ่มทุกครั้งที่เปลี่ยนฟิลเตอร์ - ผลโหลดของฟิลเตอร์เก่าที่ค้างอยู่จะถูกทิ้ง
+let pickerDraft = new Set();
+let pickerMembers = null;
+try { timelineMembers = new Set(JSON.parse(localStorage.getItem(TIMELINE_FILTER_KEY) || '[]').map(s => String(s).toLowerCase())); } catch (e) {}
+
+function updateTimelineFilterButton() {
+  const btn = document.getElementById('tl-filter-btn');
+  if (!btn) return;
+  const n = timelineMembers.size;
+  btn.classList.toggle('active', n > 0);
+  document.getElementById('tl-filter-label').textContent = n ? `${n} Filters` : '';
+}
+document.addEventListener('DOMContentLoaded', updateTimelineFilterButton);
+
+async function openMemberPicker() {
+  pickerDraft = new Set(timelineMembers);
+  document.getElementById('picker-search').value = '';
+  const picker = document.getElementById('member-picker');
+  picker.classList.add('open');
+  picker.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+  if (!pickerMembers) {
+    document.getElementById('picker-list').innerHTML = `<div class="pm-empty"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>`;
+    const me = getUserSession();
+    let kamiName = me && me.kamioshi ? String(me.kamioshi).trim() : '';
+    const [res] = await Promise.all([
+      blm48GetAllMembers(),
+      me && me.username ? blm48GetUserInfo(me.username).then(r => {
+        if (r && r.status === 'success' && r.data) kamiName = r.data.kamioshi ? String(r.data.kamioshi).trim() : '';
+      }).catch(() => {}) : null
+    ]);
+    const data = res && Array.isArray(res.data) ? res.data : null;
+    if (!data) {
+      document.getElementById('picker-list').innerHTML = `<div class="pm-empty">โหลดรายชื่อเมมเบอร์ไม่ได้</div>`;
+      return;
+    }
+    const kami = kamiName.toLowerCase();
+    pickerMembers = data
+      .filter(m => String(m.status || '').toLowerCase() !== 'graduated' && String(m.group_name || 'BLM48').toUpperCase() !== 'NPT48')
+      .map(m => ({ name: m.name, full: m['Full Name(EN)'] || m.full_name || '', img: m.profile || '', group: m.group_name, kami: !!kami && String(m.name).toLowerCase() === kami }))
+      .sort((a, b) => (b.kami - a.kami) || a.name.localeCompare(b.name));
+  }
+  renderMemberPicker();
+}
+function renderMemberPicker() {
+  if (!pickerMembers) return;
+  const q = document.getElementById('picker-search').value.trim().toLowerCase();
+  const list = pickerMembers.filter(m => !q || m.name.toLowerCase().includes(q) || m.full.toLowerCase().includes(q));
+  const allRow = q ? '' : `<div class="pm-row ${pickerDraft.size === 0 ? 'on' : ''}" onclick="selectAllPickerMembers()" role="checkbox" aria-checked="${pickerDraft.size === 0}">
+      <div class="pm-avatar"><img src="assets/images/blm48-members.png" alt="BLM48" draggable="false" oncontextmenu="return false"></div>
+      <div class="pm-info"><div class="pm-name">BLM48 Members</div><div class="pm-full">All members</div></div>
+      <div class="pm-check"><i class="fa-solid fa-check"></i></div>
+    </div>`;
+  document.getElementById('picker-list').innerHTML = allRow + (list.length ? list.map(m => {
+    const key = m.name.toLowerCase();
+    return `<div class="pm-row ${pickerDraft.has(key) ? 'on' : ''}" data-key="${escapeAttr(key)}" onclick="togglePickerMember(this)" role="checkbox" aria-checked="${pickerDraft.has(key)}">
+      <div class="pm-avatar"><img src="${escapeAttr(m.img || 'assets/images/default-profile.png')}" alt="" loading="lazy" style="border-color:${groupFrameColor(m.group)}" draggable="false" oncontextmenu="return false">${m.kami ? '<span class="pm-kami"><i class="fas fa-crown"></i> Kami-Oshi</span>' : ''}</div>
+      <div class="pm-info"><div class="pm-name">${escapeHtml(m.name)}</div>${m.full ? `<div class="pm-full">${escapeHtml(m.full)}</div>` : ''}</div>
+      <div class="pm-check"><i class="fa-solid fa-check"></i></div>
+    </div>`;
+  }).join('') : `<div class="pm-empty">ไม่พบเมมเบอร์</div>`);
+}
+function togglePickerMember(row) {
+  const key = row.dataset.key;
+  if (pickerDraft.has(key)) pickerDraft.delete(key); else pickerDraft.add(key);
+  renderMemberPicker();
+}
+function selectAllPickerMembers() {
+  pickerDraft.clear();
+  renderMemberPicker();
+}
+function applyMemberPicker() {
+  const picker = document.getElementById('member-picker');
+  picker.classList.remove('open');
+  picker.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+  const next = [...pickerDraft].sort();
+  if (next.join('|') === [...timelineMembers].sort().join('|')) return;
+  timelineMembers = new Set(next);
+  try { localStorage.setItem(TIMELINE_FILTER_KEY, JSON.stringify(next)); } catch (e) {}
+  updateTimelineFilterButton();
+  resetTimelineFeed();
+}
+// เปลี่ยนฟิลเตอร์ -> ล้างฟีด + cursor แล้วโหลดหน้าแรกใหม่ตามเมมเบอร์ที่เลือก
+function resetTimelineFeed() {
+  const container = document.getElementById('posts-container');
+  if (container) container.innerHTML = '';
+  feedCursor = null;
+  feedHasMore = true;
+  feedPaginated = false;
+  timelineGen++;
+  if (feedObserver) { feedObserver.disconnect(); feedObserver = null; }
+  const sentinel = document.getElementById('feed-scroll-sentinel');
+  if (sentinel) sentinel.innerHTML = '';
+  window.isTimelineLoading = false;
+  loadTimelinePosts();
+}
+
 async function loadTimelinePosts() {
   // 🛡️ ป้องกันการโหลดซ้อน (ถ้ากดสลับแท็บรัวๆ แล้วตัวเก่ากำลัง Fetch อยู่ ให้ข้ามฟังก์ชันนี้ไปเลย)
   if (window.isTimelineLoading) return;
@@ -3602,7 +3745,7 @@ async function loadTimelinePosts() {
   const cachedPosts = localStorage.getItem('blm48_posts_cache');
   const isContainerEmpty = container.querySelectorAll('.post-card').length === 0;
 
-  if (cachedPosts && isContainerEmpty) {
+  if (cachedPosts && isContainerEmpty && timelineMembers.size === 0) {
     try {
       let posts = JSON.parse(cachedPosts).filter(p => p.postType !== 'fan');
       // ใช้กลไกการกลับด้านข้อมูลเพื่อให้ของใหม่กว่าอยู่ด้านบนเหมือนเดิม
@@ -3632,6 +3775,7 @@ async function loadTimelinePosts() {
   }
 
   try {
+    const gen = timelineGen;
     window.isTimelineLoading = true; // เปิดสถานะล็อกป้องกันการดึงข้อมูลซ้อนกัน
 
     const currentUser = getUserSession();
@@ -3639,7 +3783,8 @@ async function loadTimelinePosts() {
     // ดึงเฉพาะหน้าแรกเสมอ (ไล่จับโพสต์/ไลก์/คอมเมนต์ใหม่สุด) - ถ้ามีลิงก์แชร์โพสต์เก่าที่ตกหน้าแรกไป
     // ให้แนบ post id นั้นไปด้วยครั้งเดียวตอนเปิดหน้า เพื่อให้ RPC แถมโพสต์นั้นมาด้วยแม้จะอยู่นอกหน้าแรก
     const sharedPostId = !feedIncludedSharedPost ? new URLSearchParams(window.location.search).get('post') : null;
-    const res = await blm48GetPostsPage(username, FEED_PAGE_SIZE, null, sharedPostId);
+    const res = await blm48GetTimelinePostsPage(username, FEED_PAGE_SIZE, null, sharedPostId, [...timelineMembers]);
+    if (gen !== timelineGen) return;
     feedIncludedSharedPost = true;
 
     // 🛡️ blm48Rpc คืน object { status:'error', ... } เวลาเน็ตเวิร์คมีปัญหา ต้องเช็คทิ้งตรงนี้
@@ -3665,7 +3810,8 @@ async function loadTimelinePosts() {
     }
 
     // 🌸 ขั้นตอนที่ B: ข้อมูลหน้าแรกอัปเดตล่าสุดส่งมาถึงแล้ว บันทึกทับลงแคชเพื่อไว้ใช้ในรอบหน้า
-    localStorage.setItem('blm48_posts_cache', JSON.stringify(posts));
+    // (แคชเก็บเฉพาะฟีดแบบไม่ฟิลเตอร์ - ฟีดที่เลือกเมมเบอร์ไว้ไม่ทับแคชหลัก)
+    if (timelineMembers.size === 0) localStorage.setItem('blm48_posts_cache', JSON.stringify(posts));
 
     // ลบข้อความ "กำลังโหลด" ออกไป (ถ้ามีอยู่บนจอ)
     const loadingMsg = document.getElementById('loading-msg');
@@ -3744,7 +3890,9 @@ async function loadMoreFeedPosts() {
   try {
     const currentUser = getUserSession();
     const username = currentUser ? currentUser.username : "";
-    const res = await blm48GetPostsPage(username, FEED_PAGE_SIZE, feedCursor);
+    const gen = timelineGen;
+    const res = await blm48GetTimelinePostsPage(username, FEED_PAGE_SIZE, feedCursor, null, [...timelineMembers]);
+    if (gen !== timelineGen) return;
 
     if (!res || res.status !== 'success' || !Array.isArray(res.data)) {
       throw new Error((res && res.message) || 'โหลดโพสต์เพิ่มเติมไม่สำเร็จ');
