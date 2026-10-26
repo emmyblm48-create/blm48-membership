@@ -2109,7 +2109,11 @@ document.addEventListener('click', function() {
       __renderEditPostImages();
     };
 
-    async function editPostUi(postId, encodedContent) {
+    // ✏️ แก้ไขโพสต์ = ไปหน้า post (โหมดแก้ไข) แทนป๊อปอัป
+    function editPostUi(postId) {
+      window.location.href = `post?edit=${encodeURIComponent(postId)}`;
+    }
+    async function editPostUiPopup(postId, encodedContent) {
       const oldContent = decodeURIComponent(encodedContent);
       const postEl = document.getElementById(`post-${postId}`);
       const oldImageUrl = postEl ? (postEl.dataset.images || '') : '';

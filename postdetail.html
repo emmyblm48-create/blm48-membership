@@ -621,6 +621,8 @@
   };
 
   async function editPostUi(postId, encodedContent) {
+    // ✏️ โพสต์เมมเบอร์แก้ไขที่หน้า post (โหมดแก้ไข) - โพสต์แฟนคลับยังใช้ป๊อปอัปเดิม
+    if (currentPostType !== 'fan') { window.location.href = `post?edit=${encodeURIComponent(postId)}`; return; }
     const oldContent = decodeURIComponent(encodedContent);
     const postEl = document.getElementById(`post-${postId}`);
     const oldImageUrl = postEl ? (postEl.dataset.images || '') : '';
