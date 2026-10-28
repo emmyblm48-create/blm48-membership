@@ -1405,6 +1405,7 @@ function renderMemberStatsAndFans() {
     // 🎁 Gift: แผงส่งของขวัญ (assets/js/member-gift-sheet.js ใช้ร่วมกับหน้า Home)
     function actionGift() {
       if (!checkLoginStatus()) return;
+      if (!blm48CanUseGift(getUserSession() || user)) { blm48GiftNotAllowedAlert(); return; }
       if (document.getElementById('btn-cookie-trigger').getAttribute('data-graduated') === 'true') {
         Swal.fire({ title: 'ส่งของขวัญไม่ได้', text: 'เมมเบอร์ท่านนี้จบการศึกษาแล้วค่ะ', confirmButtonColor: '#ffd75e' });
         return;
