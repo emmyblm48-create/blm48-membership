@@ -2,7 +2,7 @@
 // ใช้ร่วมกันในหน้า member.html (ปุ่ม Gift) และ index.html (กดรูปเมมเบอร์ใน Ranking Member)
 // ต้องโหลดหลัง common.js + supabase-client.js (+ member-gift-stickers.js สำหรับรูปสติ๊กเกอร์)
 //
-// ใช้ได้เฉพาะผู้ใช้งานทั่วไป (blm48CanUseGift ใน common.js) — Member / Admin ใช้ไม่ได้
+// เปิดให้ทุกบัญชีที่ล็อกอินแล้ว (User / Member / Admin)
 // แท็บ: Normal / BLM48 / Backpack — ไม่แสดงของขวัญ NPT48; แท็บ BLM48 ยังปิดอยู่ (visibleTiers)
 // ของขวัญ = การปาคุกกี้รายเดือน: มูลค่าของขวัญ x จำนวน = คุกกี้ที่ปาให้เมมเบอร์ (Ranking / Fan Score / Top Fans /
 // Campaign / ภารกิจรายวัน เหมือน give_cookie ทุกอย่าง) — ส่งจาก Backpack ไม่หัก Cookie ซ้ำ; ปาคุกกี้ปกติยังใช้ได้

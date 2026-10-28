@@ -3205,10 +3205,11 @@ function renderGlobalFans(rawData) {
   renderFanPreview('top-fans-preview-zone', finalFans);
 }
 
-// 🎁 กดรูปเมมเบอร์ใน Ranking Member: ผู้ใช้งานทั่วไป = เปิดแผงส่งของขวัญ (กดรูปบนแผงไปหน้าโปรไฟล์)
-// ยังไม่ล็อกอิน / Member / Admin = ไปหน้าโปรไฟล์เหมือนเดิม
+// 🎁 กดรูปเมมเบอร์ใน Ranking Member: ล็อกอินแล้ว = เปิดแผงส่งของขวัญ (กดรูปบนแผงไปหน้าโปรไฟล์)
+// ยังไม่ล็อกอิน = ไปหน้าโปรไฟล์เหมือนเดิม
 function onRankingAvatarClick(name) {
-  if (!blm48CanUseGift(getUserSession())) { openMemberProfile(name); return; }
+  const u = getUserSession();
+  if (!u || !u.username) { openMemberProfile(name); return; }
   const m = (currentRankingData || []).find(x => x.name === name) || {};
   // โหลดไฟล์แผงของขวัญเฉพาะตอนกดครั้งแรก (หน้า Home ไม่ต้องโหลดเพิ่มถ้าไม่ได้กด)
   loadGiftSheetScripts().then(() => blm48OpenMemberGift({

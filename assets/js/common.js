@@ -736,15 +736,7 @@ function blm48PostCommentPreviewHtml(post, opts) {
     </div>`;
 }
 
-// 🎁 ฟีเจอร์ Gift ใช้ได้เฉพาะผู้ใช้งานทั่วไป (role user ที่ไม่มีสิทธิ์ Admin) — Member / Admin ใช้ไม่ได้ (send_member_gift เช็คซ้ำ)
-function blm48CanUseGift(u) {
-  return !!u && String(u.role || '').toLowerCase() === 'user' && u.is_admin !== true;
-}
-function blm48GiftNotAllowedAlert() {
-  Swal.fire({ title: 'ใช้ฟีเจอร์ Gift ไม่ได้', text: 'ฟีเจอร์ Gift สำหรับผู้ใช้งานทั่วไปเท่านั้นค่ะ', confirmButtonText: 'OK', confirmButtonColor: '#ffd75e' });
-}
-
-// 🎁 กด Send Gift ในโพสต์: เปิดแผงของขวัญ (ไม่โชว์โปรไฟล์เมมเบอร์)
+// 🎁 กด Send Gift ในโพสต์: เปิดแผงของขวัญ (ไม่โชว์โปรไฟล์เมมเบอร์) — ทุกบัญชีที่ล็อกอินแล้ว
 let blm48GiftSheetLoading = null;
 function blm48LoadGiftSheet() {
   if (window.blm48OpenMemberGift) return Promise.resolve();
@@ -767,7 +759,6 @@ async function blm48OpenPostGift(postId) {
     Swal.fire({ title: 'กรุณาเข้าสู่ระบบ', text: 'เข้าสู่ระบบก่อนส่งของขวัญให้เมมเบอร์นะคะ', confirmButtonText: 'OK' });
     return;
   }
-  if (!blm48CanUseGift(u)) { blm48GiftNotAllowedAlert(); return; }
   const holder = document.getElementById(`post-gifts-${postId}`);
   try {
     await blm48LoadGiftSheet();
