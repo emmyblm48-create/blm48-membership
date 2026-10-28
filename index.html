@@ -3114,7 +3114,7 @@ function renderRanking(data) {
     card.style.minHeight = `${barHeight}px`;
 
     card.innerHTML = `
-     <div class="img-wrapper" onclick="openMemberProfile('${escapeAttr(m.name)}')">
+     <div class="img-wrapper" onclick="onRankingAvatarClick('${escapeAttr(m.name)}')">
         <img src="${getImg(m.profile_img)}" loading="lazy">
         <div class="rank-badge">${badgeContent}</div>
       </div>
@@ -3203,6 +3203,33 @@ function renderGlobalFans(rawData) {
 
   // --- รูปมินิ 3 อันดับแรกตรงหัวข้อ (พรีวิวก่อนกดเข้าไปดูหน้าเต็ม) ---
   renderFanPreview('top-fans-preview-zone', finalFans);
+}
+
+// 🎁 กดรูปเมมเบอร์ใน Ranking Member: แอดมิน = เปิดแผงส่งของขวัญ (กดรูปบนแผงไปหน้าโปรไฟล์)
+// ผู้ใช้ทั่วไป = ไปหน้าโปรไฟล์เหมือนเดิม (ฟีเจอร์ Gift ยังไม่เปิดให้ role user)
+function onRankingAvatarClick(name) {
+  const isAdmin = (() => { const u = getUserSession(); return !!u && ((u.role && ['admin', 'ceo'].includes(String(u.role).toLowerCase())) || u.is_admin === true); })();
+  if (!isAdmin) { openMemberProfile(name); return; }
+  const m = (currentRankingData || []).find(x => x.name === name) || {};
+  // โหลดไฟล์แผงของขวัญเฉพาะตอนแอดมินกดครั้งแรก (หน้า Home ของผู้ใช้ทั่วไปไม่ต้องโหลดเพิ่ม)
+  loadGiftSheetScripts().then(() => blm48OpenMemberGift({
+    name,
+    img: getImg(m.profile_img),
+    onAvatarClick: () => { blm48Gift.close(); openMemberProfile(name); }
+  })).catch(e => { console.error('Gift sheet load error:', e); openMemberProfile(name); });
+}
+let giftSheetScriptsPromise = null;
+function loadGiftSheetScripts() {
+  const load = src => new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src; s.onload = resolve; s.onerror = reject;
+    document.head.appendChild(s);
+  });
+  if (!giftSheetScriptsPromise) {
+    giftSheetScriptsPromise = load('assets/js/member-gift-stickers.js').then(() => load('assets/js/member-gift-sheet.js'));
+    giftSheetScriptsPromise.catch(() => { giftSheetScriptsPromise = null; });
+  }
+  return giftSheetScriptsPromise;
 }
 
 function openMemberProfile(name) {
