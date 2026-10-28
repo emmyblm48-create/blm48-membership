@@ -296,8 +296,8 @@
       gap: 5px;
       border: none;
       cursor: pointer;
-      background: var(--blmem-pink);
-      color: #fff;
+      background: var(--member-group-color, #ffde5b); /* สีประจำวงของเมมเบอร์ (groupFrameColor) */
+      color: #3a3a3a;
       font-size: 13px;
       font-weight: 600;
       padding: 4px 14px;
@@ -920,6 +920,8 @@ function renderMemberStatsAndFans() {
 
     const isGrad = String(m.status || '').toLowerCase() === 'graduated';
     const subEl = document.getElementById('mb-sub');
+    const kamiPill = document.getElementById('mb-kami-pill');
+    if (kamiPill) kamiPill.style.setProperty('--member-group-color', groupFrameColor(m.group_name || m.group));
     if (gradBadge) gradBadge.style.display = isGrad ? 'inline-flex' : 'none';
     if (subEl) subEl.style.display = isGrad ? 'none' : ''; // ป้าย GRADUATED แทนชื่อวง
     if (gradAvatarIcon) gradAvatarIcon.style.display = isGrad ? 'flex' : 'none';
