@@ -139,7 +139,8 @@
       + ` drop-shadow(0 ${r(o * 1.5)}px ${r(o * 1.5)}px rgba(60,45,10,0.14))`;
     const border = r(Math.max(1.5, px * 4 / 200));
     const shadow = `0 ${r(px * 6 / 200)}px 0 rgba(60,45,10,0.10), 0 ${r(px * 14 / 200)}px ${r(px * 26 / 200)}px rgba(60,45,10,0.08)`;
-    return `<div class="gift-sticker${opts && opts.play ? ' play' : ''}" style="width:${px}px;height:${px}px;background:${s.bg};border-width:${border}px;box-shadow:${shadow}">`
+    // พื้นหลังสติ๊กเกอร์เป็นสีขาวทุกชิ้น (ค่า bg ประจำชิ้นในตารางไม่ได้ใช้แล้ว)
+    return `<div class="gift-sticker${opts && opts.play ? ' play' : ''}" style="width:${px}px;height:${px}px;background:#ffffff;border-width:${border}px;box-shadow:${shadow}">`
       + `<svg viewBox="${s.viewBox}" role="img" aria-label="${s.label}" style="filter:${filter}">${s.svg}</svg></div>`;
   }
 
