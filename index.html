@@ -3162,22 +3162,10 @@ function goToTodayVip() {
 function renderFanPreview(zoneId, rankedFans) {
   const previewZone = document.getElementById(zoneId);
   if (!previewZone) return;
-  previewZone.innerHTML = '';
-  const top3Preview = rankedFans.slice(0, 3).reverse();
-  top3Preview.forEach((f, index) => {
-    const actualRank = top3Preview.length - 1 - index;
-    const miniBorderColor = actualRank === 0 ? '#ffd700' : actualRank === 1 ? '#c0c0c0' : '#cd7f32';
-    const miniAvatar = document.createElement('img');
-    miniAvatar.src = getImg(f.img);
-    miniAvatar.style = `
-      width: 26px; height: 26px; border-radius: 50%;
-      border: 2px solid ${miniBorderColor}; object-fit: cover;
-      margin-left: -6px; background: white;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    `;
-    miniAvatar.onerror = function() { this.src = 'https://lh3.googleusercontent.com/d/1rebp2F8vyP0nyvsEOFD9Nw2mPcRtVqtG=s1000'; };
-    previewZone.appendChild(miniAvatar);
-  });
+  // กรอบเหรียญขอบหยัก + มงกุฎ ทอง/เงิน/ทองแดง (blm48MedalAvatarHtml ใน common.js); โซนเป็น rtl จึงกลับลำดับให้อันดับ 1 อยู่ซ้าย
+  const top3 = rankedFans.slice(0, 3);
+  previewZone.style.gap = '3px';
+  previewZone.innerHTML = top3.map((f, rank) => blm48MedalAvatarHtml(getImg(f.img), rank, 24, f.name || f.username)).reverse().join('');
 }
 
 // Top Today VIP preview = รวมยอดของวันนี้ข้ามทุกเมมเบอร์ แล้วเอา 3 คนแรก

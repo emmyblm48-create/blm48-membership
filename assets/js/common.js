@@ -1424,6 +1424,41 @@ function groupFrameColor(groupOrName) {
   return GROUP_FRAME_COLORS[key || 'BLM48'];
 }
 
+// 🏅 รูปมินิอันดับ 1-3 ในกรอบเหรียญขอบหยัก + มงกุฎ (ทอง/เงิน/ทองแดง) — แบบเดียวกับหน้า topfans.html
+// ใช้กับแถว Top Fans / Top Today VIP ในหน้า Home และหน้า Member; rank เป็น 0-based
+const MEDAL_COLORS = [
+  { main: '#f5b400', light: '#ffe17a', dark: '#c98a00' },
+  { main: '#a9aeb8', light: '#eef0f4', dark: '#7d828c' },
+  { main: '#c8793a', light: '#f3bf8f', dark: '#9a5524' }
+];
+let medalUid = 0;
+function blm48MedalAvatarHtml(img, rank, size, alt) {
+  if (!document.getElementById('blm48-medal-css')) {
+    const st = document.createElement('style');
+    st.id = 'blm48-medal-css';
+    st.textContent = `
+      .medal-mini { position: relative; display: inline-block; flex-shrink: 0; direction: ltr; }
+      .medal-mini > svg.mm-badge { position: absolute; inset: 0; width: 100%; height: 100%; }
+      .medal-mini > img { position: absolute; inset: 15%; width: 70%; height: 70%; border-radius: 50%; object-fit: cover; background: #fff; border: 1px solid #fff; }
+      .medal-mini > svg.mm-crown { position: absolute; left: 50%; transform: translateX(-50%); top: -24%; width: 70%; pointer-events: none; }`;
+    document.head.appendChild(st);
+  }
+  const c = MEDAL_COLORS[rank] || MEDAL_COLORS[2];
+  const uid = ++medalUid;
+  let bumps = '';
+  for (let i = 0; i < 14; i++) {
+    const a = (Math.PI * 2 * i) / 14;
+    bumps += `<circle cx="${(50 + 44 * Math.cos(a)).toFixed(2)}" cy="${(50 + 44 * Math.sin(a)).toFixed(2)}" r="9"/>`;
+  }
+  const fallback = 'https://raw.githubusercontent.com/Chatchapong-Sing/stockManagement/main/default-profile.png';
+  const src = img && String(img).trim() ? String(img) : fallback;
+  return `<span class="medal-mini" style="width:${size}px;height:${size}px;margin-top:${Math.round(size * 0.24)}px;">
+    <svg class="mm-badge" viewBox="-6 -6 112 112"><defs><linearGradient id="mmb${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c.light}"/><stop offset="1" stop-color="${c.main}"/></linearGradient></defs><g fill="url(#mmb${uid})" stroke="${c.dark}" stroke-width="1">${bumps}<circle cx="50" cy="50" r="44"/></g></svg>
+    <img src="${escapeHtml(src)}" alt="${escapeHtml(alt || '')}" loading="lazy" onerror="this.onerror=null;this.src='${fallback}'">
+    <svg class="mm-crown" viewBox="0 0 64 34"><defs><linearGradient id="mmc${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c.light}"/><stop offset="1" stop-color="${c.main}"/></linearGradient></defs><path d="M6 30 L3 11 L17 20 L24 7 L32 17 L40 7 L47 20 L61 11 L58 30 Z" fill="url(#mmc${uid})" stroke="${c.dark}" stroke-width="1.6" stroke-linejoin="round"/><path d="M32 0.5 L34.2 5.3 L39.3 5.8 L35.5 9.2 L36.6 14.2 L32 11.6 L27.4 14.2 L28.5 9.2 L24.7 5.8 L29.8 5.3 Z" fill="${c.light}" stroke="${c.dark}" stroke-width="1.2" stroke-linejoin="round"/></svg>
+  </span>`;
+}
+
 // เขียนค่าตัวแปรสี CSS ทุกชื่อ (ทุกหน้า) ให้ตรงกับวงที่ระบุ ("BLM48" คือค่าปกติ)
 function applyGroupThemeVars(groupName) {
   const group = (groupName || 'BLM48').toString().trim().toUpperCase();
