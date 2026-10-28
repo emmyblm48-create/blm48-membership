@@ -2,8 +2,8 @@
 // ใช้ร่วมกันในหน้า member.html (ปุ่ม Gift) และ index.html (กดรูปเมมเบอร์ใน Ranking Member)
 // ต้องโหลดหลัง common.js + supabase-client.js (+ member-gift-stickers.js สำหรับรูปสติ๊กเกอร์)
 //
-// เปิดให้ทุกบัญชีที่ล็อกอินแล้ว (ตั้งแต่ 2026-10-28) — Backpack มีของขวัญที่ได้คืนจาก Campaign ด้วย
-// แท็บ: Normal / BLM48 / Backpack — ไม่แสดงของขวัญ NPT48
+// เปิดให้ทุกบัญชีที่ล็อกอินแล้ว (ตั้งแต่ 2026-10-28)
+// แท็บ: Normal / BLM48 / Backpack — ไม่แสดงของขวัญ NPT48; แท็บ BLM48 ตอนนี้เห็นเฉพาะแอดมิน (visibleTiers)
 // ของขวัญ = การปาคุกกี้รายเดือน: มูลค่าของขวัญ x จำนวน = คุกกี้ที่ปาให้เมมเบอร์ (Ranking / Fan Score / Top Fans /
 // Campaign / ภารกิจรายวัน เหมือน give_cookie ทุกอย่าง) — ส่งจาก Backpack ไม่หัก Cookie ซ้ำ; ปาคุกกี้ปกติยังใช้ได้
 //
@@ -184,6 +184,12 @@
   function sessionUser() { return typeof getUserSession === 'function' ? getUserSession() : null; }
   function cookieBalance() { const u = sessionUser(); return Number((u && u.cookie) || 0); }
   function isBackpack() { return tab === BACKPACK; }
+  // หมวด BLM48 เมมเบอร์กำลังออกแบบเอง: ตอนนี้ผู้ใช้ทั่วไปเห็นแค่ Normal (แอดมินเห็นครบ) — send_member_gift เช็คซ้ำ
+  function visibleTiers() {
+    const u = sessionUser();
+    const isAdmin = !!u && ((u.role && ['admin', 'ceo'].includes(String(u.role).toLowerCase())) || u.is_admin === true);
+    return isAdmin ? TIER_ORDER : ['Normal'];
+  }
   function gridImgSize() { return window.matchMedia('(max-width: 360px)').matches ? 46 : 52; }
   function imageHtml(item, size, imgHtml, opts) {
     return window.blm48GiftImageHtml ? window.blm48GiftImageHtml(item.rawId, item.img, size, imgHtml, opts) : imgHtml;
@@ -230,7 +236,7 @@
 
   function items() {
     if (isBackpack()) {
-      return wallet.map(g => ({ id: String(g.giftId), rawId: g.giftId, name: g.giftName, img: g.imageUrl, cost: Number(g.costCookies || 0), owned: Number(g.qty || 0) }));
+      return wallet.filter(g => visibleTiers().includes(g.tier)).map(g => ({ id: String(g.giftId), rawId: g.giftId, name: g.giftName, img: g.imageUrl, cost: Number(g.costCookies || 0), owned: Number(g.qty || 0) }));
     }
     return (catalog || []).filter(g => g.tier === tab).map(g => ({
       id: String(g.giftId), rawId: g.giftId, name: g.giftName, img: g.imageUrl, cost: Number(g.costCookies || 0), owned: null
@@ -271,14 +277,14 @@
   }
 
   function renderTabs() {
-    const tabs = TIER_ORDER.map(t => ({ key: t, label: TIER_LABELS[t] })).concat([{ key: BACKPACK, label: 'Backpack' }]);
+    const tabs = visibleTiers().map(t => ({ key: t, label: TIER_LABELS[t] })).concat([{ key: BACKPACK, label: 'Backpack' }]);
     $('gift-tabs').innerHTML = tabs.map(t =>
       `<button type="button" class="gift-tab ${t.key === tab ? 'active' : ''}" onclick="blm48Gift.selectTab('${t.key}')">${t.label}</button>`
     ).join('');
   }
 
   async function selectTab(t) {
-    tab = t;
+    tab = (t === BACKPACK || visibleTiers().includes(t)) ? t : 'Normal';
     selectedId = null;
     qty = 1;
     renderTabs();
