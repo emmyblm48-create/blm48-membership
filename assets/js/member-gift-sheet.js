@@ -221,7 +221,9 @@
         name: String(name).toLowerCase()
       };
     };
-    const others = list.filter(g => g.tier !== 'MembersDesign'); // Normal คงลำดับเดิม
+    // Normal: ราคาน้อย -> มาก, ราคาเท่ากันเรียงตามชื่อ (ก-ฮ / A-Z)
+    const others = list.filter(g => g.tier !== 'MembersDesign')
+      .sort((a, b) => Number(a.costCookies || 0) - Number(b.costCookies || 0) || String(a.giftName || '').localeCompare(String(b.giftName || ''), 'th'));
     const designs = list.filter(g => g.tier === 'MembersDesign').map(g => ({ g, k: keyOf(g) }));
     designs.sort((x, y) => x.k.gen - y.k.gen || x.k.id.localeCompare(y.k.id) || x.k.name.localeCompare(y.k.name));
     list.splice(0, list.length, ...others, ...designs.map(x => x.g));
