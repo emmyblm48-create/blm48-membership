@@ -119,6 +119,15 @@ document.addEventListener('DOMContentLoaded', function initSwipeBackGesture() {
   document.head.appendChild(link);
 })();
 
+// ✏️ ไอคอนเส้นบางโปร่งทั้งแอป (Font Awesome -> Phosphor Light) — รายละเอียดใน assets/css/thin-icons.css
+(function loadThinIcons() {
+  if (document.querySelector('link[href*="thin-icons.css"]')) return;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = 'assets/css/thin-icons.css';
+  document.head.appendChild(link);
+})();
+
 // 🔄 ลากจอลงเพื่อรีเฟรชหน้า (ทุกหน้า) — ตัวโค้ดอยู่ใน assets/js/pull-to-refresh.js
 (function loadPullToRefresh() {
   if (document.querySelector('script[src*="pull-to-refresh.js"]')) return;
