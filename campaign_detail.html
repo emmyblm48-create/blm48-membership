@@ -150,11 +150,16 @@
       html += `<br><span style="font-size:12px;">(ปาคุกกี้ ${cookieBase.toLocaleString()} + กดใจ/คอมเมนต์โพส ${engagement.toLocaleString()} · คืนคุกกี้คิดจากยอดปาคุกกี้)</span>`;
     }
     if (detail.myRefund) {
-      html += `<br><i class="fa-solid fa-circle-check" style="color:#2f9e44;"></i> ได้รับคุกกี้คืนแล้ว <b>${Number(detail.myRefund.refund).toLocaleString()}</b> คุกกี้ (${detail.myRefund.refund_pct}%)${detail.myRefund.is_champ_bonus ? ' <i class="fa-solid fa-trophy" style="color:#fcc419;"></i> Top Supporter เดือนเกิด' : ''}`;
+      // คืนเป็นของขวัญเข้า Backpack (ชิ้นแพงก่อน) + เศษที่ไม่ครบชิ้นคืนเป็นคุกกี้
+      const r = detail.myRefund;
+      const items = (Array.isArray(r.refund_gifts) ? r.refund_gifts : []).map(g => `${escapeHtml(g.giftName)} x${Number(g.qty).toLocaleString()}`);
+      if (Number(r.refund_cookies) > 0) items.push(`คุกกี้ ${Number(r.refund_cookies).toLocaleString()}`);
+      html += `<br><i class="fa-solid fa-circle-check" style="color:#2f9e44;"></i> ได้รับคืนแล้ว ${r.refund_pct}% มูลค่า <b>${Number(r.refund).toLocaleString()}</b> คุกกี้${items.length ? ` เป็น ${items.join(', ')}` : ''}${r.is_champ_bonus ? ' <i class="fa-solid fa-trophy" style="color:#fcc419;"></i> Top Supporter เดือนเกิด' : ''}`;
+      if (r.refund_gifts && r.refund_gifts.length) html += `<br><span style="font-size:12px;">ของขวัญเก็บอยู่ใน Backpack กด Send Gift เพื่อส่งให้เมมเบอร์ได้เลย</span>`;
     } else if (!ended) {
       const pct = Number(c.refundPct || 0);
       html += pct > 0
-        ? `<br>ตอนนี้ถึง Tier ${c.tier} แล้ว จะได้รับคุกกี้คืนอย่างน้อย <b>${Math.floor(cookieBase * pct / 100).toLocaleString()}</b> คุกกี้ (${pct}%) เมื่อจบ Campaign`
+        ? `<br>ตอนนี้ถึง Tier ${c.tier} แล้ว จะได้รับคืนอย่างน้อย ${pct}% มูลค่า <b>${Math.floor(cookieBase * pct / 100).toLocaleString()}</b> คุกกี้ เป็นของขวัญเข้า Backpack เมื่อจบ Campaign`
         : `<br>ยังไม่ถึง Tier 1 (10,000 คุกกี้) ชวนเพื่อนๆ มาซัพพอร์ตเพิ่มกันนะ`;
     } else {
       html += `<br><i class="fa-solid fa-hourglass-half"></i> กำลังสรุปผลและคืนคุกกี้...`;

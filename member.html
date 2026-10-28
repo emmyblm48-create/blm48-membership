@@ -1403,13 +1403,8 @@ function renderMemberStatsAndFans() {
     function actionKami() { setOshi('kami'); }
 
     // 🎁 Gift: แผงส่งของขวัญ (assets/js/member-gift-sheet.js ใช้ร่วมกับหน้า Home)
-    // ตอนนี้เปิดเฉพาะแอดมิน (send_member_gift เช็คซ้ำฝั่งเซิร์ฟเวอร์) — ผู้ใช้ทั่วไปเห็นแค่ Coming soon
     function actionGift() {
       if (!checkLoginStatus()) return;
-      if (!blm48IsGiftAdmin(user)) {
-        Swal.fire({ title: 'Coming soon', text: 'ฟีเจอร์ส่งของขวัญให้เมมเบอร์จะเปิดให้ใช้งานเร็ว ๆ นี้ค่ะ 🎁', confirmButtonText: 'OK', confirmButtonColor: '#ffd75e' });
-        return;
-      }
       if (document.getElementById('btn-cookie-trigger').getAttribute('data-graduated') === 'true') {
         Swal.fire({ title: 'ส่งของขวัญไม่ได้', text: 'เมมเบอร์ท่านนี้จบการศึกษาแล้วค่ะ', confirmButtonColor: '#ffd75e' });
         return;

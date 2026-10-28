@@ -2,12 +2,11 @@
 // ใช้ร่วมกันในหน้า member.html (ปุ่ม Gift) และ index.html (กดรูปเมมเบอร์ใน Ranking Member)
 // ต้องโหลดหลัง common.js + supabase-client.js (+ member-gift-stickers.js สำหรับรูปสติ๊กเกอร์)
 //
-// ตอนนี้เปิดเฉพาะแอดมิน — ผู้ใช้ทั่วไปไม่เห็นแผงนี้ (send_member_gift ฝั่งเซิร์ฟเวอร์ก็เช็คซ้ำ)
+// เปิดให้ทุกบัญชีที่ล็อกอินแล้ว (ตั้งแต่ 2026-10-28) — Backpack มีของขวัญที่ได้คืนจาก Campaign ด้วย
 // แท็บ: Normal / BLM48 / Backpack — ไม่แสดงของขวัญ NPT48
 // ของขวัญ = การปาคุกกี้รายเดือน: มูลค่าของขวัญ x จำนวน = คุกกี้ที่ปาให้เมมเบอร์ (Ranking / Fan Score / Top Fans /
 // Campaign / ภารกิจรายวัน เหมือน give_cookie ทุกอย่าง) — ส่งจาก Backpack ไม่หัก Cookie ซ้ำ; ปาคุกกี้ปกติยังใช้ได้
 //
-// blm48IsGiftAdmin(user)                       แอดมินที่ใช้แผงนี้ได้ (role admin/ceo หรือ is_admin)
 // blm48OpenMemberGift({ name, img, postId, hideRecipient, onAvatarClick, onSent })
 //   postId:        ส่งในโพสต์ของเมมเบอร์ (นับยอด Gifts ใต้โพสต์) / hideRecipient: ไม่โชว์รูป+ชื่อเมมเบอร์บนแผง
 //   onAvatarClick: กดรูปเมมเบอร์บนแผง (ไม่ใส่ = ไปหน้าโปรไฟล์เมมเบอร์)
@@ -449,9 +448,6 @@
     }
   }
 
-  window.blm48IsGiftAdmin = function (user) {
-    return !!user && ((user.role && ['admin', 'ceo'].includes(String(user.role).toLowerCase())) || user.is_admin === true);
-  };
   window.blm48OpenMemberGift = open;
   window.blm48Gift = { close, avatarClick, selectTab, selectItem, setQty, customQty, goPage, stepPage, openConfirm, closeConfirm, send };
 })();

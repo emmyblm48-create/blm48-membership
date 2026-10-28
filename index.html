@@ -3205,13 +3205,13 @@ function renderGlobalFans(rawData) {
   renderFanPreview('top-fans-preview-zone', finalFans);
 }
 
-// 🎁 กดรูปเมมเบอร์ใน Ranking Member: แอดมิน = เปิดแผงส่งของขวัญ (กดรูปบนแผงไปหน้าโปรไฟล์)
-// ผู้ใช้ทั่วไป = ไปหน้าโปรไฟล์เหมือนเดิม (ฟีเจอร์ Gift ยังไม่เปิดให้ role user)
+// 🎁 กดรูปเมมเบอร์ใน Ranking Member: ล็อกอินแล้ว = เปิดแผงส่งของขวัญ (กดรูปบนแผงไปหน้าโปรไฟล์)
+// ยังไม่ล็อกอิน = ไปหน้าโปรไฟล์เหมือนเดิม
 function onRankingAvatarClick(name) {
-  const isAdmin = (() => { const u = getUserSession(); return !!u && ((u.role && ['admin', 'ceo'].includes(String(u.role).toLowerCase())) || u.is_admin === true); })();
-  if (!isAdmin) { openMemberProfile(name); return; }
+  const u = getUserSession();
+  if (!u || !u.username) { openMemberProfile(name); return; }
   const m = (currentRankingData || []).find(x => x.name === name) || {};
-  // โหลดไฟล์แผงของขวัญเฉพาะตอนแอดมินกดครั้งแรก (หน้า Home ของผู้ใช้ทั่วไปไม่ต้องโหลดเพิ่ม)
+  // โหลดไฟล์แผงของขวัญเฉพาะตอนกดครั้งแรก (หน้า Home ไม่ต้องโหลดเพิ่มถ้าไม่ได้กด)
   loadGiftSheetScripts().then(() => blm48OpenMemberGift({
     name,
     img: getImg(m.profile_img),

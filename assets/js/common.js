@@ -660,10 +660,6 @@ async function blm48ToggleCommentLike(commentId) {
 // id ของหัวใจ/ยอดไลก์/ยอดคอมเมนต์ยังเหมือนเดิม (heart- / like-count- / comment-count-) ให้ likePost,
 // patchPostLive และ submitComment ของแต่ละหน้าทำงานต่อได้
 // =========================================================================
-function blm48IsGiftAdminUser(u) {
-  return !!u && ((u.role && ['admin', 'ceo'].includes(String(u.role).toLowerCase())) || u.is_admin === true);
-}
-
 // ตัวเลขสั้นแบบ 4K / 1.2M
 function blm48ShortCount(n) {
   const x = Number(n) || 0;
@@ -740,7 +736,7 @@ function blm48PostCommentPreviewHtml(post, opts) {
     </div>`;
 }
 
-// 🎁 กด Send Gift ในโพสต์: แอดมิน = แผงของขวัญ (ไม่โชว์โปรไฟล์เมมเบอร์) / ผู้ใช้ทั่วไป = Coming soon
+// 🎁 กด Send Gift ในโพสต์: เปิดแผงของขวัญ (ไม่โชว์โปรไฟล์เมมเบอร์) — ทุกบัญชีที่ล็อกอินแล้ว
 let blm48GiftSheetLoading = null;
 function blm48LoadGiftSheet() {
   if (window.blm48OpenMemberGift) return Promise.resolve();
@@ -761,10 +757,6 @@ async function blm48OpenPostGift(postId) {
   const u = typeof getUserSession === 'function' ? getUserSession() : null;
   if (!u || !u.username) {
     Swal.fire({ title: 'กรุณาเข้าสู่ระบบ', text: 'เข้าสู่ระบบก่อนส่งของขวัญให้เมมเบอร์นะคะ', confirmButtonText: 'OK' });
-    return;
-  }
-  if (!blm48IsGiftAdminUser(u)) {
-    Swal.fire({ title: 'Coming soon', text: 'ฟีเจอร์ส่งของขวัญให้เมมเบอร์จะเปิดให้ใช้งานเร็ว ๆ นี้ค่ะ 🎁', confirmButtonText: 'OK' });
     return;
   }
   const holder = document.getElementById(`post-gifts-${postId}`);
