@@ -5,7 +5,7 @@
 // เปิดให้ทุกบัญชีที่ล็อกอินแล้ว (User / Member / Admin)
 // แท็บ: Normal / BLM48 / Backpack — ไม่แสดงของขวัญ NPT48; แท็บ BLM48 ยังปิดอยู่ (visibleTiers)
 // ของขวัญ = การปาคุกกี้รายเดือน: มูลค่าของขวัญ x จำนวน = คุกกี้ที่ปาให้เมมเบอร์ (Ranking / Fan Score / Top Fans /
-// Campaign / ภารกิจรายวัน เหมือน give_cookie ทุกอย่าง) — ส่งจาก Backpack ไม่หัก Cookie ซ้ำ; ปาคุกกี้ปกติยังใช้ได้
+// Campaign / ภารกิจรายวัน เหมือน give_cookie ทุกอย่าง) — ของที่ซื้อเข้า Backpack ก่อนเสมอ แล้วส่งจาก Backpack (ไม่หัก Cookie ซ้ำ); ปาคุกกี้ปกติยังใช้ได้
 //
 // blm48OpenMemberGift({ name, img, postId, hideRecipient, onAvatarClick, onSent })
 //   postId:        ส่งในโพสต์ของเมมเบอร์ (นับยอด Gifts ใต้โพสต์) / hideRecipient: ไม่โชว์รูป+ชื่อเมมเบอร์บนแผง
@@ -407,7 +407,9 @@
       </div>
       <div class="gift-confirm-divider">Equal</div>
       <div class="gift-confirm-total"><i class="fa-solid fa-cookie-bite"></i>${total.toLocaleString()}</div>
-      <div class="gift-confirm-note">เท่ากับปาคุกกี้ ${total.toLocaleString()} ให้ ${esc(target.name)}${isBackpack() ? ' · ใช้ของจาก Backpack ไม่หัก Cookie ซ้ำ' : ''}</div>`;
+      <div class="gift-confirm-note">${isBackpack()
+        ? `เท่ากับปาคุกกี้ ${total.toLocaleString()} ให้ ${esc(target.name)} · ใช้ของจาก Backpack ไม่หัก Cookie ซ้ำ`
+        : 'ซื้อเก็บเข้า Backpack ก่อน แล้วกด Send ในแท็บ Backpack เพื่อส่งให้เมมเบอร์'}</div>`;
     $('gift-confirm-overlay').style.display = 'flex';
   }
   function closeConfirm() { if ($('gift-confirm-overlay')) $('gift-confirm-overlay').style.display = 'none'; }
@@ -418,16 +420,53 @@
     updateSendBar();
   }
 
-  async function send() {
+  // แท็บร้านค้า: ซื้อเก็บเข้า Backpack ก่อนเสมอ (ยังไม่ส่ง) / แท็บ Backpack: เอาของในกระเป๋าไปส่งให้เมมเบอร์
+  function send() {
     closeConfirm();
+    return isBackpack() ? sendFromBackpack() : buyToBackpack();
+  }
+
+  async function buyToBackpack() {
+    const item = selectedItem();
+    const u = sessionUser();
+    if (!item || busy || !u) return;
+    const buyQty = qty;
+    setBusy(true);
+    try {
+      const res = await blm48BuyGiftWallet(u.username, item.rawId, buyQty);
+      if (res && res.status === 'success') {
+        if (typeof saveUserSession === 'function') {
+          u.cookie = (res.newBalance !== undefined && res.newBalance !== null) ? Number(res.newBalance) : Math.max(0, Number(u.cookie || 0) - item.cost * buyQty);
+          saveUserSession(u);
+        }
+        Swal.fire({ icon: 'success', title: `เก็บ "${item.name}" x${buyQty} เข้า Backpack แล้ว`, text: 'กด Send ในแท็บ Backpack เพื่อส่งให้เมมเบอร์ได้เลย', timer: 1800, showConfirmButton: false });
+        // พาไปแท็บ Backpack พร้อมเลือกของที่เพิ่งซื้อไว้ให้ กด Send ต่อได้ทันที
+        await selectTab(BACKPACK);
+        if (isBackpack() && wallet.some(g => String(g.giftId) === item.id)) {
+          selectedId = item.id;
+          qty = Math.min(buyQty, Math.max(1, maxQty()));
+          renderItems();
+          renderQty();
+        }
+      } else {
+        Swal.fire({ title: 'เก็บของขวัญไม่สำเร็จ', text: (res && res.message) || 'กรุณาลองใหม่อีกครั้งค่ะ', icon: 'error', confirmButtonColor: '#ffd75e' });
+      }
+    } catch (err) {
+      console.error('Buy Gift To Backpack Error:', err);
+      Swal.fire({ title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้ในขณะนี้ กรุณาลองใหม่ค่ะ', icon: 'error', confirmButtonColor: '#ffd75e' });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function sendFromBackpack() {
     const item = selectedItem();
     const u = sessionUser();
     if (!item || busy || !u) return;
     const sendQty = qty;
-    const fromBackpack = isBackpack();
     setBusy(true);
     try {
-      const res = await blm48SendMemberGift(u.username, target.name, item.rawId, sendQty, fromBackpack, target.postId);
+      const res = await blm48SendMemberGift(u.username, target.name, item.rawId, sendQty, true, target.postId);
       if (res && res.status === 'success') {
         if (res.remainingCookie !== undefined && res.remainingCookie !== null && typeof saveUserSession === 'function') {
           u.cookie = Number(res.remainingCookie);
@@ -435,7 +474,7 @@
           saveUserSession(u);
         }
         Swal.fire({ icon: 'success', title: res.message || 'ส่งของขวัญเรียบร้อย', timer: 1500, showConfirmButton: false });
-        if (fromBackpack) await loadWallet();
+        await loadWallet();
         selectedId = null;
         qty = 1;
         renderItems();

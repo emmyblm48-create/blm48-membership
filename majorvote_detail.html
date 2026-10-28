@@ -1138,33 +1138,6 @@
         updateGiftSendBar();
     }
 
-    async function sendSelectedGift() {
-        const item = getSelectedGiftItem();
-        if (!item || isGiftBusy) return;
-        const qty = selectedGiftQty;
-        const totalCost = item.cost * qty;
-        if (getUserCookieBalance() < totalCost) { warnNotEnoughCookies(totalCost); return; }
-
-        setGiftBusy(true);
-        try {
-            const res = await blm48SendGift(getUsername(), campaignId, activeGiftCandidate, item.rawId, qty);
-            if (res.status === "success") {
-                applyCookieBalance(res, totalCost);
-                Swal.fire({ icon: 'success', title: `ส่ง "${item.name}" x${qty} ให้ ${activeGiftCandidate} สำเร็จ`, timer: 1400, showConfirmButton: false });
-                // รีเซ็ตกลับไปเลือกใหม่ได้ทันที (โมดัลยังเปิดอยู่ ไม่ต้องกดปุ่ม Gift ซ้ำ)
-                resetGiftSelection();
-                fetchCandidatesFromBackend();
-            } else {
-                showGiftError('ส่งของขวัญไม่สำเร็จ', res.message || 'เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์หรือการหักคุกกี้');
-            }
-        } catch (err) {
-            console.error("Send Gift Error:", err);
-            showGiftError('เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้ในขณะนี้ กรุณาลองใหม่อีกครั้งในภายหลัง');
-        } finally {
-            setGiftBusy(false);
-        }
-    }
-
     // ซื้อของขวัญเก็บเข้า Backpack (จ่าย Cookie ทันทีเหมือนกัน แต่ยังไม่โหวตให้ใคร ไปโหวตทีหลังได้ที่แท็บ Backpack)
     async function buySelectedGiftToWallet() {
         const item = getSelectedGiftItem();
