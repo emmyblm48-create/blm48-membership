@@ -654,7 +654,7 @@ async function blm48ToggleCommentLike(commentId) {
 
 // =========================================================================
 // 🧾 ส่วนล่างของโพสต์เมมเบอร์ (Home / Member / postdetail) แบบ iAM:
-//   แถว [รูป 3 คนส่งของขวัญเยอะสุด + ยอดคุกกี้ทั้งหมดของโพสต์ (posts.cookies รวมของขวัญ)]  ...  [N Comments]
+//   แถว [รูป 3 คนส่งของขวัญเยอะสุด] (ซ่อนจนกว่าโพสต์จะมีของขวัญ — ไม่โชว์ยอดคุกกี้/ยอดคอมเมนต์ และไม่มีเส้นด้านบน)
 //   ปุ่ม [♥ N Likes] | [🎁 Send Gift]   (กดใจโพสต์ เมมเบอร์ได้ 9 คุกกี้เหมือนเดิม)
 //   คอมเมนต์ยอดนิยม 2 อันดับ + ช่องพิมพ์ (มีปุ่มของขวัญในช่อง) — ไม่มีคอมเมนต์ = มีแค่ช่องพิมพ์
 // id ของหัวใจ/ยอดไลก์/ยอดคอมเมนต์ยังเหมือนเดิม (heart- / like-count- / comment-count-) ให้ likePost,
@@ -674,21 +674,15 @@ function blm48ShortCount(n) {
 
 // opts.memberName = ชื่อเมมเบอร์เจ้าของโพสต์ (โชว์ในกล่องยืนยันของขวัญ)
 // opts.canGift = false -> ไม่มีแถว Gifts/ปุ่ม Send Gift (เช่นโพสต์แฟนคลับ)
-// opts.onCommentsClick = JS ตอนกด "N Comments" (ค่าเริ่มต้น: เปิดหน้าโพสต์เต็ม)
 function blm48PostStatsActionsHtml(post, opts) {
   opts = opts || {};
   const id = escapeAttr(post.id || '');
-  const comments = Array.isArray(post.comments) ? post.comments : [];
   const canGift = opts.canGift !== false;
   const liked = !!post.isLiked;
-  const commentsClick = opts.onCommentsClick || `window.location.href='postdetail?id=${encodeURIComponent(post.id || '')}'`;
   return `
-    <div class="pf-stats">
-      ${canGift ? `<div class="pf-gifts" id="post-gifts-${id}" data-post-id="${id}" data-member="${escapeAttr(opts.memberName || '')}">
-        <span class="pf-gifters" id="post-gifters-${id}"></span><span class="pf-gift-total"><span id="post-cookies-count-${id}">${blm48ShortCount(post.cookies || 0)}</span> Cookies</span>
-      </div>` : '<div></div>'}
-      <button type="button" class="pf-comment-count" onclick="${commentsClick}"><span id="comment-count-${id}">${comments.length}</span> Comments</button>
-    </div>
+    ${canGift ? `<div class="pf-stats">
+      <div class="pf-gifts" id="post-gifts-${id}" data-post-id="${id}" data-member="${escapeAttr(opts.memberName || '')}"><span class="pf-gifters" id="post-gifters-${id}"></span></div>
+    </div>` : ''}
     <div class="pf-actions">
       <button type="button" class="pf-act pf-like" onclick="likePost('${id}')" aria-label="Like">
         <i class="${liked ? 'fa-solid' : 'fa-regular'} fa-heart" id="heart-${id}"></i><span id="like-count-${id}">${post.likes || 0}</span><span>Likes</span>
@@ -832,13 +826,14 @@ async function blm48FlushPostGifts() {
   const st = document.createElement('style');
   st.id = 'blm48-post-footer-css';
   st.textContent = `
-    .pf-stats { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0 8px; border-top: 1px solid #eee; min-height: 44px; }
+    .pf-stats { display: flex; align-items: center; padding: 4px 0 8px; }
+    .pf-stats:has(.pf-gifters:empty) { display: none; }
     .pf-gifts { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 0.92rem; color: #555; }
     .pf-gifters { display: inline-flex; align-items: center; }
     .pf-gifter { display: inline-flex; margin-right: -4px; cursor: pointer; }
     .pf-gifters:not(:empty) { margin-right: 6px; }
     .pf-comment-count { background: none; border: none; padding: 0; font-family: inherit; font-size: 0.92rem; color: #555; cursor: pointer; white-space: nowrap; }
-    .pf-actions { display: flex; align-items: center; border-top: 1px solid #eee; border-bottom: 1px solid #eee; margin: 0 -15px; }
+    .pf-actions { display: flex; align-items: center; border-bottom: 1px solid #eee; margin: 0 -15px; }
     .pf-act { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: none; border: none; padding: 11px 6px; font-family: inherit; font-size: 1rem; font-weight: 500; color: #222; cursor: pointer; }
     .pf-act:active { background: #fafafa; }
     .pf-act-icon { font-size: 1.15rem; }
