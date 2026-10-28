@@ -81,7 +81,7 @@
   // ท่าเคลื่อนไหวตามไฟล์ออกแบบ เปิดเมื่อสติ๊กเกอร์ "เล่น" (อยู่ในการ์ดที่ถูกเลือก หรือมีคลาส .play)
   const PLAY = '.selected .gift-sticker, .gift-sticker.play';
   const CSS = `
-    .gift-sticker { position: relative; display: flex; align-items: center; justify-content: center; border-radius: 28%; border-style: solid; border-color: #ffffff; box-sizing: border-box; flex-shrink: 0; }
+    .gift-sticker { position: relative; display: flex; align-items: center; justify-content: center; box-sizing: border-box; flex-shrink: 0; }
     .gift-sticker svg { width: 100%; height: 100%; overflow: visible; }
     .gift-sticker .gs-bd { transform-box: fill-box; transform-origin: 50% 100%; }
     .gift-sticker .gs-tw { transform-box: fill-box; transform-origin: 50% 50%; }
@@ -137,10 +137,8 @@
     const o = r(Math.max(1.2, px * 4 / 176));
     const filter = `drop-shadow(${o}px 0 0 #fff) drop-shadow(-${o}px 0 0 #fff) drop-shadow(0 ${o}px 0 #fff) drop-shadow(0 -${o}px 0 #fff)`
       + ` drop-shadow(0 ${r(o * 1.5)}px ${r(o * 1.5)}px rgba(60,45,10,0.14))`;
-    const border = r(Math.max(1.5, px * 4 / 200));
-    const shadow = `0 ${r(px * 6 / 200)}px 0 rgba(60,45,10,0.10), 0 ${r(px * 14 / 200)}px ${r(px * 26 / 200)}px rgba(60,45,10,0.08)`;
-    // พื้นหลังสติ๊กเกอร์เป็นสีขาวทุกชิ้น (ค่า bg ประจำชิ้นในตารางไม่ได้ใช้แล้ว)
-    return `<div class="gift-sticker${opts && opts.play ? ' play' : ''}" style="width:${px}px;height:${px}px;background:#ffffff;border-width:${border}px;box-shadow:${shadow}">`
+    // ไม่มีกล่องสี่เหลี่ยมรองหลัง — โชว์แค่ตัวสติ๊กเกอร์บนพื้นขาวของหน้า (ค่า bg ประจำชิ้นในตารางไม่ได้ใช้แล้ว)
+    return `<div class="gift-sticker${opts && opts.play ? ' play' : ''}" style="width:${px}px;height:${px}px">`
       + `<svg viewBox="${s.viewBox}" role="img" aria-label="${s.label}" style="filter:${filter}">${s.svg}</svg></div>`;
   }
 
