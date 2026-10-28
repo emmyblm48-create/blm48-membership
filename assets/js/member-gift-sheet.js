@@ -4,7 +4,8 @@
 //
 // ตอนนี้เปิดเฉพาะแอดมิน — ผู้ใช้ทั่วไปไม่เห็นแผงนี้ (send_member_gift ฝั่งเซิร์ฟเวอร์ก็เช็คซ้ำ)
 // แท็บ: Normal / BLM48 / Backpack — ไม่แสดงของขวัญ NPT48
-// ส่งแล้วนับเหมือนการปาคุกกี้ (Fan Score / Top Fans / Ranking); ส่งจาก Backpack ไม่หัก Cookie ซ้ำ
+// ของขวัญ = การปาคุกกี้รายเดือน: มูลค่าของขวัญ x จำนวน = คุกกี้ที่ปาให้เมมเบอร์ (Ranking / Fan Score / Top Fans /
+// Campaign / ภารกิจรายวัน เหมือน give_cookie ทุกอย่าง) — ส่งจาก Backpack ไม่หัก Cookie ซ้ำ; ปาคุกกี้ปกติยังใช้ได้
 //
 // blm48IsGiftAdmin(user)                       แอดมินที่ใช้แผงนี้ได้ (role admin/ceo หรือ is_admin)
 // blm48OpenMemberGift({ name, img, onAvatarClick, onSent })
@@ -375,7 +376,7 @@
       </div>
       <div class="gift-confirm-divider">Equal</div>
       <div class="gift-confirm-total"><i class="fa-solid fa-cookie-bite"></i>${total.toLocaleString()}</div>
-      <div class="gift-confirm-note">${isBackpack() ? 'ใช้ของจาก Backpack ไม่หัก Cookie' : 'หัก Cookie ของคุณ'} · นับเป็นยอดซัพพอร์ต ${esc(target.name)}</div>`;
+      <div class="gift-confirm-note">เท่ากับปาคุกกี้ ${total.toLocaleString()} ให้ ${esc(target.name)}${isBackpack() ? ' · ใช้ของจาก Backpack ไม่หัก Cookie ซ้ำ' : ''}</div>`;
     $('gift-confirm-overlay').style.display = 'flex';
   }
   function closeConfirm() { if ($('gift-confirm-overlay')) $('gift-confirm-overlay').style.display = 'none'; }
@@ -399,6 +400,7 @@
       if (res && res.status === 'success') {
         if (res.remainingCookie !== undefined && res.remainingCookie !== null && typeof saveUserSession === 'function') {
           u.cookie = Number(res.remainingCookie);
+          if (res.currentToken !== undefined && res.currentToken !== null) u.token = Number(res.currentToken); // โบนัส 10 Token ครั้งแรกของเดือน
           saveUserSession(u);
         }
         Swal.fire({ icon: 'success', title: res.message || 'ส่งของขวัญเรียบร้อย', timer: 1500, showConfirmButton: false });
