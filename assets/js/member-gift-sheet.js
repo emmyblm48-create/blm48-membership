@@ -8,7 +8,8 @@
 // Campaign / ภารกิจรายวัน เหมือน give_cookie ทุกอย่าง) — ส่งจาก Backpack ไม่หัก Cookie ซ้ำ; ปาคุกกี้ปกติยังใช้ได้
 //
 // blm48IsGiftAdmin(user)                       แอดมินที่ใช้แผงนี้ได้ (role admin/ceo หรือ is_admin)
-// blm48OpenMemberGift({ name, img, onAvatarClick, onSent })
+// blm48OpenMemberGift({ name, img, postId, hideRecipient, onAvatarClick, onSent })
+//   postId:        ส่งในโพสต์ของเมมเบอร์ (นับยอด Gifts ใต้โพสต์) / hideRecipient: ไม่โชว์รูป+ชื่อเมมเบอร์บนแผง
 //   onAvatarClick: กดรูปเมมเบอร์บนแผง (ไม่ใส่ = ไปหน้าโปรไฟล์เมมเบอร์)
 //   onSent(res):   ส่งสำเร็จ (res.cost = Cookie ที่นับเป็นยอดซัพพอร์ต)
 (function () {
@@ -108,7 +109,9 @@
 .gift-balance-chip { padding: 4px 4px 4px 12px; }
 .gift-topup-btn { width: 30px; height: 30px; }
 .gift-send-btn { padding: 11px 40px; font-size: 17px; }
-.gift-modal-avatar { cursor: pointer; }`;
+.gift-modal-avatar { cursor: pointer; }
+.gift-modal-box.no-recipient .gift-modal-recipient { display: none; }
+.gift-modal-box.no-recipient .gift-tabs { border-top: none; padding-right: 44px; }`;
 
   const MARKUP = `
   <div id="gift-modal-overlay" class="gift-modal-overlay" onclick="blm48Gift.close()">
@@ -161,7 +164,7 @@
   let selectedId = null;
   let qty = 1;
   let busy = false;
-  let target = { name: '', onAvatarClick: null, onSent: null };
+  let target = { name: '', postId: null, onAvatarClick: null, onSent: null };
 
   const $ = id => document.getElementById(id);
   const esc = s => (typeof escapeAttr === 'function' ? escapeAttr(s) : String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])));
@@ -190,9 +193,33 @@
   async function loadCatalog() {
     if (catalog) return;
     try {
-      const data = await blm48GetGiftCatalog();
+      const [data, members] = await Promise.all([
+        blm48GetGiftCatalog(),
+        typeof blm48GetAllMembers === 'function' ? blm48GetAllMembers().catch(() => null) : null
+      ]);
       catalog = (Array.isArray(data) ? data : []).filter(g => (g.active === true || g.active === undefined) && TIER_ORDER.includes(g.tier));
+      sortByGeneration(catalog, members && Array.isArray(members.data) ? members.data : (Array.isArray(members) ? members : []));
     } catch (e) { console.error('Load Gift Catalog Error:', e); catalog = []; }
+  }
+
+  // แท็บ BLM48: เรียงของขวัญประจำตัวตามรุ่นของเมมเบอร์ (รุ่นแรกก่อน) แล้วตามรหัสเมมเบอร์ในรุ่นเดียวกัน
+  // ชื่อเมมเบอร์ของแต่ละชิ้นมาจากแผนที่สติ๊กเกอร์ (gift_name บางชิ้นเป็นชื่อแฟนด้อม ไม่ใช่ชื่อเมมเบอร์)
+  function sortByGeneration(list, members) {
+    const info = {};
+    members.forEach(m => { if (m && m.name) info[String(m.name).toLowerCase()] = m; });
+    const keyOf = g => {
+      const name = (window.blm48GiftMemberName && window.blm48GiftMemberName(g.giftId)) || g.giftName || '';
+      const m = info[String(name).toLowerCase()];
+      return {
+        gen: m && Number(m.generation) ? Number(m.generation) : 999,
+        id: (m && m.member_id) || 'ZZZ',
+        name: String(name).toLowerCase()
+      };
+    };
+    const others = list.filter(g => g.tier !== 'MembersDesign'); // Normal คงลำดับเดิม
+    const designs = list.filter(g => g.tier === 'MembersDesign').map(g => ({ g, k: keyOf(g) }));
+    designs.sort((x, y) => x.k.gen - y.k.gen || x.k.id.localeCompare(y.k.id) || x.k.name.localeCompare(y.k.name));
+    list.splice(0, list.length, ...others, ...designs.map(x => x.g));
   }
 
   async function loadWallet() {
@@ -215,7 +242,8 @@
 
   async function open(opts) {
     ensureDom();
-    target = { name: opts.name, onAvatarClick: opts.onAvatarClick || null, onSent: opts.onSent || null };
+    target = { name: opts.name || '', postId: opts.postId || null, onAvatarClick: opts.onAvatarClick || null, onSent: opts.onSent || null };
+    document.querySelector('#gift-modal-overlay .gift-modal-box').classList.toggle('no-recipient', !!opts.hideRecipient);
     selectedId = null;
     qty = 1;
     $('gift-modal-target').textContent = opts.name;
@@ -396,7 +424,7 @@
     const fromBackpack = isBackpack();
     setBusy(true);
     try {
-      const res = await blm48SendMemberGift(u.username, target.name, item.rawId, sendQty, fromBackpack);
+      const res = await blm48SendMemberGift(u.username, target.name, item.rawId, sendQty, fromBackpack, target.postId);
       if (res && res.status === 'success') {
         if (res.remainingCookie !== undefined && res.remainingCookie !== null && typeof saveUserSession === 'function') {
           u.cookie = Number(res.remainingCookie);

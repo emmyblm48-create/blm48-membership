@@ -1774,8 +1774,6 @@ function renderPost(post) {
   // ตัดตัวอักษรคำว่า Graduated ออกไปแล้ว (ปล่อยเป็นค่าว่างไว้) เพื่อความคลีน
   const graduatedSubtext = ''; 
 
-  const postComments = Array.isArray(post.comments) ? post.comments : [];
-  const commentsHtml = buildCommentsHtml(postComments, postId);
 
   let mediaHtml = '';
 
@@ -1789,21 +1787,27 @@ function renderPost(post) {
 
   const imagesHtml = buildImagesHtml(displayImage);
 
-  const actionMenu = canManage ? `
+  // เมนู ⋯ : แชร์ได้ทุกคน (ย้ายมาจากแถบปุ่มเดิม) / แก้ไข-ลบเฉพาะคนที่มีสิทธิ์
+  const actionMenu = `
     <div class="post-menu-container">
       <button class="post-menu-btn" onclick="togglePostMenu(event, '${postId}')">
         <i class="fa-solid fa-ellipsis-vertical"></i>
       </button>
       <div class="post-dropdown-menu" id="dropdown-${postId}">
+        <button class="post-dropdown-item" onclick="actionSharePost('${postId}', 'index')">
+          <i class="fa-solid fa-share-nodes"></i> แชร์โพสต์
+        </button>
+        ${canManage ? `
         <button class="post-dropdown-item" onclick="editPostUi('${postId}', '${encodeURIComponent(post.content || '')}')">
           <i class="fa-solid fa-pen"></i> แก้ไขโพสต์
         </button>
         <button class="post-dropdown-item delete-item" onclick="deletePostUi('${postId}')">
           <i class="fa-solid fa-trash"></i> ลบโพสต์
         </button>
+        ` : ''}
       </div>
     </div>
-  ` : '';
+  `;
       
   return `
     <div class="${postContainerClass}" id="post-${postId}" data-images="${escapeAttr(displayImage)}" style="position: relative; border-radius: 15px; padding: 15px; margin-bottom: 20px; ${champCardStyle}">
@@ -1826,30 +1830,9 @@ function renderPost(post) {
         ${mediaHtml}
       </div>
       
-      <div class="post-actions" style="border-top: 1px solid #eee; padding-top: 10px; display: flex; align-items: center; gap: 15px;">
-        <button onclick="likePost('${postId}')" style="background: none; border: none; color: var(--blmem-pink); cursor: pointer; display: flex; align-items: center; gap: 6px;">
-          <i class="${heartClass} fa-heart" id="heart-${postId}"></i> <span id="like-count-${postId}">${postLikes}</span>
-        </button>
-        <button onclick="toggleCommentSection('${postId}')" style="background: none; border: none; color: #555; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-          <i class="fa-regular fa-comment"></i> <span id="comment-count-${postId}">${postComments.length}</span>
-        </button>
-        <button onclick="actionSharePost('${postId}')" style="background: none; border: none; color: #555; cursor: pointer; display: flex; align-items: center; gap: 6px;" title="แชร์โพสต์เป็นลิงก์">
-          <i class="fa-solid fa-paper-plane"></i>
-        </button>
-        <div id="post-cookies-${postId}" style="margin-left: auto; display: flex; align-items: center; gap: 4px; font-size: 0.78rem; color: #d2691e; font-weight: 600;" title="โพสต์นี้ทำคุกกี้สะสมได้">
-          <i class="fa-solid fa-cookie-bite"></i> <span id="post-cookies-count-${postId}">${postCookies}</span>
-        </div>
-      </div>
-
-      <div id="comment-section-${postId}" style="display: none; margin-top: 15px; border-top: 1px dashed #ffd1dc; padding-top: 12px;">
-        <div id="comment-list-${postId}" style="max-height: 180px; overflow-y: auto; margin-bottom: 10px; padding-right: 5px;">
-          ${commentsHtml}
-        </div>
-        <div class="comment-input-box" style="display: flex; gap: 8px;">
-          <input type="text" id="comment-input-${postId}" placeholder="Write a comment..." style="flex: 1; border: 1px solid #ffccd7; border-radius: 20px; padding: 6px 14px; font-size: 0.85rem; outline: none;">
-          <button class="cmt-send-btn" onclick="submitComment('${postId}', this)" aria-label="ส่งคอมเมนต์"><i class="fa-regular fa-paper-plane"></i></button>
-        </div>
-      </div>
+      <!-- 🧾 ส่วนล่างโพสต์แบบ iAM (common.js): Gifts/Comments, 9 Cookies | Send Gift, คอมเมนต์ยอดนิยม + ช่องพิมพ์ -->
+      ${blm48PostStatsActionsHtml(post, { memberName: post.authorName || '', canGift: post.postType !== 'fan' })}
+      ${blm48PostCommentPreviewHtml(post, { canGift: post.postType !== 'fan' })}
     </div>
   `;
 }

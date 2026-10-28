@@ -180,8 +180,13 @@ function blm48GiveGiftWallet(username, collectionId, candidateName, giftId, quan
 }
 // 🎁 ส่งของขวัญให้เมมเบอร์ (แผงของขวัญใน member.html) — ตอนนี้เซิร์ฟเวอร์รับเฉพาะแอดมิน, นับเหมือนการปาคุกกี้
 // fromBackpack = ใช้ของใน Backpack (จ่ายไปตอนซื้อแล้ว ไม่หัก Cookie ซ้ำ)
-function blm48SendMemberGift(username, memberName, giftId, quantity, fromBackpack) {
-  return blm48Rpc('send_member_gift', { p_username: username, p_member_name: memberName, p_gift_id: giftId, p_quantity: quantity, p_from_backpack: !!fromBackpack });
+// postId = ส่งในโพสต์ของเมมเบอร์ (server ใช้เจ้าของโพสต์เป็นผู้รับเสมอ)
+function blm48SendMemberGift(username, memberName, giftId, quantity, fromBackpack, postId) {
+  return blm48Rpc('send_member_gift', { p_username: username, p_member_name: memberName || null, p_gift_id: giftId, p_quantity: quantity, p_from_backpack: !!fromBackpack, p_post_id: postId || null });
+}
+// ยอดของขวัญต่อโพสต์: [{ postId, gifts, gifters: [{ username, name, img }] (3 อันดับ) }]
+function blm48GetPostGiftSummaries(postIds) {
+  return blm48Rpc('get_post_gift_summaries', { p_post_ids: postIds });
 }
 function blm48GetGiftWallet(username) {
   return blm48Rpc('get_gift_wallet', { p_username: username });
