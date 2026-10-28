@@ -165,6 +165,8 @@
         .gift-send-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
 
         /* ป๊อปอัปยืนยันก่อนส่ง: ของขวัญ x จำนวน = Cookie ที่ต้องจ่าย */
+        /* ป๊อปอัป SweetAlert (เช่น Customize ระบุจำนวน) ต้องอยู่เหนือแผงของขวัญ + หน้ายืนยัน ไม่งั้นโดนบังจนพิมพ์/กดไม่ได้ */
+        .swal2-container { z-index: 2300 !important; }
         .gift-confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45); z-index: 2100; align-items: center; justify-content: center; padding: 16px; }
         .gift-confirm-box { background: #ffffff; width: 100%; max-width: 380px; border-radius: 22px; overflow: hidden; animation: gift-confirm-pop 0.18s ease; }
         @keyframes gift-confirm-pop { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }

@@ -86,6 +86,8 @@
 .gift-confirm-actions.has-choice { gap: 8px; padding: 16px 14px 18px; }
 .gift-confirm-actions.has-choice .gift-confirm-cancel, .gift-confirm-actions.has-choice .gift-confirm-ok { flex: 1; font-size: 15px; padding: 12px 0; }
 .gift-confirm-bag { flex: 1; border-radius: 999px; padding: 12px 0; font-family: 'Quicksand', 'Kanit', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; background: #fffdf4; color: #222; border: 1.5px solid #ffd75e; }
+/* ป๊อปอัป SweetAlert (เช่น Customize ระบุจำนวน) ต้องอยู่เหนือแผงของขวัญ + หน้ายืนยัน ไม่งั้นโดนบังจนพิมพ์/กดไม่ได้ */
+.swal2-container { z-index: 2300 !important; }
 @media (max-width: 360px) {
 .gift-item-img { width: 56px; height: 56px; }
 .gift-qty-btn { font-size: 14px; }
