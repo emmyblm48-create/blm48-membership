@@ -488,7 +488,7 @@
         </div>
 
         ${post.postType !== 'fan'
-          ? blm48PostStatsActionsHtml(post, { memberName: post.authorName || '' })
+          ? blm48PostStatsActionsHtml(post, { memberName: post.authorName || '', onCommentsClick: "document.getElementById('comment-section-" + postId + "').scrollIntoView({ behavior: 'smooth' })" })
           : `        <div class="post-actions" style="border-top: 1px solid #eee; padding-top: 10px; display: flex; align-items: center; gap: 15px;">
           <button onclick="likePost('${postId}')" style="background: none; border: none; color: var(--primary-pink); cursor: pointer; display: flex; align-items: center; gap: 6px;">
             <i class="${heartClass} fa-heart" id="heart-${postId}"></i> <span id="like-count-${postId}">${postLikes}</span>
