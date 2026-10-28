@@ -184,6 +184,9 @@
         .gift-confirm-cancel, .gift-confirm-ok { flex: 1; border-radius: 999px; padding: 13px 0; font-family: 'Quicksand', 'Kanit', sans-serif; font-size: 17px; cursor: pointer; }
         .gift-confirm-cancel { background: #ffffff; color: #222; border: 1.5px solid #222; font-weight: 500; }
         .gift-confirm-ok { flex: 1.5; background: #ffd75e; color: #222; border: none; font-weight: 700; }
+        .gift-confirm-actions.has-choice { gap: 8px; padding: 16px 14px 18px; }
+        .gift-confirm-actions.has-choice .gift-confirm-cancel, .gift-confirm-actions.has-choice .gift-confirm-ok { flex: 1; font-size: 15px; padding: 12px 0; }
+        .gift-confirm-bag { flex: 1; border-radius: 999px; padding: 12px 0; font-family: 'Quicksand', 'Kanit', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; background: #fffdf4; color: #222; border: 1.5px solid #ffd75e; }
 
         @media (max-width: 360px) {
             .gift-item-img { width: 56px; height: 56px; }
@@ -288,10 +291,7 @@
         <div class="gift-confirm-box" onclick="event.stopPropagation()">
             <div class="gift-confirm-title">Confirmation</div>
             <div class="gift-confirm-body" id="gift-confirm-body"></div>
-            <div class="gift-confirm-actions">
-                <button type="button" class="gift-confirm-cancel" onclick="closeGiftConfirm()">Cancel</button>
-                <button type="button" class="gift-confirm-ok" onclick="confirmGiftSend()">Confirm</button>
-            </div>
+            <div class="gift-confirm-actions" id="gift-confirm-actions"></div>
         </div>
     </div>
 
@@ -1095,7 +1095,14 @@
             ? `<div class="gift-confirm-total"><i class="fa-solid fa-star"></i>${totalPoints.toLocaleString()}</div>
                <div class="gift-confirm-note">คะแนนโหวต · ใช้ของจาก Backpack ไม่หัก Cookie</div>`
             : `<div class="gift-confirm-total"><i class="fa-solid fa-cookie-bite"></i>${totalCost.toLocaleString()}</div>
-               <div class="gift-confirm-note">ซื้อเก็บเข้า Backpack ก่อน แล้วกด Send ในแท็บ Backpack เพื่อโหวต${totalPoints ? ` (+${totalPoints.toLocaleString()} คะแนน)` : ''}</div>`;
+               <div class="gift-confirm-note">Send Now = โหวตให้ ${escapeAttr(activeGiftCandidate)} ทันที${totalPoints ? ` (+${totalPoints.toLocaleString()} คะแนน)` : ''} · Backpack = ซื้อเก็บไว้ก่อน โหวตทีหลังได้</div>`;
+        // แท็บร้านค้า: ให้ผู้ใช้เลือกเองว่าจะ "ส่งเลย" หรือ "เก็บเข้า Backpack" ก่อน
+        const actions = document.getElementById('gift-confirm-actions');
+        actions.classList.toggle('has-choice', !isBackpackTab());
+        actions.innerHTML = `<button type="button" class="gift-confirm-cancel" onclick="closeGiftConfirm()">Cancel</button>` + (isBackpackTab()
+            ? `<button type="button" class="gift-confirm-ok" onclick="confirmGiftSend('now')">Confirm</button>`
+            : `<button type="button" class="gift-confirm-bag" onclick="confirmGiftSend('bag')">Backpack</button>
+               <button type="button" class="gift-confirm-ok" onclick="confirmGiftSend('now')">Send Now</button>`);
 
         document.getElementById('gift-confirm-body').innerHTML = `
             <div class="gift-confirm-item">
@@ -1116,11 +1123,12 @@
         document.getElementById('gift-confirm-overlay').style.display = 'none';
     }
 
-    // แท็บร้านค้า: ซื้อเก็บเข้า Backpack ก่อนเสมอ (ยังไม่โหวต) / แท็บ Backpack: เอาของในกระเป๋าไปโหวต
-    function confirmGiftSend() {
+    // แท็บร้านค้า: mode 'now' = ซื้อแล้วโหวตเลย / 'bag' = ซื้อเก็บเข้า Backpack ก่อน · แท็บ Backpack: เอาของในกระเป๋าไปโหวต
+    function confirmGiftSend(mode) {
         closeGiftConfirm();
         if (isBackpackTab()) giveSelectedWalletGift();
-        else buySelectedGiftToWallet();
+        else if (mode === 'bag') buySelectedGiftToWallet();
+        else sendSelectedGift();
     }
 
     function setGiftBusy(busy) {
@@ -1136,6 +1144,33 @@
         renderGiftItems();
         renderQtyRow();
         updateGiftSendBar();
+    }
+
+    async function sendSelectedGift() {
+        const item = getSelectedGiftItem();
+        if (!item || isGiftBusy) return;
+        const qty = selectedGiftQty;
+        const totalCost = item.cost * qty;
+        if (getUserCookieBalance() < totalCost) { warnNotEnoughCookies(totalCost); return; }
+
+        setGiftBusy(true);
+        try {
+            const res = await blm48SendGift(getUsername(), campaignId, activeGiftCandidate, item.rawId, qty);
+            if (res.status === "success") {
+                applyCookieBalance(res, totalCost);
+                Swal.fire({ icon: 'success', title: `ส่ง "${item.name}" x${qty} ให้ ${activeGiftCandidate} สำเร็จ`, timer: 1400, showConfirmButton: false });
+                // รีเซ็ตกลับไปเลือกใหม่ได้ทันที (โมดัลยังเปิดอยู่ ไม่ต้องกดปุ่ม Gift ซ้ำ)
+                resetGiftSelection();
+                fetchCandidatesFromBackend();
+            } else {
+                showGiftError('ส่งของขวัญไม่สำเร็จ', res.message || 'เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์หรือการหักคุกกี้');
+            }
+        } catch (err) {
+            console.error("Send Gift Error:", err);
+            showGiftError('เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้ในขณะนี้ กรุณาลองใหม่อีกครั้งในภายหลัง');
+        } finally {
+            setGiftBusy(false);
+        }
     }
 
     // ซื้อของขวัญเก็บเข้า Backpack (จ่าย Cookie ทันทีเหมือนกัน แต่ยังไม่โหวตให้ใคร ไปโหวตทีหลังได้ที่แท็บ Backpack)

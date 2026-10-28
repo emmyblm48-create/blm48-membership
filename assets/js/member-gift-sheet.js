@@ -5,7 +5,7 @@
 // เปิดให้ทุกบัญชีที่ล็อกอินแล้ว (User / Member / Admin)
 // แท็บ: Normal / BLM48 / Backpack — ไม่แสดงของขวัญ NPT48; แท็บ BLM48 ยังปิดอยู่ (visibleTiers)
 // ของขวัญ = การปาคุกกี้รายเดือน: มูลค่าของขวัญ x จำนวน = คุกกี้ที่ปาให้เมมเบอร์ (Ranking / Fan Score / Top Fans /
-// Campaign / ภารกิจรายวัน เหมือน give_cookie ทุกอย่าง) — ของที่ซื้อเข้า Backpack ก่อนเสมอ แล้วส่งจาก Backpack (ไม่หัก Cookie ซ้ำ); ปาคุกกี้ปกติยังใช้ได้
+// Campaign / ภารกิจรายวัน เหมือน give_cookie ทุกอย่าง) — ซื้อแล้วเลือกได้ว่าจะส่งเลยหรือเก็บเข้า Backpack ก่อน — ส่งจาก Backpack ไม่หัก Cookie ซ้ำ; ปาคุกกี้ปกติยังใช้ได้
 //
 // blm48OpenMemberGift({ name, img, postId, hideRecipient, onAvatarClick, onSent })
 //   postId:        ส่งในโพสต์ของเมมเบอร์ (นับยอด Gifts ใต้โพสต์) / hideRecipient: ไม่โชว์รูป+ชื่อเมมเบอร์บนแผง
@@ -83,6 +83,9 @@
 .gift-confirm-cancel, .gift-confirm-ok { flex: 1; border-radius: 999px; padding: 13px 0; font-family: 'Quicksand', 'Kanit', sans-serif; font-size: 17px; cursor: pointer; }
 .gift-confirm-cancel { background: #ffffff; color: #222; border: 1.5px solid #222; font-weight: 500; }
 .gift-confirm-ok { flex: 1.5; background: #ffd75e; color: #222; border: none; font-weight: 700; }
+.gift-confirm-actions.has-choice { gap: 8px; padding: 16px 14px 18px; }
+.gift-confirm-actions.has-choice .gift-confirm-cancel, .gift-confirm-actions.has-choice .gift-confirm-ok { flex: 1; font-size: 15px; padding: 12px 0; }
+.gift-confirm-bag { flex: 1; border-radius: 999px; padding: 12px 0; font-family: 'Quicksand', 'Kanit', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; background: #fffdf4; color: #222; border: 1.5px solid #ffd75e; }
 @media (max-width: 360px) {
 .gift-item-img { width: 56px; height: 56px; }
 .gift-qty-btn { font-size: 14px; }
@@ -142,10 +145,7 @@
     <div class="gift-confirm-box" onclick="event.stopPropagation()">
       <div class="gift-confirm-title">Confirmation</div>
       <div class="gift-confirm-body" id="gift-confirm-body"></div>
-      <div class="gift-confirm-actions">
-        <button type="button" class="gift-confirm-cancel" onclick="blm48Gift.closeConfirm()">Cancel</button>
-        <button type="button" class="gift-confirm-ok" onclick="blm48Gift.send()">Confirm</button>
-      </div>
+      <div class="gift-confirm-actions" id="gift-confirm-actions"></div>
     </div>
   </div>`;
 
@@ -409,7 +409,14 @@
       <div class="gift-confirm-total"><i class="fa-solid fa-cookie-bite"></i>${total.toLocaleString()}</div>
       <div class="gift-confirm-note">${isBackpack()
         ? `เท่ากับปาคุกกี้ ${total.toLocaleString()} ให้ ${esc(target.name)} · ใช้ของจาก Backpack ไม่หัก Cookie ซ้ำ`
-        : 'ซื้อเก็บเข้า Backpack ก่อน แล้วกด Send ในแท็บ Backpack เพื่อส่งให้เมมเบอร์'}</div>`;
+        : `Send Now = ส่งให้ ${esc(target.name)} ทันที · Backpack = ซื้อเก็บไว้ก่อน ส่งทีหลังได้`}</div>`;
+    // แท็บร้านค้า: ให้ผู้ใช้เลือกเองว่าจะ "ส่งเลย" หรือ "เก็บเข้า Backpack" ก่อน
+    const actions = $('gift-confirm-actions');
+    actions.classList.toggle('has-choice', !isBackpack());
+    actions.innerHTML = `<button type="button" class="gift-confirm-cancel" onclick="blm48Gift.closeConfirm()">Cancel</button>` + (isBackpack()
+      ? `<button type="button" class="gift-confirm-ok" onclick="blm48Gift.send('now')">Confirm</button>`
+      : `<button type="button" class="gift-confirm-bag" onclick="blm48Gift.send('bag')">Backpack</button>
+         <button type="button" class="gift-confirm-ok" onclick="blm48Gift.send('now')">Send Now</button>`);
     $('gift-confirm-overlay').style.display = 'flex';
   }
   function closeConfirm() { if ($('gift-confirm-overlay')) $('gift-confirm-overlay').style.display = 'none'; }
@@ -420,10 +427,11 @@
     updateSendBar();
   }
 
-  // แท็บร้านค้า: ซื้อเก็บเข้า Backpack ก่อนเสมอ (ยังไม่ส่ง) / แท็บ Backpack: เอาของในกระเป๋าไปส่งให้เมมเบอร์
-  function send() {
+  // mode 'now' = ส่งให้เมมเบอร์เลย (แท็บร้านค้า: ซื้อแล้วส่งทันที / แท็บ Backpack: ใช้ของในกระเป๋า)
+  // mode 'bag' = แท็บร้านค้า: ซื้อเก็บเข้า Backpack ไว้ก่อน ยังไม่ส่ง
+  function send(mode) {
     closeConfirm();
-    return isBackpack() ? sendFromBackpack() : buyToBackpack();
+    return (mode === 'bag' && !isBackpack()) ? buyToBackpack() : sendGift();
   }
 
   async function buyToBackpack() {
@@ -459,14 +467,15 @@
     }
   }
 
-  async function sendFromBackpack() {
+  async function sendGift() {
     const item = selectedItem();
     const u = sessionUser();
     if (!item || busy || !u) return;
     const sendQty = qty;
+    const fromBackpack = isBackpack();
     setBusy(true);
     try {
-      const res = await blm48SendMemberGift(u.username, target.name, item.rawId, sendQty, true, target.postId);
+      const res = await blm48SendMemberGift(u.username, target.name, item.rawId, sendQty, fromBackpack, target.postId);
       if (res && res.status === 'success') {
         if (res.remainingCookie !== undefined && res.remainingCookie !== null && typeof saveUserSession === 'function') {
           u.cookie = Number(res.remainingCookie);
@@ -474,7 +483,7 @@
           saveUserSession(u);
         }
         Swal.fire({ icon: 'success', title: res.message || 'ส่งของขวัญเรียบร้อย', timer: 1500, showConfirmButton: false });
-        await loadWallet();
+        if (fromBackpack) await loadWallet();
         selectedId = null;
         qty = 1;
         renderItems();
