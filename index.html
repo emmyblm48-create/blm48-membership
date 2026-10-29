@@ -1973,6 +1973,10 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
         border-radius: 4px;
     }
 
+    /* แถบเทาแนวนอนคั่นระหว่างส่วนของหน้า Home เต็มขอบจอ (หักล้าง padding 12px ของ .main-content-container) แบบแอป iAM */
+    .home-divider { height: 5px; background: #ededed; margin: 14px -12px; }
+    .home-divider.flush-bottom { margin-bottom: 0; }
+
     .main-content-container {
       /* ✏️ ตามคำขอผู้ใช้: คอนเทนเนอร์สีขาวทึบตั้งแต่ Member Ranking ถึง Post (ไม่ใช่กระจกฝ้า) */
       background: #ffffff;
@@ -2167,7 +2171,8 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
   </div>
 </div>
 
-<div class="shop-banner-slider-wrapper" style="position: relative; margin: 14px -12px; border-radius: 0; overflow: hidden;"><!-- เต็มขอบจอซ้าย-ขวา (หักล้าง padding 12px ของ .main-content-container) -->
+<div class="home-divider flush-bottom"></div>
+<div class="shop-banner-slider-wrapper" style="position: relative; margin: 0 -12px 14px; border-radius: 0; overflow: hidden;"><!-- เต็มขอบจอซ้าย-ขวา (หักล้าง padding 12px ของ .main-content-container) -->
     
     <div id="autoBannerContainer" style="display: flex; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scrollbar-width: none; background-color: #ffeef2; -ms-overflow-style: none; cursor: grab;">
         
@@ -2201,6 +2206,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
         </div>
     </div>
   
+<div class="home-divider"></div>
 <div class="section-title" onclick="window.location.href='campaign'" style="cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding-right: 0; user-select: none;">
   <span>Campaign</span>
   <span style="font-size: 13px; font-weight: 500; color: #555;">View All <i class="fas fa-chevron-right" style="font-size: 12px; margin-left: 4px;"></i></span>
@@ -2213,6 +2219,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
   </div>
 </div>
   
+<div class="home-divider"></div>
 <div class="section-title" onclick="window.location.href='musicvideo'" style="cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding-right: 0; user-select: none;">
   <span>Music Video</span>
   <span style="font-size: 13px; font-weight: 500; color: #555;">View All <i class="fas fa-chevron-right" style="font-size: 12px; margin-left: 4px;"></i></span>
@@ -2222,6 +2229,7 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     </div>
 </div>
 
+<div class="home-divider"></div>
 <div class="section-title" style="display: flex; align-items: center; justify-content: space-between; padding-right: 0;">
   <span>Timeline</span>
   <button type="button" id="tl-filter-btn" class="tl-filter-btn" onclick="openMemberPicker()" aria-label="Filter members"><span class="tl-filter-count" id="tl-filter-label"></span><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/><circle cx="8" cy="6" r="2.2" fill="#fff"/><circle cx="15" cy="12" r="2.2" fill="#fff"/><circle cx="10" cy="18" r="2.2" fill="#fff"/></svg></button>
