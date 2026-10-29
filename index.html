@@ -714,12 +714,13 @@ body.dark-mode .wallet-item { background: #3d3d3d; color: #ccc; border-color: #4
     /* Ranking & Lists */
    /* 1. สไตล์หลัก (ใช้สำหรับ Desktop/Tablet) */
 .section-title { 
-  font-family: 'Quicksand', 'Kanit', sans-serif; font-weight: 600; color: #444; 
+  font-family: 'Quicksand', 'Kanit', sans-serif; font-weight: 700; color: #222; /* หัวข้อตัวหนาแบบแอป iAM */
   margin: 14px 0 8px 0; font-size: 18px; /* หัวข้อแต่ละส่วนชิดกันขึ้น (เดิม 30px/15px) */
-  border-left: 5px solid var(--primary-pink); padding-left: 12px; 
+  padding-left: 0; /* เอาแถบชมพูแนวตั้งด้านหน้าออก */
 }
+.section-title.fan-ticker { font-weight: 600; color: #444; } /* แถว Top Fans / Top Today VIP คงน้ำหนักปกติแบบเดิม */
     
-/* 🏅👑 ช่อง Top Fans / Top Today VIP สลับกันแบบเลื่อนขึ้น (แถบชมพูด้านซ้ายอยู่กับที่ เลื่อนแค่เนื้อหา) */
+/* 🏅👑 ช่อง Top Fans / Top Today VIP สลับกันแบบเลื่อนขึ้น */
 .fan-ticker { height: 32px; overflow: hidden; padding-right: 0; user-select: none; }
 .fan-ticker-track { will-change: transform; }
 .fan-ticker-item { height: 32px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
