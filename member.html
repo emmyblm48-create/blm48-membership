@@ -141,6 +141,19 @@
       pointer-events: none;
     }
 
+    /* ปกเคลื่อนไหววางแบบเดียวกับหน้า profile.html: กรอบสูงตายตัว ไม่มีเงาขาว รูปโปรไฟล์ทับแค่ขอบล่าง */
+    .hero-image-container.has-animated-cover {
+      height: 260px;
+      overflow: hidden;
+    }
+    .has-animated-cover .hero-image,
+    .has-animated-cover .hero-video {
+      aspect-ratio: auto;
+      object-position: center;
+    }
+    .has-animated-cover .hero-gradient { display: none; }
+    .has-animated-cover + .profile-body { margin-top: 0; } /* รูปโปรไฟล์คร่อมขอบล่างครึ่งวงพอดี */
+
     .hero-gradient {
       position: absolute;
       bottom: 0;
@@ -155,6 +168,9 @@
     @media (min-width: 768px) {
       .hero-image-container {
         height: 480px !important;
+      }
+      .hero-image-container.has-animated-cover {
+        height: 320px !important; /* เท่ากับหน้า profile บนจอใหญ่ */
       }
 
       .hero-gradient {
