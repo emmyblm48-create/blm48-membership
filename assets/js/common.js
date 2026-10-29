@@ -31,6 +31,30 @@
   document.addEventListener('dblclick', function(e) { e.preventDefault(); }, { passive: false });
 })();
 
+// 🐛 [แก้บัค iOS] เมนูล่าง (.bottom-tab-bar) ลอยค้างกลางจอ: หลังคีย์บอร์ดหุบ (เช่นพิมพ์จำนวน Customize)
+// iOS ไม่คืนขนาด layout viewport ทำให้ fixed bottom:0 ไปยึดขอบล่างที่หดลงเท่าความสูงคีย์บอร์ด
+// วัดช่องว่างระหว่างขอบล่างจอจริง (visualViewport) กับขอบล่าง layout แล้วเลื่อนเมนูลงไปเท่านั้น
+// ปกติช่องว่าง = 0 จึงไม่มีผลอะไร / ตอนคีย์บอร์ดเปิดอยู่ (ช่องว่างติดลบ) ปล่อยเมนูไว้ที่เดิม
+(function fixBottomTabBarAfterKeyboard() {
+  const vv = window.visualViewport;
+  if (!vv) return;
+  let frame = 0;
+  function apply() {
+    frame = 0;
+    const bar = document.querySelector('.bottom-tab-bar');
+    if (!bar) return;
+    const gap = Math.round(vv.offsetTop + vv.height - window.innerHeight);
+    bar.style.bottom = gap > 1 ? (-gap) + 'px' : '';
+  }
+  function schedule() { if (!frame) frame = requestAnimationFrame(apply); }
+  vv.addEventListener('resize', schedule);
+  vv.addEventListener('scroll', schedule);
+  window.addEventListener('scroll', schedule, { passive: true });
+  window.addEventListener('pageshow', schedule);
+  document.addEventListener('focusout', () => setTimeout(schedule, 300)); // รอคีย์บอร์ดหุบเสร็จ
+  document.addEventListener('DOMContentLoaded', schedule);
+})();
+
 // 👈 [ปัดย้อนกลับ] หน้าที่ไม่มี bottom-tab-bar (เมนูหลักด้านล่าง) ปัดจากขอบซ้ายสุดของจอไปทางขวาเพื่อ
 // ย้อนกลับไปหน้าก่อนหน้าได้ เหมือน edge-swipe มาตรฐานของ iOS — เช็คจาก DOM ว่ามี .bottom-tab-bar
 // อยู่จริงไหม (ไม่ใช่เช็คจากชื่อไฟล์) กันหลุดถ้าโครงสร้างหน้าเปลี่ยนในอนาคต ต้องรอ DOMContentLoaded
