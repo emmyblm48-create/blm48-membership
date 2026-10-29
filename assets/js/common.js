@@ -188,6 +188,7 @@ function updatePostCookiesUI(postId, postCookies) {
   if (!postId || postCookies === undefined || postCookies === null) return;
   const el = document.getElementById(`post-cookies-count-${postId}`);
   if (el) el.innerText = blm48ShortCount(postCookies);
+  blm48QueuePostGifts([postId]); // รูป 3 อันดับหน้าจำนวนคุกกี้นับจากใจ/คอมเมนต์/ของขวัญ เลยต้องดึงใหม่ทุกครั้งที่ยอดเปลี่ยน
 }
 
 // หา postId จากคอมเมนต์/reply (ใช้ตอนกดใจคอมเมนต์ ซึ่งมีแค่ commentId ไม่มี postId ส่งมาตรงๆ)
@@ -807,7 +808,7 @@ async function blm48OpenPostGift(postId) {
   });
 }
 
-// 📊 รูป 3 คนส่งของขวัญเยอะสุดใต้โพสต์: เก็บ id ของโพสต์ที่เพิ่งขึ้นจอ แล้วดึงทีเดียว (ทุกหน้า ทุกจังหวะที่วาดโพสต์ใหม่)
+// 📊 รูป 3 แฟนที่ให้คุกกี้โพสต์นี้เยอะสุด (กดใจ + คอมเมนต์ + กดใจคอมเมนต์ + ของขวัญ, ไม่นับ member/admin): เก็บ id ของโพสต์ที่เพิ่งขึ้นจอ แล้วดึงทีเดียว (ทุกหน้า ทุกจังหวะที่วาดโพสต์ใหม่)
 const blm48PendingGiftPosts = new Set();
 let blm48GiftSummaryTimer = null;
 function blm48QueuePostGifts(ids) {
@@ -827,7 +828,7 @@ async function blm48FlushPostGifts() {
       const s = map[id] || { gifts: 0, gifters: [] };
       const giftersEl = document.getElementById(`post-gifters-${id}`);
       if (giftersEl) giftersEl.innerHTML = (s.gifters || []).map((g, i) =>
-        `<span class="pf-gifter" data-fan="${escapeAttr(g.username || '')}">${blm48MedalAvatarHtml(g.img, i, 26, g.name)}</span>`
+        `<span class="pf-gifter" data-fan="${escapeAttr(g.username || '')}">${blm48MedalAvatarHtml(g.img, i, 32, g.name)}</span>`
       ).join('');
     });
   } catch (e) { console.error('Post gift summary error:', e); }
@@ -875,7 +876,7 @@ async function blm48FlushPostGifts() {
     .pf-cmt-list:empty { display: none; }
     .pf-cmt-list .cmt-replies-toggle { display: none !important; }
     .pf-input-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
-    .pf-my-avatar { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: #f2f2f2; }
+    .pf-my-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: #f2f2f2; }
     .pf-input-wrap { flex: 1; min-width: 0; display: flex; align-items: center; border: 1px solid #d9d9d9; border-radius: 22px; padding: 0 6px 0 14px; background: #fff; }
     .pf-input-wrap input, .comment-input-box .pf-input-wrap input, .comment-input-box .pf-input-wrap input:focus { flex: 1; min-width: 0; width: auto !important; height: auto !important; border: none !important; border-radius: 0 !important; outline: none !important; box-shadow: none !important; background: none !important; font-family: inherit; font-size: 0.9rem; padding: 9px 0 !important; margin: 0 !important; }
     .pf-input-gift { background: none; border: none; color: #e8590c; font-size: 1.05rem; padding: 6px; cursor: pointer; flex-shrink: 0; }
