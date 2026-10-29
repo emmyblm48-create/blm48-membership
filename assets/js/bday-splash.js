@@ -267,7 +267,8 @@
     { name: 'Ductile Display', file: 'ductile-display.otf', weight: 400 },
     { name: 'Circo', file: 'circo.otf', weight: 400 },
     { name: 'BETRAYED', file: 'betrayed.otf', weight: 400 },
-    { name: 'Unplugged Pop', file: 'unplugged-pop.otf', weight: 400 }
+    { name: 'Unplugged Pop', file: 'unplugged-pop.otf', weight: 400 },
+    { name: 'Written in the Stars 2', file: 'written-in-the-stars-2.ttf', weight: 400 }
   ];
 
   // คืนข้อมูลฟอนต์ที่อยู่ในลิสต์เท่านั้น (ชื่ออื่น/ว่าง -> null = ฟอนต์ตั้งต้น)
