@@ -14,6 +14,7 @@ function applyAnimatedCover(name, imgEl, videoEl) {
   if (!cover || !imgEl || !videoEl) return false;
 
   imgEl.classList.remove('skeleton', 'skeleton-avatar');
+  if (videoEl.parentElement) videoEl.parentElement.classList.add('has-animated-cover'); // ให้หน้าเพจจัดกรอบปกแบบเดียวกับหน้า profile ได้
   if (videoEl.dataset.src === cover.mp4) return true; // ตั้งไว้แล้ว ไม่ต้องโหลดใหม่ (กันวิดีโอกระตุกตอนรีเฟรชข้อมูล)
 
   const useGif = () => {
