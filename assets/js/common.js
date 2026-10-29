@@ -53,6 +53,30 @@
   window.addEventListener('pageshow', schedule);
   document.addEventListener('focusout', () => setTimeout(schedule, 300)); // รอคีย์บอร์ดหุบเสร็จ
   document.addEventListener('DOMContentLoaded', schedule);
+
+  // iOS บางรุ่นไม่ส่งตัวเลขที่ผิดมาให้วัด (gap = 0) แต่ layout viewport ยังค้างเลื่อนขึ้นไปหลังคีย์บอร์ดหุบ:
+  // เมนูล่างลอยค้างกลางจอและแถบ Discover ด้านบนหายไป จนกว่าจะเลื่อนขึ้นไปบนสุด
+  // สะกิดตำแหน่ง scroll 1px แล้วกลับที่เดิม ให้ Safari คำนวณ viewport ใหม่ (ผู้ใช้มองไม่เห็นการขยับ)
+  function resyncViewport() {
+    const el = document.activeElement;
+    if (el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) return; // คีย์บอร์ดยังเปิดอยู่
+    const x = window.scrollX, y = window.scrollY;
+    window.scrollTo(x, y + 1);
+    window.scrollTo(x, y);
+    schedule();
+  }
+  // ทำเฉพาะหลังคีย์บอร์ดเพิ่งหุบ (ไม่ทำระหว่างเลื่อนจอปกติ เพราะ scrollTo จะหยุดการเลื่อนแบบมีแรงเหวี่ยงของ iOS)
+  let fullHeight = vv.height, keyboardOpen = false;
+  document.addEventListener('focusout', (e) => {
+    if (!e.target || !/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return; // เฉพาะช่องพิมพ์ที่เปิดคีย์บอร์ด
+    setTimeout(resyncViewport, 350);
+    setTimeout(resyncViewport, 800);
+  });
+  vv.addEventListener('resize', () => {
+    if (vv.height < fullHeight - 150) keyboardOpen = true;
+    else if (keyboardOpen && vv.height > fullHeight - 50) { keyboardOpen = false; setTimeout(resyncViewport, 100); }
+    if (!keyboardOpen) fullHeight = Math.max(fullHeight, vv.height);
+  });
 })();
 
 // 👈 [ปัดย้อนกลับ] หน้าที่ไม่มี bottom-tab-bar (เมนูหลักด้านล่าง) ปัดจากขอบซ้ายสุดของจอไปทางขวาเพื่อ
