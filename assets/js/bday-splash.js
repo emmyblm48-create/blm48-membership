@@ -263,7 +263,11 @@
     { name: 'Written in the Stars', file: 'written-in-the-stars.ttf', weight: 400 },
     { name: 'Chetkiy', file: 'chetkiy.ttf', weight: 400 },
     { name: 'Opuntia', file: 'opuntia.ttf', weight: 400 },
-    { name: 'Saint', file: 'saint.ttf', weight: 400 }
+    { name: 'Saint', file: 'saint.ttf', weight: 400 },
+    { name: 'Ductile Display', file: 'ductile-display.otf', weight: 400 },
+    { name: 'Circo', file: 'circo.otf', weight: 400 },
+    { name: 'BETRAYED', file: 'betrayed.otf', weight: 400 },
+    { name: 'Unplugged Pop', file: 'unplugged-pop.otf', weight: 400 }
   ];
 
   // คืนข้อมูลฟอนต์ที่อยู่ในลิสต์เท่านั้น (ชื่ออื่น/ว่าง -> null = ฟอนต์ตั้งต้น)
@@ -279,7 +283,7 @@
     var el;
     if (f.file) {
       el = document.createElement('style');
-      el.textContent = "@font-face{font-family:'" + f.name + "';src:url('assets/fonts/bday/" + f.file + "') format('truetype');font-weight:" + f.weight + ";font-display:swap;}";
+      el.textContent = "@font-face{font-family:'" + f.name + "';src:url('assets/fonts/bday/" + f.file + "') format('" + (/\.otf$/i.test(f.file) ? 'opentype' : 'truetype') + "');font-weight:" + f.weight + ";font-display:swap;}";
     } else {
       el = document.createElement('link');
       el.rel = 'stylesheet';
