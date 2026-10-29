@@ -127,6 +127,62 @@
         .save-bar-txt .err { color: #d6304f; }
         .toast-msg { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: #222; color: #fff; padding: 10px 18px; border-radius: 20px; font-size: 13px; z-index: 300; display: none; max-width: 90vw; }
         .toast-msg.up { bottom: calc(84px + env(safe-area-inset-bottom)); }
+        .toast-msg { align-items: center; gap: 12px; }
+        .toast-act { border: none; background: none; color: #ffd76e; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; padding: 4px 2px; }
+
+        /* หัวหน้า: ปก + ชื่อ + สถานะ + เช็กลิสต์พร้อมเปิดขาย */
+        .col-head { margin-bottom: 14px; }
+        .ch-row { display: flex; align-items: center; gap: 12px; }
+        .ch-cover { width: 52px; height: 52px; flex: 0 0 52px; border-radius: 12px; background: #fafafa center/cover no-repeat; display: flex; align-items: center; justify-content: center; color: #ccc; font-size: 18px; border: 1px dashed #e0e0e0; }
+        .ch-cover.has { border: none; }
+        .ch-info { min-width: 0; flex: 1; }
+        .ch-name { font-size: 16px; font-weight: 700; color: #222; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .ch-sub { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 12.5px; color: #767676; margin-top: 3px; }
+        .ready { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 12px; padding: 10px 12px; border-radius: 12px; background: #fffaf0; border: 1px solid #ffe8b0; }
+        .ready-title { font-size: 12.5px; font-weight: 700; color: #8a6100; margin-right: 2px; }
+        .ready-title .fa-circle-check { color: #1f9d55; }
+        .ready-item { display: inline-flex; align-items: center; gap: 5px; min-height: 30px; border: 1px solid #f0dca8; background: #fff; color: #8a6100; border-radius: 16px; padding: 4px 10px; font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+        .ready-item.ok { border-color: #cdeedb; color: #1a7f45; background: #f2fbf6; }
+
+        /* จุดแดงบนแท็บที่มีข้อผิดพลาด */
+        .filter-tab { position: relative; }
+        .t-dot { display: none; position: absolute; top: 6px; right: 10px; width: 7px; height: 7px; border-radius: 50%; background: #e0284f; box-shadow: 0 0 0 2px #fff; }
+        .filter-tab.has-err .t-dot { display: block; }
+
+        .pill.draft { background: #fff3c4; color: #7a5a00; }
+        .err-link { border: none; background: none; padding: 4px 0; text-align: left; color: #d6304f; font-family: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; line-height: 1.4; }
+        .err-link .fa-arrow-right { font-size: 10px; margin-left: 2px; }
+        .btn-ghost { background: #f1f1f1; color: #555; }
+        .btn-up:disabled { opacity: .45; cursor: default; }
+        .label-row { display: flex !important; justify-content: space-between; align-items: center; }
+        .link-btn { border: none; background: none; padding: 2px 4px; color: #b06a00; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+
+        /* ตัวกรองการ์ด ทั้งหมด / ปกติ / SSR */
+        .seg { display: inline-flex; background: #f4f4f4; border-radius: 20px; padding: 3px; margin-bottom: 4px; }
+        .seg button { border: none; background: none; border-radius: 16px; padding: 6px 14px; font-family: inherit; font-size: 12.5px; font-weight: 700; color: #767676; cursor: pointer; }
+        .seg button span { font-weight: 600; opacity: .7; }
+        .seg button.active { background: #fff; color: #222; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+        .empty-cards { text-align: center; padding: 32px 16px; font-size: 12.5px; color: #767676; line-height: 1.7; border: 1px dashed #e6e6e6; border-radius: 14px; }
+        .empty-cards i { display: block; font-size: 28px; color: #d0d0d0; margin-bottom: 6px; }
+        .empty-cards b { display: block; color: #444; font-size: 14px; }
+
+        .stock-list { border: 1px solid #f0f0f0; border-radius: 12px; max-height: 280px; overflow-y: auto; }
+        .stock-item { display: flex; justify-content: space-between; gap: 10px; padding: 8px 12px; font-size: 12.5px; border-bottom: 1px solid #f6f6f6; }
+        .stock-item:last-child { border-bottom: none; }
+        .stock-item.zero .si-num { color: #d6304f; }
+        .si-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #444; }
+        .si-num { font-weight: 700; color: #222; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .si-num s { color: #aaa; font-weight: 500; }
+        .ssr-tag { color: #b8860b; font-size: 11px; }
+
+        /* โฟกัสชัดเจน + ปุ่มแตะง่ายบนมือถือ */
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #ffc107 !important; box-shadow: 0 0 0 3px rgba(255, 193, 7, .22); }
+        button:focus-visible, a:focus-visible { outline: 2px solid #ffc107; outline-offset: 2px; }
+        .icon-btn { width: 36px; height: 36px; padding: 0; }
+        .ssr-toggle { min-height: 34px; }
+        .card-fields input, .card-top input { font-variant-numeric: tabular-nums; }
+        .preview { max-width: 200px; }
+        ::selection { background: #ffe08a; }
     </style>
     <link rel="stylesheet" href="assets/css/admin-theme.css">
 </head>
@@ -150,7 +206,7 @@
 
 <script>
   const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
-  const STATES = { open: 'เปิดขายอยู่', scheduled: 'ตั้งเวลาไว้', soldout: 'สต็อกหมด', off: 'ปิด / ร่าง', ended: 'หมดเวลาขาย' };
+  const STATES = { open: 'เปิดขายอยู่', scheduled: 'ตั้งเวลาไว้', soldout: 'สต็อกหมด', off: 'ปิดขาย', draft: 'ร่าง', ended: 'หมดเวลาขาย' };
   const TABS = [['info', 'Info'], ['sale', 'Sale'], ['cards', 'Cards'], ['stock', 'Stock']];
   const params = new URLSearchParams(location.search);
   let collectionId = params.get('id');
@@ -182,14 +238,21 @@
 
   function listUrl() { return 'admin_collections'; }
   function goBack() {
-    if (isDirty() && !confirm('ยังไม่ได้บันทึก ออกจากหน้านี้เลยไหม?')) return;
-    window.onbeforeunload = null;
-    blm48Back(listUrl(), { refresh: changed });
+    if (isDirty()) { leaving = true; renderSaveBar(); return; }
+    leaveNow();
   }
-  function toast(msg) {
+  // actionLabel/onAction = ปุ่มในตัว toast เช่น "เอากลับ" (อยู่นานขึ้นให้กดทัน)
+  function toast(msg, actionLabel, onAction) {
     const t = document.getElementById('toast');
-    t.textContent = msg; t.style.display = 'block';
-    clearTimeout(t._h); t._h = setTimeout(() => { t.style.display = 'none'; }, 2400);
+    t.textContent = msg;
+    if (actionLabel) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'toast-act'; b.textContent = actionLabel;
+      b.onclick = () => { t.style.display = 'none'; onAction(); };
+      t.appendChild(b);
+    }
+    t.style.display = 'flex';
+    clearTimeout(t._h); t._h = setTimeout(() => { t.style.display = 'none'; }, actionLabel ? 5000 : 2400);
   }
 
   function emptyCollection() {
@@ -244,57 +307,119 @@
     return { pct, ssrPct, stock, ssr: items.filter(i => i.tag === 'SSR').length };
   }
 
-  // ตรวจก่อนบันทึก -> คืนข้อความผิดพลาดแรก (ตรงกับที่เซิร์ฟเวอร์ตรวจ)
+  // ตรวจก่อนบันทึก -> { msg, tab } ข้อแรกที่ผิด (ตรงกับที่เซิร์ฟเวอร์ตรวจ) / tab = แท็บที่ต้องไปแก้
   function validate() {
-    if (!draft.name.trim()) return 'กรุณากรอกชื่อคอลเลกชัน';
+    const e = (msg, tab) => ({ msg, tab });
+    if (!draft.name.trim()) return e('กรุณากรอกชื่อคอลเลกชัน', 'info');
     const cost = Number(draft.costTokens);
-    if (draft.costTokens === '' || !Number.isInteger(cost) || cost < 0) return 'ราคาสุ่ม 1 ครั้งต้องเป็นจำนวนเต็ม';
+    if (draft.costTokens === '' || !Number.isInteger(cost) || cost < 0) return e('ราคาสุ่ม 1 ครั้งต้องเป็นจำนวนเต็ม', 'sale');
     if (draft.allowX5) {
       const c5 = Number(draft.costTokensX5);
-      if (draft.costTokensX5 === '' || !Number.isInteger(c5) || c5 < 0) return 'ราคาสุ่ม x5 ต้องเป็นจำนวนเต็ม';
+      if (draft.costTokensX5 === '' || !Number.isInteger(c5) || c5 < 0) return e('ราคาสุ่ม x5 ต้องเป็นจำนวนเต็ม', 'sale');
     }
-    if (draft.maxDrawsPerAccount !== '' && !(Number.isInteger(Number(draft.maxDrawsPerAccount)) && Number(draft.maxDrawsPerAccount) >= 1)) return 'จำกัดครั้งต่อบัญชีต้องตั้งแต่ 1 ขึ้นไป หรือเว้นว่าง';
-    if (draft.saleStartAt && draft.saleEndAt && new Date(draft.saleEndAt) <= new Date(draft.saleStartAt)) return 'เวลาปิดขายต้องหลังเวลาเปิดขาย';
+    if (draft.maxDrawsPerAccount !== '' && !(Number.isInteger(Number(draft.maxDrawsPerAccount)) && Number(draft.maxDrawsPerAccount) >= 1)) return e('จำกัดครั้งต่อบัญชีต้องตั้งแต่ 1 ขึ้นไป หรือเว้นว่าง', 'sale');
+    if (draft.saleStartAt && draft.saleEndAt && new Date(draft.saleEndAt) <= new Date(draft.saleStartAt)) return e('เวลาปิดขายต้องหลังเวลาเปิดขาย', 'sale');
     if (!saved.isLucky) {
       const names = new Set();
       for (const i of draft.items) {
-        if (!i.name.trim()) return 'การ์ดทุกใบต้องมีชื่อ';
-        if (!i.imageUrl) return `การ์ด "${i.name}" ยังไม่มีรูป`;
-        if (!(Number(i.pct) >= 0)) return `อัตราออกของ "${i.name}" ไม่ถูกต้อง`;
-        if (i.add !== '' && !Number.isInteger(Number(i.add))) return `จำนวนเติมสต็อกของ "${i.name}" ต้องเป็นจำนวนเต็ม`;
+        if (!i.name.trim()) return e('การ์ดทุกใบต้องมีชื่อ', 'cards');
+        if (!i.imageUrl) return e(`การ์ด "${i.name}" ยังไม่มีรูป`, 'cards');
+        if (!(Number(i.pct) >= 0)) return e(`อัตราออกของ "${i.name}" ไม่ถูกต้อง`, 'cards');
+        if (i.add !== '' && !Number.isInteger(Number(i.add))) return e(`จำนวนเติมสต็อกของ "${i.name}" ต้องเป็นจำนวนเต็ม`, 'cards');
         const n = i.name.trim().toLowerCase();
-        if (names.has(n)) return `มีการ์ดชื่อ "${i.name}" ซ้ำกัน`;
+        if (names.has(n)) return e(`มีการ์ดชื่อ "${i.name}" ซ้ำกัน`, 'cards');
         names.add(n);
       }
     }
     if (draft.on && !saved.isLucky) {
-      if (!draft.coverImage) return 'ต้องมีรูปปกก่อนเปิดขาย';
-      if (!draft.items.length) return 'ต้องมีการ์ดอย่างน้อย 1 ใบก่อนเปิดขาย';
-      if (!draft.items.some(i => i.stock + (Number(i.add) || 0) > 0 && Number(i.pct) > 0)) return 'ต้องมีการ์ดที่มีสต็อกและอัตราออกมากกว่า 0 ก่อนเปิดขาย';
+      if (!draft.coverImage) return e('ต้องมีรูปปกก่อนเปิดขาย', 'info');
+      if (!draft.items.length) return e('ต้องมีการ์ดอย่างน้อย 1 ใบก่อนเปิดขาย', 'cards');
+      if (!draft.items.some(i => i.stock + (Number(i.add) || 0) > 0 && Number(i.pct) > 0)) return e('ต้องมีการ์ดที่มีสต็อกและอัตราออกมากกว่า 0 ก่อนเปิดขาย', 'stock');
     }
     return null;
   }
 
+  // เช็กลิสต์ "พร้อมเปิดขาย" (แสดงตอนยังไม่เปิด) แต่ละข้อกดแล้วไปแท็บนั้น
+  function readiness() {
+    const t = totals();
+    return [
+      { label: 'ชื่อ', ok: !!draft.name.trim(), tab: 'info' },
+      { label: 'รูปปก', ok: !!draft.coverImage, tab: 'info' },
+      { label: 'ราคา', ok: draft.costTokens !== '' && Number(draft.costTokens) >= 0, tab: 'sale' },
+      { label: 'การ์ด', ok: draft.items.length > 0 && draft.items.every(i => i.name.trim() && i.imageUrl), tab: 'cards' },
+      { label: 'อัตรา 100%', ok: draft.items.length > 0 && Math.abs(t.pct - 100) < 0.01, tab: 'cards' },
+      { label: 'สต็อก', ok: t.stock > 0, tab: 'stock' }
+    ];
+  }
+
+  // หัวหน้า: ปก + ชื่อ + สถานะ + เช็กลิสต์ (อัปเดตตามที่แก้ ไม่ต้องวาดทั้งหน้า)
+  function renderHead() {
+    const el = document.getElementById('col-head');
+    if (!el) return;
+    const t = totals();
+    const isNew = !saved.collectionId;
+    const state = isNew ? 'draft' : (saved.state === 'off' && !saved.sold ? 'draft' : saved.state);
+    const cover = draft.coverImage ? `style="background-image:url('${escapeAttr(draft.coverImage)}')"` : '';
+    const ready = !draft.on && !saved.isLucky ? readiness() : [];
+    el.innerHTML = `
+      <div class="ch-row">
+        <div class="ch-cover ${draft.coverImage ? 'has' : ''}" ${cover}>${draft.coverImage ? '' : '<i class="fa-regular fa-image"></i>'}</div>
+        <div class="ch-info">
+          <div class="ch-name">${escapeHtml(draft.name.trim() || 'ยังไม่มีชื่อ')}</div>
+          <div class="ch-sub"><span class="pill ${state}">${STATES[state] || state}</span>
+            ${saved.isLucky ? 'Lucky Box' : `${fmt(draft.items.length)} การ์ด · เหลือ ${fmt(t.stock)}${saved.sold ? ` · ขายแล้ว ${fmt(saved.sold)}` : ''}`}</div>
+        </div>
+      </div>
+      ${ready.length ? `<div class="ready">
+        <span class="ready-title">${ready.every(r => r.ok) ? '<i class="fa-solid fa-circle-check"></i> พร้อมเปิดขาย · เปิดสวิตช์ในแท็บ Sale' : 'ก่อนเปิดขาย'}</span>
+        ${ready.every(r => r.ok) ? '' : ready.map(r => `<button type="button" class="ready-item ${r.ok ? 'ok' : ''}" onclick="setTab('${r.tab}')"><i class="fa-${r.ok ? 'solid fa-circle-check' : 'regular fa-circle'}"></i> ${r.label}</button>`).join('')}
+      </div>` : ''}`;
+  }
+
+  // จุดแดงบนแท็บที่มีข้อผิดพลาด
+  function refreshTabDots(err) {
+    document.querySelectorAll('.tabs .filter-tab').forEach(b => b.classList.toggle('has-err', !!err && b.dataset.tab === err.tab));
+  }
+
+  let leaving = false; // กดย้อนกลับตอนยังไม่บันทึก -> ถามในแถบด้านล่าง (ไม่ใช้ popup)
+
   function renderSaveBar() {
     const bar = document.getElementById('save-bar');
     const show = isDirty();
+    if (!show) leaving = false;
     bar.classList.toggle('show', show);
     document.getElementById('toast').classList.toggle('up', show);
     window.onbeforeunload = show ? () => true : null;
+    renderHead();
+    const err = show ? validate() : null;
+    refreshTabDots(err);
     if (!show) { bar.innerHTML = ''; return; }
     if (saving) return;
-    const err = validate();
     const isNew = !saved.collectionId;
+    if (leaving) {
+      bar.innerHTML = `<div class="save-bar-in">
+          <div class="save-bar-txt"><b>ยังไม่ได้บันทึก</b> · ออกจากหน้านี้เลยไหม?</div>
+          <button class="btn btn-del" onclick="leaveNow()">ออกไม่บันทึก</button>
+          <button class="btn btn-ghost" onclick="leaving = false; renderSaveBar();">อยู่ต่อ</button>
+        </div>`;
+      return;
+    }
     bar.innerHTML = `<div class="save-bar-in">
-        <div class="save-bar-txt">${err ? `<span class="err"><i class="fa-solid fa-circle-exclamation"></i> ${escapeHtml(err)}</span>` : (isNew ? `<b>New collection</b> · ${draft.on ? 'เปิดขาย' : 'บันทึกเป็นร่าง (ยังไม่ขาย)'}` : 'Unsaved changes')}</div>
+        <div class="save-bar-txt">${err
+          ? `<button type="button" class="err-link" onclick="setTab('${err.tab}')"><i class="fa-solid fa-circle-exclamation"></i> ${escapeHtml(err.msg)} <i class="fa-solid fa-arrow-right"></i></button>`
+          : (isNew ? `<b>New collection</b> · ${draft.on ? 'เปิดขายทันที' : 'บันทึกเป็นร่าง (ยังไม่ขาย)'}` : 'มีการแก้ไขที่ยังไม่บันทึก')}</div>
         ${isNew ? '' : '<button class="btn btn-del" onclick="cancelAll()">Cancel</button>'}
-        <button class="btn btn-up" id="save-btn" onclick="saveAll()" ${err ? 'disabled style="opacity:.5"' : ''}><i class="fa-solid fa-check"></i> ${isNew ? 'Create' : 'Save'}</button>
+        <button class="btn btn-up" id="save-btn" onclick="saveAll()" ${err ? 'disabled' : ''} style="white-space:nowrap;"><i class="fa-solid fa-check"></i> ${isNew ? 'Create' : 'Save'}</button>
       </div>`;
   }
 
   function cancelAll() {
     draft = toDraft(saved);
     render();
+  }
+  function leaveNow() {
+    window.onbeforeunload = null;
+    blm48Back(listUrl(), { refresh: changed });
   }
 
   async function saveAll() {
@@ -343,6 +468,8 @@
     if (saved.collectionId) history.replaceState(history.state, '', 'admin_collection?id=' + encodeURIComponent(saved.collectionId) + '&tab=' + k);
     document.querySelectorAll('.tabs .filter-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === k));
     document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === 'pane-' + k));
+    const tabs = document.querySelector('.tabs');
+    if (tabs && tabs.getBoundingClientRect().top < 0) window.scrollTo({ top: tabs.offsetTop - 70 });
   }
 
   function render() {
@@ -352,7 +479,8 @@
     const tabs = saved.isLucky ? TABS.filter(([k]) => k === 'info' || k === 'sale') : TABS;
     if (!tabs.some(([k]) => k === tab)) tab = 'info';
     document.getElementById('root').innerHTML = `
-      <div class="tabs">${tabs.map(([k, label]) => `<button type="button" class="filter-tab ${k === tab ? 'active' : ''}" data-tab="${k}" onclick="setTab('${k}')">${label}</button>`).join('')}</div>
+      <div class="col-head" id="col-head"></div>
+      <div class="tabs">${tabs.map(([k, label]) => `<button type="button" class="filter-tab ${k === tab ? 'active' : ''}" data-tab="${k}" onclick="setTab('${k}')">${label}<span class="t-dot" aria-hidden="true"></span></button>`).join('')}</div>
       <div class="tab-pane ${tab === 'info' ? 'active' : ''}" id="pane-info"></div>
       <div class="tab-pane ${tab === 'sale' ? 'active' : ''}" id="pane-sale"></div>
       <div class="tab-pane ${tab === 'cards' ? 'active' : ''}" id="pane-cards"></div>
@@ -427,7 +555,7 @@
     document.getElementById('pane-sale').innerHTML = `
       <div class="sale-switch">
         <div class="txt">
-          <b>เปิดขาย</b> ${saved.collectionId ? `<span class="pill ${saved.state}">${STATES[saved.state] || saved.state}</span>` : ''}
+          <b>เปิดขาย</b>
           <div class="note" style="margin-top:3px;">${escapeHtml(hint)}</div>
         </div>
         <button type="button" class="switch ${draft.on ? 'on' : ''}" role="switch" aria-checked="${draft.on}" aria-label="เปิดขาย" onclick="toggleOn()"></button>
@@ -443,8 +571,11 @@
       </label>
       <div class="form-field"><label>จำกัดจำนวนครั้งต่อบัญชี</label><input type="number" inputmode="numeric" min="1" step="1" placeholder="ไม่จำกัด" value="${escapeAttr(draft.maxDrawsPerAccount)}" oninput="setField('maxDrawsPerAccount', this.value)"></div>
       <div class="section-title">เวลาขาย</div>
-      <div class="form-field"><label>เปิดขาย</label><input type="datetime-local" value="${escapeAttr(draft.saleStartAt)}" onchange="setField('saleStartAt', this.value); renderSale();"></div>
-      <div class="form-field"><label>ปิดขาย</label><input type="datetime-local" value="${escapeAttr(draft.saleEndAt)}" onchange="setField('saleEndAt', this.value); renderSale();"></div>
+      ${['saleStartAt', 'saleEndAt'].map(k => `
+      <div class="form-field">
+        <label class="label-row">${k === 'saleStartAt' ? 'เปิดขาย' : 'ปิดขาย'}${draft[k] ? `<button type="button" class="link-btn" onclick="setField('${k}', ''); renderSale();">ล้าง</button>` : ''}</label>
+        <input type="datetime-local" value="${escapeAttr(draft[k])}" onchange="setField('${k}', this.value); renderSale();">
+      </div>`).join('')}
       <div class="note">เว้นว่าง "ปิดขาย" = ขายไปจนกว่าจะปิดเองหรือสต็อกหมด · เวลาเป็นเวลาของเครื่องนี้</div>`;
   }
 
@@ -455,19 +586,27 @@
   }
 
   // ----- Cards -----
-  function renderCards() {
+  let cardFilter = 'all'; // all | normal | ssr
+  function rateSumHtml() {
     const t = totals();
     const pctOk = Math.abs(t.pct - 100) < 0.01;
+    return `<span>${fmt(draft.items.length)} การ์ด · SSR ${fmt(t.ssr)}</span>
+        <span>อัตรารวม <b class="${pctOk ? 'good' : 'bad'}">${t.pct}%</b>${pctOk || !draft.items.length ? '' : ' · ควรรวมได้ 100%'}</span>
+        <span>SSR รวม <b>${t.ssrPct}%</b></span>`;
+  }
+  function setCardFilter(k) { cardFilter = k; renderCards(); }
+
+  function renderCards() {
+    const t = totals();
     const names = draft.items.map(i => i.name.trim().toLowerCase());
+    const FILTERS = [['all', 'ทั้งหมด', () => true], ['normal', 'ปกติ', i => i.tag !== 'SSR'], ['ssr', 'SSR', i => i.tag === 'SSR']];
+    if (!t.ssr) cardFilter = 'all';
+    const shown = draft.items.filter(FILTERS.find(([k]) => k === cardFilter)[2]);
     document.getElementById('pane-cards').innerHTML = `
-      <div class="rate-sum">
-        <span>${fmt(draft.items.length)} การ์ด · SSR ${fmt(t.ssr)}</span>
-        <span>อัตรารวม <b class="${pctOk ? 'good' : 'bad'}">${t.pct}%</b>${pctOk ? '' : ' (ควรรวมได้ 100%)'}</span>
-        <span>SSR รวม <b>${t.ssrPct}%</b></span>
-      </div>
+      <div class="rate-sum">${rateSumHtml()}</div>
       <div class="tools-row">
-        <button type="button" class="btn-mini" onclick="document.getElementById('file-many').click()"><i class="fa-solid fa-images"></i> Upload หลายรูป</button>
-        <button type="button" class="btn-mini" onclick="addCard()"><i class="fa-solid fa-plus"></i> เพิ่มการ์ด</button>
+        <button type="button" class="${draft.items.length ? 'btn-mini' : 'btn btn-up'}" onclick="document.getElementById('file-many').click()"><i class="fa-solid fa-images"></i> Upload หลายรูป</button>
+        <button type="button" class="btn-mini" onclick="addCardRow()"><i class="fa-solid fa-plus"></i> เพิ่มการ์ด</button>
         <button type="button" class="btn-mini" onclick="toggleBox('auto-box')" ${draft.items.length ? '' : 'disabled'}><i class="fa-solid fa-percent"></i> ตั้งอัตราอัตโนมัติ</button>
       </div>
       <div class="auto-box" id="auto-box">
@@ -476,7 +615,10 @@
           <button type="button" class="btn btn-up" onclick="autoRates()">Apply</button></div>
         ${t.ssr ? '' : '<div class="note" style="margin-top:6px;">ยังไม่มีการ์ด SSR · กดปุ่ม SSR ที่การ์ดก่อน ถ้าต้องการ</div>'}
       </div>
-      <div id="card-list">${draft.items.length ? draft.items.map(i => cardHtml(i, names)).join('') : '<div class="empty-state">ยังไม่มีการ์ด · กด "Upload หลายรูป" เพื่อเพิ่มทีละหลายใบ (ชื่อการ์ด = ชื่อไฟล์)</div>'}</div>
+      ${t.ssr ? `<div class="seg">${FILTERS.map(([k, label, fn]) => `<button type="button" class="${k === cardFilter ? 'active' : ''}" onclick="setCardFilter('${k}')">${label} <span>${draft.items.filter(fn).length}</span></button>`).join('')}</div>` : ''}
+      <div id="card-list">${draft.items.length ? shown.map(i => cardHtml(i, names)).join('')
+        : `<div class="empty-cards"><i class="fa-regular fa-images"></i><b>ยังไม่มีการ์ด</b>
+             เลือกรูปการ์ดทั้งหมดทีเดียวด้วย "Upload หลายรูป" · ชื่อการ์ดจะตั้งจากชื่อไฟล์ และไฟล์ที่ขึ้นต้นด้วย SSR จะติดป้าย SSR ให้</div>`}</div>
       <div class="note" style="margin-top:10px;">อัตราออกจริงคิดเฉพาะการ์ดที่ยังมีสต็อก ถ้าใบไหนหมด โอกาสของใบที่เหลือจะเพิ่มขึ้นตามสัดส่วน · การ์ดที่ขายไปแล้วลบหรือเปลี่ยนชื่อไม่ได้</div>`;
   }
 
@@ -521,12 +663,8 @@
     renderSaveBar();
   }
   function refreshCardSummary() {
-    const t = totals();
-    const pctOk = Math.abs(t.pct - 100) < 0.01;
     const el = document.querySelector('#pane-cards .rate-sum');
-    if (el) el.innerHTML = `<span>${fmt(draft.items.length)} การ์ด · SSR ${fmt(t.ssr)}</span>
-        <span>อัตรารวม <b class="${pctOk ? 'good' : 'bad'}">${t.pct}%</b>${pctOk ? '' : ' (ควรรวมได้ 100%)'}</span>
-        <span>SSR รวม <b>${t.ssrPct}%</b></span>`;
+    if (el) el.innerHTML = rateSumHtml();
     const names = draft.items.map(i => i.name.trim().toLowerCase());
     draft.items.forEach(i => {
       const row = document.querySelector(`.card-row[data-key="${i.key}"]`);
@@ -541,11 +679,30 @@
   function addCard(name, imageUrl) {
     draft.items.push({ key: 'k' + (++keySeq), id: null, name: name || '', imageUrl: imageUrl || '', pct: 0, tag: null, stock: 0, sold: 0, add: '' });
   }
+  // ปุ่ม "เพิ่มการ์ด" -> แถวใหม่ท้ายรายการ เลื่อนไปหาและโฟกัสช่องชื่อ
+  function addCardRow() {
+    addCard();
+    cardFilter = 'all';
+    renderCards(); renderSaveBar();
+    const row = document.querySelector(`.card-row[data-key="${draft.items[draft.items.length - 1].key}"]`);
+    row.scrollIntoView({ block: 'center' });
+    row.querySelector('input[data-f="name"]').focus({ preventScroll: true });
+  }
+  // ลบทันที (มีผลตอน Save) + ปุ่ม "เอากลับ" ใน toast แทน popup ยืนยัน
+  let removed = null;
   function removeCard(key) {
-    const c = findCard(key);
+    const idx = draft.items.findIndex(i => i.key === key);
+    const c = draft.items[idx];
     if (!c || c.sold > 0) return;
-    if (c.id && !confirm(`ลบการ์ด "${c.name}"? (มีผลตอนกด Save)`)) return;
-    draft.items = draft.items.filter(i => i.key !== key);
+    removed = { item: c, idx };
+    draft.items.splice(idx, 1);
+    renderCards(); renderSaveBar();
+    toast(`ลบ "${c.name || 'การ์ด'}" แล้ว`, 'เอากลับ', undoRemove);
+  }
+  function undoRemove() {
+    if (!removed) return;
+    draft.items.splice(Math.min(removed.idx, draft.items.length), 0, removed.item);
+    removed = null;
     renderCards(); renderSaveBar();
   }
   function toggleBox(id) { document.getElementById(id).classList.toggle('show'); }
@@ -578,6 +735,13 @@
         <button type="button" class="btn-mini" onclick="bulkAdd(true)" ${draft.items.some(i => i.tag !== 'SSR') ? '' : 'disabled'}>เฉพาะการ์ดปกติ</button>
       </div>
       <div class="note">ใส่จำนวนติดลบเพื่อลดสต็อกได้ · เติมรายใบได้ที่แท็บ Cards · มีผลตอนกด Save</div>
+      ${draft.items.length ? `<div class="section-title">คงเหลือรายใบ <span class="note">น้อยไปมาก</span></div>
+      <div class="stock-list">${draft.items.slice().sort((a, b) => (a.stock + (Number(a.add) || 0)) - (b.stock + (Number(b.add) || 0))).map(i => {
+        const after = Math.max(i.stock + (Number(i.add) || 0), 0);
+        return `<div class="stock-item ${after === 0 ? 'zero' : ''}">
+          <span class="si-name">${i.tag === 'SSR' ? '<b class="ssr-tag">SSR</b> ' : ''}${escapeHtml(i.name || '(ไม่มีชื่อ)')}</span>
+          <span class="si-num">${Number(i.add) ? `<s>${fmt(i.stock)}</s> ` : ''}${fmt(after)}</span>
+        </div>`; }).join('')}</div>` : ''}
       <div class="section-title">ประวัติสต็อก</div>
       ${(saved.logs || []).length ? saved.logs.map(l => `
         <div class="log-row">
