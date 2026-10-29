@@ -500,11 +500,9 @@
       box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
     }
 
+    /* แถว Top Fans / Top Today VIP แบบหน้า Home: ไม่มีการ์ด วางเรียบบนพื้นขาว (ไม่มีแถบชมพูด้านซ้าย) */
     .leaderboard-section {
-      background: #ffffff;
-      border-radius: 22px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-      padding: 20px 18px;
+      padding: 4px 0;
     }
     .leaderboard-title {
       font-size: 14px;
@@ -549,9 +547,13 @@
     .top-fans-preview .ln-chev { color: #2b2b2b; font-size: 22px; margin: 0 0 0 6px; }
 
     /* 🏅👑 Top Fans / Top Today VIP ใช้ช่องเดียวกัน สลับกันเลื่อนขึ้นทีละอัน (แบบเดียวกับหน้า Home) */
-    .fan-ticker { height: 30px; overflow: hidden; }
+    .fan-ticker { height: 32px; overflow: hidden; }
     .fan-ticker-track { will-change: transform; }
-    .fan-ticker .leaderboard-title.with-preview { height: 30px; }
+    .fan-ticker .leaderboard-title.with-preview { height: 32px; font-size: 18px; font-weight: 600; color: #444; }
+    .fan-ticker-label { display: inline-flex; align-items: center; gap: 6px; }
+    .fan-ticker-icon { width: 22px; height: 22px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    .fan-ticker .top-fans-preview { gap: 10px; }
+    .fan-ticker .top-fans-preview i.fa-chevron-right { font-size: 14px; color: #888; margin: 0; }
 
     .post-gallery {
       display: grid;
@@ -905,17 +907,17 @@
         <div class="fan-ticker">
           <div class="fan-ticker-track" id="fan-ticker-track">
             <div class="leaderboard-title with-preview" id="top-fans-toggle" onclick="goToTopFans()">
-              <span><svg class="ln-ic"><use href="#ic-trophy"/></svg> Top Fans</span>
+              <span class="fan-ticker-label"><svg class="fan-ticker-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 2.8h9v6.8L12 12.3 7.5 9.6z"/><path d="M10.5 2.8v8M13.5 2.8v8"/><path transform="translate(12 17)" d="M0,-5 L1.29,-1.78 4.76,-1.55 2.09,.68 2.94,4.05 0,2.2 -2.94,4.05 -2.09,.68 -4.76,-1.55 -1.29,-1.78Z"/></svg>Top Fans</span>
               <span id="top-fans-preview" class="top-fans-preview">
                 <span id="top-fans-avatar-stack" class="top-fans-avatar-stack"></span>
-                <svg class="ln-ic ln-chev"><use href="#ic-chevron-right"/></svg>
+                <i class="fas fa-chevron-right"></i>
               </span>
             </div>
             <div class="leaderboard-title with-preview" onclick="goToTodayVip()">
-              <span><svg class="ln-ic"><use href="#ic-crown"/></svg> Top Today VIP</span>
+              <span class="fan-ticker-label"><svg class="fan-ticker-icon" viewBox="0 0 24 24" aria-hidden="true"><path transform="translate(12 12.8)" d="M0,-10.5 L3.29,-4.53 9.99,-3.24 5.33,1.73 6.17,8.49 0,5.6 -6.17,8.49 -5.33,1.73 -9.99,-3.24 -3.29,-4.53Z"/><text x="12" y="15.1" text-anchor="middle" font-family="Inter, 'Quicksand', sans-serif" font-weight="800" font-size="5.4" letter-spacing="0.1" fill="currentColor" stroke="none">VIP</text></svg>Top Today VIP</span>
               <span class="top-fans-preview">
                 <span id="today-vip-avatar-stack" class="top-fans-avatar-stack"></span>
-                <svg class="ln-ic ln-chev"><use href="#ic-chevron-right"/></svg>
+                <i class="fas fa-chevron-right"></i>
               </span>
             </div>
           </div>
