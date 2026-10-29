@@ -514,6 +514,8 @@
       gap: 6px;
     }
     .leaderboard-title i { color: var(--gold-kami); }
+    /* หัวข้อส่วนต่างๆ (Special Fans Day / Timeline) ตัวหนาแบบหน้า Home */
+    .leaderboard-title.section-heading { font-size: 18px; font-weight: 700; color: #222; }
     .leaderboard-title .ln-ic { font-size: 1.25em; color: #2b2b2b; margin-right: 4px; }
 
     /* 🏅 แถว Top Fans: ไอคอน + ชื่อ ทางซ้าย, สแตกรูปแฟนคลับ + ลูกศรทางขวา (กดพาไปหน้า Top Fans เต็ม) */
@@ -927,13 +929,13 @@
       <div class="section-divider thick"></div>
 
       <div id="champ-thanks-container" style="display: none;">
-        <div class="leaderboard-title" style="font-weight: 700;"><i class="fas fa-crown" style="color: #d4af37;"></i>Special Fans Day</div>
+        <div class="leaderboard-title section-heading"><i class="fas fa-crown" style="color: #d4af37;"></i>Special Fans Day</div>
         <div id="champ-thanks-content"></div>
         <div class="section-divider thick"></div>
       </div>
       
       <div class="member-feed-section" id="member-feed">
-        <div class="leaderboard-title" style="font-weight: 700;"><svg class="ln-ic"><use href="#ic-list"/></svg> Timeline</div>
+        <div class="leaderboard-title section-heading"><svg class="ln-ic"><use href="#ic-list"/></svg> Timeline</div>
         <div id="posts-container">
            <div id="loading-msg" style="text-align: center; color: #bbb; font-size: 13px; padding: 20px 0;">
              <i class="fa-solid fa-spinner fa-spin" style="margin-right: 5px;"></i> LOADING...
