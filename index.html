@@ -3359,11 +3359,15 @@ function renderTracker() {
   // 🌟 Special Fans Day: นับวันของเดือน สัปดาห์ปัจจุบัน (buildSpecialFansDaysHtml อยู่ใน common.js ใช้ร่วมกับ specialfansday.html)
   container.innerHTML = buildSpecialFansDaysHtml();
 
+  // วันสุดท้ายของเดือน: ซ่อนเส้นคุกกี้ โชว์การ์ดนับถอยหลังแทน / วันอื่นๆ: โชว์เส้นคุกกี้อย่างเดียว
   const countdownBox = document.getElementById('finale-countdown');
   if (today === daysInMonth) {
+    container.style.display = 'none';
     countdownBox.style.display = 'flex';
+    countdownBox.style.marginTop = '0'; // ไม่มีเส้นคุกกี้ด้านบนแล้ว ให้การ์ดชิดหัวข้อ
     startFinaleCountdown(year, month, daysInMonth);
   } else {
+    container.style.display = '';
     countdownBox.style.display = 'none';
   }
 }
