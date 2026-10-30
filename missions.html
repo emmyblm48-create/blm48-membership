@@ -85,6 +85,28 @@
     color: #999;
     margin-bottom: 16px;
   }
+  /* หัวการ์ด: ชื่อซ้าย + ป้ายรางวัลขวา */
+  .mission-card-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    margin-bottom: 4px;
+  }
+  .mission-card-head .mission-card-title { margin-bottom: 0; }
+  .reward-chip {
+    flex: 0 0 auto;
+    display: inline-flex; align-items: center; gap: 5px;
+    background: #fff5d6; color: #d99a00;
+    border-radius: 999px; padding: 4px 10px;
+    font-size: 0.75rem; font-weight: 800; white-space: nowrap;
+  }
+  /* นับถอยหลังรีเซ็ตภารกิจ: ป้ายเล็กมีไอคอนนาฬิกา ตัวเลขกล่องเทาเข้มแบบเดียวกับหน้า Home */
+  .reset-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.75rem; color: #999; margin-bottom: 8px;
+  }
+  .reset-pill .reset-time {
+    background: #3a3a3a; color: #fff; border-radius: 6px;
+    padding: 2px 7px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: 0.5px;
+  }
   .mission-item {
     display: flex;
     align-items: center;
@@ -130,6 +152,9 @@
     color: #aaa;
     margin-top: 4px;
   }
+  .mission-item.done .mission-item-text { color: #999; }
+  .mission-item.done .mission-progress-fill { background: linear-gradient(90deg, #7ee08c, #3cb371); }
+  .mission-item.done .mission-item-count { color: #3cb371; font-weight: 700; }
   .mission-item-check {
     flex: 0 0 auto;
     color: #3cb371;
@@ -173,19 +198,42 @@
     font-size: 0.82rem; color: #666;
   }
   .streak-rescue-row b { color: var(--primary-pink, #ff85a2); }
+  /* แถบความคืบหน้าเช็คอินของเดือน */
+  .streak-summary { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
+  .streak-summary-count { font-size: 1.4rem; font-weight: 800; color: #333; }
+  .streak-summary-count small { font-size: 0.8rem; color: #aaa; font-weight: 600; }
+  .streak-summary-month { font-size: 0.78rem; color: #999; font-weight: 600; }
+  .streak-progress { height: 8px; background: #f5e6ea; border-radius: 6px; overflow: hidden; margin-bottom: 14px; }
+  .streak-progress-fill {
+    height: 100%; border-radius: 6px; transition: width 0.3s ease;
+    background: linear-gradient(90deg, #ff9db1, var(--primary-pink, #ff85a2));
+  }
+  .streak-weekdays {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 6px;
+    text-align: center; font-size: 0.7rem; font-weight: 700; color: #bbb;
+  }
   .streak-calendar-grid {
     display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 8px;
   }
   .streak-day {
-    aspect-ratio: 1 / 1; border-radius: 10px; display: flex; align-items: center; justify-content: center;
-    font-size: 0.75rem; font-weight: 700; position: relative; background: #f5f5f5; color: #bbb;
+    aspect-ratio: 1 / 1; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 1px; font-size: 0.85rem; font-weight: 700; position: relative; background: #f5f5f5; color: #bbb; line-height: 1;
   }
-  .streak-day.present { background: linear-gradient(135deg, #ffb6c1, var(--primary-pink, #ff85a2)); color: #fff; }
+  .streak-day .streak-mark { font-size: 0.62rem; }
+  .streak-day.present { background: linear-gradient(135deg, #ffc2cf, var(--primary-pink, #ff85a2)); color: #fff; }
   .streak-day.rescued { background: linear-gradient(135deg, #ffe08a, #ffc247); color: #fff; }
-  .streak-day.missed { background: #fff0f0; color: #ff8a8a; cursor: pointer; }
+  .streak-day.missed { background: #fff0f0; color: #ff8a8a; }
+  .streak-day.missed.can-rescue { cursor: pointer; box-shadow: inset 0 0 0 1.5px #ffb3b3; }
   .streak-day.missed.can-rescue:active { transform: scale(0.92); }
   .streak-day.future { background: #f8f8f8; color: #ccc; }
-  .streak-day i { font-size: 0.7rem; }
+  .streak-day.today { box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--primary-pink, #ff85a2); }
+  .streak-day.blank { background: transparent; }
+  .streak-legend {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px;
+    margin-top: 10px; font-size: 0.72rem; color: #999;
+  }
+  .streak-legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .streak-legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
   #streak-claim-btn {
     width: 100%;
     margin-top: 16px;
@@ -227,21 +275,39 @@
     <div class="main-container">
         <!-- 🎯 ภารกิจประจำวัน -->
         <div class="mission-card">
-            <div class="mission-card-title"><i class="fas fa-list-check"></i> ภารกิจประจำวัน</div>
-            <div class="mission-card-subtitle">ทำภารกิจครบ รับ 5 Tokens ฟรี! รีเซ็ตในอีก <span id="mission-countdown">--:--:--</span></div>
+            <div class="mission-card-head">
+                <div class="mission-card-title"><i class="fas fa-list-check"></i> ภารกิจประจำวัน</div>
+                <span class="reward-chip"><i class="fas fa-coins"></i> +<span id="mission-reward">5</span> Tokens</span>
+            </div>
+            <div class="mission-card-subtitle" style="margin-bottom: 6px;">ทำภารกิจครบทุกข้อ รับ Tokens ฟรีทุกวัน!</div>
+            <div class="reset-pill"><i class="fa-regular fa-clock"></i> รีเซ็ตในอีก <span class="reset-time" id="mission-countdown">--:--:--</span></div>
             <div id="mission-item-list"><div style="text-align:center;color:#aaa;padding:20px 0;">กำลังโหลด...</div></div>
             <button id="mission-claim-btn" disabled onclick="claimDailyMissionReward()">ทำภารกิจให้ครบก่อนนะ</button>
         </div>
 
         <!-- 📅 เช็คอินรายเดือน -->
         <div class="mission-card">
-            <div class="mission-card-title"><i class="fas fa-calendar-check"></i> เช็คอินรายเดือน</div>
+            <div class="mission-card-head">
+                <div class="mission-card-title"><i class="fas fa-calendar-check"></i> เช็คอินรายเดือน</div>
+                <span class="reward-chip"><i class="fas fa-coins"></i> +100 Tokens</span>
+            </div>
             <div class="mission-card-subtitle" id="streak-subtitle">เช็คอินให้ครบทุกวันในเดือนนี้ รับ 100 Tokens เลย!</div>
+            <div class="streak-summary">
+                <div class="streak-summary-count"><span id="streak-present">-</span> <small>/ <span id="streak-total">-</span> วัน</small></div>
+                <div class="streak-summary-month" id="streak-month"></div>
+            </div>
+            <div class="streak-progress"><div class="streak-progress-fill" id="streak-progress-fill" style="width:0%;"></div></div>
             <div class="streak-rescue-row">
                 <span><i class="fas fa-heart-circle-bolt"></i> สิทธิ์กู้วันที่พลาด</span>
                 <b id="streak-rescue-count">5/5</b>
             </div>
+            <div class="streak-weekdays"><span>อา</span><span>จ</span><span>อ</span><span>พ</span><span>พฤ</span><span>ศ</span><span>ส</span></div>
             <div class="streak-calendar-grid" id="streak-calendar-grid"><div style="grid-column: 1 / -1; text-align:center;color:#aaa;padding:20px 0;">กำลังโหลด...</div></div>
+            <div class="streak-legend">
+                <span><i style="background: var(--primary-pink);"></i> เช็คอินแล้ว</span>
+                <span><i style="background: #ffc247;"></i> กู้แล้ว</span>
+                <span><i style="background: #ffd6d6;"></i> พลาด (แตะเพื่อกู้)</span>
+            </div>
             <button id="streak-claim-btn" disabled onclick="claimLoginStreakReward()">เช็คอินให้ครบเดือนก่อนนะ</button>
         </div>
     </div>
@@ -316,6 +382,8 @@ function renderDailyMissionsModal() {
         <div class="mission-item-check"><i class="fas fa-circle-check"></i></div>
       </div>`;
   }).join('');
+
+  if (dailyMissionData.reward) document.getElementById('mission-reward').textContent = dailyMissionData.reward;
 
   if (dailyMissionData.claimed) {
     btn.disabled = true;
@@ -395,15 +463,32 @@ function renderLoginStreakModal() {
   if (!grid || !btn || !loginStreakData) return;
 
   const days = Array.isArray(loginStreakData.days) ? loginStreakData.days : [];
-  grid.innerHTML = days.map(d => {
+  // วันนี้ตามเวลาไทย (YYYY-MM-DD) ไว้ไฮไลต์ช่องวันนี้
+  const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Bangkok' });
+  // เว้นช่องว่างหน้าวันที่ 1 ให้ตรงกับหัววัน อา-ส
+  const firstDate = days.length ? new Date(`${days[0].date}T00:00:00`) : null;
+  const offset = firstDate && !isNaN(firstDate) ? firstDate.getDay() : 0;
+  const blanks = '<div class="streak-day blank"></div>'.repeat(offset);
+  grid.innerHTML = blanks + days.map(d => {
     const canRescue = d.status === 'missed' && loginStreakData.rescuesRemaining > 0 && !loginStreakData.rescueUsedToday;
-    let icon = d.day;
-    if (d.status === 'present') icon = '<i class="fas fa-check"></i>';
-    else if (d.status === 'rescued') icon = '<i class="fas fa-heart-circle-bolt"></i>';
-    else if (d.status === 'missed') icon = canRescue ? '<i class="fas fa-rotate-left"></i>' : '<i class="fas fa-xmark"></i>';
+    let mark = '';
+    if (d.status === 'present') mark = '<i class="fas fa-check streak-mark"></i>';
+    else if (d.status === 'rescued') mark = '<i class="fas fa-heart-circle-bolt streak-mark"></i>';
+    else if (d.status === 'missed') mark = canRescue ? '<i class="fas fa-rotate-left streak-mark"></i>' : '<i class="fas fa-xmark streak-mark"></i>';
     const clickAttr = canRescue ? `onclick="useLoginRescue('${d.date}')"` : '';
-    return `<div class="streak-day ${d.status} ${canRescue ? 'can-rescue' : ''}" ${clickAttr} title="${d.date}">${icon}</div>`;
+    const todayClass = d.date === todayStr ? 'today' : '';
+    return `<div class="streak-day ${d.status} ${canRescue ? 'can-rescue' : ''} ${todayClass}" ${clickAttr} title="${d.date}"><span>${d.day}</span>${mark}</div>`;
   }).join('');
+
+  // สรุปจำนวนวันที่เช็คอินแล้ว (นับวันที่กู้ด้วย) + แถบความคืบหน้า
+  const checkedCount = days.filter(d => d.status === 'present' || d.status === 'rescued').length;
+  const totalDays = loginStreakData.daysInMonth || days.length;
+  document.getElementById('streak-present').textContent = checkedCount;
+  document.getElementById('streak-total').textContent = totalDays;
+  document.getElementById('streak-progress-fill').style.width = `${totalDays ? Math.round((checkedCount / totalDays) * 100) : 0}%`;
+  if (firstDate && !isNaN(firstDate)) {
+    document.getElementById('streak-month').textContent = firstDate.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+  }
 
   rescueCountEl.textContent = `${loginStreakData.rescuesRemaining}/${loginStreakData.rescuesMax || 5}`;
 
