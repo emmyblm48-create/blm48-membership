@@ -592,13 +592,53 @@
     inp.click();
   }
 
+  // ✂️ ลบพื้นขาวอัตโนมัติ: iPhone มักแปลงรูปที่เลือกจากคลังรูปเป็น JPEG ตอนอัปโหลด พื้นใสที่ลบไว้เลยกลายเป็นสีขาว
+  // ถ้ารูปไม่มีพิกเซลใสเลยและขอบรูปส่วนใหญ่เป็นสีขาว -> ไล่ลบสีขาวที่ต่อกับขอบรูป (flood fill) ให้กลับมาใส
+  // คืนค่า canvas ที่ลบพื้นแล้ว หรือ null ถ้ารูปใสอยู่แล้ว/ขอบไม่ใช่สีขาว
+  function cutWhiteBackground(img) {
+    const MAX = 1400;
+    const k = Math.min(1, MAX / Math.max(img.naturalWidth, img.naturalHeight));
+    const W = Math.max(1, Math.round(img.naturalWidth * k)), H = Math.max(1, Math.round(img.naturalHeight * k));
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const cx = c.getContext('2d');
+    cx.drawImage(img, 0, 0, W, H);
+    const id = cx.getImageData(0, 0, W, H), px = id.data, N = W * H;
+    for (let i = 3; i < px.length; i += 4) if (px[i] < 250) return null; // มีพื้นใสอยู่แล้ว ไม่ต้องทำ
+    const isWhite = i => { const r = px[i * 4], g = px[i * 4 + 1], b = px[i * 4 + 2];
+      return Math.min(r, g, b) >= 228 && Math.max(r, g, b) - Math.min(r, g, b) <= 24; };
+    const border = [];
+    for (let x = 0; x < W; x++) border.push(x, (H - 1) * W + x);
+    for (let y = 1; y < H - 1; y++) border.push(y * W, y * W + W - 1);
+    if (border.filter(isWhite).length < border.length * 0.4) return null; // ขอบไม่ใช่พื้นขาว (เป็นรูปถ่ายเต็มเฟรม)
+    const bg = new Uint8Array(N), stack = [];
+    border.forEach(i => { if (!bg[i] && isWhite(i)) { bg[i] = 1; stack.push(i); } });
+    while (stack.length) {
+      const i = stack.pop(), x = i % W;
+      const nb = [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, i - W, i + W];
+      for (const j of nb) if (j >= 0 && j < N && !bg[j] && isWhite(j)) { bg[j] = 1; stack.push(j); }
+    }
+    for (let i = 0; i < N; i++) {
+      if (bg[i]) { px[i * 4 + 3] = 0; continue; }
+      // ขอบตัวคน: พิกเซลสว่างที่ติดพื้นที่ลบ ทำให้จางลงตามความสว่าง กันเส้นขอบขาว
+      const x = i % W;
+      if ((x > 0 && bg[i - 1]) || (x < W - 1 && bg[i + 1]) || (i >= W && bg[i - W]) || (i + W < N && bg[i + W])) {
+        const m = Math.min(px[i * 4], px[i * 4 + 1], px[i * 4 + 2]);
+        if (m > 170) px[i * 4 + 3] = Math.round(255 * Math.max(0, (255 - m) / 85));
+      }
+    }
+    cx.putImageData(id, 0, 0);
+    return c;
+  }
+
   // วาดรูปเมมเบอร์แบบเต็มช่อง (cover) ซูม/เลื่อนได้ แล้ววาดกรอบทับ
   function composeNav(ctx, tpl, d) {
     const S = NAV_SIZE;
     ctx.clearRect(0, 0, S, S);
-    const photo = d.photo;
-    const scale = Math.max(S / photo.naturalWidth, S / photo.naturalHeight) * (d.zoom / 100);
-    const w = photo.naturalWidth * scale, h = photo.naturalHeight * scale;
+    const photo = d.cut && d.removeBg ? d.cut : d.photo;
+    const pw = photo.naturalWidth || photo.width, ph = photo.naturalHeight || photo.height;
+    const scale = Math.max(S / pw, S / ph) * (d.zoom / 100);
+    const w = pw * scale, h = ph * scale;
     ctx.drawImage(photo, (S - w) * (d.posX / 100), (S - h) * (d.posY / 100), w, h);
     if (tpl) ctx.drawImage(tpl, 0, 0, S, S);
   }
@@ -621,6 +661,13 @@
     const d = navDraft && navDraft.slots[navDraft.active];
     if (!d) return;
     d[prop] = +val;
+    drawDraft();
+  }
+
+  function toggleRemoveBg(on) {
+    const d = navDraft && navDraft.slots[navDraft.active];
+    if (!d) return;
+    d.removeBg = on;
     drawDraft();
   }
 
@@ -652,7 +699,8 @@
           <div class="adjust-title">Adjusting: <b>${actLabel}</b></div>
           <div class="range-row"><span>Size</span><input type="range" min="100" max="220" value="${act.zoom}" oninput="adjustActive('zoom', this.value)"></div>
           <div class="range-row"><span>Left - Right</span><input type="range" min="0" max="100" value="${act.posX}" oninput="adjustActive('posX', this.value)"></div>
-          <div class="range-row"><span>Up - Down</span><input type="range" min="0" max="100" value="${act.posY}" oninput="adjustActive('posY', this.value)"></div>` : ''}
+          <div class="range-row"><span>Up - Down</span><input type="range" min="0" max="100" value="${act.posY}" oninput="adjustActive('posY', this.value)"></div>
+          ${act.cut ? `<label class="range-row" style="cursor:pointer"><span>Remove white</span><input type="checkbox" ${act.removeBg ? 'checked' : ''} onchange="toggleRemoveBg(this.checked)" style="flex:0;width:18px;height:18px"> <small style="color:#888">ลบพื้นขาวรอบรูป</small></label>` : ''}` : ''}
         <div class="btns" style="margin-top:12px">
           <button class="btn btn-up" id="nav-save-btn" onclick="saveNavDraft()" ${newCount ? '' : 'disabled'}><i class="fa-solid fa-check"></i> Save ${newCount} button${newCount === 1 ? '' : 's'}</button>
           <button class="btn btn-del" onclick="navDraft=null;renderDraft()">Cancel</button>
@@ -672,7 +720,10 @@
         ...NAV_SLOTS.map(([, , , src]) => navTemplates[src] ? null : loadImg(src).then(i => { navTemplates[src] = i; }))
       ]);
       // รูปแนวตั้งชิดบน (เห็นหน้า), รูปอื่นกึ่งกลาง - แต่ละปุ่มเก็บค่าปรับแยกกัน
-      const fresh = () => ({ photo, zoom: 100, posX: 50, posY: photo.naturalHeight > photo.naturalWidth ? 0 : 50 });
+      let cut = null;
+      try { cut = cutWhiteBackground(photo); } catch (e) { console.warn('cut background failed', e); }
+      if (cut) toast('รูปนี้พื้นหลังไม่ใส (มักเกิดจาก iPhone แปลงเป็น JPEG) ลบพื้นขาวให้อัตโนมัติแล้ว');
+      const fresh = () => ({ photo, cut, removeBg: !!cut, zoom: 100, posX: 50, posY: photo.naturalHeight > photo.naturalWidth ? 0 : 50 });
       if (!navDraft) navDraft = { active: null, slots: { navHome: null, navKami: null, navCart: null, navNoti: null } };
       if (target === '*') NAV_SLOTS.forEach(([k]) => { navDraft.slots[k] = fresh(); });
       else navDraft.slots[target] = fresh();
