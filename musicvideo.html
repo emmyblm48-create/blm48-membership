@@ -19,7 +19,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="assets/js/supabase-client.js"></script>
     <script src="assets/js/common.js"></script>
-    <script src="assets/js/music-videos.js"></script>
+    <script src="assets/js/music-videos.js?v=20261101"></script>
     <link rel="stylesheet" href="assets/css/music-video.css">
     <link rel="stylesheet" href="assets/css/media-topbar.css">
 
@@ -150,7 +150,7 @@
   function mvCardHtml(mv, withAction) {
     return `
       <div class="mv-thumb-wrap">
-        <img src="${mvEsc(mv.image)}" alt="MV Cover" class="mv-thumbnail" loading="lazy">
+        <img src="${mvEsc(mv.image)}" alt="MV Cover" class="mv-thumbnail" loading="lazy" onerror="mvImgFallback(this, '${mvEsc(mv.link)}')">
         ${MV_RIBBON_HTML}
       </div>
       <div class="mv-title">${mvEsc(mv.title.trim())}</div>
