@@ -150,7 +150,7 @@
   function mvCardHtml(mv, withAction) {
     return `
       <div class="mv-thumb-wrap">
-        <img src="${mvEsc(mv.image)}" alt="MV Cover" class="mv-thumbnail" loading="lazy">
+        <img src="${mvEsc(mv.image)}" alt="MV Cover" class="mv-thumbnail" loading="lazy" onerror="mvImgFallback(this, '${mvEsc(mv.link)}')">
         ${MV_RIBBON_HTML}
       </div>
       <div class="mv-title">${mvEsc(mv.title.trim())}</div>

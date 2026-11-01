@@ -103,6 +103,12 @@ function mvEsc(t) {
   return String(t == null ? "" : t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c]));
 }
 
+// รูปปกโหลดไม่ได้ → ใช้ thumbnail จาก YouTube แทน (ลองครั้งเดียว)
+function mvImgFallback(img, link) {
+  const id = mvYoutubeId(link);
+  img.onerror = null;
+  if (id) img.src = "https://i.ytimg.com/vi/" + id + "/hqdefault.jpg";
+}
 // ป้ายริบบิ้นมุมขวาบน (ไอคอนเล่น + BLM 48)
 const MV_RIBBON_HTML = '<div class="mv-ribbon"><i class="fa-regular fa-circle-play"></i><span>BLM</span><span>48</span></div>';
 
@@ -174,6 +180,10 @@ function mergeMvLists(movie, playlistVideos) {
   const list = (movie || [])
     .filter(m => m && m.link && m.thumbnail)
     .map(m => ({ title: String(m.title || ""), date: m.date, image: m.thumbnail, link: m.link }));
+  // คลิปที่มีใน blm48MVs ด้วย → ใช้รูปปกจาก blm48MVs (รูปปกจากเว็บนั้นอาจเสีย/ยังไม่ได้ใส่)
+  const localImg = {};
+  blm48MVs.forEach(mv => { const id = mvYoutubeId(mv.link); if (id && mv.image) localImg[id] = mv.image; });
+  list.forEach(mv => { const id = mvYoutubeId(mv.link); if (localImg[id]) mv.image = localImg[id]; });
   insertMvsByDate(list, blm48MVs);
   insertMvsByDate(list, (playlistVideos || []).map(v => ({ title: v.title, date: v.date, image: v.image, link: v.link })));
   return list;
